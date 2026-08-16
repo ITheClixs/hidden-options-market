@@ -16,8 +16,25 @@ structure rather than a covered-call overlay.
 | Global X | `assets.globalxetfs.com/funds/holdings/{ticker}_full-holdings_{YYYYMMDD}.csv` | **Dated URLs resolve for past dates** — verified 2026-08-13 and a second fund. This is the only issuer found so far offering retrievable history rather than a latest-only file. |
 
 The Global X dated pattern matters beyond Global X: it means part of the panel can be
-back-filled rather than only accumulated forward. Worth testing how far back it goes
-before assuming it is limited.
+back-filled rather than only accumulated forward.
+
+**History depth, probed 2026-08-17.** Files resolve back to roughly **October 2024**
+and 404 before that:
+
+| date | result |
+|---|---|
+| 2024-08-01, 2024-09-02 | 404 |
+| 2024-10-01 onward (2024-11, 2024-12, 2025-01, 2025-07, 2026-01, 2026-06) | 200 |
+
+So roughly **22 months of daily history** are retrievable for the Global X funds,
+against zero for every other source found so far. That does not back-fill the
+single-name programmes the study leans on — Global X is index-level covered call
+(QYLD, XYLD, RYLD) — but it does supply a real pre-period for the index arm and a
+second, independent issuer for cross-checking the measurement chain.
+
+Not yet established: whether the boundary is a retention policy (which would mean the
+window rolls forward and early files disappear) or simply when the asset host was
+adopted. If it is retention, back-filling is urgent rather than optional.
 
 Caveat: the QYLD file lists equity holdings and a written index call; the header rows
 (fund name, as-of date) precede the real header, so it needs its own parser rather
