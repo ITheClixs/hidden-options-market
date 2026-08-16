@@ -94,6 +94,36 @@ uv venv && uv pip install -e ".[dev]"
 Output is Parquet partitioned by capture date, plus a JSON manifest per run recording
 row counts and a SHA-256 of every raw payload.
 
+## Scheduled capture
+
+The primary collector is the `daily-capture` GitHub Actions workflow, which runs at
+23:30 UTC Mon–Fri and publishes each day as a `.tar.zst` asset on a monthly release
+tag (`data-YYYY-MM`). Release assets do not count against repository size, so the
+capture is stored at full fidelity rather than trimmed. The workflow refuses to
+publish if fewer than 80% of symbols were captured.
+
+Retrieve captures on any machine:
+
+```bash
+scripts/fetch_captures.sh            # all months
+scripts/fetch_captures.sh 2026-08    # one month
+```
+
+A local launchd job is available as an optional second, independent capture:
+
+```bash
+scripts/install_launchd.sh           # install or reinstall
+scripts/install_launchd.sh --uninstall
+```
+
+Do not render the plist template in place — the installer writes a temporary copy so
+that no machine-specific path enters version control.
+
+Two operational notes. Scheduled workflows are disabled after 60 days of repository
+inactivity, so check the schedule is still enabled after any quiet period. And the
+local job accumulates roughly 18 MB per trading day on disk; prune `data/raw` once
+the corresponding release assets are confirmed.
+
 ## License
 
 MIT for the code. Any preprint is released separately under CC BY 4.0.
