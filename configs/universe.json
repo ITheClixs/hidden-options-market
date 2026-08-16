@@ -1,0 +1,29 @@
+{
+  "_comment": "Provisional seed universe for the daily collector. The authoritative fund universe is built later from EDGAR N-CEN/N-PORT; this file exists so collection can start on day 1. Adding a symbol is cheap; a symbol never collected is a permanent hole.",
+  "_schema_version": 1,
+  "treated_underlyings": {
+    "_comment": "Underlyings with at least one dedicated option-income / covered-call / buffer programme.",
+    "single_name": [
+      "TSLA", "NVDA", "MSTR", "COIN", "PLTR", "AMD", "HOOD", "SMCI", "MARA",
+      "AAPL", "MSFT", "AMZN", "GOOGL", "META", "NFLX", "AVGO", "MU",
+      "JPM", "XOM", "PYPL", "DIS", "BABA", "SNOW", "ABNB", "MRNA",
+      "IBIT", "GDX", "SOFI", "RIVN", "LCID", "F", "INTC", "CRWD", "UBER"
+    ],
+    "index_and_etf": [
+      "_SPX", "_NDX", "_RUT", "SPY", "QQQ", "IWM", "DIA", "EFA", "TLT", "GLD"
+    ]
+  },
+  "control_underlyings": {
+    "_comment": "Liquid names with no dedicated option-income programme as of the seed date; used as matched controls and as future-treated candidates.",
+    "single_name": [
+      "ADBE", "CSCO", "TXN", "QCOM", "NOW", "PANW", "LRCX", "KLAC",
+      "CAT", "DE", "HON", "UNH", "LLY", "MRK", "PFE", "CVX", "COP",
+      "GS", "MS", "BAC", "WFC", "SCHW", "V", "MA", "COST", "WMT", "TGT"
+    ]
+  },
+  "collection": {
+    "cboe_chain": true,
+    "occ_open_interest": true,
+    "occ_symbols_max_per_run": 120
+  }
+}

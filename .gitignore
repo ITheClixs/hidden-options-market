@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Data (never commit raw captures; they are large and vendor-sourced)
+data/raw/
+data/interim/
+data/external/
+*.parquet
+*.zip
+*.csv.gz
+
+# Local scratch
+tmp/
+scratch/
+*.log
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
