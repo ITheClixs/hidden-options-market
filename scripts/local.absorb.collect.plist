@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  launchd job for the daily capture.
+
+  Runs at 17:15 America/New_York equivalent in local time. Adjust StartCalendarInterval
+  to your machine's timezone: the requirement is "after the US close, before issuers
+  refresh their holdings files overnight".
+
+  Install:
+    cp scripts/local.absorb.collect.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/local.absorb.collect.plist
+
+  Verify:
+    launchctl list | grep absorb
+    tail -f logs/collect_$(date +%F).log
+
+  Remove:
+    launchctl unload -w ~/Library/LaunchAgents/local.absorb.collect.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.absorb.collect</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>REPLACE_WITH_PROJECT_DIR/scripts/collect_daily.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict>
+            <key>Hour</key><integer>23</integer>
+            <key>Minute</key><integer>15</integer>
+            <key>Weekday</key><integer>1</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>23</integer>
+            <key>Minute</key><integer>15</integer>
+            <key>Weekday</key><integer>2</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>23</integer>
+            <key>Minute</key><integer>15</integer>
+            <key>Weekday</key><integer>3</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>23</integer>
+            <key>Minute</key><integer>15</integer>
+            <key>Weekday</key><integer>4</integer>
+        </dict>
+        <dict>
+            <key>Hour</key><integer>23</integer>
+            <key>Minute</key><integer>15</integer>
+            <key>Weekday</key><integer>5</integer>
+        </dict>
+    </array>
+
+    <!-- No catch-up keys are needed: for StartCalendarInterval, launchd runs a missed
+         job once when the machine next wakes. That is the behaviour we want, since a
+         late capture is still a capture and a skipped day is unrecoverable. It does
+         NOT cover a machine that stays powered off past the next scheduled slot;
+         check the manifests for gaps after any multi-day absence. -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>REPLACE_WITH_PROJECT_DIR/logs/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>REPLACE_WITH_PROJECT_DIR/logs/launchd.err.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>REPLACE_WITH_PROJECT_DIR</string>
+</dict>
+</plist>
