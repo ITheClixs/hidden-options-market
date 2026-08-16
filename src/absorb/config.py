@@ -18,6 +18,7 @@ RAW_DIR = DATA_ROOT / "raw"
 INTERIM_DIR = DATA_ROOT / "interim"
 CONFIG_DIR = PROJECT_ROOT / "configs"
 UNIVERSE_FILE = CONFIG_DIR / "universe.json"
+FUNDS_FILE = CONFIG_DIR / "funds.json"
 
 # Cboe publishes a free, unauthenticated, 15-minute-delayed full option chain per
 # symbol. Index symbols are prefixed with an underscore (e.g. "_SPX").
@@ -26,10 +27,10 @@ CBOE_CHAIN_URL = "https://cdn.cboe.com/api/global/delayed_quotes/options/{symbol
 # OCC series search returns authoritative per-series open interest for one underlying.
 OCC_SERIES_URL = "https://marketdata.theocc.com/series-search"
 
-USER_AGENT = os.environ.get(
-    "ABSORB_USER_AGENT",
-    "absorb-research/0.1 (academic study of disclosed option flows)",
+_DEFAULT_USER_AGENT = (
+    "absorb-research/0.1 (academic study of disclosed option flows)"
 )
+USER_AGENT = os.environ.get("ABSORB_USER_AGENT", _DEFAULT_USER_AGENT)
 
 REQUEST_TIMEOUT_SECONDS = 45
 REQUEST_MAX_ATTEMPTS = 4
@@ -96,3 +97,50 @@ def load_universe(path: Path | None = None) -> Universe:
     if not universe.all_symbols:
         raise ValueError(f"Universe config at {target} lists no symbols")
     return universe
+
+
+@dataclass(frozen=True)
+class Programme:
+    """One fund whose disclosed option flow is tracked."""
+
+    fund: str
+    underlying: str
+    issuer: str
+    url_template: str
+
+
+def load_programmes(path: Path | None = None) -> tuple[Programme, ...]:
+    """Read the fund registry into a flat, immutable tuple of programmes."""
+    target = path or FUNDS_FILE
+    if not target.exists():
+        raise FileNotFoundError(f"Fund registry not found at {target}")
+
+    try:
+        payload = json.loads(target.read_text())
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Fund registry at {target} is not valid JSON: {exc}") from exc
+
+    issuers = payload.get("issuers")
+    if not isinstance(issuers, dict) or not issuers:
+        raise ValueError(f"Fund registry at {target} defines no issuers")
+
+    programmes: list[Programme] = []
+    for issuer_name, spec in issuers.items():
+        try:
+            template = spec["url_template"]
+            funds = spec["funds"]
+        except (KeyError, TypeError) as exc:
+            raise ValueError(f"Issuer {issuer_name!r} in {target} is malformed: {exc}") from exc
+        for fund, underlying in funds.items():
+            programmes.append(
+                Programme(
+                    fund=fund.upper(),
+                    underlying=underlying,
+                    issuer=issuer_name,
+                    url_template=template,
+                )
+            )
+
+    if not programmes:
+        raise ValueError(f"Fund registry at {target} lists no funds")
+    return tuple(programmes)
