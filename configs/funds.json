@@ -1,0 +1,40 @@
+{
+  "_comment": "Programme registry. Seeded with the YieldMax single-name complex because its URL pattern is stable and its FLEX synthetic legs are the cleanest disclosed flow. Other issuers use different templates and are added as each is verified. The authoritative universe is rebuilt later from EDGAR N-CEN.",
+  "_schema_version": 1,
+  "issuers": {
+    "yieldmax": {
+      "url_template": "https://yieldmaxetfs.com/wp-content/uploads/funds/{ticker}/TidalFG_Holdings_{ticker}.csv",
+      "format": "tidal_csv",
+      "funds": {
+        "MSTY": "MSTR",
+        "NVDY": "NVDA",
+        "TSLY": "TSLA",
+        "CONY": "COIN",
+        "PLTY": "PLTR",
+        "AMDY": "AMD",
+        "HOOY": "HOOD",
+        "SMCY": "SMCI",
+        "MRNY": "MRNA",
+        "APLY": "AAPL",
+        "MSFO": "MSFT",
+        "AMZY": "AMZN",
+        "GOOY": "GOOGL",
+        "FBY": "META",
+        "NFLY": "NFLX",
+        "JPMO": "JPM",
+        "XOMO": "XOM",
+        "PYPY": "PYPL",
+        "DISO": "DIS",
+        "BABO": "BABA",
+        "SNOY": "SNOW",
+        "ABNY": "ABNB",
+        "MARO": "MARA",
+        "YBIT": "IBIT",
+        "GDXY": "GDX",
+        "SDTY": "_SPX",
+        "QDTY": "_NDX",
+        "RDTY": "_RUT"
+      }
+    }
+  }
+}
