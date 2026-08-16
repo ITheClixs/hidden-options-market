@@ -23,7 +23,9 @@ from absorb.collect.http import FetchError, fetch
 from absorb.config import CBOE_CHAIN_URL
 
 # OSI-style contract identifier, e.g. MSTR260814C00030000
-_CONTRACT_RE = re.compile(r"^(?P<root>[A-Z0-9^./_-]{1,6}?)(?P<yy>\d{2})(?P<mm>\d{2})(?P<dd>\d{2})(?P<right>[CP])(?P<strike>\d{8})$")
+_CONTRACT_RE = re.compile(
+    r"^(?P<root>[A-Z0-9^./_-]{1,6}?)(?P<yy>\d{2})(?P<mm>\d{2})(?P<dd>\d{2})(?P<right>[CP])(?P<strike>\d{8})$"
+)
 
 _OPTION_FIELDS = (
     "bid",
