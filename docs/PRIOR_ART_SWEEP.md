@@ -53,3 +53,18 @@ paper, not an optional extra.
 Unchanged at roughly 32%, dominated by the ~18% that someone extends Huang (2025)-style
 launch-event designs from leveraged single-stock ETFs to option-income ones. Nothing in
 this sweep raises or lowers it.
+
+## Addendum, same day: OpenAlex
+
+Scholar and SSRN block automated access, so the sweep was repeated against OpenAlex,
+a free open scholarly API with no auth.
+
+A first query sorted by publication date, which overrode relevance ranking and
+returned unrelated work; that result is discarded. Re-run on relevance, the only
+covered-call-ETF hit is a volatility-*forecasting* paper (HAR-RV-CARMA, *Risks*, 2025)
+that uses QYLD/XYLD/RYLD/JEPI/JEPQ as forecasting subjects and does not examine market
+impact at all.
+
+No competitor found. But OpenAlex indexes journals far better than it indexes SSRN and
+NBER working papers, which is exactly where a competing paper would first appear. This
+raises confidence only slightly and does not replace the manual sweep.

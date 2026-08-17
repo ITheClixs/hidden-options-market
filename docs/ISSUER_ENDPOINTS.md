@@ -18,23 +18,31 @@ structure rather than a covered-call overlay.
 The Global X dated pattern matters beyond Global X: it means part of the panel can be
 back-filled rather than only accumulated forward.
 
-**History depth, probed 2026-08-17.** Files resolve back to roughly **October 2024**
-and 404 before that:
+**History depth, probed 2026-08-17.** An initial pass suggested a boundary around
+October 2024. That was wrong: the 2024-09-02 miss was Labor Day, a market holiday, and
+carries no information. Re-probing puts the true boundary in **early August 2024**:
 
 | date | result |
 |---|---|
-| 2024-08-01, 2024-09-02 | 404 |
-| 2024-10-01 onward (2024-11, 2024-12, 2025-01, 2025-07, 2026-01, 2026-06) | 200 |
+| 2024-08-05 | 404 |
+| 2024-08-12 onward (08-15, 08-16, 08-19, 08-26, 09-03 … 2026-06) | 200 |
 
-So roughly **22 months of daily history** are retrievable for the Global X funds,
-against zero for every other source found so far. That does not back-fill the
-single-name programmes the study leans on — Global X is index-level covered call
-(QYLD, XYLD, RYLD) — but it does supply a real pre-period for the index arm and a
-second, independent issuer for cross-checking the measurement chain.
+So roughly **24 months of daily history** are retrievable.
 
-Not yet established: whether the boundary is a retention policy (which would mean the
-window rolls forward and early files disappear) or simply when the asset host was
-adopted. If it is retention, back-filling is urgent rather than optional.
+### This is a rolling retention window, and the early files are expiring
+
+Today is 2026-08-17. Exactly two years earlier is 2024-08-17. The boundary sits within
+a few days of that, at roughly 735–741 days back. A fixed adoption date landing inside
+a one-week window of exactly-two-years-ago would be a large coincidence; a **rolling
+~2-year retention** explains it directly.
+
+Consequence: **every day of delay permanently loses a day off the back of the panel.**
+Back-filling the ~500 available trading days is urgent, not optional, and should be
+done before any further collector work. The cost is one bulk download.
+
+This is index-level covered call only (QYLD, XYLD, RYLD), so it does not back-fill the
+single-name programmes the study leans on. It supplies a pre-period for the index arm
+and a second, independent issuer for cross-checking the measurement chain.
 
 Caveat: the QYLD file lists equity holdings and a written index call; the header rows
 (fund name, as-of date) precede the real header, so it needs its own parser rather
