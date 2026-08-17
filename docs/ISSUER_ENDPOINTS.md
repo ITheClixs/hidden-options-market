@@ -29,16 +29,30 @@ carries no information. Re-probing puts the true boundary in **early August 2024
 
 So roughly **24 months of daily history** are retrievable.
 
-### This is a rolling retention window, and the early files are expiring
+### Correction: there is no clean two-year edge
 
-Today is 2026-08-17. Exactly two years earlier is 2024-08-17. The boundary sits within
-a few days of that, at roughly 735–741 days back. A fixed adoption date landing inside
-a one-week window of exactly-two-years-ago would be a large coincidence; a **rolling
-~2-year retention** explains it directly.
+An intermediate reading claimed a rolling two-year retention window with files expiring
+daily. **That was wrong, and it was over-inferred from sparse probing.**
 
-Consequence: **every day of delay permanently loses a day off the back of the panel.**
-Back-filling the ~500 available trading days is urgent, not optional, and should be
-done before any further collector work. The cost is one bulk download.
+Running the actual back-fill retrieved QYLD as far back as **2024-07-03**, earlier than
+the "edge" the probes had suggested. The apparent edge was an artefact: individual days
+inside the covered range are simply missing (2024-08-05 among them), and hitting one
+during a binary search looks identical to hitting the end of history.
+
+Direct probing of older dates puts the true edge between **2024-06-03 (404)** and
+**2024-07-03 (present)** — roughly 26 months, not 24.
+
+**Retention versus adoption remains unresolved**, and cannot be settled from a single
+point in time. The distinguishing test is to re-probe a date near the edge in a week
+or two: if it has moved forward, the window rolls and the early data is expiring; if
+it has not, the edge is simply when the asset host was adopted.
+
+The practical conclusion is unchanged — back-fill now, because the downside of being
+wrong is losing data permanently and the cost is one bulk download. But it should not
+be described as a race until the re-probe confirms it.
+
+Note also that the back-fill script's 780-day lookback is close to the true edge, so it
+may be clipping a few weeks of available history. Worth extending on the next run.
 
 This is index-level covered call only (QYLD, XYLD, RYLD), so it does not back-fill the
 single-name programmes the study leans on. It supplies a pre-period for the index arm
