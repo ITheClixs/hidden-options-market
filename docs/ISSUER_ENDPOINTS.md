@@ -51,8 +51,21 @@ The practical conclusion is unchanged — back-fill now, because the downside of
 wrong is losing data permanently and the cost is one bulk download. But it should not
 be described as a race until the re-probe confirms it.
 
-Note also that the back-fill script's 780-day lookback is close to the true edge, so it
-may be clipping a few weeks of available history. Worth extending on the next run.
+### Back-fill result
+
+Completed 2026-08-17: **2,032 files, 26 MB, zero errors.** QYLD, XYLD, RYLD and DJIA
+each have **508 trading days** reaching back to **2024-07-03**.
+
+That edge is real, not an artefact of the script's 780-day lookback. The run did
+attempt 2024-06-29 through 2024-07-02 and received 404s before succeeding at 07-03, so
+the boundary sits at the start of July 2024 for all four funds simultaneously. A
+common edge across four independently-managed funds points to an asset-host adoption
+date rather than a per-file retention rule, though the week-later re-probe is still the
+test that settles it.
+
+192 dates inside the covered range returned 404 — market holidays plus scattered
+missing days. Those gaps are a property of the source and must be handled in the panel
+rather than assumed away.
 
 This is index-level covered call only (QYLD, XYLD, RYLD), so it does not back-fill the
 single-name programmes the study leans on. It supplies a pre-period for the index arm
