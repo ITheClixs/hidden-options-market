@@ -5,17 +5,16 @@
 \usepackage[margin=1.1in]{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
-\usepackage{graphicx}
 \usepackage{natbib}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf}
 
-\newcommand{\dose}{\ensuremath{\mathit{dose}}}
+\newcommand{\dose}{\ensuremath{\mathit{size}}}
 
-\title{\textbf{A Disclosed Mechanical Option Flow Leaves No Volume Footprint}\\[0.4em]
-\large Evidence from the Single-Name Option-Income Fund Complex}
+\title{\textbf{Notional Is Not Gamma}\\[0.4em]
+\large Why Single-Name Option-Income Funds Imply Almost No Hedging Flow}
 
 \author{Anonymous}
 
@@ -26,173 +25,228 @@
 
 \begin{abstract}
 \noindent
-Single-name option-income exchange-traded funds write options against a synthetic long
-position on one underlying stock. Their holdings, strikes, expiries and roll calendars
-are disclosed daily, their trades are mechanical, and at the extreme one fund held
-$5.7$ times its underlying's entire daily dollar turnover. Standard reasoning about
-dealer hedging implies these programmes should leave a large, dated footprint in the
-underlying. We look for it and do not find it. Across $23$ programmes spanning three
-orders of magnitude of size relative to turnover, the volume response to programme size
-is statistically indistinguishable from zero on every weekday, with a minimum
-detectable effect of about two percent per log unit of size; a randomisation test
-places the estimate at the $37$th percentile of its own null. The same estimator on the
-same panel detects volatility-driven volume at $t=9.4$ and option-expiry effects at
-$|t|=3.1$ to $4.7$, so the null is a property of the flow rather than of the design.
-An intraday specification that sorts names cross-sectionally by programme size produces
-a monotone, highly significant profile of the wrong sign; it does not survive a
-within-name design and we report it as a cautionary case. We also document that the
-positions can be recovered end to end from free public sources: fund holdings reconcile
-to Options Clearing Corporation series open interest exactly on $8$ of $11$ attributed
-legs, and the FLEX leg that carries the synthetic position is identifiable from a
-cent-offset strike with one-sided open interest. The results bound the footprint of a
-large, fully disclosed, uninformed derivative flow near zero and suggest that such flow
-is intermediated against offsetting demand rather than hedged into the underlying.
+Single-name option-income exchange-traded funds have grown large relative to the stocks
+they write on: at its 2025 peak one fund reported net assets of $5.7$ times its
+underlying's entire daily dollar turnover. Their scale has prompted concern that
+dealer hedging of these programmes moves the underlying. We show from disclosed
+positions that the concern does not follow from the structure. These funds hold a
+synthetic long --- a long call and a short put at effectively the same strike --- which
+is a forward by put-call parity and therefore carries no gamma: the dealer hedges it
+once and does not rebalance it. All rebalancing arises from the short-call overlay,
+which the funds write as spreads, offsetting further. Computing dollar gamma leg by leg
+across $24$ programmes from disclosed holdings, a one percent move in the underlying
+implies a rehedge of between $0.00\%$ and $0.65\%$ of daily dollar volume, with a
+median of $0.09\%$. Notional overstates the hedging footprint by roughly two orders of
+magnitude. Consistent with this, a difference-in-differences design over $64{,}553$
+name-days finds no volume response to programme size on any weekday, and a
+randomisation test places the estimate at the $37$th percentile of its null; but we
+show the design's minimum detectable effect is about an order of magnitude larger than
+the predicted flow, so the empirical null corroborates the calculation rather than
+testing it independently. Separately, we document that these positions are recoverable
+end to end from free public sources --- issuer holdings reconcile exactly to Options
+Clearing Corporation series open interest on $8$ of $11$ attributed legs --- and that
+the FLEX leg carrying the synthetic position is identifiable from a cent-offset strike
+with one-sided open interest.
 
 \vspace{0.8em}
-\noindent\textbf{Keywords:} option-income funds; covered calls; dealer hedging; market
-absorption; disclosed positions; FLEX options.
+\noindent\textbf{Keywords:} option-income funds; covered calls; dealer gamma; hedging
+flow; FLEX options; disclosed positions.
 
 \noindent\textbf{JEL:} G12, G14, G23.
 \end{abstract}
 
 \section{Introduction}
 
-A recurring claim in both practitioner and academic work is that option dealers, having
-taken the other side of customer positions, hedge those positions in the underlying and
-in doing so move it. The claim underlies the industry of ``dealer gamma'' estimates, a
-substantial empirical literature on hedging-induced return dynamics, and recurring
-supervisory attention to options-based funds as amplifiers of volatility. The claim is
-difficult to test directly because dealer inventory is not observed. Studies infer it
-from open interest under sign assumptions, or from exchange data that identifies trade
-initiator but not the resulting book.
+Option-income exchange-traded funds have grown quickly, and their growth has attracted
+attention from supervisors and market commentators who ask whether the hedging of these
+positions amplifies movements in the underlying. The question is natural. The funds are
+large: measured against the daily dollar turnover of the single stocks they write on,
+the programmes in our sample reach a peak ratio of $5.7$, and seven of $23$ exceed
+$0.25$. If a dealer intermediating a multi-billion-dollar position rebalances it in the
+underlying, the flow should be conspicuous.
 
-This paper studies a setting where the inference is unnecessary. Single-name
-option-income exchange-traded funds hold a synthetic long position in one stock and
-write calls against it. Three features make them unusually informative. First, their
-option positions are disclosed daily at contract level: strike, expiry, right and
-signed contract count. Second, the programmes are mechanical, following a schedule set
-in the prospectus rather than a view on the underlying. Third, and most importantly,
-several have become very large relative to the stocks they write on. At its peak in
-July 2025 the largest fund in our sample reported \$5.75bn of net assets against a
-median daily dollar volume in its underlying of about \$1.0bn.
+This paper makes a simple structural point and then documents its consequences. The
+concern rests on an implicit step from notional to hedging flow. For these products the
+step does not hold, because of how the position is built.
 
-If a dealer intermediating such a programme hedges it in the underlying, the resulting
-flow should be conspicuous. We look for it in trading volume, which is the necessary
-condition: whatever else scheduled hedging of a multi-billion-dollar delta position
-does, it must transact. We find no relationship between programme size and volume. The
-coefficient on the interaction of programme size with day of week is within
-$\pm 0.006$ on every weekday against a minimum detectable effect near $0.020$ per log
-unit, and programme size in our sample spans roughly seven log units. A randomisation
-test that permutes size across programmes puts the estimate at the $37$th percentile of
-its null distribution.
+A single-name option-income fund does not own the stock. It holds a long call and a
+short put at effectively the same strike and expiry, and writes calls against that
+position. By put-call parity a long call plus a short put at one strike is a forward.
+It has a delta of approximately one and, critically, \emph{a gamma of zero}. The dealer
+on the other side of the synthetic acquires a static short forward, hedges it once at
+inception, and thereafter has nothing to rebalance. Every unit of rebalancing flow the
+programme generates must come from the short-call overlay alone --- and because these
+funds write call \emph{spreads} rather than naked calls, the long leg of each spread
+offsets part of the short leg's gamma as well.
 
-Two features make this a bound rather than an unrejected hypothesis. The first is
-power, discussed throughout. The second is a set of positive controls: the same
-estimator applied to the same panel recovers the mechanical relationship between
-absolute returns and volume at $t=9.4$, a triple-witching effect at $t=-4.7$ and a
-monthly option-expiry effect at $t=-3.1$. A design that detects option-expiry effects
-and does not detect the programme is informative about the programme.
+The result is a large gap between notional and hedging footprint. We compute dollar
+gamma leg by leg from disclosed holdings for $24$ programmes, using exchange greeks
+where the series is listed and Black-Scholes where the leg is FLEX. A one percent move
+in the underlying implies a dealer rehedge of between $0.00\%$ and $0.65\%$ of that
+underlying's median daily dollar volume, with a median across programmes of $0.09\%$.
+Even a five percent move --- a typical daily range for the most volatile names in the
+sample --- implies a median rehedge near half a percent of daily volume.
 
-We make three contributions.
+We then ask whether a footprint of that size is visible in the data, and find that it
+is not, using a difference-in-differences design around staggered programme launches
+over $64{,}553$ name-days. The estimated response of volume to programme size is within
+$\pm 0.006$ on every weekday, and a randomisation test that permutes size across
+programmes places the estimate at the $37$th percentile of its own null distribution.
 
-\paragraph{A measurement.} We show that the positions of this complex can be recovered
-from free public sources and cross-validated. Issuer holdings files give the intended
-position; Options Clearing Corporation series files give realised open interest for
-every series including FLEX. The two reconcile exactly, to the contract, for $8$ of the
-$11$ legs we attribute. The synthetic leg, which is transacted as FLEX and does not
-print on the ordinary tape, is identifiable from a distinctive signature: a
-non-standard-deliverable series struck one or two cents off the round strike, carrying
-one-sided open interest.
+We are explicit about what this second result does and does not add. The design's
+minimum detectable effect is about two percent of volume per log unit of programme
+size, while the structural calculation predicts an effect roughly an order of magnitude
+smaller. The empirical null is therefore \emph{consistent} with the calculation but does
+not independently test it: a test cannot reject what it was never powered to see. We
+report it because a reader is entitled to know that the data were examined and what was
+found, and because the accompanying positive controls establish that the design detects
+comparable effects when they exist --- volatility-driven volume at $t=9.4$ and
+option-expiry effects at $|t|=3.1$ to $4.7$ in the same panel.\footnote{The empirical
+design was specified and executed before the structural calculation was performed. The
+project repository records that order, including a pre-registered pilot specification
+and results that the calculation later reframed. We describe the work in logical rather
+than chronological order here, but the chronology is available and we think it matters.}
 
-\paragraph{A bound.} We bound the volume footprint of a large, disclosed, mechanical
-derivative programme near zero, with power documented and positive controls passed.
+A third contribution is methodological. We show that this category of derivative
+positioning is measurable end to end from free public sources. Issuer holdings give the
+intended position at contract level; Options Clearing Corporation series files give
+realised open interest for every series, including FLEX series that never print on the
+ordinary tape. The two reconcile exactly, to the contract, for $8$ of the $11$ legs we
+attribute. The synthetic put leg, which we had expected to be unobservable without
+commercial data, turns out to carry a distinctive signature: a non-standard-deliverable
+series struck one or two cents off the round strike, holding one-sided open interest.
 
-\paragraph{A cautionary case.} An intraday specification that sorts names by programme
-size cross-sectionally yields a monotone profile with two coefficients beyond
-$|t|=3$ and the wrong sign for hedging. It is confounded: programme size is correlated
-with the clientele of the underlying, and the profile reflects retail-heavy names being
-open-weighted rather than anything about programmes. It disappears in a within-name
-design. Since cross-sectional dose sorts are common in this literature, we report the
-failure alongside its refutation.
-
-\paragraph{Relation to the literature.} Our conclusion is close in spirit to
-\citet{brogger2021} who studies leveraged volatility exchange-traded products, finds
-their predictable rebalancing is absorbed in an orderly way, and reports no excess
-profit from trading ahead of it. The flow we study is larger relative to its market,
-disclosed in far greater detail, and concentrated in single names rather than an index
-complex, and we reach the same qualitative answer through a different design.
-\citet{park2025} document that aggregate call overwriting by income mutual funds
-predicts lower implied and realised volatility in the following month; our results do
-not contradict theirs, since we examine a different outcome at a different frequency,
-but they do place a tight bound on the volume channel through which such an effect
-would most naturally operate. On the measurement side our approach is complementary to
-work that infers positioning from open interest under sign assumptions
-\citep{garleanu2009,bollen2004}: rather than assume the sign, we read it from
-disclosure and then verify it against clearing data.
+\paragraph{Relation to the literature.} \citet{cboe2024} asks whether option-income
+funds suppress volatility and concludes they do not, arguing that diversity across
+underlyings, tenors and strikes dilutes any surface effect; that analysis is aggregate
+and, as it notes, without data on the notional or volume share these funds represent.
+We supply the position-level calculation at single-name level and identify the
+structural reason rather than the dilution one. \citet{park2025} find that aggregate
+call overwriting by income mutual funds predicts lower implied and realised volatility
+in the following month; our results concern a different outcome and do not contradict
+theirs, but they do imply that any such effect operates through a channel other than
+delta-hedging volume in the underlying. \citet{brogger2021} shows that the predictable
+rebalancing of leveraged volatility products is absorbed in an orderly fashion; our
+setting differs in that the flow we examine turns out to be small at source rather than
+absorbed after the fact. On measurement, work inferring dealer positioning from open
+interest under sign assumptions \citep{garleanu2009,bollen2004} must assume the side;
+we read it from disclosure and verify it against clearing data.
 
 \section{Institutional setting}
 
-Single-name option-income funds do not hold the underlying stock. They construct a
-synthetic long position and write options against it. Taking the largest fund in our
-sample as of 17 August 2026, the disclosed portfolio contains:
+Taking the largest programme in our sample as of 17 August 2026, the disclosed
+portfolio contains, alongside Treasury bills and cash:
 
 \begin{itemize}
-\item a long call struck at \$95 expiring 16 October 2026, $+45{,}115$ contracts;
+\item a long call struck at \$95.00 expiring 16 October 2026, $+45{,}115$ contracts;
 \item a short put on a non-standard-deliverable series struck at \$95.01, same expiry,
       $-45{,}115$ contracts;
-\item a ladder of short and long calls expiring 21 August 2026 spanning strikes \$94 to
-      \$106, forming call spreads;
-\item Treasury bills and cash comprising most of the balance sheet.
+\item a ladder of long and short calls expiring 21 August 2026 spanning strikes \$94 to
+      \$106, forming call spreads.
 \end{itemize}
 
-The first two legs are a synthetic long: long call plus short put at effectively the
-same strike replicates the stock. The one-cent strike offset on the put distinguishes
-the non-standard-deliverable series from the listed one. The call ladder is the income
-overlay.
+The first two legs are the synthetic long. The one-cent strike offset distinguishes the
+non-standard-deliverable series from the listed one and prevents the two from being
+netted at clearing. The ladder is the income overlay.
 
-Two implications matter. First, the fund's net delta is large and positive: the
-synthetic long contributes approximately one unit of delta per unit of notional, the
-short calls subtract a fraction. The dealer on the other side therefore carries a
-correspondingly large negative delta, which under textbook practice is hedged by buying
-the underlying and rebalanced as the position's delta changes. Second, because the
-overlay is short-dated and rolled frequently, the rebalancing is recurrent rather than
-one-off.
+\subsection{Why the synthetic long generates no rebalancing}
 
-The magnitude of the implied hedging can be sized. For an at-the-money option book, a
-$5\%$ move in the underlying changes delta by roughly $5$ to $15$ percentage points of
-notional. The largest fund's underlying has a daily volatility near $6\%$, and the fund
-held between one and six times the underlying's daily dollar volume over its life.
-Daily delta rebalancing of order ten percent of notional would therefore be of order
-ten percent or more of the underlying's daily volume. This is the effect we look for.
+By put-call parity, for a call $C$ and put $P$ at strike $K$ and maturity $T$,
+\begin{equation}
+C - P \;=\; S - K e^{-rT},
+\end{equation}
+so a long call and short put at the same strike replicate a forward on the underlying.
+Differentiating twice in $S$,
+\begin{equation}
+\frac{\partial^2 (C-P)}{\partial S^2} \;=\; 0 .
+\end{equation}
+The position has unit delta and zero gamma. A dealer short this structure holds a
+static short forward: the hedge is established once and requires no rebalancing as the
+underlying moves. In our sample the two legs differ by one cent in strike, which is
+immaterial.
 
-\section{Measuring disclosed derivative positioning}
-\label{sec:measurement}
+This is the crux. It means the programme's notional --- the quantity that makes these
+funds look large --- is attached to the part of the position that generates no ongoing
+hedging flow at all. Only the overlay matters, and the overlay is a small fraction of
+notional in gamma terms.
 
-Our measurement combines three free sources.
+\section{The implied hedging flow}
+\label{sec:implied}
 
-\paragraph{Issuer holdings.} Each fund publishes a daily holdings file listing every
-position with a signed quantity. Option positions carry an identifier in an
-OSI-like form from which root, expiry, right and strike are recovered. Leading-digit
-roots denote non-standard deliverable series.
+We compute, for each programme, the dollar delta and the change in dollar delta implied
+by a one percent move in the underlying:
+\begin{equation}
+\Gamma^{\$}_{1\%} \;=\; \sum_{\ell} q_\ell \cdot 100 \cdot \gamma_\ell \cdot S \cdot (0.01\, S),
+\end{equation}
+summing over disclosed legs $\ell$ with signed contract counts $q_\ell$. Greeks are
+taken from the exchange chain where the series is listed and computed under
+Black-Scholes where the leg is FLEX. Including the FLEX legs is essential: they are
+precisely the synthetic puts, and omitting them leaves the long synthetic calls
+uncancelled and overstates gamma by orders of magnitude.
 
-\paragraph{Clearing data.} The Options Clearing Corporation publishes, per underlying,
-open interest for every series, including FLEX series that do not appear in ordinary
-listed chains. This is the independent check on disclosure.
-
-\paragraph{Chains and prices.} Full option chains with two-sided quotes and quote sizes
-are available from an exchange content delivery network; underlying bars are available
-from a public charting interface.
-
-\subsection{Identifying the FLEX leg}
-
-The synthetic put leg is transacted as FLEX and does not print on the ordinary tape,
-which we expected to make it unobservable without commercial data. It is not. The leg
-leaves a distinctive signature in clearing data. Table~\ref{tab:signature} shows the
-cluster of series at one strike and expiry for the largest programme's underlying.
+Table~\ref{tab:hedge} reports the result against each underlying's median daily dollar
+volume.
 
 \begin{table}[t]
 \centering
-\caption{Open interest around a single strike and expiry, 16 October 2026, as of
+\caption{Implied dealer rehedge per one percent move in the underlying, from disclosed
+positions as of 17 August 2026. Programmes ordered by hedge as a share of daily dollar
+volume; a representative selection is shown.}
+\label{tab:hedge}
+\begin{tabular}{llrrrr}
+\toprule
+Fund & Underlying & \$ delta (m) & $\Gamma^{\$}_{1\%}$ (m) & ADV (m) & Hedge / ADV \\
+\midrule
+MRNY & MRNA  &    96 & $-1.9$  &    297 & 0.65\% \\
+GDXY & GDX   &   198 & $-5.1$  &  1,260 & 0.41\% \\
+MSTY & MSTR  &   605 & $-7.6$  &  3,633 & 0.21\% \\
+NVDY & NVDA  & 1,111 & $-56.8$ & 30,597 & 0.19\% \\
+CONY & COIN  &   276 & $-2.8$  &  2,100 & 0.13\% \\
+AMZY & AMZN  &   221 & $-10.2$ &  8,823 & 0.12\% \\
+HOOY & HOOD  &   109 & $-1.9$  &  2,118 & 0.09\% \\
+PLTY & PLTR  &   332 & $-5.7$  &  7,211 & 0.08\% \\
+TSLY & TSLA  &   508 & $-16.7$ & 26,483 & 0.06\% \\
+APLY & AAPL  &    92 & $-2.2$  & 11,177 & 0.02\% \\
+AMDY & AMD   &   364 & $+0.4$  &  6,553 & 0.01\% \\
+\midrule
+\multicolumn{4}{l}{\emph{All 24 programmes}} & median & 0.09\% \\
+\multicolumn{4}{l}{} & maximum & 0.65\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The dispersion is informative. Dollar delta reaches \$1.1bn for the largest programme,
+and the ratio of programme net assets to daily turnover reaches $5.7$ elsewhere in the
+sample. Yet the implied rebalancing never exceeds two thirds of one percent of daily
+volume for a one percent move, and its median is under a tenth of a percent. Scaling to
+a five percent move, which is a routine daily range for the most volatile names here,
+the median implied rehedge is roughly half a percent of daily volume.
+
+Note also the sign heterogeneity: AMDY shows positive gamma, meaning the leg
+composition happens to leave the dealer short gamma rather than long. Aggregating these
+programmes into a single directional ``gamma'' figure, as is common in commentary,
+discards that variation.
+
+\section{Measuring disclosed positioning from free sources}
+\label{sec:measurement}
+
+The calculation above requires knowing the positions. We describe how they are
+obtained, because the procedure is reusable and costs nothing.
+
+\paragraph{Sources.} Issuer holdings files list every position daily with a signed
+quantity and an OSI-like identifier from which root, expiry, right and strike are
+recovered; leading-digit roots denote non-standard deliverable series. The Options
+Clearing Corporation publishes per-underlying open interest for every series including
+FLEX. Full chains with two-sided quotes, sizes and greeks are available from an
+exchange content delivery network, and underlying bars from a public charting
+interface. Programme size over time comes from Form N-PORT.
+
+\paragraph{Identifying the FLEX leg.} Table~\ref{tab:signature} shows the cluster of
+series at one strike and expiry.
+
+\begin{table}[t]
+\centering
+\caption{Open interest around one strike and expiry, 16 October 2026, observed
 16 August 2026. The programme's disclosed position is $-45{,}115$ contracts.}
 \label{tab:signature}
 \begin{tabular}{rrrl}
@@ -207,124 +261,62 @@ Strike & Call OI & Put OI & Interpretation \\
 \end{tabular}
 \end{table}
 
-Two conditions jointly identify the leg: an \emph{offset strike}, meaning the cents
-component is not a standard increment, and \emph{one-sidedness}, meaning essentially
-all open interest in the series sits on one right. Note that a detector keyed on
-\emph{equal} call and put open interest finds a different and much larger population,
-consisting of conversions, reversals and boxes, which are dealer financing structures
-rather than fund positions. We report both separately.
+Two conditions jointly identify the leg: an offset strike, meaning the cents component
+is not a standard increment, and one-sidedness, meaning essentially all open interest
+in the series sits on one right. A detector keyed instead on \emph{equal} call and put
+open interest recovers a different and much larger population --- conversions,
+reversals and boxes, which are dealer financing structures rather than fund positions
+--- and we report the two separately.
 
-\subsection{Reconciliation}
+\paragraph{Reconciliation.} Across $68$ underlyings and $113{,}610$ series, matched
+against $28$ programmes on underlying, expiry, strike and right, the procedure
+attributes $11$ legs. Eight match the disclosed contract count exactly. Of the
+remainder, one differs by $116$ contracts, consistent with a second holder in the same
+series; one by $4{,}009$, consistent with a second programme at the same strike; and one
+is a false positive on the call side. We report the attributed count as small: it
+reflects a single observation date and a registry covering one issuer's complex, and it
+should be read as a demonstration that the reconciliation works rather than as a census.
 
-Applying the detector to $68$ underlyings and $113{,}610$ series, and matching against
-$28$ programmes' disclosed holdings on underlying, expiry, strike and right, yields
-$11$ attributed legs. Eight match the disclosed contract count exactly. The three that
-do not are explicable: one differs by $116$ contracts, consistent with a second holder
-in the same series; one differs by $4{,}009$, consistent with a second programme on the
-same underlying and strike; and one is a false positive on the call side.
+\section{Is a footprint of this size visible?}
 
-We regard this as the paper's most durable component. It establishes that a
-consequential category of derivative positioning is publicly measurable at no cost, and
-it is independent of anything we conclude below.
+\subsection{Data and design}
 
-\section{Data and sample}
+The treated group is the $25$ underlyings carrying a dedicated single-name programme,
+with launch dates from each fund's first trade date, staggered between November 2022 and
+July 2026. The control group is $27$ liquid names without such a programme. Daily bars
+over five years give $64{,}553$ name-days across $52$ names and $1{,}253$ trading days.
 
-The treated group is the $25$ underlyings carrying a dedicated single-name
-option-income programme, identified from the issuer's fund registry, with launch dates
-taken from each fund's first trade date. Launches are staggered from November 2022 to
-July 2026. The control group is $27$ liquid names carrying no such programme.
+Programme size is taken from N-PORT ($226$ reports across $23$ funds) and enters as a
+step function that is never carried backwards before its report date. Using reported
+rather than current size matters: the largest fund reported \$437m in July 2024,
+\$5{,}747m in July 2025, and \$726m in August 2026.
 
-Daily bars covering five years give $64{,}553$ name-days across $52$ names and
-$1{,}253$ trading days. Programme size is taken from Form N-PORT: $226$ reports across
-$23$ funds between January 2023 and April 2026. N-PORT is filed monthly and released
-quarterly with roughly a two-month lag, so size enters as a step function that never
-carries a value backwards before its report date.
-
-Using reported rather than current size is essential. The largest fund reported
-\$437m of net assets in July 2024, \$5{,}747m in July 2025 and \$726m in August 2026.
-An earlier version of this analysis applied the current figure across the whole sample
-and produced an uninformative dose sort; the correction is not cosmetic.
-
-We define programme size relative to turnover as
-\begin{equation}
-\dose_{i,t} \;=\; \frac{\text{reported net assets}_{i,t}}{\text{median daily dollar volume}_i},
-\end{equation}
-and use $\log \dose$, demeaned, in estimation. Table~\ref{tab:dose} reports the
-distribution. It spans three orders of magnitude, which is what a size-response test
-requires.
-
-\begin{table}[t]
-\centering
-\caption{Programme size relative to underlying turnover. Peak is the largest reported
-net assets over the underlying's median daily dollar volume.}
-\label{tab:dose}
-\begin{tabular}{lrrrr}
-\toprule
-Underlying & Peak $\dose$ & Median $\dose$ & Peak net assets (\$m) & Median ADV (\$m) \\
-\midrule
-MSTR & 5.72 & 1.27 & 5,747 & 1,004 \\
-COIN & 1.02 & 0.44 & 1,455 & 1,427 \\
-HOOD & 0.89 & 0.47 & 252   & 282 \\
-SMCI & 0.41 & 0.15 & 338   & 825 \\
-GDX  & 0.36 & 0.13 & 283   & 789 \\
-MRNA & 0.27 & 0.17 & 115   & 425 \\
-MARA & 0.27 & 0.14 & 125   & 469 \\
-NVDA & 0.08 & 0.05 & 1,910 & 23,635 \\
-AAPL & 0.014& 0.008& 155   & 11,098 \\
-DIS  & 0.005& 0.005& 5     & 1,049 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Seven of $23$ programmes peak above $0.25$ and two exceed $1.0$. Measuring turnover
-over the pre-launch window only, which removes any contribution of the programme itself
-to the denominator, raises the maximum to $27.7$.
-
-\section{Empirical design}
-
-Our outcome is $\log$ dollar volume. The specification is
+We estimate
 \begin{align}
 \log V_{i,t} \;=\; \alpha_i + \delta_t
-&+ \beta_1 \, \mathit{post}_{i,t}
- + \beta_2 \, (\mathit{post}_{i,t} \times \mathit{day}_t) \nonumber \\
-&+ \beta_3 \, (\mathit{post}_{i,t} \times \mathit{day}_t \times \log \dose_{i,t})
- + \beta_4 \, (\mathit{post}_{i,t} \times \log \dose_{i,t}) \nonumber \\
-&+ \beta_5 \, (\mathit{day}_t \times \mathit{treated}_i)
- + \gamma \, |r_{i,t}| + \varepsilon_{i,t},
+&+ \beta_1 \mathit{post}_{i,t}
+ + \beta_2 (\mathit{post}_{i,t} \times \mathit{day}_t) \nonumber \\
+&+ \beta_3 (\mathit{post}_{i,t} \times \mathit{day}_t \times \log \dose_{i,t})
+ + \beta_4 (\mathit{post}_{i,t} \times \log \dose_{i,t}) \nonumber \\
+&+ \beta_5 (\mathit{day}_t \times \mathit{treated}_i)
+ + \gamma |r_{i,t}| + \varepsilon_{i,t},
 \label{eq:main}
 \end{align}
-where $\mathit{post}$ indicates dates after a programme's launch, $\mathit{day}$ is a
-weekday indicator, and $|r|$ absorbs the mechanical dependence of volume on absolute
-returns. Name effects absorb persistent liquidity differences; date effects absorb all
-market-wide variation including the common weekday pattern.
+with $\beta_3$ the estimand. Name effects absorb persistent liquidity differences, date
+effects absorb all market-wide variation including the common weekday pattern, and
+$|r|$ absorbs the mechanical dependence of volume on absolute returns. The roll weekday
+is scanned across all five days rather than assumed, and all five are reported.
+Inference is two-way clustered on name and date \citep{cameron2011} with $t$ critical
+values from the smaller clustering dimension; the estimator agrees with a reference
+implementation to four decimals and is very slightly conservative in simulation under
+errors with within-name persistence and a common daily factor.
 
-The estimand is $\beta_3$: whether the day-of-week volume footprint scales with
-programme size. This is the mechanism test. A flow proportional to programme notional
-must generate an effect that grows with notional; an effect identical across sizes is
-not that flow.
-
-We do not assume which day the programme transacts. The roll weekday is scanned across
-all five days and all five are reported. This is a five-way search and we treat it as
-such.
-
-Inference is two-way clustered on name and date following \citet{cameron2011}, with
-critical values from a $t$ distribution with degrees of freedom set by the smaller
-clustering dimension. We verified the estimator against a reference implementation
-(agreement to four decimals on both coefficient and standard error) and checked its
-calibration by simulation under errors with within-name persistence and a common daily
-factor, where it is very slightly conservative.
-
-\section{Results}
-
-\subsection{The size response is zero}
-
-Table~\ref{tab:main} reports estimates of \eqref{eq:main} for each weekday.
+\subsection{Results}
 
 \begin{table}[t]
 \centering
-\caption{Volume response to programme size, by weekday. ``Level'' is $\beta_2$ and
-``Size response'' is $\beta_3$ from \eqref{eq:main}. MDE80 is the effect detectable at
-$80\%$ power. $64{,}553$ observations, $52$ names, $1{,}253$ dates.}
+\caption{Volume response to programme size by weekday. MDE80 is the effect detectable
+at $80\%$ power. $64{,}553$ observations, $52$ names, $1{,}253$ dates.}
 \label{tab:main}
 \begin{tabular}{lrrrrr}
 \toprule
@@ -341,29 +333,15 @@ Friday    & $+0.0288$ & $+1.95$ & $-0.0035$ & $-0.40$ & 0.025 \\
 \end{tabular}
 \end{table}
 
-The size response is indistinguishable from zero on every day, with every point
-estimate inside $\pm 0.006$ and standard errors implying a detectable effect near
-$0.020$ per log unit. Since $\log \dose$ spans approximately seven units across the
-sample, the design would resolve a spread of roughly $14\%$ of volume between the
-smallest and largest programmes. It finds none.
+Table~\ref{tab:main} reports no size response on any weekday. Measuring turnover over
+the pre-launch window only, which removes any endogenous contribution of the programme
+to the denominator, leaves the Friday estimate at $-0.0038$ ($t=-0.41$). Randomisation
+inference permuting size across treated names over $300$ draws places the actual
+estimate of $-0.00348$ at the $37$th percentile of its null, central $95\%$ interval
+$[-0.0232, +0.0201]$, two-sided $p=0.773$; the permutation standard deviation of
+$0.0114$ is close to the clustered standard error.
 
-Replacing turnover measured over the full sample with turnover measured over the
-pre-launch window only, which removes any endogenous contribution of the programme to
-the denominator, leaves the Friday estimate at $-0.0038$ ($t=-0.41$).
-
-\subsection{Randomisation inference}
-
-Because the estimate relies on clustered standard errors with $25$ treated clusters, we
-also conduct randomisation inference, permuting programme size across treated names and
-re-estimating $300$ times. The actual estimate of $-0.00348$ sits at the $37$th
-percentile of the permutation distribution, whose central $95\%$ runs from $-0.0232$ to
-$+0.0201$; the two-sided permutation $p$-value is $0.773$. The permutation standard
-deviation of $0.0114$ is close to the clustered standard error, so the parametric
-inference was not materially optimistic.
-
-\subsection{Positive controls}
-
-Table~\ref{tab:controls} reports effects the design must be able to see.
+\subsection{Positive controls, and the limits of this test}
 
 \begin{table}[t]
 \centering
@@ -373,7 +351,7 @@ Table~\ref{tab:controls} reports effects the design must be able to see.
 \toprule
 Control & $\beta$ & $t$ \\
 \midrule
-$|r|$ $\rightarrow$ volume                & $+10.68$ & $+9.40$ \\
+$|r| \rightarrow$ volume                  & $+10.68$ & $+9.40$ \\
 Triple witching $\times$ treated          & $-0.330$ & $-4.65$ \\
 Monthly option expiry $\times$ treated    & $-0.122$ & $-3.13$ \\
 \midrule
@@ -382,16 +360,19 @@ Programme size response (Friday)          & $-0.004$ & $-0.40$ \\
 \end{tabular}
 \end{table}
 
-The design detects volatility-driven volume and option-expiry effects at $|t|$ between
-$3.1$ and $9.4$. It reports the programme size response at $|t|=0.40$. The negative
-sign on the expiry controls reflects composition: our control names are mega-caps with
-large index-driven expiry activity, so treated names show \emph{less} relative volume
-on those dates. That is a statement about the control group, not about programmes.
+The design detects comparable effects when they exist. That establishes the machinery
+works; it does not establish that this test was capable of seeing the effect
+Section~\ref{sec:implied} predicts. It was not. The minimum detectable effect is about
+$0.020$ in log volume per log unit of programme size, whereas the predicted rehedge is
+of order $0.001$ to $0.005$ of daily volume even for the largest programmes on
+high-volatility days. The empirical null is therefore corroborative and not
+independent evidence, and we do not present it as a rejection of anything.
+
+The negative sign on the expiry controls reflects composition rather than programmes:
+our control names are mega-caps with large index-driven expiry activity, so treated
+names show less relative volume on those dates.
 
 \subsection{An attention cycle around launch}
-
-Figure-style estimates by quarter relative to launch, with the quarter before launch as
-reference, are reported in Table~\ref{tab:event}.
 
 \begin{table}[t]
 \centering
@@ -407,132 +388,85 @@ $t$     & $1.12$ & $1.07$ & $1.16$ & $1.86$ & $2.09$ & $2.65$ & $2.27$ & $1.89$ 
 \end{tabular}
 \end{table}
 
-This is important and largely negative for one of our own auxiliary results. The
-pre-launch coefficients are not flat: volume in these names is elevated two to four
-quarters before launch, dips in the quarter immediately preceding it, rises to a peak
-two quarters after, and decays. The pattern is that of an attention cycle in which
-sponsors launch products onto stocks that are already the subject of unusual interest.
+Pre-launch coefficients in Table~\ref{tab:event} are not flat. Volume is elevated two to
+four quarters before launch, dips immediately before it, peaks two quarters after, and
+decays --- the profile of an attention cycle in which sponsors launch products onto
+stocks already receiving unusual interest. Consequently the level coefficients in
+Table~\ref{tab:main}, including the $+2.9\%$ Friday estimate, cannot be given a causal
+reading, and we do not rely on them. The size response is more robust, and the bias runs
+toward detection: if larger programmes launch onto larger attention surges, $\beta_3$ is
+biased upward, and we estimate zero.
 
-The consequence is that \emph{level} effects around launch, including the $+2.9\%$
-Friday coefficient in Table~\ref{tab:main}, cannot be given a causal reading. We do not
-rely on them.
+\subsection{A confound that looks like a result}
 
-The size response is more robust to this concern, and the direction of the bias is
-favourable to detection. If sponsors launch larger programmes onto names experiencing
-larger attention surges, then programme size is positively correlated with the
-confounding surge, and $\beta_3$ should be biased \emph{upward}. We estimate zero.
+Repeating the exercise intraday on $60$ sessions of five-minute bars ($40{,}560$
+bin-observations), every programme launched before the window opens, so the
+difference-in-differences collapses. A specification identifying from programme size
+interacted with time of day, with name and date-by-bin effects, produces a clean
+monotone profile: $+0.035$ at the open falling to $-0.042$ at 15:00 ($t=-3.52$) and
+$-0.095$ at 15:30 ($t=-3.20$).
 
-\subsection{Intraday, and a confound that looks like a result}
-
-We repeat the exercise intraday using $60$ sessions of five-minute bars, the maximum
-freely available, aggregated to thirteen half-hour bins ($40{,}560$ bin-observations).
-Every programme in the sample launched before this window opens, so there is no
-pre/post variation within it and the difference-in-differences design collapses.
-
-A first specification identifies from the interaction of programme size with time of
-day across names, with name and date-by-bin effects. It produces a strikingly clean
-result: relative to midday, the coefficient rises to $+0.035$ at the open and falls
-monotonically to $-0.042$ at 15:00 ($t=-3.52$) and $-0.095$ at 15:30 ($t=-3.20$).
-
-This is not evidence of hedging, and we report it because it is the kind of result that
-would be easy to present as such. The sign is wrong: dealer hedging concentrated near
-the close predicts \emph{more} close volume in large-programme names, not less. The
-pattern is a confound. With programme size time-invariant inside a 60-day window, the
-interaction of size with time of day cannot be separated from the interaction of any
-other name characteristic with time of day, and programme size is strongly correlated
-with clientele. The large-programme names are retail-heavy and open-weighted; the
-small-programme names are mega-caps with large closing auctions.
-
-A within-name design removes it. Using each name's own share of daily dollar volume
-falling in the final hour, with name and date effects, so that each name's average
-intraday shape is absorbed, the interaction of size with weekday is null on all five
-days: the largest coefficient is Wednesday at $t=2.19$, against a Bonferroni threshold
-near $2.8$ for five tests.
-
-\section{Why is there no footprint?}
-
-The estimates above bound the volume response near zero. They do not explain it. We
-offer one explanation we find most plausible and state how it could be tested, and note
-two alternatives.
-
-\paragraph{Intermediation against offsetting demand.} The most likely explanation is
-that the dealer does not hedge the position into the underlying because it does not
-need to. These programmes write calls precisely on the stocks where retail demand to
-\emph{buy} calls is heaviest --- the same names dominate both lists. A dealer
-intermediating between a fund systematically selling upside and a retail clientele
-systematically buying it holds a substantially netted book and hedges only the residual.
-Under this account the programme is absorbed by an offsetting clientele rather than by
-the underlying's order book, and the absence of a footprint is the expected outcome
-rather than a puzzle.
-
-This is a conjecture, and we are careful to label it as such: our data establish the
-absence of a footprint, not the reason for it. The natural test uses signed option
-volume by trade origin to measure the extent to which programme writing is offset by
-customer buying in the same series and expiry. Such data exist commercially. Our free
-sources do not identify the counterparty side.
-
-\paragraph{Alternatives.} Two others deserve mention. Delta changes at each roll may be
-smaller relative to notional than the at-the-money calculation in Section~2 suggests,
-if the overlay is struck far enough out of the money. And hedging may be executed
-continuously and patiently enough to leave no dated or time-concentrated trace, in
-which case a design keyed on weekday or on time of day is looking in the wrong place
-even though the flow is real. We regard the second as the most serious threat to the
-interpretation, and it is partially testable as intraday depth accumulates.
+It is not evidence of hedging. The sign is wrong for close-concentrated hedging, and
+with programme size time-invariant inside the window the interaction cannot be
+separated from that of any other name characteristic with time of day. Programme size
+is strongly correlated with clientele: large-programme names here are retail-heavy and
+open-weighted, small-programme names are mega-caps with large closing auctions. A
+within-name design, using each name's own share of daily volume in the final hour with
+name and date effects, is null on all five weekdays, the largest being Wednesday at
+$t=2.19$ against a Bonferroni threshold near $2.8$. We report the failed specification
+because cross-sectional size sorts are common and this one is persuasive and wrong.
 
 \section{Limitations}
 
-We state these plainly because several are material.
-
 \begin{enumerate}
-\item \textbf{Volume, not prices.} We test the necessary condition, not the sufficient
-one. A price effect without a volume effect is difficult but not impossible, for
-instance through quote revision by liquidity providers who anticipate the flow.
+\item \textbf{The gamma calculation is a snapshot.} It uses disclosed positions on one
+date. Position composition varies over the roll cycle, and a fuller treatment would
+integrate over it. We would expect the conclusion to be robust because it follows from
+structure rather than from a particular day's strikes, but we have not shown that.
 
-\item \textbf{Roll timing is inferred.} We scan weekdays rather than assume one, which
-is an improvement, but we do not observe the day each programme transacts. If rolls are
-spread across days or keyed to expiry cycles rather than weekdays, a weekday design
-dilutes the estimand. Resolving this requires a holdings time series, which we are
-accumulating but do not yet have.
+\item \textbf{Gamma is not the only hedging channel.} Vanna and charm generate flow as
+volatility and time change, and we have not quantified them. Large moves also carry the
+overlay through strikes, which the local calculation understates.
 
-\item \textbf{Intraday depth is 60 sessions.} This is the free limit. The intraday
-result should be regarded as preliminary.
+\item \textbf{The empirical test is underpowered for the predicted effect} and is
+reported as corroborative only.
 
-\item \textbf{Programme size is a step function.} N-PORT is released quarterly, so size
-is measured at a coarser frequency than the outcome.
+\item \textbf{Volume, not prices.} A price effect without a detectable volume effect is
+difficult but not impossible, for instance through quote revision in anticipation.
 
-\item \textbf{Level effects are confounded.} The event study shows a non-flat
-pre-trend. We rely on the size response, not on level effects around launch.
+\item \textbf{Roll timing is inferred} from weekday rather than observed.
 
-\item \textbf{One product family.} Our treated group is dominated by a single issuer's
-complex. Index-level and buffer programmes are not covered here.
+\item \textbf{One product family.} The treated group is dominated by a single issuer's
+complex; index-level and buffer programmes are not covered.
 \end{enumerate}
 
 \section{Conclusion}
 
-A set of option-writing programmes grew to hold, in the largest case, several times
-their underlying's entire daily turnover, with positions disclosed daily at contract
-level and trades set by a published schedule. Across three orders of magnitude of
-programme size, they leave no measurable footprint in the underlying's trading volume,
-daily or intraday, while the same estimator detects option-expiry and
-volatility-driven effects in the same panel and a randomisation test places the
-estimate squarely inside its null.
+Single-name option-income funds are large in notional and small in gamma, and the gap
+between the two is structural rather than incidental. The synthetic long that carries
+almost all of their notional is a forward, and a forward does not need rebalancing.
+What remains is a short-call overlay written as spreads, implying a dealer rehedge with
+a median of nine basis points of daily dollar volume per one percent move and a maximum
+of sixty-five.
 
-The natural reading is that a large, uninformed, fully disclosed derivative flow is
-intermediated rather than transmitted: absorbed against offsetting demand or by
-liquidity provision organised around it, rather than pushed into the underlying's order
-book. This aligns with what \citet{brogger2021} finds for a different predictable flow
-in a different market, and it suggests that inferences drawn from assumed dealer
-hedging should be treated with more caution than is customary.
+The practical implication is that notional, assets under management, and ratios of
+either to turnover are poor guides to the market footprint of these products. The
+relevant quantity is dollar gamma net of the offsetting legs, it is computable from
+public disclosure, and it is roughly two orders of magnitude smaller.
 
-We also show that the positions concerned are publicly and freely measurable, and that
-they reconcile exactly against clearing data. We regard that as the more durable
-contribution, and it is available for reuse independent of the conclusion above.
+We do not claim these funds are inconsequential. They may affect the price of
+volatility, as \citet{park2025} suggest, through the supply of options rather than
+through hedging flow in the underlying; that channel is untouched by our calculation.
+What we claim is narrower and, we think, useful: the specific mechanism by which large
+notional is presumed to reach the underlying does not operate at the magnitude the
+notional implies, and the reason is visible in the structure of the position.
 
 \section*{Data and code availability}
 
-Every input is free and public. Code and collection infrastructure, together with the
-pre-registered pilot specification and the results recorded as they were produced,
-including those superseded, are available at the project repository.
+Every input is free and public. Code, collection infrastructure, the pre-registered
+pilot specification, and results as they were produced --- including those later
+reframed by the calculation in Section~\ref{sec:implied} --- are available at the
+project repository.
 
 \begin{thebibliography}{99}
 
@@ -550,6 +484,11 @@ The market impact of predictable flows: Evidence from leveraged VIX products.
 Cameron, A.~C., J.~B. Gelbach, and D.~L. Miller (2011).
 Robust inference with multiway clustering.
 \emph{Journal of Business and Economic Statistics} 29(2), 238--249.
+
+\bibitem[Cboe(2024)]{cboe2024}
+Cboe Global Markets (2024).
+Are option income funds suppressing volatility?
+Cboe Insights.
 
 \bibitem[G\^{a}rleanu et al.(2009)]{garleanu2009}
 G\^{a}rleanu, N., L.~H. Pedersen, and A.~M. Poteshman (2009).
