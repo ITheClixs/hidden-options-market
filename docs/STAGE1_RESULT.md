@@ -176,3 +176,44 @@ If both come back null, the finding is that a large, fully disclosed, mechanical
 scheduled option programme leaves no measurable footprint in its underlying — which
 is a publishable result about market absorption, and closer to Brøgger's VIX
 conclusion than to the paper originally envisaged.
+
+---
+
+# Positive controls and randomization inference — 2026-08-18
+
+Added because a null is worthless without evidence the design can detect anything.
+
+## Positive controls (same estimator, same panel)
+
+| control | β | t |
+|---|---:|---:|
+| \|return\| → volume | +10.6806 | +9.40 |
+| triple witching × ever_treated | −0.3297 | −4.65 |
+| monthly opex × ever_treated | −0.1221 | −3.13 |
+
+The design detects volatility-driven volume and option-expiry effects at |t| = 3 to 9.
+It reports the programme dose effect at |t| < 1. The null is a property of the flow,
+not of the machinery.
+
+Note the sign on the expiry controls: treated names show *less* relative volume on
+expiry days than controls. That is the same clientele composition effect seen
+intraday — controls are mega-caps with large index-driven expiry activity — and is not
+itself a finding about programmes.
+
+## Randomization inference
+
+Dose permuted across the 25 treated names, 300 draws, re-estimating each time. This
+avoids relying on the clustered standard error at all.
+
+```
+actual dose-response beta : -0.00348
+permutation mean / sd     : -0.00008 / 0.01144
+permutation 2.5 / 97.5    : -0.02317 / +0.02011
+two-sided permutation p   : 0.773
+```
+
+The estimate sits at the 37th percentile of its own null. The permutation sd (0.0114)
+is close to the clustered standard error, so the parametric inference was not
+materially optimistic.
+
+This replaces the falsification recorded earlier as "did not run".
