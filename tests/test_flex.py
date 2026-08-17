@@ -16,6 +16,7 @@ from absorb.measure.flex import (
     ClassifierConfig,
     build_census,
     classify,
+    detect_multileg,
     is_flex_strike,
     strike_cents,
     summarise,
@@ -177,3 +178,59 @@ class TestSummarise:
 
     def test_empty_census_summarises_empty(self):
         assert summarise(pd.DataFrame(columns=["category", "strike", "notional"])).empty
+
+
+class TestDetectMultileg:
+    """A butterfly counted leg by leg looks like three outright positions and is
+    credited with notional ~49x its maximum possible value."""
+
+    def _butterfly(self):
+        return build_census(
+            _frame(
+                [
+                    ("MSFT", 510.01, 100000, 0),
+                    ("MSFT", 550.01, 200000, 0),
+                    ("MSFT", 590.01, 100000, 0),
+                ]
+            )
+        )
+
+    def test_labels_all_three_legs(self):
+        out = detect_multileg(self._butterfly())
+        assert (out["structure"] == "butterfly").sum() == 3
+
+    def test_max_value_is_spacing_times_wing(self):
+        out = detect_multileg(self._butterfly())
+        assert out["max_value"].iloc[0] == pytest.approx(40 * 100000 * 100)
+
+    def test_max_value_is_far_below_notional(self):
+        out = detect_multileg(self._butterfly())
+        assert out["max_value"].iloc[0] < out["notional"].sum() / 20
+
+    def test_unequal_spacing_is_not_a_butterfly(self):
+        census = build_census(
+            _frame([("X", 100.01, 100000, 0), ("X", 150.01, 200000, 0), ("X", 175.01, 100000, 0)])
+        )
+        assert detect_multileg(census)["structure"].isna().all()
+
+    def test_wrong_ratio_is_not_a_butterfly(self):
+        census = build_census(
+            _frame([("X", 100.01, 100000, 0), ("X", 140.01, 100000, 0), ("X", 180.01, 100000, 0)])
+        )
+        assert detect_multileg(census)["structure"].isna().all()
+
+    def test_small_wings_are_ignored(self):
+        census = build_census(
+            _frame([("X", 100.01, 200, 0), ("X", 140.01, 400, 0), ("X", 180.01, 200, 0)])
+        )
+        assert detect_multileg(census)["structure"].isna().all()
+
+    def test_unrelated_series_keep_their_category(self):
+        census = build_census(_frame([("MSTR", 95.01, 0, 45115)]))
+        out = detect_multileg(census)
+        assert out["structure"].isna().all()
+        assert out["category"].iloc[0] == "fund_synthetic"
+
+    def test_empty_census_is_handled(self):
+        empty = build_census(_frame([]).reindex(columns=list(_frame([("A", 1, 1, 1)]).columns)))
+        assert detect_multileg(empty).empty

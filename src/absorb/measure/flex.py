@@ -170,6 +170,58 @@ def build_census(
     return result.sort_values("notional", ascending=False).reset_index(drop=True)
 
 
+def detect_multileg(
+    census: pd.DataFrame, *, min_wing: int = 5_000, tol: float = 0.05
+) -> pd.DataFrame:
+    """Relabel series that are legs of a multi-leg structure at the same expiry.
+
+    Classifying series one at a time misreads structures whose legs only make sense
+    together. The clearest case is a butterfly: three strikes at equal spacing with
+    open interest in a 1:2:1 ratio. Counted leg by leg it looks like three large
+    outright positions, and its notional bears no relation to its economics --- the
+    most a butterfly can be worth is the strike spacing times the wing size, which for
+    the structures found here is 49 times smaller than the notional they were being
+    credited with.
+
+    Adds ``structure`` and ``max_value``: for a butterfly, the maximum attainable
+    payoff, which is the right scale for it. Series that are not part of a detected
+    structure keep their original category and a null max value.
+    """
+    if census.empty:
+        return census.assign(structure=None, max_value=np.nan)
+
+    out = census.copy()
+    out["structure"] = None
+    out["max_value"] = np.nan
+
+    for (_symbol, _expiry), group in out.groupby(["symbol", "expiry"], sort=False):
+        for oi_column in ("call_open_interest", "put_open_interest"):
+            legs = group[group[oi_column] > 0].sort_values("strike")
+            if len(legs) < 3:
+                continue
+            strikes = legs["strike"].to_numpy()
+            interest = legs[oi_column].to_numpy()
+            index = legs.index.to_numpy()
+
+            for i in range(len(legs) - 2):
+                lower, middle, upper = strikes[i : i + 3]
+                wing_lo, body, wing_hi = interest[i : i + 3]
+                if not np.isclose(middle - lower, upper - middle, rtol=0.02):
+                    continue
+                if min(wing_lo, wing_hi) < min_wing:
+                    continue
+                if not (
+                    np.isclose(wing_lo, wing_hi, rtol=tol)
+                    and np.isclose(body, 2 * wing_lo, rtol=tol)
+                ):
+                    continue
+
+                out.loc[index[i : i + 3], "structure"] = "butterfly"
+                out.loc[index[i : i + 3], "max_value"] = (middle - lower) * wing_lo * 100
+
+    return out
+
+
 def summarise(census: pd.DataFrame) -> pd.DataFrame:
     """Aggregate the census by category.
 
@@ -205,6 +257,7 @@ __all__ = [
     "ClassifierConfig",
     "build_census",
     "classify",
+    "detect_multileg",
     "is_flex_strike",
     "strike_cents",
     "summarise",
