@@ -61,6 +61,12 @@ class TestClassify:
         """The real MSTY leg: 95.01, all open interest on the put side."""
         assert classify(_row(95.01, 0, 45115), CFG) == "fund_synthetic"
 
+    def test_one_sided_calls_at_cent_offset_are_not_a_fund_synthetic(self):
+        """Regression: a fund synthetic writes puts. An observed MSFT ladder of
+        200,000-contract call lines at 550.01 was misread as a fund leg before the
+        put-dominance condition was added."""
+        assert classify(_row(550.01, 200000, 0), CFG) != "fund_synthetic"
+
     def test_matched_combination_takes_precedence(self):
         """Equal legs at an offset strike are a financing structure, not a fund leg."""
         assert classify(_row(95.02, 6620, 6620), CFG) == "matched_combination"
@@ -159,7 +165,15 @@ class TestBuildCensus:
 class TestSummarise:
     def test_shares_sum_to_one(self):
         census = build_census(_frame([("MSTR", 95.01, 0, 45115), ("SPY", 765.66, 37507, 0)]))
-        assert summarise(census)["share"].sum() == pytest.approx(1.0)
+        assert summarise(census)["share_contracts"].sum() == pytest.approx(1.0)
+
+    def test_reports_contracts_alongside_notional(self):
+        """Notional misleads for boxes struck far from spot, so contracts are also
+        reported: an SPY box at strike 10,010 carries $29bn of meaningless notional."""
+        census = build_census(_frame([("SPY", 10010.01, 14494, 14494)]))
+        row = summarise(census).iloc[0]
+        assert row["category"] == "matched_combination"
+        assert row["contracts_m"] == pytest.approx(28988 / 1e6)
 
     def test_empty_census_summarises_empty(self):
         assert summarise(pd.DataFrame(columns=["category", "strike", "notional"])).empty

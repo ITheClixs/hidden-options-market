@@ -118,7 +118,11 @@ def classify(row: pd.Series, config: ClassifierConfig) -> str:
         return "matched_combination"
 
     if one_sided >= config.one_sided_threshold:
-        if cents in SYNTHETIC_OFFSET_CENTS:
+        # A fund synthetic is a *written put*. Requiring the put side to dominate
+        # matters: without it, a one-sided call ladder at cent-offset strikes is
+        # misread as a fund leg. An observed MSFT programme of 100,000-200,000
+        # contract call lines was labelled this way before the condition was added.
+        if cents in SYNTHETIC_OFFSET_CENTS and put > call:
             return "fund_synthetic"
         if cents not in STANDARD_CENTS:
             return "index_linked"
@@ -167,17 +171,31 @@ def build_census(
 
 
 def summarise(census: pd.DataFrame) -> pd.DataFrame:
-    """Aggregate the census by category."""
+    """Aggregate the census by category.
+
+    Notional is reported but should not be read as economic exposure for
+    ``matched_combination``. Boxes and conversions are routinely struck far from spot
+    purely to transport cash --- the largest single line observed is an SPY series at
+    a strike of 10,010 against a spot near 765, carrying \\$29bn of notional and no
+    directional or convex exposure whatever. Contract counts are the safer scale for
+    that category.
+    """
     if census.empty:
-        return pd.DataFrame(columns=["category", "series", "notional_bn", "share"])
+        return pd.DataFrame(
+            columns=["category", "series", "contracts_m", "notional_bn", "share_contracts"]
+        )
 
     grouped = (
         census.groupby("category")
-        .agg(series=("strike", "size"), notional_bn=("notional", lambda x: x.sum() / 1e9))
+        .agg(
+            series=("strike", "size"),
+            contracts_m=("total_open_interest", lambda x: x.sum() / 1e6),
+            notional_bn=("notional", lambda x: x.sum() / 1e9),
+        )
         .reset_index()
     )
-    grouped["share"] = grouped["notional_bn"] / grouped["notional_bn"].sum()
-    return grouped.sort_values("notional_bn", ascending=False).reset_index(drop=True)
+    grouped["share_contracts"] = grouped["contracts_m"] / grouped["contracts_m"].sum()
+    return grouped.sort_values("contracts_m", ascending=False).reset_index(drop=True)
 
 
 __all__ = [
