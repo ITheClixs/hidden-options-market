@@ -1,14 +1,17 @@
 #!/usr/bin/env python
-"""Back-fill Global X daily holdings before they expire.
+"""Back-fill Global X daily holdings.
 
-Global X serves dated holdings URLs that resolve for roughly the last two years and
-404 before that. Probing on 2026-08-17 put the edge within days of exactly two years
-back, which reads as a rolling retention window rather than an adoption date. If that
-is right, the earliest files are expiring daily and this is a race.
+Global X serves dated holdings URLs, the only source found so far with retrievable
+history — everything else in the project accumulates forward only.
 
-Everything else in the project accumulates forward. This is the one source with
-retrievable history, so it is worth grabbing in full immediately and reasoning about
-afterwards.
+History runs from 2024-07-03, an edge shared by all four funds. An earlier reading
+called this a rolling two-year retention window with files expiring daily; that was
+wrong. It was inferred from probes that happened to land on a market holiday and on
+scattered missing days inside the covered range. A single boundary common to four
+independently-managed funds points to an asset-host adoption date instead.
+
+Roughly 190 dates inside the range are genuinely absent (holidays plus gaps), so a
+404 is an expected answer rather than a failure.
 
 Usage:
     scripts/backfill_globalx.py                    # all funds, full window
@@ -34,9 +37,9 @@ URL = "https://assets.globalxetfs.com/funds/holdings/{fund}_full-holdings_{day:%
 # Index-level covered-call and related option-overlay funds.
 DEFAULT_FUNDS = ("qyld", "xyld", "ryld", "djia", "qyle", "xyle")
 
-# Retention appears to be ~2 years; look back a little further so the true edge is
-# observed rather than assumed.
-DEFAULT_LOOKBACK_DAYS = 780
+# History begins 2024-07-03; look back beyond that so the edge is observed rather
+# than assumed, and so a future extension of the archive is picked up automatically.
+DEFAULT_LOOKBACK_DAYS = 850
 
 
 def destination(root: Path, fund: str, day: date) -> Path:
@@ -99,9 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.info("Back-filling %s over %d days", args.funds, args.days)
 
     stats = backfill(tuple(args.funds), args.days, args.root, overwrite=args.overwrite)
-    logging.info(
-        "saved=%(saved)d skipped=%(skipped)d absent=%(absent)d error=%(error)d", stats
-    )
+    logging.info("saved=%(saved)d skipped=%(skipped)d absent=%(absent)d error=%(error)d", stats)
     return 0 if stats["saved"] or stats["skipped"] else 1
 
 
