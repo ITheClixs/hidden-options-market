@@ -64,10 +64,10 @@ class TestExitCodes:
 
 
 class TestArgumentHandling:
-    def test_defaults_to_all_three_sources(self, stub_run, tmp_path):
+    def test_defaults_to_every_source(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=1),))
         cli.main(["--root", str(tmp_path)])
-        assert captured["sources"] == ("holdings", "cboe", "occ")
+        assert captured["sources"] == ("holdings", "cboe", "occ", "bars")
 
     def test_source_subset_is_honoured(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("occ_oi", "MSTR", "ok", rows=1),))

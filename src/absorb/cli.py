@@ -21,8 +21,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--sources",
-        default="holdings,cboe,occ",
-        help="Comma-separated sources (holdings, cboe, occ). Default: holdings,cboe,occ",
+        default="holdings,cboe,occ,bars",
+        help="Comma-separated sources (holdings, cboe, occ, bars). Default: all",
     )
     parser.add_argument(
         "--root", type=Path, default=RAW_DIR, help=f"Output root. Default: {RAW_DIR}"

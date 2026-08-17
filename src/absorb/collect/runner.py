@@ -12,7 +12,7 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from absorb.collect import cboe, holdings, occ
+from absorb.collect import bars, cboe, holdings, occ
 from absorb.collect.http import build_session
 from absorb.config import RAW_DIR, Programme, Universe
 
@@ -148,6 +148,58 @@ def collect_fund_holdings(
     return tuple(outcomes)
 
 
+def collect_underlying_bars(
+    universe: Universe,
+    as_of: datetime,
+    root: Path,
+    *,
+    interval: str = "5m",
+    lookback: str = "1mo",
+) -> tuple[SymbolOutcome, ...]:
+    """Capture intraday bars for every underlying.
+
+    Free intraday history is shallow and ages out, so depth has to be accumulated.
+    The fetched window overlaps heavily with what is already held: the redundancy is
+    cheap and lets a missed run repair itself rather than leaving a permanent hole.
+    """
+    session = build_session()
+    outcomes: list[SymbolOutcome] = []
+    source = f"bars_{interval}"
+
+    for symbol in universe.all_symbols:
+        # Index pseudo-symbols use a different convention upstream ("_SPX" -> "^SPX").
+        request_symbol = f"^{symbol.lstrip('_')}" if symbol.startswith("_") else symbol
+        try:
+            snapshot = bars.fetch_bars(
+                session, request_symbol, interval=interval, lookback=lookback
+            )
+        except Exception as exc:  # noqa: BLE001
+            outcomes.append(
+                SymbolOutcome(source, symbol, "error", detail=f"{type(exc).__name__}: {exc}")
+            )
+            continue
+
+        destination = root / bars.snapshot_partition(snapshot, as_of)
+        try:
+            _write_frame(snapshot.frame, destination)
+        except OSError as exc:
+            outcomes.append(SymbolOutcome(source, symbol, "write_error", detail=str(exc)))
+            continue
+
+        outcomes.append(
+            SymbolOutcome(
+                source,
+                symbol,
+                "ok",
+                rows=snapshot.n_bars,
+                sha256=snapshot.payload_sha256,
+                detail=f"{snapshot.first_timestamp} to {snapshot.last_timestamp}",
+            )
+        )
+
+    return tuple(outcomes)
+
+
 def write_manifest(outcomes: tuple[SymbolOutcome, ...], as_of: datetime, root: Path) -> Path:
     """Persist the run log. The manifest is the audit trail for data provenance."""
     destination = root / "manifests" / f"{as_of:%Y-%m-%d}T{as_of:%H%M%S}.json"
@@ -217,7 +269,7 @@ def run_daily_collection(
     *,
     root: Path | None = None,
     as_of: datetime | None = None,
-    sources: tuple[str, ...] = ("holdings", "cboe", "occ"),
+    sources: tuple[str, ...] = ("holdings", "cboe", "occ", "bars"),
     sweep_up: bool = True,
 ) -> tuple[SymbolOutcome, ...]:
     """Run every enabled source once, retry failures, and write a manifest.
@@ -234,6 +286,11 @@ def run_daily_collection(
         outcomes += collect_cboe_chains(universe, timestamp, target_root)
     if "occ" in sources:
         outcomes += collect_occ_open_interest(universe, timestamp, target_root)
+    if "bars" in sources:
+        outcomes += collect_underlying_bars(universe, timestamp, target_root, interval="5m")
+        outcomes += collect_underlying_bars(
+            universe, timestamp, target_root, interval="1d", lookback="2y"
+        )
 
     if sweep_up:
         outcomes = _sweep_up(outcomes, universe, programmes, timestamp, target_root)
@@ -246,6 +303,7 @@ __all__ = [
     "SymbolOutcome",
     "collect_cboe_chains",
     "collect_fund_holdings",
+    "collect_underlying_bars",
     "collect_occ_open_interest",
     "run_daily_collection",
     "write_manifest",
