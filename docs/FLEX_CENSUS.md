@@ -104,3 +104,52 @@ fact cancel. Cancelling matched legs alone removes 29% of the gross figure.
 - **Attribution is mostly absent.** We can name the holder for income-fund legs. For
   the \$82bn of blocks we cannot, and identifying the counterparties to a
   \$60bn MSFT programme would be a contribution in itself.
+
+---
+
+## Correction: the index_linked category is overstated, and its notional is wrong in both directions
+
+Audit of 2026-08-18, prompted by finding the same class of error in the block category.
+
+`index_linked` is 47% of the census and had not been checked for offsetting legs.
+It should have been. A buffer fund is a four-leg collar, and the census counts each
+leg as a separate position.
+
+SPY at expiry 2026-09-30 carries 99 FLEX legs. One fund is directly visible in four
+of them, identifiable because the contract counts match:
+
+| strike | side | contracts | role |
+|---:|---|---:|---|
+| 1.87 | call | 37,507 | synthetic long |
+| 765.66 | call | 37,507 | cap |
+| 746.77 | put | 38,317 | floor |
+| 597.42 | put | 37,540 | buffer floor |
+
+The fund's exposure is roughly 37,500 contracts of SPY, about **\$2.87bn**. The census
+credits these four legs with **\$8.02bn**, counting one fund nearly three times.
+
+The notional metric fails in both directions at once:
+
+- **Overstated by leg duplication.** Every buffer fund contributes four legs, so a
+  category composed of them is inflated by roughly the leg count.
+- **Understated on the synthetic leg.** The long call struck at \$1.87 against a spot
+  of \$765 is economically \$2.9bn of exposure. Valued as strike times contracts, it
+  is recorded as \$7m — three orders of magnitude too small. Deep-in-the-money calls
+  used to replicate the underlying are systematically invisible to a strike-based
+  notional.
+
+The correct scale for these structures is underlying-equivalent exposure, contracts
+times spot, counted once per fund rather than once per leg.
+
+**Consequence.** The headline decomposition in the table above should not be read as
+economic exposure for `index_linked` or `matched_combination`, and the \$364bn figure
+for buffer structures is materially overstated. Contract counts are unaffected by the
+valuation error but are still inflated by leg duplication. Re-quantifying on an
+underlying-equivalent, per-fund basis is the outstanding task; until it is done, the
+composition should be read as *series counts by structure type*, which is what the
+detector actually establishes.
+
+This is the third instance of the same underlying mistake — treating series
+independently when they are legs of one position — after the fund-synthetic
+misclassification and the MSFT butterflies. The pattern is now clear enough that any
+remaining category should be assumed guilty until audited.
