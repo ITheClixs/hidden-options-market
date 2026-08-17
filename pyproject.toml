@@ -40,5 +40,8 @@ addopts = "-q"
 line-length = 100
 src = ["src", "tests"]
 
+[tool.ruff.lint.isort]
+known-local-folder = ["run_stage1"]
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]

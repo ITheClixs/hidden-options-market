@@ -45,7 +45,6 @@ from absorb.collect.http import build_session  # noqa: E402
 from absorb.collect.nport import as_of_series  # noqa: E402
 from absorb.config import RAW_DIR, load_programmes, load_universe  # noqa: E402
 from absorb.measure.panel import fit  # noqa: E402
-from run_stage1 import daily_bars, fund_launch_dates  # noqa: E402
 
 WEEKDAYS = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4}
 
@@ -105,6 +104,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     reports = pd.read_parquet(reports_path)
 
+    # Imported here rather than at module scope: this is a sibling script, not a
+    # package module, and importing it at the top confuses import ordering.
+    from run_stage1 import build_panel, daily_bars, fund_launch_dates  # noqa: PLC0415
+
     session = build_session()
     programmes = [p for p in load_programmes() if not p.underlying.startswith("_")]
     universe = load_universe()
@@ -115,8 +118,6 @@ def main(argv: list[str] | None = None) -> int:
     controls = [s for s in universe.control_single_name if s not in treated]
 
     bars = daily_bars(session, treated + controls, args.lookback)
-
-    from run_stage1 import build_panel  # noqa: PLC0415
 
     panel = build_panel(bars, launches, pd.DataFrame(columns=["symbol", "net_assets"]))
     panel = attach_dose(panel, reports, launches)
