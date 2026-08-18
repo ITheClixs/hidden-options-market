@@ -11,10 +11,8 @@
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf}
 
-\newcommand{\dose}{\ensuremath{\mathit{size}}}
-
-\title{\textbf{Notional Is Not Gamma}\\[0.4em]
-\large Why Single-Name Option-Income Funds Imply Almost No Hedging Flow}
+\title{\textbf{Reading the FLEX Options Market from Clearing Data}\\[0.4em]
+\large A Census of Structured Option Positions Invisible to Listed Chains}
 
 \author{Anonymous}
 
@@ -25,448 +23,431 @@
 
 \begin{abstract}
 \noindent
-Single-name option-income exchange-traded funds have grown large relative to the stocks
-they write on: at its 2025 peak one fund reported net assets of $5.7$ times its
-underlying's entire daily dollar turnover. Their scale has prompted concern that
-dealer hedging of these programmes moves the underlying. We show from disclosed
-positions that the concern does not follow from the structure. These funds hold a
-synthetic long --- a long call and a short put at effectively the same strike --- which
-is a forward by put-call parity and therefore carries no gamma: the dealer hedges it
-once and does not rebalance it. All rebalancing arises from the short-call overlay,
-which the funds write as spreads, offsetting further. Computing dollar gamma leg by leg
-across $24$ programmes from disclosed holdings, a one percent move in the underlying
-implies a rehedge of between $0.00\%$ and $0.65\%$ of daily dollar volume, with a
-median of $0.09\%$. Notional overstates the hedging footprint by roughly two orders of
-magnitude. Consistent with this, a difference-in-differences design over $64{,}553$
-name-days finds no volume response to programme size on any weekday, and a
-randomisation test places the estimate at the $37$th percentile of its null; but we
-show the design's minimum detectable effect is about an order of magnitude larger than
-the predicted flow, so the empirical null corroborates the calculation rather than
-testing it independently. Separately, we document that these positions are recoverable
-end to end from free public sources --- issuer holdings reconcile exactly to Options
-Clearing Corporation series open interest on $8$ of $11$ attributed legs --- and that
-the FLEX leg carrying the synthetic position is identifiable from a cent-offset strike
-with one-sided open interest.
+FLEX options are negotiated bilaterally, cleared centrally, and absent from listed
+option chains. They are about seven percent of US listed options open interest and grew
+forty-five percent in 2025, yet we did not locate empirical work using them. This paper
+shows they are observable at no cost and maps them. Listed strikes fall on a standard
+grid, so a cleared series struck off that grid was not listed; applying this to 682
+underlyings recovers 30.9 million contracts of FLEX open interest, 81\% of the
+exchange's own published figure, the shortfall being FLEX struck on-grid which no
+strike signature can find. Structures leave separable fingerprints, and two are
+verified against fund disclosure: a cent-offset written put is an option-income fund's
+synthetic leg, and an off-grid short call is a defined-outcome fund's cap. Counting
+cleared series independently, however, mismeasures positions badly, and in both
+directions. A butterfly counted leg by leg is credited with 49 times its maximum
+attainable value; a four-leg buffer fund is counted nearly three times over; and
+strike-based notional records a synthetic long call struck at \$1.87 against a \$765
+spot as \$7m when its exposure is \$2.9bn. Grouping legs into positions by their
+contract counts and valuing on the underlying gives 1,193 structures across 220
+underlyings and \$196bn of exposure, against \$630bn if legs are summed naively.
+Composition is roughly even between synthetics, buffer collars and spreads. Because
+listed chains omit all of this, gamma measures built from them miss 5.5\% of measured
+gamma in aggregate, 0.5\% at the median underlying, and 11.3\% for SPY.
 
 \vspace{0.8em}
-\noindent\textbf{Keywords:} option-income funds; covered calls; dealer gamma; hedging
-flow; FLEX options; disclosed positions.
+\noindent\textbf{Keywords:} FLEX options; clearing data; open interest; defined-outcome
+funds; dealer gamma; option market structure.
 
-\noindent\textbf{JEL:} G12, G14, G23.
+\noindent\textbf{JEL:} G13, G14, G23.
 \end{abstract}
 
 \section{Introduction}
 
-Option-income exchange-traded funds have grown quickly, and their growth has attracted
-attention from supervisors and market commentators who ask whether the hedging of these
-positions amplifies movements in the underlying. The question is natural. The funds are
-large: measured against the daily dollar turnover of the single stocks they write on,
-the programmes in our sample reach a peak ratio of $5.7$, and seven of $23$ exceed
-$0.25$. If a dealer intermediating a multi-billion-dollar position rebalances it in the
-underlying, the flow should be conspicuous.
+A FLEX option is negotiated bilaterally between two parties, who then submit it for
+central clearing. It combines the customisation of an over-the-counter contract with
+the counterparty protection of a cleared one. It does not print on the consolidated
+tape and does not appear in the option chains that both practitioners and researchers
+use, and it is consequently treated as unobservable.
 
-This paper makes a simple structural point and then documents its consequences. The
-concern rests on an implicit step from notional to hedging flow. For these products the
-step does not hold, because of how the position is built.
+The market is not small. Cboe reports FLEX open interest of 38.1 million contracts for
+2025, up 45\% year on year and about 7\% of total US listed options open
+interest.\footnote{Cboe Global Markets, ``Index FLEX Contracts Hit New Records as
+Investors Customize Their Options''.} Despite this we did not locate empirical work
+using FLEX data, in searches across the usual repositories. The absence is plausibly
+explained by the assumption that the data does not exist.
 
-A single-name option-income fund does not own the stock. It holds a long call and a
-short put at effectively the same strike and expiry, and writes calls against that
-position. By put-call parity a long call plus a short put at one strike is a forward.
-It has a delta of approximately one and, critically, \emph{a gamma of zero}. The dealer
-on the other side of the synthetic acquires a static short forward, hedges it once at
-inception, and thereafter has nothing to rebalance. Every unit of rebalancing flow the
-programme generates must come from the short-call overlay alone --- and because these
-funds write call \emph{spreads} rather than naked calls, the long leg of each spread
-offsets part of the short leg's gamma as well.
+It does. The Options Clearing Corporation publishes open interest for every series it
+clears, FLEX included, and FLEX is separable from listed activity by a simple property:
+listed strikes fall on a standard grid, so a cleared series whose strike sits off that
+grid was not listed. This paper applies that observation to 682 underlyings and reports
+what is there.
 
-The result is a large gap between notional and hedging footprint. We compute dollar
-gamma leg by leg from disclosed holdings for $24$ programmes, using exchange greeks
-where the series is listed and Black-Scholes where the leg is FLEX. A one percent move
-in the underlying implies a dealer rehedge of between $0.00\%$ and $0.65\%$ of that
-underlying's median daily dollar volume, with a median across programmes of $0.09\%$.
-Even a five percent move --- a typical daily range for the most volatile names in the
-sample --- implies a median rehedge near half a percent of daily volume.
+\paragraph{What we find.} Three things.
 
-We then ask whether a footprint of that size is visible in the data, and find that it
-is not, using a difference-in-differences design around staggered programme launches
-over $64{,}553$ name-days. The estimated response of volume to programme size is within
-$\pm 0.006$ on every weekday, and a randomisation test that permutes size across
-programmes places the estimate at the $37$th percentile of its own null distribution.
+First, the method works and can be checked. It recovers 30.9 million contracts carrying
+the FLEX strike signature, which is 81\% of the exchange's own published figure. The
+shortfall is expected and in the conservative direction: FLEX struck on the standard
+grid cannot be identified by strike alone, so the census is a lower bound.
 
-We are explicit about what this second result does and does not add. The design's
-minimum detectable effect is about two percent of volume per log unit of programme
-size, while the structural calculation predicts an effect roughly an order of magnitude
-smaller. The empirical null is therefore \emph{consistent} with the calculation but does
-not independently test it: a test cannot reject what it was never powered to see. We
-report it because a reader is entitled to know that the data were examined and what was
-found, and because the accompanying positive controls establish that the design detects
-comparable effects when they exist --- volatility-driven volume at $t=9.4$ and
-option-expiry effects at $|t|=3.1$ to $4.7$ in the same panel.\footnote{The empirical
-design was specified and executed before the structural calculation was performed. The
-project repository records that order, including a pre-registered pilot specification
-and results that the calculation later reframed. We describe the work in logical rather
-than chronological order here, but the chronology is available and we think it matters.}
+Second, structures are separable and the separation can be verified. Defined-outcome
+funds, option-income funds, financing structures and negotiated blocks each leave a
+distinct fingerprint, and two of the fingerprints are confirmed against fund
+disclosure without having been derived from it.
 
-A third contribution is methodological. We show that this category of derivative
-positioning is measurable end to end from free public sources. Issuer holdings give the
-intended position at contract level; Options Clearing Corporation series files give
-realised open interest for every series, including FLEX series that never print on the
-ordinary tape. The two reconcile exactly, to the contract, for $8$ of the $11$ legs we
-attribute. The synthetic put leg, which we had expected to be unobservable without
-commercial data, turns out to carry a distinctive signature: a non-standard-deliverable
-series struck one or two cents off the round strike, holding one-sided open interest.
+Third, and most consequential for anyone using open-interest data of any kind: counting
+cleared series independently mismeasures positions severely. We document three
+instances with magnitudes, correct them by grouping legs into positions, and report the
+corrected census.
 
-\paragraph{Relation to the literature.} \citet{cboe2024} asks whether option-income
-funds suppress volatility and concludes they do not, arguing that diversity across
-underlyings, tenors and strikes dilutes any surface effect; that analysis is aggregate
-and, as it notes, without data on the notional or volume share these funds represent.
-We supply the position-level calculation at single-name level and identify the
-structural reason rather than the dilution one. \citet{park2025} find that aggregate
-call overwriting by income mutual funds predicts lower implied and realised volatility
-in the following month; our results concern a different outcome and do not contradict
-theirs, but they do imply that any such effect operates through a channel other than
-delta-hedging volume in the underlying. \citet{brogger2021} shows that the predictable
-rebalancing of leveraged volatility products is absorbed in an orderly fashion; our
-setting differs in that the flow we examine turns out to be small at source rather than
-absorbed after the fact. On measurement, work inferring dealer positioning from open
-interest under sign assumptions \citep{garleanu2009,bollen2004} must assume the side;
-we read it from disclosure and verify it against clearing data.
+\paragraph{Why the third point generalises.} Open interest is reported per series. A
+position is not a series. When the two are conflated, a structure is counted once per
+leg and valued at a strike that may bear no relation to its exposure. We found this
+three times in succession while building the census --- in a fund's synthetic long, in
+a butterfly, and in a buffer collar --- with errors of 49-fold, threefold, and three
+orders of magnitude respectively. The errors have opposite signs and do not cancel.
+Since the same conflation is available to any study using open interest, we report the
+failures in detail rather than only the corrected figures.
 
-\section{Institutional setting}
+\paragraph{Relation to the literature.} A long line of work infers option-market
+positioning from listed data under assumptions about who holds each side.
+\citet{bollen2004} read net buying pressure from the shape of the implied volatility
+function; \citet{garleanu2009} model demand pressure directly and estimate it from
+exchange data identifying end users and intermediaries; \citet{ni2005} use aggregate
+open interest at strikes to identify clustering of stock prices on expiration dates.
+Each takes the set of observable series as given. Our contribution is orthogonal to the
+sign problem those papers confront, and does not solve it: we add a category of
+positions previously assumed unobservable, and show that the standard practice of
+treating each series as a position mismeasures what is already observed. The
+expiration-date literature is the most directly affected, since strike-level open
+interest is its input and we show that input to be incomplete in a way that is
+concentrated in particular underlyings.
 
-Taking the largest programme in our sample as of 17 August 2026, the disclosed
-portfolio contains, alongside Treasury bills and cash:
+The single-name option-income funds that first motivated this study are examined by
+\citet{park2025}, who find that aggregate call overwriting by income funds predicts
+lower implied and realised volatility in the following month. Our census locates those
+funds within the wider FLEX market and finds them to be a small share of it, which is
+context for their result rather than a challenge to it.
+
+\paragraph{What this paper does not do.} It is a census taken on one date. It says
+nothing about growth, turnover or dynamics, which require a time series we are
+accumulating but do not have. It makes no claim about returns or profitability. And,
+for a reason inherent to the data rather than to our method, it cannot say who holds
+what: clearing data reports open interest per series aggregated across all holders, so
+a position identified here is the sum of every participant in that series.
+
+\section{Institutional background and data}
+
+\subsection{Why FLEX exists and why it is invisible}
+
+FLEX contracts let a user set strike, expiry, exercise style and settlement outside
+the listed grid. The natural users are those whose requirements do not fit standard
+series: a defined-outcome fund that must strike a cap at a level derived from an index
+value on a particular morning; an income fund that needs a series which will not be
+netted against a listed one at clearing; a desk transporting cash through a box spread
+at a strike far from spot.
+
+Because the trade is negotiated rather than executed on a lit book, it does not
+generate a print. Because the resulting series is not listed, it does not appear in an
+option chain. What it does generate is a cleared position, and clearing is where it
+becomes visible.
+
+\subsection{Sources}
+
+Everything used here is free and public.
 
 \begin{itemize}
-\item a long call struck at \$95.00 expiring 16 October 2026, $+45{,}115$ contracts;
-\item a short put on a non-standard-deliverable series struck at \$95.01, same expiry,
-      $-45{,}115$ contracts;
-\item a ladder of long and short calls expiring 21 August 2026 spanning strikes \$94 to
-      \$106, forming call spreads.
+\item \textbf{Clearing.} OCC series files give open interest per series per underlying,
+      including FLEX and including non-standard deliverable roots.
+\item \textbf{Listed chains.} An exchange content delivery network publishes full
+      chains with two-sided quotes, sizes, implied volatility and greeks. Comparing
+      these against clearing data isolates what the chain cannot see.
+\item \textbf{Disclosure.} SEC Form N-PORT gives registered funds' option positions at
+      contract level, and EDGAR full-text search indexes it. This is how signatures
+      are verified.
+\item \textbf{Prices.} A public charting interface supplies spot and daily bars.
 \end{itemize}
 
-The first two legs are the synthetic long. The one-cent strike offset distinguishes the
-non-standard-deliverable series from the listed one and prevents the two from being
-netted at clearing. The ladder is the income overlay.
+The universe is the 682 underlyings with listed weekly options, comprising 486,895
+cleared series and 576 million contracts of open interest on 17 August 2026.
 
-\subsection{Why the synthetic long generates no rebalancing}
+\subsection{Identifying FLEX}
 
-By put-call parity, for a call $C$ and put $P$ at strike $K$ and maturity $T$,
-\begin{equation}
-C - P \;=\; S - K e^{-rT},
-\end{equation}
-so a long call and short put at the same strike replicate a forward on the underlying.
-Differentiating twice in $S$,
-\begin{equation}
-\frac{\partial^2 (C-P)}{\partial S^2} \;=\; 0 .
-\end{equation}
-The position has unit delta and zero gamma. A dealer short this structure holds a
-static short forward: the hedge is established once and requires no rebalancing as the
-underlying moves. In our sample the two legs differ by one cent in strike, which is
-immaterial.
+Listed strikes fall on a standard grid: whole dollars, halves, quarters. Define a
+series as off-grid when the cents component of its strike is not $0$, $25$, $50$ or
+$75$. Applying this to the universe isolates 5,084 series carrying 30.9 million
+contracts across 326 of the 682 underlyings.
 
-This is the crux. It means the programme's notional --- the quantity that makes these
-funds look large --- is attached to the part of the position that generates no ongoing
-hedging flow at all. Only the overlay matters, and the overlay is a small fraction of
-notional in gamma terms.
+Two checks support the identification.
 
-\section{The implied hedging flow}
-\label{sec:implied}
+\paragraph{Against the exchange.} Cboe reports 38.1 million FLEX contracts for 2025.
+The detector finds 30.9 million on a single day in 2026, or 81\% of that figure. Since
+FLEX may also be struck on the grid, where no strike signature can find it, the census
+is a lower bound and the direction of the gap is as expected.
 
-We compute, for each programme, the dollar delta and the change in dollar delta implied
-by a one percent move in the underlying:
-\begin{equation}
-\Gamma^{\$}_{1\%} \;=\; \sum_{\ell} q_\ell \cdot 100 \cdot \gamma_\ell \cdot S \cdot (0.01\, S),
-\end{equation}
-summing over disclosed legs $\ell$ with signed contract counts $q_\ell$. Greeks are
-taken from the exchange chain where the series is listed and computed under
-Black-Scholes where the leg is FLEX. Including the FLEX legs is essential: they are
-precisely the synthetic puts, and omitting them leaves the long synthetic calls
-uncancelled and overstates gamma by orders of magnitude.
+\paragraph{Against the listed chain.} Matching clearing series to chain series on
+expiry and strike, 90.8\% of clearing open interest corresponds to a listed series and
+9.2\% does not. Of the total, 5.5\% carries the off-grid signature and 5.7\% sits at
+expiries the chain does not carry at all; the categories overlap. No open interest is
+left unexplained on the standard grid at expiries the chain does carry, so the
+decomposition closes.
 
-Table~\ref{tab:hedge} reports the result against each underlying's median daily dollar
-volume.
+An intermediate version of this comparison put the invisible share at 16.7\% by
+comparing aggregate sums rather than matching series, which counted open-interest
+differences on matched series as missing series. The series-level figure of 9.2\%
+supersedes it.
+
+\section{A taxonomy of structures}
+
+Categories are assigned from structural signatures alone. Two are then verified against
+disclosure that played no part in constructing them.
+
+\begin{description}
+\item[Fund synthetic] A one- or two-cent offset from a round strike with open interest
+concentrated on the put side. Single-name option-income funds hold a synthetic long ---
+long call, short put, effectively one strike --- and write calls against it; the cent
+offset keeps the written put from being netted against the listed series at clearing.
+
+\item[Index-linked] An arbitrary decimal strike, such as SPY at 765.66 or 597.42.
+Defined-outcome funds set caps and floors from an index level on the day an outcome
+period opens, which produces strikes that cannot be on a grid. \emph{20.6\% of these
+series expire on a month end, against 4.7\% for every other category} --- the monthly
+outcome-period cycle appearing in the data without being assumed.
+
+\item[Matched combination] Call and put open interest exactly equal in one series: a
+conversion, reversal or box. These are financing and carry structures. Their legs
+offset, so they carry no directional or convex exposure.
+
+\item[Block] A one-sided round lot on a standard strike, large enough to be a single
+negotiated trade rather than an accumulation.
+\end{description}
+
+\subsection{Verification against disclosure}
+
+Attributed fund-synthetic legs reconcile to issuer holdings exactly, to the contract,
+in 8 of 11 cases. Of the three that do not, one differs by 116 contracts, consistent
+with a second holder in the series; one by 4,009, consistent with a second programme at
+the same strike; and one is a false positive on the call side.
+
+Two structures were traced to named filings by searching N-PORT and reading the
+document rather than trusting the search result:
+
+\begin{center}
+\begin{tabular}{lll r}
+\toprule
+Predicted & Filing & Position & Balance \\
+\midrule
+buffer cap & Innovator U.S. Equity Ultra Buffer ETF --- December & \texttt{SPY 11/30/2026 765.66 C} & $-4{,}473$ \\
+fund synthetic & YieldMax JPM Option Income Strategy ETF & \texttt{JPM 05/16/2025 230.01 P} & $-2{,}005$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Both confirm the signature assigned without reference to disclosure. The Innovator
+filing also carries the identifier \texttt{4SPY 261130C00765660}, showing that
+defined-outcome issuers use leading-digit non-standard roots, the same convention as
+the income funds.
+
+\subsection{The limits of attribution}
+
+Attribution does not scale, for three reasons that are worth stating because they bound
+what this data can ever deliver.
+
+Search hits are not attributions. Pursuing a structure at strike 230.01 returned a
+filing holding \texttt{JPM} at that strike rather than the underlying sought: strike
+values recur across underlyings and full-text search cannot reliably conjoin
+underlying, strike and expiry. Round strikes return the search limit of ten thousand
+hits and are useless --- which is precisely where the unattributed block exposure sits.
+
+Most fundamentally, clearing data is aggregated across holders. The SPY 765.66 series
+carries 37,507 contracts and the Innovator fund holds 4,473 of them. A confirmed match
+therefore identifies \emph{a} holder, never \emph{the} holder. Every position reported
+below is a sum across participants.
+
+\section{Counting series is not counting positions}
+
+Building the census surfaced the same error three times. Because each produced
+plausible output, and because the same mistake is available to any study using open
+interest, we report them.
+
+\subsection{A butterfly counted leg by leg}
+
+One underlying in the census carries a ladder of one-sided call lines:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Expiry & \multicolumn{3}{c}{Strike (contracts)} \\
+\midrule
+2026-11-20 & 510.01 (100k) & 550.01 (200k) & 590.01 (100k) \\
+2026-12-17 & 525.00 (100k) & 575.00 (200k) & 625.00 (100k) \\
+2027-01-14 & 430.00 (100k) & 470.00 (200k) & 510.00 (100k) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Three strikes at equal spacing with open interest in a 1:2:1 ratio is a butterfly. Read
+as nine independent lines it is \$63.8bn of notional. A butterfly cannot be worth more
+than its strike spacing times its wing size, which is \$1.30bn in total: an
+overstatement of 49 times. These are the only butterflies in 682 underlyings, so this is
+one identifiable programme rather than a pattern, but the defect it revealed was
+general.
+
+\subsection{A buffer fund counted four times}
+
+SPY at expiry 2026-09-30 carries 99 off-grid legs. One fund is visible across four of
+them because the contract counts match:
+
+\begin{center}
+\begin{tabular}{rlrl}
+\toprule
+Strike & Side & Contracts & Role \\
+\midrule
+1.87 & call & 37,507 & synthetic long \\
+765.66 & call & 37,507 & cap \\
+746.77 & put & 38,317 & floor \\
+597.42 & put & 37,540 & buffer floor \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The position is roughly 37,500 contracts of SPY, about \$2.87bn. Counted leg by leg at
+strike-based notional it is \$8.02bn.
+
+\subsection{Notional fails in both directions at once}
+
+The same fund demonstrates both failure modes. Its four legs inflate the count. But its
+synthetic long call, struck at \$1.87 against a spot near \$765, carries \$2.9bn of
+exposure and is recorded by strike times contracts as \$7m --- three orders of magnitude
+too small. Deep in-the-money calls used to replicate an underlying are systematically
+invisible to a strike-based measure, while far out-of-the-money legs are inflated by it.
+
+A third case makes the point without a fund: the largest single line in the census is an
+SPY series struck at \textbf{10,010.01} against a spot near 765, with equal call and put
+open interest and \$29bn of notional. It is a box spread. Its economic content is a
+loan.
+
+\section{The corrected census}
+
+\subsection{Method}
+
+Legs of one trade carry near-identical contract counts at a shared expiry, because they
+were transacted together. Clustering on contract count within an expiry recovers the
+position without requiring the number of structures to be known in advance. Each
+recovered structure is then valued once, on the underlying, as contracts $\times$ spot
+--- the only scale that survives both failure modes above.
+
+\subsection{Result}
 
 \begin{table}[t]
 \centering
-\caption{Implied dealer rehedge per one percent move in the underlying, from disclosed
-positions as of 17 August 2026. Programmes ordered by hedge as a share of daily dollar
-volume; a representative selection is shown.}
-\label{tab:hedge}
-\begin{tabular}{llrrrr}
+\caption{Structures recovered from off-grid cleared series, 682 underlyings,
+17 August 2026. Exposure is contracts $\times$ spot, counted once per structure.}
+\label{tab:census}
+\begin{tabular}{lrrr}
 \toprule
-Fund & Underlying & \$ delta (m) & $\Gamma^{\$}_{1\%}$ (m) & ADV (m) & Hedge / ADV \\
+Structure & Count & Exposure (\$bn) & Share \\
 \midrule
-MRNY & MRNA  &    96 & $-1.9$  &    297 & 0.65\% \\
-GDXY & GDX   &   198 & $-5.1$  &  1,260 & 0.41\% \\
-MSTY & MSTR  &   605 & $-7.6$  &  3,633 & 0.21\% \\
-NVDY & NVDA  & 1,111 & $-56.8$ & 30,597 & 0.19\% \\
-CONY & COIN  &   276 & $-2.8$  &  2,100 & 0.13\% \\
-AMZY & AMZN  &   221 & $-10.2$ &  8,823 & 0.12\% \\
-HOOY & HOOD  &   109 & $-1.9$  &  2,118 & 0.09\% \\
-PLTY & PLTR  &   332 & $-5.7$  &  7,211 & 0.08\% \\
-TSLY & TSLA  &   508 & $-16.7$ & 26,483 & 0.06\% \\
-APLY & AAPL  &    92 & $-2.2$  & 11,177 & 0.02\% \\
-AMDY & AMD   &   364 & $+0.4$  &  6,553 & 0.01\% \\
+Synthetic            & 458 & 57.0 & 29.1\% \\
+Collar / buffer      & 245 & 50.5 & 25.7\% \\
+Vertical spread      & 185 & 38.7 & 19.7\% \\
+Risk reversal        & 123 & 19.5 & 10.0\% \\
+Three-leg            & 116 & 17.5 &  8.9\% \\
+Five or more legs    &  55 & 11.9 &  6.1\% \\
 \midrule
-\multicolumn{4}{l}{\emph{All 24 programmes}} & median & 0.09\% \\
-\multicolumn{4}{l}{} & maximum & 0.65\% \\
+Total                & 1,193 & \textbf{196} & \\
+\midrule
+\emph{Naive sum of leg notionals} & & \emph{630} & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The dispersion is informative. Dollar delta reaches \$1.1bn for the largest programme,
-and the ratio of programme net assets to daily turnover reaches $5.7$ elsewhere in the
-sample. Yet the implied rebalancing never exceeds two thirds of one percent of daily
-volume for a one percent move, and its median is under a tenth of a percent. Scaling to
-a five percent move, which is a routine daily range for the most volatile names here,
-the median implied rehedge is roughly half a percent of daily volume.
+Table~\ref{tab:census} reports 1,193 structures across 220 underlyings and \$196bn of
+exposure, against \$630bn if legs are summed naively: an overstatement of 3.2 times.
+The method reproduces the case worked by hand, valuing the SPY buffer fund at \$2.90bn
+against \$2.87bn manual and \$8.02bn per leg.
 
-Note also the sign heterogeneity: AMDY shows positive gamma, meaning the leg
-composition happens to leave the dealer short gamma rather than long. Aggregating these
-programmes into a single directional ``gamma'' figure, as is common in commentary,
-discards that variation.
+Composition is roughly even across three families. Synthetics and buffer collars each
+account for a quarter to a third, spreads a fifth. The single-name option-income funds
+that motivated this study are a small part of the market they belong to.
 
-\section{Measuring disclosed positioning from free sources}
-\label{sec:measurement}
+Largest individual positions are three vertical spreads on one underlying of \$4.8bn
+each across consecutive expiries, a spread of \$4.69bn expiring in 2028, and the SPY
+buffer at \$2.90bn.
 
-The calculation above requires knowing the positions. We describe how they are
-obtained, because the procedure is reusable and costs nothing.
+\subsection{What the grouping does not capture}
 
-\paragraph{Sources.} Issuer holdings files list every position daily with a signed
-quantity and an OSI-like identifier from which root, expiry, right and strike are
-recovered; leading-digit roots denote non-standard deliverable series. The Options
-Clearing Corporation publishes per-underlying open interest for every series including
-FLEX. Full chains with two-sided quotes, sizes and greeks are available from an
-exchange content delivery network, and underlying bars from a public charting
-interface. Programme size over time comes from Form N-PORT.
+Only 3,291 of 5,084 legs group, so \$196bn is itself a partial count; the remainder are
+singletons or fall below the size threshold and are left unvalued. Clustering on size
+also separates a butterfly's body from its wings, because the body is twice their size,
+so the butterflies appear here as vertical spreads while the dedicated leg-level
+detector finds them correctly. We report both rather than reconciling them by hand.
+And grouping is inference: legs are assigned to one structure because their sizes
+match, which is strong evidence but not proof, and only the fund-synthetic cases are
+independently verified.
 
-\paragraph{Identifying the FLEX leg.} Table~\ref{tab:signature} shows the cluster of
-series at one strike and expiry.
+\section{Implication for gamma measurement}
 
-\begin{table}[t]
-\centering
-\caption{Open interest around one strike and expiry, 16 October 2026, observed
-16 August 2026. The programme's disclosed position is $-45{,}115$ contracts.}
-\label{tab:signature}
-\begin{tabular}{rrrl}
+Measures of dealer gamma in public use are built from listed chains and therefore
+exclude every position above. Pricing the absent series under Black-Scholes at implied
+volatility interpolated from the nearest listed strikes in the same expiry, and
+cancelling matched legs because a box contributes no gamma:
+
+\begin{center}
+\begin{tabular}{lr}
 \toprule
-Strike & Call OI & Put OI & Interpretation \\
+& Share of listed-chain gamma \\
 \midrule
-95.00 & 46,125 & 1,746  & ordinary listed series \\
-95.00 & 7,000  & 7,000  & unrelated matched combination \\
-\textbf{95.01} & \textbf{0} & \textbf{45,115} & \textbf{the programme's written put} \\
-95.02 & 6,620  & 6,620  & unrelated matched combination \\
+Aggregate, 67 underlyings & 5.5\% \\
+Median underlying & 0.5\% \\
+SPY & 11.3\% \\
+Largest cases & 25--43\% \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{center}
 
-Two conditions jointly identify the leg: an offset strike, meaning the cents component
-is not a standard increment, and one-sidedness, meaning essentially all open interest
-in the series sits on one right. A detector keyed instead on \emph{equal} call and put
-open interest recovers a different and much larger population --- conversions,
-reversals and boxes, which are dealer financing structures rather than fund positions
---- and we report the two separately.
+The omission is concentrated rather than pervasive. For a typical underlying it is
+negligible. For SPY --- the contract most gamma commentary concerns --- roughly one
+dollar of gamma in nine is invisible to the data such commentary is built on.
 
-\paragraph{Reconciliation.} Across $68$ underlyings and $113{,}610$ series, matched
-against $28$ programmes on underlying, expiry, strike and right, the procedure
-attributes $11$ legs. Eight match the disclosed contract count exactly. Of the
-remainder, one differs by $116$ contracts, consistent with a second holder in the same
-series; one by $4{,}009$, consistent with a second programme at the same strike; and one
-is a false positive on the call side. We report the attributed count as small: it
-reflects a single observation date and a registry covering one issuer's complex, and it
-should be read as a demonstration that the reconciliation works rather than as a census.
+An earlier version of this calculation reported a median of 3.6\%. It priced every
+off-grid strike at the chain's median implied volatility, which badly overstates gamma
+for far out-of-the-money strikes, and counted both legs of matched combinations that in
+fact cancel; cancelling matched legs alone removes 29\% of the gross figure. The
+corrected figures supersede it.
 
-\section{Is a footprint of this size visible?}
-
-\subsection{Data and design}
-
-The treated group is the $25$ underlyings carrying a dedicated single-name programme,
-with launch dates from each fund's first trade date, staggered between November 2022 and
-July 2026. The control group is $27$ liquid names without such a programme. Daily bars
-over five years give $64{,}553$ name-days across $52$ names and $1{,}253$ trading days.
-
-Programme size is taken from N-PORT ($226$ reports across $23$ funds) and enters as a
-step function that is never carried backwards before its report date. Using reported
-rather than current size matters: the largest fund reported \$437m in July 2024,
-\$5{,}747m in July 2025, and \$726m in August 2026.
-
-We estimate
-\begin{align}
-\log V_{i,t} \;=\; \alpha_i + \delta_t
-&+ \beta_1 \mathit{post}_{i,t}
- + \beta_2 (\mathit{post}_{i,t} \times \mathit{day}_t) \nonumber \\
-&+ \beta_3 (\mathit{post}_{i,t} \times \mathit{day}_t \times \log \dose_{i,t})
- + \beta_4 (\mathit{post}_{i,t} \times \log \dose_{i,t}) \nonumber \\
-&+ \beta_5 (\mathit{day}_t \times \mathit{treated}_i)
- + \gamma |r_{i,t}| + \varepsilon_{i,t},
-\label{eq:main}
-\end{align}
-with $\beta_3$ the estimand. Name effects absorb persistent liquidity differences, date
-effects absorb all market-wide variation including the common weekday pattern, and
-$|r|$ absorbs the mechanical dependence of volume on absolute returns. The roll weekday
-is scanned across all five days rather than assumed, and all five are reported.
-Inference is two-way clustered on name and date \citep{cameron2011} with $t$ critical
-values from the smaller clustering dimension; the estimator agrees with a reference
-implementation to four decimals and is very slightly conservative in simulation under
-errors with within-name persistence and a common daily factor.
-
-\subsection{Results}
-
-\begin{table}[t]
-\centering
-\caption{Volume response to programme size by weekday. MDE80 is the effect detectable
-at $80\%$ power. $64{,}553$ observations, $52$ names, $1{,}253$ dates.}
-\label{tab:main}
-\begin{tabular}{lrrrrr}
-\toprule
-& \multicolumn{2}{c}{Level $\beta_2$} & \multicolumn{3}{c}{Size response $\beta_3$} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-6}
-Weekday & $\beta$ & $t$ & $\beta$ & $t$ & MDE80 \\
-\midrule
-Monday    & $-0.0133$ & $-1.25$ & $+0.0033$ & $+0.46$ & 0.020 \\
-Tuesday   & $-0.0129$ & $-1.64$ & $+0.0059$ & $+0.87$ & 0.019 \\
-Wednesday & $-0.0045$ & $-0.49$ & $-0.0018$ & $-0.24$ & 0.021 \\
-Thursday  & $+0.0013$ & $+0.11$ & $-0.0039$ & $-0.52$ & 0.021 \\
-Friday    & $+0.0288$ & $+1.95$ & $-0.0035$ & $-0.40$ & 0.025 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:main} reports no size response on any weekday. Measuring turnover over
-the pre-launch window only, which removes any endogenous contribution of the programme
-to the denominator, leaves the Friday estimate at $-0.0038$ ($t=-0.41$). Randomisation
-inference permuting size across treated names over $300$ draws places the actual
-estimate of $-0.00348$ at the $37$th percentile of its null, central $95\%$ interval
-$[-0.0232, +0.0201]$, two-sided $p=0.773$; the permutation standard deviation of
-$0.0114$ is close to the clustered standard error.
-
-\subsection{Positive controls, and the limits of this test}
-
-\begin{table}[t]
-\centering
-\caption{Positive controls, same estimator and panel.}
-\label{tab:controls}
-\begin{tabular}{lrr}
-\toprule
-Control & $\beta$ & $t$ \\
-\midrule
-$|r| \rightarrow$ volume                  & $+10.68$ & $+9.40$ \\
-Triple witching $\times$ treated          & $-0.330$ & $-4.65$ \\
-Monthly option expiry $\times$ treated    & $-0.122$ & $-3.13$ \\
-\midrule
-Programme size response (Friday)          & $-0.004$ & $-0.40$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The design detects comparable effects when they exist. That establishes the machinery
-works; it does not establish that this test was capable of seeing the effect
-Section~\ref{sec:implied} predicts. It was not. The minimum detectable effect is about
-$0.020$ in log volume per log unit of programme size, whereas the predicted rehedge is
-of order $0.001$ to $0.005$ of daily volume even for the largest programmes on
-high-volatility days. The empirical null is therefore corroborative and not
-independent evidence, and we do not present it as a rejection of anything.
-
-The negative sign on the expiry controls reflects composition rather than programmes:
-our control names are mega-caps with large index-driven expiry activity, so treated
-names show less relative volume on those dates.
-
-\subsection{An attention cycle around launch}
-
-\begin{table}[t]
-\centering
-\caption{Log volume by quarter relative to programme launch, reference $q=-1$.}
-\label{tab:event}
-\begin{tabular}{lrrrrrrrrrr}
-\toprule
-$q$ & $-4$ & $-3$ & $-2$ & $0$ & $+1$ & $+2$ & $+3$ & $+4$ & $+5$ & $+6$ \\
-\midrule
-$\beta$ & $0.16$ & $0.18$ & $0.21$ & $0.35$ & $0.42$ & $0.49$ & $0.43$ & $0.33$ & $0.23$ & $0.13$ \\
-$t$     & $1.12$ & $1.07$ & $1.16$ & $1.86$ & $2.09$ & $2.65$ & $2.27$ & $1.89$ & $1.52$ & $0.95$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Pre-launch coefficients in Table~\ref{tab:event} are not flat. Volume is elevated two to
-four quarters before launch, dips immediately before it, peaks two quarters after, and
-decays --- the profile of an attention cycle in which sponsors launch products onto
-stocks already receiving unusual interest. Consequently the level coefficients in
-Table~\ref{tab:main}, including the $+2.9\%$ Friday estimate, cannot be given a causal
-reading, and we do not rely on them. The size response is more robust, and the bias runs
-toward detection: if larger programmes launch onto larger attention surges, $\beta_3$ is
-biased upward, and we estimate zero.
-
-\subsection{A confound that looks like a result}
-
-Repeating the exercise intraday on $60$ sessions of five-minute bars ($40{,}560$
-bin-observations), every programme launched before the window opens, so the
-difference-in-differences collapses. A specification identifying from programme size
-interacted with time of day, with name and date-by-bin effects, produces a clean
-monotone profile: $+0.035$ at the open falling to $-0.042$ at 15:00 ($t=-3.52$) and
-$-0.095$ at 15:30 ($t=-3.20$).
-
-It is not evidence of hedging. The sign is wrong for close-concentrated hedging, and
-with programme size time-invariant inside the window the interaction cannot be
-separated from that of any other name characteristic with time of day. Programme size
-is strongly correlated with clientele: large-programme names here are retail-heavy and
-open-weighted, small-programme names are mega-caps with large closing auctions. A
-within-name design, using each name's own share of daily volume in the final hour with
-name and date effects, is null on all five weekdays, the largest being Wednesday at
-$t=2.19$ against a Bonferroni threshold near $2.8$. We report the failed specification
-because cross-sectional size sorts are common and this one is persuasive and wrong.
+We stress that this is a statement about measurement inputs, not about true dealer
+positioning. Attributing a sign to open interest requires knowing who holds each side,
+which neither listed nor clearing data reveals. That problem is unchanged by this paper;
+what changes is that a category of inputs previously assumed unavailable is available.
 
 \section{Limitations}
 
 \begin{enumerate}
-\item \textbf{The gamma calculation is a snapshot.} It uses disclosed positions on one
-date. Position composition varies over the roll cycle, and a fuller treatment would
-integrate over it. We would expect the conclusion to be robust because it follows from
-structure rather than from a particular day's strikes, but we have not shown that.
-
-\item \textbf{Gamma is not the only hedging channel.} Vanna and charm generate flow as
-volatility and time change, and we have not quantified them. Large moves also carry the
-overlay through strikes, which the local calculation understates.
-
-\item \textbf{The empirical test is underpowered for the predicted effect} and is
-reported as corroborative only.
-
-\item \textbf{Volume, not prices.} A price effect without a detectable volume effect is
-difficult but not impossible, for instance through quote revision in anticipation.
-
-\item \textbf{Roll timing is inferred} from weekday rather than observed.
-
-\item \textbf{One product family.} The treated group is dominated by a single issuer's
-complex; index-level and buffer programmes are not covered.
+\item \textbf{One date.} Everything is a snapshot. Growth, turnover and entry dynamics
+require a time series.
+\item \textbf{A lower bound.} FLEX struck on the standard grid is undetectable by strike
+signature, and only 65\% of detected legs group into structures.
+\item \textbf{Aggregated across holders.} Clearing data cannot identify participants;
+every position is a sum.
+\item \textbf{Categories are inferred.} Two signatures are verified against disclosure;
+the others rest on structural evidence that is strong but not proof.
+\item \textbf{No claim about prices.} This paper measures positions. Whether they
+matter for returns or volatility is not tested here.
 \end{enumerate}
 
 \section{Conclusion}
 
-Single-name option-income funds are large in notional and small in gamma, and the gap
-between the two is structural rather than incidental. The synthetic long that carries
-almost all of their notional is a forward, and a forward does not need rebalancing.
-What remains is a short-call overlay written as spreads, implying a dealer rehedge with
-a median of nine basis points of daily dollar volume per one percent move and a maximum
-of sixty-five.
+FLEX options are about seven percent of US listed options open interest, growing
+quickly, and generally treated as unobservable. They are observable at no cost, because
+clearing reports what execution does not, and because a strike off the standard grid
+identifies itself.
 
-The practical implication is that notional, assets under management, and ratios of
-either to turnover are poor guides to the market footprint of these products. The
-relevant quantity is dollar gamma net of the offsetting legs, it is computable from
-public disclosure, and it is roughly two orders of magnitude smaller.
+Mapping them yields \$196bn of structured positions across 220 underlyings, split
+roughly evenly between synthetics, defined-outcome collars and spreads, none of which
+appears in a listed option chain. Reaching that figure required correcting a
+threefold overstatement caused by counting legs rather than positions, and the same
+correction reveals a butterfly overstated 49-fold and a synthetic long call understated
+by three orders of magnitude.
 
-We do not claim these funds are inconsequential. They may affect the price of
-volatility, as \citet{park2025} suggest, through the supply of options rather than
-through hedging flow in the underlying; that channel is untouched by our calculation.
-What we claim is narrower and, we think, useful: the specific mechanism by which large
-notional is presumed to reach the underlying does not operate at the magnitude the
-notional implies, and the reason is visible in the structure of the position.
+That methodological point may outlast the census. Open interest is reported per series;
+positions are not series; and the errors from conflating them are large, of both signs,
+and do not cancel.
 
 \section*{Data and code availability}
 
-Every input is free and public. Code, collection infrastructure, the pre-registered
-pilot specification, and results as they were produced --- including those later
-reframed by the calculation in Section~\ref{sec:implied} --- are available at the
-project repository.
+Every input is free and public. Collection infrastructure, the classifier, the grouping
+method, and results as they were produced --- including the superseded figures
+described above --- are available at the project repository.
 
 \begin{thebibliography}{99}
 
@@ -475,25 +456,15 @@ Bollen, N.~P.~B. and R.~E. Whaley (2004).
 Does net buying pressure affect the shape of implied volatility functions?
 \emph{Journal of Finance} 59(2), 711--753.
 
-\bibitem[Br{\o}gger(2021)]{brogger2021}
-Br{\o}gger, S.~B. (2021).
-The market impact of predictable flows: Evidence from leveraged VIX products.
-\emph{Journal of Banking and Finance} 133, 106280.
-
-\bibitem[Cameron et al.(2011)]{cameron2011}
-Cameron, A.~C., J.~B. Gelbach, and D.~L. Miller (2011).
-Robust inference with multiway clustering.
-\emph{Journal of Business and Economic Statistics} 29(2), 238--249.
-
-\bibitem[Cboe(2024)]{cboe2024}
-Cboe Global Markets (2024).
-Are option income funds suppressing volatility?
-Cboe Insights.
-
 \bibitem[G\^{a}rleanu et al.(2009)]{garleanu2009}
 G\^{a}rleanu, N., L.~H. Pedersen, and A.~M. Poteshman (2009).
 Demand-based option pricing.
 \emph{Review of Financial Studies} 22(10), 4259--4299.
+
+\bibitem[Ni et al.(2005)]{ni2005}
+Ni, S.~X., N.~D. Pearson, and A.~M. Poteshman (2005).
+Stock price clustering on option expiration dates.
+\emph{Journal of Financial Economics} 78(1), 49--87.
 
 \bibitem[Park and Kurucak(2025)]{park2025}
 Park, T. and U.~Kurucak (2025).
