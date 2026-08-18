@@ -214,13 +214,31 @@ negotiated trade rather than an accumulation.
 
 \subsection{Verification against disclosure}
 
-Attributed fund-synthetic legs reconcile to issuer holdings exactly, to the contract,
-in 8 of 11 cases. Of the three that do not, one differs by 116 contracts, consistent
-with a second holder in the series; one by 4,009, consistent with a second programme at
-the same strike; and one is a false positive on the call side.
+Categories are assigned from structure. Two independent sources test whether the
+assignment is right.
 
-Two structures were traced to named filings by searching N-PORT and reading the
-document rather than trusting the search result:
+\paragraph{Daily issuer holdings, which are current.} Option-income issuers publish
+complete holdings every day, including contract-level option positions with signed
+quantities. Matching detected fund-synthetic legs against them on underlying, expiry,
+strike and right reconciles \emph{exactly, to the contract}, in 8 of 11 attributed
+cases. Of the three that do not, one differs by 116 contracts, consistent with a second
+holder in the series; one by 4,009, consistent with a second programme at the same
+strike; and one is a false positive on the call side. This is the primary evidence, and
+it concerns positions open on the date of the census.
+
+\paragraph{Regulatory filings, which are not current.} Form N-PORT gives contract-level
+option positions for every registered fund and is indexed by EDGAR full-text search, so
+it can in principle name the holder of any series. In practice it cannot name the
+holder of a series open \emph{now}. Public N-PORT runs about four months behind: across
+the 23 funds we collect, the most recent publicly available report date is 110 days
+old, and \textbf{100\% of the FLEX series in the census expire after it}. Positions
+currently open therefore cannot appear in any public filing.
+
+A systematic attempt bears this out. Searching for 24 of the largest off-grid
+positions, opening every candidate filing and requiring the underlying, strike and side
+to match, confirmed one: a written put in \texttt{NVDA} at 195.01, disclosed by the
+corresponding income fund at a quantity reflecting the earlier report date. Two further
+cases were confirmed by hand for series old enough to have been disclosed:
 
 \begin{center}
 \begin{tabular}{lll r}
@@ -233,10 +251,16 @@ fund synthetic & YieldMax JPM Option Income Strategy ETF & \texttt{JPM 05/16/202
 \end{tabular}
 \end{center}
 
-Both confirm the signature assigned without reference to disclosure. The Innovator
-filing also carries the identifier \texttt{4SPY 261130C00765660}, showing that
-defined-outcome issuers use leading-digit non-standard roots, the same convention as
-the income funds.
+Both confirm the signature assigned without reference to disclosure, and the Innovator
+filing carries the identifier \texttt{4SPY 261130C00765660}, showing that
+defined-outcome issuers use leading-digit non-standard roots --- the same convention as
+the income funds, arrived at independently.
+
+The asymmetry is worth stating plainly, because it inverts the usual relationship
+between clearing data and regulatory disclosure. Clearing reports what is open today
+and cannot say who holds it. Disclosure says who holds what and reports it four months
+late. Neither substitutes for the other, and the census is possible only because the
+first exists.
 
 \subsection{The limits of attribution}
 
@@ -489,8 +513,15 @@ require a time series.
 signature, and only 65\% of detected legs group into structures.
 \item \textbf{Aggregated across holders.} Clearing data cannot identify participants;
 every position is a sum.
-\item \textbf{Categories are inferred.} Two signatures are verified against disclosure;
-the others rest on structural evidence that is strong but not proof.
+\item \textbf{Categories are inferred.} The fund-synthetic signature is verified
+against current issuer holdings in 8 of 11 cases and the buffer-cap signature against
+filings in two; the financing and block signatures rest on structural evidence that is
+strong but unverified, because no disclosure regime covers their holders.
+
+\item \textbf{Verification is bounded by disclosure lag, not by method.} Public N-PORT
+is roughly four months stale, and every FLEX series in the census expires after the most
+recent available report, so currently open positions cannot be checked against filings
+at all.
 \item \textbf{No claim about prices.} This paper measures positions. Whether they
 matter for returns or volatility is not tested here.
 \end{enumerate}
