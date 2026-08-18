@@ -8,6 +8,7 @@
 \usepackage{natbib}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{graphicx}
 \usepackage{caption}
 \captionsetup{font=small,labelfont=bf}
 
@@ -199,8 +200,8 @@ offset keeps the written put from being netted against the listed series at clea
 
 \item[Index-linked] An arbitrary decimal strike, such as SPY at 765.66 or 597.42.
 Defined-outcome funds set caps and floors from an index level on the day an outcome
-period opens, which produces strikes that cannot be on a grid. \emph{20.6\% of these
-series expire on a month end, against 4.7\% for every other category} --- the monthly
+period opens, which produces strikes that cannot be on a grid. \emph{19.0\% of these
+series expire on a month end, against 2.2--6.1\% for every other category} --- the monthly
 outcome-period cycle appearing in the data without being assumed.
 
 \item[Matched combination] Call and put open interest exactly equal in one series: a
@@ -364,6 +365,53 @@ Largest individual positions are three vertical spreads on one underlying of \$4
 each across consecutive expiries, a spread of \$4.69bn expiring in 2028, and the SPY
 buffer at \$2.90bn.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.47\textwidth]{figures/naive_vs_grouped.pdf}\hfill
+\includegraphics[width=0.50\textwidth]{figures/composition.pdf}
+\caption{Left: summing leg notionals overstates exposure by 3.2 times. Right: exposure
+by structure type, counted once per structure and valued on the underlying.}
+\label{fig:census}
+\end{figure}
+
+\subsection{Concentration}
+
+Exposure is highly concentrated. SPY alone accounts for 37.4\% of it, the top five
+underlyings for 56.9\%, and the top twenty-five for 80.1\%, across the 220 underlyings
+carrying any recovered structure (Figure~\ref{fig:concentration}). The five largest are
+SPY at \$73.3bn, one large-cap technology name at \$16.6bn, QQQ at \$10.8bn, and two
+single names near \$5--6bn.
+
+This matters for interpretation. A market that is 7\% of open interest in aggregate is
+not diffusely spread: it is a handful of index products plus a thin tail of single
+names, which is why the gamma omission reported below is negligible at the median
+underlying and material for SPY.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.49\textwidth]{figures/concentration.pdf}\hfill
+\includegraphics[width=0.49\textwidth]{figures/expiry_signature.pdf}
+\caption{Left: cumulative share of exposure by underlying. Right: share of series
+expiring on a month end, by category. The index-linked category stands apart, which is
+the monthly outcome-period cycle appearing in the data without being imposed.}
+\label{fig:concentration}
+\end{figure}
+
+\subsection{Robustness of the grouping}
+
+The grouping has one free parameter, the relative tolerance within which contract
+counts are treated as matching. Varying it from 0.01 to 0.20 moves total exposure
+between \$185bn and \$205bn, with the reported value of \$196bn at a tolerance of 0.05
+sitting inside that range; the count of recovered structures varies only between 1,114
+and 1,200. The result is not an artefact of the threshold.
+
+The legs that never group are immaterial rather than merely unexamined. Of the 1,793
+census rows not consumed by a structure, 1,522 fall below the 500-contract size
+threshold, and those carry 0.38 million contracts, or 1.2\% of census open interest.
+The median ungrouped series holds 228 contracts. The \$196bn therefore covers
+essentially all of the open interest that the census identifies, notwithstanding that
+it covers only 65\% of its rows.
+
 \subsection{What the grouping does not capture}
 
 Only 3,291 of 5,084 legs group, so \$196bn is itself a partial count; the remainder are
@@ -409,6 +457,28 @@ We stress that this is a statement about measurement inputs, not about true deal
 positioning. Attributing a sign to open interest requires knowing who holds each side,
 which neither listed nor clearing data reveals. That problem is unchanged by this paper;
 what changes is that a category of inputs previously assumed unavailable is available.
+
+\section{Captures are not settlements}
+
+One operational finding deserves separate statement because it would corrupt a panel
+silently.
+
+OCC publishes settlement open interest overnight, so a capture taken during or shortly
+after a session reports the \emph{previous} settlement. Two of our captures, taken on
+2026-08-16 and 2026-08-17, were byte-identical: both returned Friday 2026-08-14's
+settlement, agreeing on every one of 113,610 series. Read as two observations they
+would suggest a market that did not move a single contract in a day; they are in fact
+one observation recorded twice.
+
+Any panel assembled by concatenating capture-dated partitions inherits this as
+spurious stability. We therefore key captures by the content hash of their payload and
+collapse identical contents to a single observation, and we report this rather than
+quietly deduplicating, because the same lag applies to every snapshot source with a
+publication delay and the resulting duplicates are not visible in a file listing.
+
+The consequence for this paper is narrow --- it is a single-date census, so
+deduplication changes nothing reported here --- but it disqualifies the day-over-day
+comparison we had intended as a stability check. No such check is claimed.
 
 \section{Limitations}
 
