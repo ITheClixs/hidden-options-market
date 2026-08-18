@@ -213,3 +213,54 @@ Roughly **\$196bn of identifiable structured positions** across 220 underlyings,
 about evenly between synthetics, buffer collars and spreads, observable in free
 clearing data and invisible in listed option chains. Every earlier notional figure in
 this document overstates by around threefold and should be read as superseded.
+
+---
+
+## Attribution: what can and cannot be identified — 2026-08-18
+
+EDGAR full-text search does index N-PORT, including numeric strings, so a cleared
+series can in principle be traced to the fund holding it.
+
+### Two verified attributions
+
+Both were confirmed by opening the filing and reading the position, not by trusting a
+search hit.
+
+| structure predicted | filing | position | balance |
+|---|---|---|---:|
+| buffer cap | Innovator U.S. Equity Ultra Buffer ETF — December | `SPY 11/30/2026 765.66 C` | −4,473 |
+| fund synthetic | YieldMax JPM Option Income Strategy ETF | `JPM 05/16/2025 230.01 P` | −2,005 |
+
+Both confirm the structural signature the classifier assigns without reference to
+disclosure: an off-grid short call is a buffer cap, and a cent-offset short put is a
+fund synthetic leg. The Innovator filing also shows the identifier `4SPY
+261130C00765660` — buffer issuers use leading-digit non-standard roots, the same
+convention as the `2MSTR` legs found earlier.
+
+### Three limits, all material
+
+**Search hits are not attributions.** Chasing an AMD structure at strike 230.01
+returned a YieldMax filing that holds `JPM` at 230.01. Strike values recur across
+underlyings and EDGAR full-text cannot reliably conjoin underlying, strike and expiry,
+so every candidate must be opened and read. Of ten largest structures searched, round
+strikes such as 625 or 510 returned 10,000 hits and were useless, and `SPY 746.77`
+returned an unrelated alternative lending fund.
+
+**Clearing data is aggregate.** OCC reports total open interest per series across all
+holders. The SPY 765.66 line carries 37,507 contracts; the Innovator fund holds 4,473
+of them. A confirmed match therefore identifies *a* holder, never *the* holder, and
+the grouped structures in the previous section are aggregates across every fund in
+that series rather than individual positions. Aggregate exposure is unaffected;
+per-structure attribution is not available from this data.
+
+**Only off-grid decimals are searchable.** Attribution works for the very strikes that
+identify FLEX in the first place and fails for the round strikes that make up the
+block category — which is precisely where the unattributed exposure sits.
+
+### What this means for the census
+
+The \$196bn figure is an aggregate across holders and should be read that way. Naming
+the participants at scale is not achievable with these sources; it would require
+matching every candidate filing by hand, and even then would recover only the
+registered-fund share of each series. The two verified cases establish that the
+structural signatures are correct, which is what they were used for.
