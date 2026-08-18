@@ -166,9 +166,26 @@ Calls, share of open interest & & 57.2\% \\
 \end{tabular}
 \end{table}
 
-Open interest roughly doubled over thirteen months and mark value rose by 87\%. The
-five largest underlyings on the final date are SPY, SPX, one large-cap technology name,
-an index product and one further single name.
+Open interest roughly doubled over thirteen months and mark value rose by 87\%
+(Figure~\ref{fig:growth}). The five largest underlyings on the final date are SPY, SPX,
+one large-cap technology name, an index product and one further single name.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\textwidth]{figures/growth.pdf}
+\caption{FLEX open interest and its mark value across the panel. Both roughly double.}
+\label{fig:growth}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.49\textwidth]{figures/concentration.pdf}\hfill
+\includegraphics[width=0.49\textwidth]{figures/maturity.pdf}
+\caption{Left: cumulative share of open interest by underlying on the final date, ranked.
+Right: open interest by remaining maturity. The market is concentrated and more than
+half of it expires within sixty days.}
+\label{fig:structure}
+\end{figure}
 
 \section{Two measurement results}
 
@@ -281,7 +298,16 @@ three, five and ten days gives $t=-0.88$, $-0.59$ and $-0.12$. Restricting to th
 decile of inventory changes, so that only large creations and extinguishments enter,
 gives $t=-0.71$ at one day.
 
-The placebo settles the interpretation. Using inventory dated \emph{after} the outcome
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.68\textwidth]{figures/placebo.pdf}
+\caption{Coefficients on next-day absolute return with 95\% intervals. The placebo uses
+inventory dated after the outcome and cannot carry information; it is indistinguishable
+from the genuine predictor.}
+\label{fig:placebo}
+\end{figure}
+
+The placebo settles the interpretation (Figure~\ref{fig:placebo}). Using inventory dated \emph{after} the outcome
 it is asked to predict --- which cannot carry information --- returns $-0.00032$ at
 $t=-1.37$, against the genuine predictor's $-0.00030$ at $t=-1.37$. The association runs
 equally well backwards in time, which is the signature of a common factor moving both
