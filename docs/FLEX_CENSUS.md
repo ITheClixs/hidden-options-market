@@ -153,3 +153,63 @@ This is the third instance of the same underlying mistake — treating series
 independently when they are legs of one position — after the fund-synthetic
 misclassification and the MSFT butterflies. The pattern is now clear enough that any
 remaining category should be assumed guilty until audited.
+
+---
+
+## Corrected census: structures, not legs — 2026-08-18
+
+The three errors above share one cause, so they get one fix: group legs into positions
+before counting, and value on the underlying rather than the strike.
+
+Legs of a single trade carry near-identical contract counts at a shared expiry, because
+they were transacted together. Clustering on contract count within an expiry recovers
+the structure without needing to know how many there are.
+
+### Result
+
+| | |
+|---|---:|
+| structures recovered | 1,193 across 220 underlyings |
+| legs consumed | 3,291 of 5,084 census rows |
+| **naive summed notional** | **\$630bn** |
+| **exposure, corrected** | **\$196bn** |
+| overstatement | **3.2x** |
+
+The method reproduces the case worked by hand: the SPY buffer fund at expiry
+2026-09-30 is valued at \$2.90bn against \$2.87bn computed manually, having been
+credited with \$8.02bn by the per-leg census.
+
+### Composition by exposure
+
+| structure | count | exposure | share |
+|---|---:|---:|---:|
+| synthetic | 458 | \$57.0bn | 29.1% |
+| collar / buffer | 245 | \$50.5bn | 25.7% |
+| vertical spread | 185 | \$38.7bn | 19.7% |
+| risk reversal | 123 | \$19.5bn | 10.0% |
+| three-leg | 116 | \$17.5bn | 8.9% |
+| five or more legs | 55 | \$11.9bn | 6.1% |
+
+Largest single positions: three MSFT vertical spreads of \$4.8bn each across
+consecutive expiries, a WDC spread of \$4.69bn expiring 2028, an STX spread of
+\$3.68bn, and the SPY buffer at \$2.90bn.
+
+### Limitations of the grouping
+
+- **65% of legs group.** The remaining 1,793 are singletons or fall below the size
+  threshold and are not valued, so \$196bn is itself a partial count.
+- **Ratio structures split.** Clustering on contract count separates a butterfly's body
+  from its wings, because the body is twice their size. The MSFT butterflies therefore
+  appear as vertical spreads here while the dedicated leg-level detector finds them
+  correctly. A ratio-aware grouper would fix this; the two methods are kept separate
+  rather than reconciled by hand.
+- **Grouping is inference.** Legs are attributed to one structure because their sizes
+  match, which is strong but not proof. Only the fund-synthetic cases are verified
+  against disclosure.
+
+### What the headline now is
+
+Roughly **\$196bn of identifiable structured positions** across 220 underlyings, split
+about evenly between synthetics, buffer collars and spreads, observable in free
+clearing data and invisible in listed option chains. Every earlier notional figure in
+this document overstates by around threefold and should be read as superseded.
