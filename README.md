@@ -66,13 +66,15 @@ Every input is free and public — no WRDS, no OptionMetrics, no vendor feed.
 
 ## Scheduled capture
 
-The primary collector is the `daily-capture` GitHub Actions workflow, which runs at
-23:30 UTC Mon–Fri and publishes each day as a `.tar.zst` asset on a monthly release
-tag (`data-YYYY-MM`). Release assets do not count against repository size, so the
-capture is stored at full fidelity rather than trimmed. The workflow refuses to
-publish if fewer than 80% of symbols were captured.
+The primary collector is a `daily-capture` GitHub Actions workflow that runs at
+23:30 UTC Mon–Fri in a separate private repository. It checks out this code and
+stores each day as a `.tar.zst` asset on a monthly release tag (`data-YYYY-MM`)
+there. The raw snapshots are vendor-sourced and are not redistributed, so this
+public repository contains code, paper and derived results only. The workflow
+refuses to publish if fewer than 80% of symbols were captured.
 
-Retrieve captures on any machine:
+To rebuild the panel yourself, run the collector (`absorb-collect --root data/raw`)
+on your own schedule. With access to the private store, retrieve captures with:
 
 ```bash
 scripts/fetch_captures.sh            # all months

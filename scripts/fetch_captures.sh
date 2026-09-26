@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Download captured days from the GitHub Releases store into ./data/raw.
+# Download captured days from the private GitHub Releases store into ./data/raw.
 #
 # Captures are published as one asset per trading day under a monthly release tag
-# (data-YYYY-MM). This pulls them back down and unpacks them, so a fresh clone can
+# (data-YYYY-MM) in a private repository, because the raw snapshots are
+# vendor-sourced and not redistributable. Access to that repository is required;
+# set KFA_DATA_REPO to use a different store. This pulls them back down and unpacks them, so a fresh clone can
 # reconstruct the full panel with one command.
 #
 # Usage:
@@ -14,6 +16,7 @@ set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STAGING="${PROJECT_DIR}/tmp/captures"
+DATA_REPO="${KFA_DATA_REPO:-ITheClixs/known-flow-alpha-data}"
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "gh CLI is required: https://cli.github.com" >&2
@@ -24,7 +27,7 @@ if [[ $# -gt 0 ]]; then
   months=("$@")
 else
   mapfile -t months < <(
-    gh release list --limit 200 |
+    gh release list -R "${DATA_REPO}" --limit 200 |
       awk '{print $1}' |
       grep '^data-' |
       sed 's/^data-//' |
@@ -45,7 +48,7 @@ for month in "${months[@]}"; do
   rm -rf "${STAGING:?}/${month}"
   mkdir -p "${STAGING}/${month}"
 
-  if ! gh release download "${tag}" --dir "${STAGING}/${month}" --pattern '*.tar.zst' --clobber; then
+  if ! gh release download "${tag}" -R "${DATA_REPO}" --dir "${STAGING}/${month}" --pattern '*.tar.zst' --clobber; then
     echo "    no assets for ${tag}, skipping" >&2
     continue
   fi
