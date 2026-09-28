@@ -1,101 +1,125 @@
-# Reading the FLEX Options Market from Clearing Data
+# The Hidden Options Market
 
-**Anonymous**
+**FLEX inventory in clearing data, and whether it predicts the visible market.**
 
-**Paper:** [`paper/known_flow.pdf`](paper/known_flow.pdf) · rebuild with `scripts/reproduce.sh`
+FLEX options are negotiated bilaterally, cleared centrally, and absent from the listed
+option chains that most option research is built on. They are not unobservable. The
+Options Clearing Corporation publishes a free daily report of every cleared FLEX series —
+root, strike, expiry, mark price and open interest — and this repository turns it into a
+panel.
 
----
+![FLEX open interest and mark value, July 2025 to August 2026](docs/figures/growth.png)
 
-## The question
+| | 23 Jul 2025 | 17 Aug 2026 |
+|---|---:|---:|
+| Open interest | 34.8m contracts | **73.0m contracts** |
+| Mark value | \$319bn | **\$596bn** |
 
-FLEX options are negotiated bilaterally, cleared centrally, and absent from listed
-option chains. They are about 7% of US listed options open interest and grew 45% in
-2025, and are generally treated as unobservable.
+269 activity dates, 1,691 underlyings, 9.06m series-days. On the last date, 42,740 series
+across 1,023 underlyings: the ten largest underlyings hold 29% of open interest, 56%
+expires within sixty days, and 57% is calls.
 
-They are observable at no cost. Listed strikes fall on a standard grid, so a cleared
-series struck off that grid was not listed. Applying that to 682 underlyings recovers
-30.9m contracts of FLEX open interest — 81% of the exchange's own published figure.
+## Does hidden inventory predict the visible market?
 
-## What is in it
+A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
+residual convexity while the position lives. If that matters, inventory published
+overnight for day *T* should say something about day *T+1*.
 
-| structure | count | exposure | share |
+It does not. Underlying and date fixed effects, errors two-way clustered, controls for
+trailing realised volatility at 5 and 22 days, same-day absolute return and log dollar
+volume; 58,014 underlying-days across 281 underlyings.
+
+| predictor | outcome | β | *t* | MDE80 |
+|---|---|---:|---:|---:|
+| inventory innovation | next-day \|r\| | −0.00030 | −1.37 | 0.00062 |
+| inventory change | next-day \|r\| | −0.00016 | −0.40 | 0.00115 |
+| near-dated share change | next-day \|r\| | +0.00081 | +0.58 | 0.00390 |
+| put share | next-day \|r\| | −0.00189 | −1.73 | 0.00307 |
+| inventory innovation | next-day r² | −0.00003 | −0.81 | 0.00011 |
+| **placebo: inventory dated *after* the outcome** | next-day \|r\| | **−0.00032** | **−1.37** | 0.00065 |
+
+![Coefficients on next-day absolute return with 95% intervals](docs/figures/placebo.png)
+
+The placebo cannot carry information, and on this sample it reproduces the genuine
+estimate to two decimal places. On an earlier, smaller panel the same predictor reached
+*t* = −1.95 — the kind of number that gets written up as suggestive when no placebo is
+run. The minimum detectable effect at 80% power is about 0.0006 against a typical daily
+|r| near 0.02, so effects of 3–5% would have shown up. Longer horizons are weaker still.
+
+**The null does not depend on the window.** Loading the panel from different start dates
+changes the estimates, but no predictor reaches |*t*| = 2 on any of them:
+
+| panel loaded from | underlying-days | inventory innovation | placebo |
 |---|---:|---:|---:|
-| synthetic | 458 | $57.0bn | 29.1% |
-| collar / buffer | 245 | $50.5bn | 25.7% |
-| vertical spread | 185 | $38.7bn | 19.7% |
-| risk reversal | 123 | $19.5bn | 10.0% |
-| three-leg | 116 | $17.5bn | 8.9% |
-| five or more legs | 55 | $11.9bn | 6.1% |
+| 2025-09-09 (table above) | 58,014 | −0.00030 (*t* −1.37) | −0.00032 (*t* −1.37) |
+| 2025-07-23 | 65,356 | −0.00039 (*t* −1.86) | −0.00032 (*t* −1.48) |
+| 2024-12-02 (all on disk) | 99,097 | −0.00026 (*t* −1.29) | +0.00004 (*t* +0.26) |
 
-**1,193 structures, 220 underlyings, $196bn of exposure** — against $630bn if legs are
-summed naively, a 3.2× overstatement.
+The exact placebo match is specific to the first sample; the absence of predictability is
+not.
 
-## The methodological point
+Not ruled out: strike-local effects, intraday responses, and effects on the listed option
+surface rather than the underlying. Each needs data that cannot be collected
+retrospectively for free. Details in [`docs/PREDICTIVE_RESULT.md`](docs/PREDICTIVE_RESULT.md).
 
-Open interest is reported per series. A position is not a series. Conflating them
-produced three errors here, with opposite signs that do not cancel:
+## Two measurement results that travel
 
-- a butterfly counted leg by leg, credited with **49×** its maximum attainable value;
-- a four-leg buffer fund counted nearly **3×** over;
-- a synthetic long call struck at \$1.87 against a \$765 spot recorded at \$7m when its
-  exposure is **\$2.9bn**.
+**FLEX cannot be found by its strikes.** Listed strikes sit on a grid, so an off-grid
+strike looks like a FLEX tell. Scored against the OCC report over 486,895 cleared series,
+that rule has precision 0.67 and recall 0.34. FLEX is routinely struck *on* the grid —
+`1AAON` at \$99.00 is FLEX — so two thirds of it is invisible to any strike-based test,
+and a third of what the rule flags is not FLEX at all. This project used the rule first;
+the superseded census is kept as it was in [`docs/FLEX_CENSUS.md`](docs/FLEX_CENSUS.md).
 
-Grouping legs by contract count and valuing on the underlying corrects all three.
+**A cleared series is not a position.** Open interest is reported per series, and
+positions span series. Conflating them produced errors in both directions that do not
+cancel:
 
-## Verification
+- a butterfly counted leg by leg is credited with **49×** its maximum attainable value;
+- a four-leg SPY collar is counted about **3×** over;
+- a synthetic long call struck at \$1.87 against a \$765 spot is recorded as **\$7m** of
+  strike notional when its exposure is **\$2.9bn**.
 
-Detected fund-synthetic legs reconcile to daily issuer holdings **exactly, to the
-contract, in 8 of 11 cases**. Two further structures were confirmed against SEC
-filings. Filing-based verification is bounded by disclosure lag rather than by method:
-public N-PORT is ~110 days stale and every series in the census expires after the most
-recent available report.
+## Run it
+
+Python 3.11+. Every input is free: no WRDS, no OptionMetrics, no vendor feed, no account.
+
+```bash
+uv venv && uv pip install -e '.[dev]'
+.venv/bin/pytest                                     # 283 tests
+
+# the OCC FLEX report, equity and index classes
+.venv/bin/python scripts/backfill_occ_flex.py --start 2025-07-23 --end 2026-08-17
+
+# the regression table above
+.venv/bin/python scripts/run_predictive.py --start 2025-09-09 --end 2026-08-17
+
+# the figures in this README
+.venv/bin/python scripts/make_readme_figures.py
+```
+
+Every downloaded report is checked against the per-class totals it carries and stored
+under its own activity date, not the date it was fetched. OCC publishes overnight, so a
+capture taken during a session returns the previous settlement; partitioning by fetch
+date would enter one settlement twice as two suspiciously stable days.
+`run_predictive.py` joins the panel to daily bars for the underlyings
+(`data/flex_underlying_bars.parquet`, fetched with `absorb.collect.bars.fetch_bars`).
 
 ## Layout
 
 ```
-src/absorb/collect/     OCC, chains, holdings, bars, N-PORT collectors
-src/absorb/measure/     flex classifier, leg grouping, gamma gap, snapshots
-scripts/reproduce.sh    rebuilds every number in the paper
-paper/                  LaTeX source and figures
-docs/                   census, results, corrections as they happened
+src/absorb/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
+src/absorb/measure/flex_panel.py    panel assembly and inventory measures
+src/absorb/measure/structures.py    leg grouping and valuation on the underlying
+src/absorb/collect/                 chains, holdings, bars and N-PORT collectors
+scripts/                            backfill, regressions, figures
+docs/                               results and corrections, as they happened
 ```
 
-## Data policy
-
-Every input is free and public — no WRDS, no OptionMetrics, no vendor feed.
-
-## Scheduled capture
-
-The primary collector is a `daily-capture` GitHub Actions workflow that runs at
-23:30 UTC Mon–Fri in a separate private repository. It checks out this code and
-stores each day as a `.tar.zst` asset on a monthly release tag (`data-YYYY-MM`)
-there. The raw snapshots are vendor-sourced and are not redistributed, so this
-public repository contains code, paper and derived results only. The workflow
-refuses to publish if fewer than 80% of symbols were captured.
-
-To rebuild the panel yourself, run the collector (`absorb-collect --root data/raw`)
-on your own schedule. With access to the private store, retrieve captures with:
-
-```bash
-scripts/fetch_captures.sh            # all months
-scripts/fetch_captures.sh 2026-08    # one month
-```
-
-A local launchd job is available as an optional second, independent capture:
-
-```bash
-scripts/install_launchd.sh           # install or reinstall
-scripts/install_launchd.sh --uninstall
-```
-
-Do not render the plist template in place — the installer writes a temporary copy so
-that no machine-specific path enters version control.
-
-Two operational notes. Scheduled workflows are disabled after 60 days of repository
-inactivity, so check the schedule is still enabled after any quiet period. And the
-local job accumulates roughly 18 MB per trading day on disk; prune `data/raw` once
-the corresponding release assets are confirmed.
+The earlier strike-heuristic census is rebuilt by `scripts/reproduce.sh`. Raw snapshots
+from the collectors are vendor-sourced and not redistributed here; the scheduled capture
+is described in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 
 ## License
 
-MIT for the code. Any preprint is released separately under CC BY 4.0.
+MIT for the code.

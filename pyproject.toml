@@ -1,7 +1,7 @@
 [project]
 name = "absorb"
 version = "0.1.0"
-description = "Absorption dynamics of disclosed, calendar-scheduled option flows"
+description = "FLEX options from OCC clearing data: panel assembly and predictive tests"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

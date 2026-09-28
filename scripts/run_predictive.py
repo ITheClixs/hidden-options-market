@@ -39,8 +39,13 @@ from absorb.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
 from absorb.measure.panel import fit  # noqa: E402
 
 
-def build(root: Path, min_history: int = 40) -> pd.DataFrame:
-    inventory = daily_inventory(load_panel(root))
+def build(
+    root: Path, min_history: int = 40, start: str | None = None, end: str | None = None
+) -> pd.DataFrame:
+    panel = load_panel(root)
+    if start or end:
+        panel = panel[panel["report_date"].between(start or "1900-01-01", end or "2100-01-01")]
+    inventory = daily_inventory(panel)
 
     bars = pd.read_parquet("data/flex_underlying_bars.parquet")
     bars["date"] = pd.to_datetime(bars["timestamp"]).dt.tz_localize(None).dt.normalize()
@@ -113,9 +118,11 @@ def report(panel: pd.DataFrame, outcome: str, predictors: list[str], label: str)
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("data/raw"))
+    parser.add_argument("--start", help="first FLEX activity date to load (YYYY-MM-DD)")
+    parser.add_argument("--end", help="last FLEX activity date to load (YYYY-MM-DD)")
     args = parser.parse_args(argv)
 
-    panel = build(args.root)
+    panel = build(args.root, start=args.start, end=args.end)
     print(
         f"panel {len(panel):,} underlying-days | {panel.symbol.nunique()} underlyings | "
         f"{panel.date.nunique()} dates | {panel.date.min().date()} to {panel.date.max().date()}\n"

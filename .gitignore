@@ -26,3 +26,6 @@ scratch/
 .idea/
 .vscode/
 logs/
+
+# Compiled paper (not published from this repository)
+paper/*.pdf
