@@ -25,7 +25,9 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-UA = {"User-Agent": "absorb-research"}
+from absorb.config import USER_AGENT  # noqa: E402
+
+UA = {"User-Agent": USER_AGENT}
 FTS = "https://efts.sec.gov/LATEST/search-index?q={q}&forms=NPORT-P"
 DOC = "https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/primary_doc.xml"
 

@@ -27,8 +27,11 @@ CBOE_CHAIN_URL = "https://cdn.cboe.com/api/global/delayed_quotes/options/{symbol
 # OCC series search returns authoritative per-series open interest for one underlying.
 OCC_SERIES_URL = "https://marketdata.theocc.com/series-search"
 
+# SEC EDGAR asks automated clients to declare a contact address. Set ABSORB_USER_AGENT
+# to include one before running the N-PORT collectors.
 _DEFAULT_USER_AGENT = (
-    "absorb-research/0.1 (academic study of disclosed option flows)"
+    "absorb-research/0.1 (academic study of FLEX option data; "
+    "+https://github.com/ITheClixs/known-flow-alpha)"
 )
 USER_AGENT = os.environ.get("ABSORB_USER_AGENT", _DEFAULT_USER_AGENT)
 
