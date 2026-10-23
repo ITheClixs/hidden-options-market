@@ -17,6 +17,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+from pandas._libs.tslibs.nattype import NaTType
 
 from hidden_options.measure.flex_panel import NEAR_DATED_DAYS
 
@@ -27,12 +28,17 @@ MARKET_DAILY_COLUMNS = ("report_date", "open_interest", "mark_value", "series", 
 COMPOSITION_KEYS = ("series", "underlyings", "top10_share", "within60d_share", "call_share")
 CYCLE_COLUMNS = ("start", "end", "dates", "open_interest")
 DROP_COLUMNS = ("report_date", "previous_date", "change", "pct_change", "on_expiry", "expiry")
+MATURITY_COLUMNS = ("over_one_year_share", "over_two_years_share", "median_days")
 
 TOP_UNDERLYINGS = 10
 # A break needs this many activity dates on each side, about two months, so a fit cannot
 # hang its break on the first or last few expiry cycles.
 BREAK_MIN_SIDE = 40
 TOP_DROPS = 10
+ONE_YEAR_DAYS = 365
+TWO_YEARS_DAYS = 730
+# The remaining-maturity map shows this many calendar months, then one row for the rest.
+MATURITY_HORIZON_MONTHS = 24
 # A holiday moves an expiry back a day; a third Friday further than this from the last
 # activity date before it means the panel has a gap there, not a holiday.
 _MAX_EXPIRY_SHIFT_DAYS = 3
@@ -206,6 +212,63 @@ def expiry_cohorts(panel: pd.DataFrame, freq: str = "MS") -> pd.DataFrame:
     return cohorts
 
 
+def maturity_profile(
+    cohorts: pd.DataFrame, horizon_months: int = MATURITY_HORIZON_MONTHS
+) -> pd.DataFrame:
+    """Each activity date's open interest by calendar months until its expiry month.
+
+    Takes `expiry_cohorts` by month. Row 0 is the month of the activity date itself, row
+    1 the next month, and the last row, `horizon_months`, gathers every expiry that far
+    ahead or further, so nothing is cut. Values are shares of the date's open interest,
+    so each column sums to one. Counting calendar months rather than days keeps one
+    monthly cohort in one row, where fixed-width day bins would split or skip them.
+    """
+    long = cohorts.melt(ignore_index=False, value_name="open_interest").reset_index()
+    expiry, day = long["expiry"].dt, long["report_date"].dt
+    ahead = (expiry.year - day.year) * 12 + (expiry.month - day.month)
+    table = (
+        long.assign(months_ahead=ahead.clip(lower=0, upper=horizon_months))
+        .groupby(["months_ahead", "report_date"])["open_interest"]
+        .sum()
+        .unstack("report_date", fill_value=0)
+        .reindex(range(horizon_months + 1), fill_value=0)
+    )
+    table.index.name = "months_ahead"
+    return table / table.sum(axis=0)
+
+
+def maturity_by_date(panel: pd.DataFrame) -> pd.DataFrame:
+    """`MATURITY_COLUMNS` for every activity date, indexed by date.
+
+    The two shares count open interest with more than a year (365 days) and more than two
+    years (730 days) to expiry. `median_days` is the open-interest-weighted median days to
+    expiry: the fewest days by which half of that date's open interest has expired.
+    """
+    frame = pd.DataFrame(
+        {
+            "report_date": panel["report_date"],
+            "days": (panel["expiry"] - panel["report_date"]).dt.days,
+            "open_interest": panel["open_interest"],
+        }
+    )
+    by_day = frame.groupby(["report_date", "days"], sort=True)["open_interest"].sum().reset_index()
+    dates = by_day.groupby("report_date", sort=True)["open_interest"]
+    total = dates.transform("sum")
+    reached = by_day[dates.cumsum() >= total / 2]
+    median = reached.groupby("report_date")["days"].first()
+
+    oi = by_day["open_interest"]
+    totals = dates.sum()
+    shares = {
+        name: oi.where(by_day["days"] > limit, 0).groupby(by_day["report_date"]).sum() / totals
+        for name, limit in (
+            ("over_one_year_share", ONE_YEAR_DAYS),
+            ("over_two_years_share", TWO_YEARS_DAYS),
+        )
+    }
+    return pd.DataFrame({**shares, "median_days": median})[list(MATURITY_COLUMNS)]
+
+
 def monthly_expiries(calendar: pd.DatetimeIndex) -> pd.DatetimeIndex:
     """The standard monthly expiry of each month the activity calendar covers.
 
@@ -249,12 +312,25 @@ def largest_drops(
     table = table[table["change"] < 0].nsmallest(n, "pct_change").reset_index(drop=True)
     marks = pd.DatetimeIndex(expiries)
     landed = [
-        marks[(marks >= previous) & (marks <= day)]
+        _expiry_in_span(marks, previous, day)
         for previous, day in zip(table["previous_date"], table["report_date"], strict=True)
     ]
-    table["expiry"] = pd.DatetimeIndex([hit[0] if len(hit) else pd.NaT for hit in landed])
+    table["expiry"] = pd.DatetimeIndex(landed)
     table["on_expiry"] = table["expiry"].notna()
     return table[list(DROP_COLUMNS)]
+
+
+def expiry_window_changes(daily: pd.DataFrame, expiries: pd.DatetimeIndex) -> tuple[int, int]:
+    """How many day-to-day changes span a monthly expiry, and how many changes there are.
+
+    "Span" is the rule `largest_drops` uses, so the ratio is the base rate against which
+    the share of large falls landing on an expiry should be read.
+    """
+    dates = pd.DatetimeIndex(daily["report_date"]).sort_values()
+    marks = pd.DatetimeIndex(expiries)
+    spans = zip(dates[:-1], dates[1:], strict=True)
+    touching = sum(pd.notna(_expiry_in_span(marks, previous, day)) for previous, day in spans)
+    return int(touching), len(dates) - 1
 
 
 def expiring_decline(panel: pd.DataFrame, start: pd.Timestamp, end: pd.Timestamp) -> float:
@@ -285,6 +361,14 @@ def expiry_cycles(daily: pd.DataFrame, expiries: pd.DatetimeIndex) -> pd.DataFra
             }
         )
     return pd.DataFrame(rows, columns=list(CYCLE_COLUMNS))
+
+
+def _expiry_in_span(
+    marks: pd.DatetimeIndex, previous: pd.Timestamp, day: pd.Timestamp
+) -> pd.Timestamp | NaTType:
+    """The first expiry between `previous` and `day`, inclusive, else NaT."""
+    hits = marks[(marks >= previous) & (marks <= day)]
+    return hits[0] if len(hits) else pd.NaT
 
 
 def _hinge_fit(years: np.ndarray, log_level: np.ndarray, kink: float) -> tuple[float, np.ndarray]:

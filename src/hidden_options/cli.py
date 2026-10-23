@@ -227,7 +227,7 @@ def _results(args: argparse.Namespace) -> int:
 
 def _figures(args: argparse.Namespace) -> int:
     """Run registered figure builders. Exit 2 for an unknown name."""
-    registry.load_registrations()
+    registry.load_figure_registrations()
     if args.only is None and not registry.FIGURES.select():
         print("No figure builders are registered; nothing to do.")
         return 0

@@ -9,6 +9,7 @@ produce invalid or colliding LaTeX, and an edited output is always reported as d
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -468,6 +469,29 @@ class TestDrift:
         """The check CI runs, on this very repository."""
         assert check_drift(PROJECT_ROOT) == []
 
+    def test_check_and_results_need_no_matplotlib(self):
+        """Publishing reads results/ alone, so a checkout without matplotlib can check it.
+
+        A fresh interpreter has matplotlib blocked (a `None` entry in `sys.modules` makes
+        any import of it fail), then loads every analysis and table registration and runs
+        the drift check. A figure module leaking into those registrations fails here.
+        """
+        script = (
+            "import sys\n"
+            "sys.modules['matplotlib'] = None\n"
+            "from hidden_options.config import PROJECT_ROOT\n"
+            "from hidden_options.publish import check_drift, registry\n"
+            "registry.load_registrations()\n"
+            "assert 'matplotlib' not in [m.split('.')[0] for m in sys.modules if sys.modules[m]]\n"
+            "print(check_drift(PROJECT_ROOT), sorted(registry.ANALYSES.select()))\n"
+        )
+        run = subprocess.run(
+            [sys.executable, "-c", script], capture_output=True, text=True, check=False
+        )
+
+        assert run.returncode == 0, run.stderr
+        assert run.stdout.strip() == "[] ['market']"
+
 
 class TestRegistry:
     def test_decorator_registers_and_returns_the_function(self):
@@ -523,6 +547,24 @@ class TestRegistry:
 
         assert list(registry.ANALYSES.select()) == ["fake"]
 
+    def test_figure_modules_load_apart_from_the_registration_modules(self, tmp_path, monkeypatch):
+        (tmp_path / "fake_figure.py").write_text(
+            "from hidden_options.publish import registry\n"
+            "registry.FIGURES.register('fake')(lambda: None)\n"
+        )
+        monkeypatch.syspath_prepend(str(tmp_path))
+        monkeypatch.setattr(registry, "FIGURES", registry.Registry("figure builder"))
+        monkeypatch.setattr(registry, "REGISTRATION_MODULES", ())
+        monkeypatch.setattr(registry, "FIGURE_MODULES", ("fake_figure",))
+        sys.modules.pop("fake_figure", None)
+
+        registry.load_registrations()
+        assert list(registry.FIGURES.select()) == []
+
+        registry.load_figure_registrations()
+        assert list(registry.FIGURES.select()) == ["fake"]
+        sys.modules.pop("fake_figure", None)
+
     def test_select_one_and_unknown(self):
         analyses = registry.Registry("analysis")
         analyses.register("a")(lambda: make_result("a"))
@@ -541,6 +583,7 @@ def empty_registries(monkeypatch):
     for attr, kind in (("ANALYSES", "analysis"), ("FIGURES", "figure"), ("TABLES", "table")):
         monkeypatch.setattr(registry, attr, registry.Registry(kind))
     monkeypatch.setattr(registry, "REGISTRATION_MODULES", ())
+    monkeypatch.setattr(registry, "FIGURE_MODULES", ())
 
 
 class TestCli:

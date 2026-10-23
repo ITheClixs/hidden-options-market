@@ -16,6 +16,11 @@ new analysis is wired in by listing its module in REGISTRATION_MODULES and nothi
 else. Registration modules are named explicitly rather than discovered, so what the
 paper depends on can be read off one tuple.
 
+Figure modules have a list of their own, FIGURE_MODULES, which only the `figures`
+command loads. Drawing needs matplotlib and publishing does not: `publish`, `check` and
+`results` read and write results and text, and must run on a checkout without the
+plotting extra. A module in REGISTRATION_MODULES must therefore not import matplotlib.
+
 A table name becomes `paper/tables/<name>.tex`, so TABLES accepts only the characters a
 result name may use: letters, digits, `_` and `-`.
 """
@@ -36,12 +41,12 @@ AnalysisFn = Callable[[], Result]
 FigureFn = Callable[[], None]
 TableFn = Callable[[Mapping[str, Result]], str]
 
-# Modules whose import registers analyses, figures and tables. Each analysis task adds
-# its module here.
-REGISTRATION_MODULES: tuple[str, ...] = (
-    "hidden_options.measure.market_result",
-    "hidden_options.figures.market",
-)
+# Modules whose import registers analyses and tables. Each analysis task adds its module
+# here. None of them may import matplotlib.
+REGISTRATION_MODULES: tuple[str, ...] = ("hidden_options.measure.market_result",)
+
+# Modules whose import registers figure builders, loaded only to draw figures.
+FIGURE_MODULES: tuple[str, ...] = ("hidden_options.figures.market",)
 
 
 class Registry(Generic[T]):  # noqa: UP046 - PEP 695 syntax needs Python 3.12
@@ -87,8 +92,14 @@ TABLES: Registry[TableFn] = Registry("table", name_pattern=NAME_PATTERN)
 
 
 def load_registrations() -> None:
-    """Import every registration module so its decorators run."""
+    """Import every analysis and table registration module so its decorators run."""
     for module in REGISTRATION_MODULES:
+        importlib.import_module(module)
+
+
+def load_figure_registrations() -> None:
+    """Import every figure module so its builders register. Needs matplotlib."""
+    for module in FIGURE_MODULES:
         importlib.import_module(module)
 
 

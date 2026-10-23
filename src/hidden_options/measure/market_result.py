@@ -8,15 +8,19 @@ whole is computed here from every report on disk. Three kinds of number come out
   the turn, the same fit on the cycle's troughs alone and on its peaks alone says how far
   the date moves with the sawtooth, and averages over complete expiry cycles give the
   level before the turn and the level now.
-* The sawtooth itself: whether the largest one-day falls land on monthly expiries, and
-  how much of each the expiring cohort accounts for.
+* The sawtooth itself: whether the largest one-day falls land on monthly expiries, how
+  often a day-to-day change touches one at all, and how much of each fall the expiring
+  cohort accounts for.
+* Maturity: how much of the book is near expiry, and how much is more than one or two
+  years out, on the end dates and over every date.
+
+`market_macros` turns these values into the strings the paper and README print.
 """
 
 from __future__ import annotations
 
 import math
 import re
-from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
@@ -25,17 +29,23 @@ import pandas as pd
 from hidden_options.config import RAW_DIR
 from hidden_options.measure.flex_panel import load_panel
 from hidden_options.measure.market import (
+    MATURITY_HORIZON_MONTHS,
     TOP_DROPS,
     composition_by_date,
     cumulative_share,
     expiring_decline,
+    expiry_cohorts,
     expiry_cycles,
+    expiry_window_changes,
     fit_growth,
     largest_drops,
     largest_underlyings,
     market_daily,
+    maturity_by_date,
+    maturity_profile,
     monthly_expiries,
 )
+from hidden_options.measure.market_macros import market_macros
 from hidden_options.publish import formats
 from hidden_options.publish.registry import ANALYSES
 from hidden_options.publish.results import Result, now_iso
@@ -71,6 +81,7 @@ def market_result(panel: pd.DataFrame) -> Result:
         "cycles": cycles,
         "drops": _drops(panel, daily, expiries),
         "concentration": _concentration(panel, last),
+        "maturity": _maturity(panel),
         "expiries": [formats.iso_date(day) for day in expiries],
     }
     inputs = {
@@ -81,7 +92,7 @@ def market_result(panel: pd.DataFrame) -> Result:
         "dates": len(calendar),
         "rows": len(panel),
     }
-    return Result(NAME, values, _macros(values), inputs, now_iso())
+    return Result(NAME, values, market_macros(values), inputs, now_iso())
 
 
 @ANALYSES.register(NAME)
@@ -179,6 +190,13 @@ def _cycles(
     latest = cycles.iloc[-1]
     quarter_ago = cycles.iloc[-1 - QUARTER_CYCLES]
     flat_level = float(flat["open_interest"].mean())
+    flat_high = float(flat["open_interest"].max())
+    # The fitted break is a date; the cycles say when the level actually left its band.
+    risen = cycles[(cycles["end"] >= break_date) & (cycles["open_interest"] > flat_high)]
+    if risen.empty:
+        raise ValueError("No cycle after the break averages above the pre-break band")
+    # The cycles are numbered from 0 in order, so the one before is one row up.
+    band_end = pd.Timestamp(cycles["end"].iloc[int(risen.index[0]) - 1])
     return {
         "table": [
             {
@@ -191,8 +209,9 @@ def _cycles(
         ],
         "flat_cycles": len(flat),
         "flat_low": float(flat["open_interest"].min()),
-        "flat_high": float(flat["open_interest"].max()),
+        "flat_high": flat_high,
         "flat_level": flat_level,
+        "flat_band_end": formats.iso_date(band_end),
         "latest_end": formats.iso_date(latest["end"]),
         "latest_level": float(latest["open_interest"]),
         "multiple": float(latest["open_interest"]) / flat_level,
@@ -220,9 +239,15 @@ def _drops(panel: pd.DataFrame, daily: pd.DataFrame, expiries: pd.DatetimeIndex)
         )
     ratios = [float(drop["expiring_ratio"]) for drop in largest]
     falls = [-float(drop["pct_change"]) for drop in largest]
+    touching, changes = expiry_window_changes(daily, expiries)
     return {
         "largest": largest,
         "on_expiry": sum(drop["on_expiry"] for drop in largest),
+        "on_expiry_date": sum(drop["date"] == drop["expiry"] for drop in largest),
+        "day_after_expiry": sum(drop["previous_date"] == drop["expiry"] for drop in largest),
+        "window_changes": touching,
+        "changes": changes,
+        "window_share": touching / changes,
         "distinct_expiries": len({drop["expiry"] for drop in largest if drop["on_expiry"]}),
         "fall_low": min(falls),
         "fall_high": max(falls),
@@ -246,82 +271,25 @@ def _concentration(panel: pd.DataFrame, on: pd.Timestamp) -> dict[str, Any]:
     }
 
 
-def _macros(values: Mapping[str, Any]) -> dict[str, str]:
-    return {**_panel_macros(values), **_growth_macros(values), **_cycle_macros(values)}
-
-
-def _panel_macros(values: Mapping[str, Any]) -> dict[str, str]:
-    panel, start, end = values["panel"], values["start"], values["end"]
-    within = values["shares_over_panel"]["within60d_share"]
-    tops = values["concentration"]["top_shares"]
+def _maturity(panel: pd.DataFrame) -> dict[str, Any]:
+    """Near-dated and long-dated open interest, on the end dates and over every date."""
+    by_date = maturity_by_date(panel)
+    beyond = maturity_profile(expiry_cohorts(panel)).iloc[-1]
     return {
-        "PanelDates": formats.count(panel["dates"]),
-        "PanelUnderlyings": formats.count(panel["underlyings"]),
-        "PanelSeriesDays": formats.count(panel["series_days"]),
-        "PanelSeriesDaysMillions": formats.millions(panel["series_days"]),
-        "PanelStart": formats.long_date(pd.Timestamp(panel["first_date"])),
-        "PanelEnd": formats.long_date(pd.Timestamp(panel["last_date"])),
-        "PanelMonths": formats.count(panel["months"]),
-        "PanelMissingWeekdays": formats.count(len(panel["missing_weekdays"])),
-        "OIStart": formats.millions(start["open_interest"]),
-        "OIEnd": formats.millions(end["open_interest"]),
-        "ValueStart": formats.usd_billions(start["mark_value"]),
-        "ValueEnd": formats.usd_billions(end["mark_value"]),
-        "SeriesStart": formats.count(start["series"]),
-        "SeriesEnd": formats.count(end["series"]),
-        "UnderlyingsStart": formats.count(start["underlyings"]),
-        "UnderlyingsEnd": formats.count(end["underlyings"]),
-        "TopTenShareStart": formats.percent(start["top10_share"]),
-        "TopTenShare": formats.percent(end["top10_share"]),
-        "WithinSixtyShareStart": formats.percent(start["within60d_share"]),
-        "WithinSixtyShare": formats.percent(end["within60d_share"]),
-        "CallShareStart": formats.percent(start["call_share"]),
-        "CallShare": formats.percent(end["call_share"]),
-        "WithinSixtyMean": formats.percent(within["mean"]),
-        "WithinSixtyLow": formats.percent(within["min"]),
-        "WithinSixtyHigh": formats.percent(within["max"]),
-        "TopTwentyFiveShare": formats.percent(tops["25"]),
-        "TopHundredShare": formats.percent(tops["100"]),
-        "TopFiveUnderlyings": _name_list(values["concentration"]["largest"]),
+        "horizon_months": MATURITY_HORIZON_MONTHS,
+        "over_one_year": _ends(by_date["over_one_year_share"]),
+        "over_two_years": _ends(by_date["over_two_years_share"]),
+        "median_days": _ends(by_date["median_days"]),
+        "beyond_horizon": _ends(beyond),
     }
 
 
-def _growth_macros(values: Mapping[str, Any]) -> dict[str, str]:
-    growth, peak = values["growth"], values["peak"]
-    breaks = pd.Timestamp(growth["break_date"])
+def _ends(series: pd.Series) -> dict[str, float]:
+    """First and last value of a by-date series, with its mean, low and high."""
     return {
-        "OIPeak": formats.millions(peak["open_interest"]),
-        "OIPeakDate": formats.long_date(pd.Timestamp(peak["date"])),
-        "BreakDate": formats.long_date(breaks),
-        "BreakMonth": formats.month_year(breaks),
-        "BreakShiftDays": formats.count(growth["break_shift_days"]),
-        "PreBreakGrowth": formats.signed_percent(growth["pre_growth"], digits=0),
-        "PostBreakGrowth": formats.signed_percent(growth["post_growth"], digits=0),
-        "PostBreakGrowthQuarter": formats.signed_percent(growth["post_growth_quarter"], digits=0),
+        "start": float(series.iloc[0]),
+        "end": float(series.iloc[-1]),
+        "mean": float(series.mean()),
+        "min": float(series.min()),
+        "max": float(series.max()),
     }
-
-
-def _cycle_macros(values: Mapping[str, Any]) -> dict[str, str]:
-    cycles, drops = values["cycles"], values["drops"]
-    return {
-        "OIFlatLow": formats.millions(cycles["flat_low"]),
-        "OIFlatHigh": formats.millions(cycles["flat_high"]),
-        "OIFlatLevel": formats.millions(cycles["flat_level"]),
-        "OICycleLatest": formats.millions(cycles["latest_level"]),
-        "OICycleLatestEnd": formats.long_date(pd.Timestamp(cycles["latest_end"])),
-        "GrowthMultiple": formats.decimal(cycles["multiple"]),
-        "OIQuarterChange": formats.signed_percent(cycles["quarter_change"]),
-        "DropsOnExpiry": formats.count(drops["on_expiry"]),
-        "DropExpiries": formats.count(drops["distinct_expiries"]),
-        "DropLow": formats.percent(drops["fall_low"], digits=1),
-        "DropHigh": formats.percent(drops["fall_high"], digits=1),
-        "ExpiringRatioLow": formats.decimal(drops["expiring_ratio_low"]),
-        "ExpiringRatioHigh": formats.decimal(drops["expiring_ratio_high"]),
-    }
-
-
-def _name_list(names: list[str]) -> str:
-    """`SPY, SPX, NVDA, EWZ and EFA`."""
-    if len(names) < 2:
-        return "".join(names)
-    return f"{', '.join(names[:-1])} and {names[-1]}"

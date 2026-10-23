@@ -1,4 +1,4 @@
-"""Figures for the market section: growth (F1), expiry cohorts (F2) and concentration.
+"""Figures for the market section: growth (F1), remaining maturity (F2), concentration.
 
 The drawing functions take data and return a figure; the registered builders load the
 panel, read the `market` result for every number a figure prints, and save. A builder
@@ -16,7 +16,7 @@ from typing import Any
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
-from matplotlib.colors import LogNorm
+from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter, MaxNLocator, NullFormatter
 
@@ -27,15 +27,12 @@ from hidden_options.measure.market import (
     cumulative_share,
     expiry_cohorts,
     market_daily,
+    maturity_profile,
 )
 from hidden_options.publish.registry import FIGURES
 from hidden_options.publish.results import RESULTS_DIR, read_results
 
 RESULT = "market"
-# Expiries further out than this from the last report are left off the cohort map.
-COHORT_HORIZON_MONTHS = 24
-# The lowest open interest the cohort map's colour scale resolves, in million contracts.
-COHORT_FLOOR_M = 0.01
 
 
 def fig_growth(daily: pd.DataFrame, break_date: pd.Timestamp, expiries: pd.DatetimeIndex) -> Figure:
@@ -79,40 +76,41 @@ def fig_growth(daily: pd.DataFrame, break_date: pd.Timestamp, expiries: pd.Datet
     return fig
 
 
-def fig_cohorts(cohorts: pd.DataFrame, horizon_months: int = COHORT_HORIZON_MONTHS) -> Figure:
-    """F2: open interest by expiry month (rows) and activity date (columns).
+def fig_maturity(profile: pd.DataFrame) -> Figure:
+    """F2: each activity date's open interest by calendar months to its expiry month.
 
-    Each row is one month's expiries over its life: it fills as the month approaches and
-    empties when it expires, at the diagonal. The colour scale is logarithmic so the
-    long-dated rows stay visible beside the front month.
+    Rows count months ahead, 0 being the activity date's own month. The top row gathers
+    every expiry beyond the horizon, so the long-dated tail is shown rather than cut off.
+    Colour is the share of the date's open interest on a linear scale, so a row looks as
+    heavy as it is and a thinly held far month stays pale.
     """
-    report_dates = pd.DatetimeIndex(cohorts.columns)
-    limit = (report_dates[-1] + pd.DateOffset(months=horizon_months)).to_period("M")
-    months = pd.date_range(cohorts.index.min(), limit.start_time, freq="MS")
-    shown = cohorts.reindex(months, fill_value=0) / 1e6
-    grid = np.ma.masked_less_equal(shown.to_numpy(dtype=float), 0.0)
+    report_dates = pd.DatetimeIndex(profile.columns)
+    rows = len(profile)
+    horizon = rows - 1
+    shares = profile.to_numpy(dtype=float) * 100
 
-    row_edges = pd.DatetimeIndex([*months, months[-1] + pd.offsets.MonthBegin()])
-
-    fig = new_figure(1.0, aspect=0.56)
+    fig = new_figure(1.0, aspect=0.5)
     ax = fig.subplots()
     mesh = ax.pcolormesh(
         _edges(_date_numbers(report_dates)),
-        _date_numbers(row_edges),
-        grid,
+        np.arange(rows + 1) - 0.5,
+        shares,
         cmap=seq_cmap(),
-        norm=LogNorm(vmin=COHORT_FLOOR_M, vmax=float(grid.max()), clip=True),
+        norm=Normalize(vmin=0.0, vmax=float(shares.max())),
         shading="flat",
         rasterized=True,
     )
     ax.xaxis_date()
-    ax.yaxis_date()
+    # A rule in the page colour sets the gathered row apart from the single months.
+    ax.axhline(horizon - 0.5, color=PALETTE["surface"], linewidth=1.5)
+    ticks = [*range(0, horizon, 6), horizon]
+    ax.set_yticks(ticks, [*(str(tick) for tick in ticks[:-1]), f"{horizon}+"])
+    ax.set_ylim(-0.5, horizon + 0.5)
     ax.set_xlabel("Activity date")
-    ax.set_ylabel("Expiry month")
+    ax.set_ylabel("Months to expiry month")
     bar = fig.colorbar(mesh, ax=ax, pad=0.02, fraction=0.04)
-    bar.set_label("Open interest, million contracts")
+    bar.set_label("Share of the date's open interest, %")
     bar.outline.set_visible(False)
-    _plain_log_ticks(bar.ax.yaxis)
     return fig
 
 
@@ -161,16 +159,17 @@ def build_growth(
     save(fig, "growth", paper=True, readme=True, root=root)
 
 
-@FIGURES.register("cohorts")
-def build_cohorts(
+@FIGURES.register("maturity")
+def build_maturity(
     raw: Path = RAW_DIR, results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT
 ) -> None:
-    """F2."""
+    """F2, at the horizon the result's tail shares were computed with."""
     values = _market_values(results)
     panel = cached_panel(raw)
     _checked_daily(panel, values)
+    profile = maturity_profile(expiry_cohorts(panel), int(values["maturity"]["horizon_months"]))
     apply_style()
-    save(fig_cohorts(expiry_cohorts(panel)), "cohorts", root=root)
+    save(fig_maturity(profile), "maturity", root=root)
 
 
 @FIGURES.register("concentration")

@@ -6,17 +6,20 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from hidden_options.measure import market, market_result
+from hidden_options.measure import market, market_macros, market_result
 from hidden_options.measure.market import (
     composition,
     composition_by_date,
     expiring_decline,
     expiry_cohorts,
     expiry_cycles,
+    expiry_window_changes,
     fit_growth,
     growth_break,
     largest_drops,
     market_daily,
+    maturity_by_date,
+    maturity_profile,
     monthly_expiries,
 )
 from hidden_options.publish.latex import collect_macros
@@ -275,6 +278,22 @@ class TestMarketResult:
 
     def test_carries_the_macros_the_paper_uses(self, result):
         for name in (
+            "OverOneYear",
+            "OverOneYearStart",
+            "OverTwoYears",
+            "OverTwoYearsStart",
+            "MedianDaysMean",
+            "MedianDaysLow",
+            "MedianDaysHigh",
+            "BeyondHorizonShare",
+            "BeyondHorizonMean",
+            "MapHorizonMonths",
+            "ExpiryWindowShare",
+            "ExpiryWindowChanges",
+            "DailyChanges",
+            "DropsOnExpiryDate",
+            "DropsDayAfter",
+            "FlatBandEnd",
             "PanelDates",
             "PanelUnderlyings",
             "PanelSeriesDays",
@@ -310,6 +329,10 @@ class TestMarketResult:
         named = {d["expiry"] for d in drops["largest"] if d["expiry"] is not None}
         assert drops["distinct_expiries"] == len(named)
         assert result.macros["DropExpiries"] == str(len(named))
+        # Every fall in the sawtooth market lands on an expiry, and the text says "all".
+        assert result.macros["DropsOnExpiry"] == "all"
+        on_day = drops["on_expiry_date"] + drops["day_after_expiry"]
+        assert on_day == drops["on_expiry"]
 
     def test_values_are_plain_json(self, result, tmp_path):
         from hidden_options.publish.results import read_results, write_result
@@ -381,4 +404,74 @@ class TestRefusals:
         [(["SPY"], "SPY"), (["SPY", "SPX"], "SPY and SPX"), (["A", "B", "C"], "A, B and C")],
     )
     def test_name_list(self, names, text):
-        assert market_result._name_list(names) == text
+        assert market_macros._name_list(names) == text
+
+
+class TestMaturity:
+    def test_profile_rows_are_calendar_months_ahead_with_one_later_row(self):
+        panel = make_panel(
+            [
+                ("2026-08-14", "AAA", "C", "2026-08-21", 100.0, 1.0, 50),  # this month
+                ("2026-08-14", "AAA", "C", "2026-09-04", 100.0, 1.0, 30),  # next month
+                ("2026-08-14", "AAA", "C", "2028-08-18", 100.0, 1.0, 15),  # 24 months on
+                ("2026-08-14", "AAA", "C", "2030-01-18", 100.0, 1.0, 5),
+            ]
+        )
+
+        profile = maturity_profile(expiry_cohorts(panel), horizon_months=24)
+        column = profile[pd.Timestamp("2026-08-14")]
+
+        assert list(profile.index) == list(range(25))
+        assert column[0] == pytest.approx(0.5)
+        assert column[1] == pytest.approx(0.3)
+        # Row 24 gathers every expiry 24 or more calendar months ahead.
+        assert column[24] == pytest.approx(0.2)
+        assert column[2:24].sum() == 0
+
+    def test_profile_columns_are_shares_of_each_date(self):
+        profile = maturity_profile(expiry_cohorts(synthetic_market(end="2025-03-31")))
+
+        assert profile.sum(axis=0).to_numpy() == pytest.approx(1.0)
+
+    def test_long_dated_shares_and_weighted_median(self):
+        panel = make_panel(
+            [
+                ("2026-01-02", "AAA", "C", "2026-01-12", 100.0, 1.0, 40),  # 10 days
+                ("2026-01-02", "AAA", "C", "2027-02-06", 100.0, 1.0, 30),  # 400 days
+                ("2026-01-02", "AAA", "C", "2028-03-12", 100.0, 1.0, 30),  # 800 days
+                ("2026-01-05", "AAA", "C", "2026-01-15", 100.0, 1.0, 60),  # 10 days
+                ("2026-01-05", "AAA", "C", "2027-02-09", 100.0, 1.0, 40),  # 400 days
+            ]
+        )
+
+        frame = maturity_by_date(panel)
+        first, second = frame.iloc[0], frame.iloc[1]
+
+        assert first["over_one_year_share"] == pytest.approx(0.6)
+        assert first["over_two_years_share"] == pytest.approx(0.3)
+        # Half the open interest is reached only at the 400-day line.
+        assert first["median_days"] == 400
+        assert second["median_days"] == 10
+        assert second["over_two_years_share"] == 0
+
+    def test_expiry_window_changes_count_the_spans_that_touch_an_expiry(self):
+        daily = pd.DataFrame(
+            {
+                "report_date": pd.bdate_range("2025-03-03", periods=6),
+                "open_interest": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+            }
+        )
+
+        touching, changes = expiry_window_changes(daily, pd.DatetimeIndex(["2025-03-05"]))
+
+        # 03-04 -> 03-05 and 03-05 -> 03-06 touch the expiry; five changes in all.
+        assert (touching, changes) == (2, 5)
+
+
+def test_a_market_that_never_leaves_its_band_is_refused():
+    daily = pd.DataFrame(
+        {"report_date": pd.bdate_range("2025-01-02", "2025-12-31"), "open_interest": 1e6}
+    )
+    expiries = monthly_expiries(pd.DatetimeIndex(daily["report_date"]))
+    with pytest.raises(ValueError, match="above the pre-break band"):
+        market_result._cycles(daily, expiries, pd.Timestamp("2025-06-02"))
