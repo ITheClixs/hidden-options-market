@@ -257,6 +257,10 @@ def _refresh_bars(args: argparse.Namespace) -> int:
         print(f"  failed   {symbol}: {reason}")
     if summary.dropped:
         print(f"  dropped  {', '.join(summary.dropped)}")
+    for symbol, rows in summary.kept_history.items():
+        print(f"  kept     {symbol}: {rows} held rows from before the fetched window")
+    for symbol, rows in summary.discarded_history.items():
+        print(f"  discarded {symbol}: {rows} held rows from before the fetched window")
     if summary.late_starts:
         since = f"{summary.history_start:%Y-%m-%d}"
         print(f"  starting after {since}: {', '.join(summary.late_starts)}")

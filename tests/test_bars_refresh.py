@@ -259,11 +259,65 @@ class TestRefresh:
                 "AAPL": _bars("AAPL", ["2026-10-22"]),
             },
         )
-        self._refresh(out)
+        summary = self._refresh(out)
 
         aal = pd.read_parquet(out).query("symbol == 'AAL'")
         assert list(aal["timestamp"].dt.strftime("%Y-%m-%d")) == ["2026-08-18", "2026-10-22"]
         assert set(aal["close"]) == {50.0}
+        # The 08-17 row predates the fetched window and is lost, so it is reported.
+        assert dict(summary.discarded_history) == {"AAL": 1}
+        assert dict(summary.kept_history) == {}
+
+    def test_a_stub_keeps_the_held_history_before_it(self, tmp_path, monkeypatch):
+        """A delisted name can come back as one bar. The held history before it cannot be
+        fetched again, and where the overlapping close agrees it is the same series."""
+        out = tmp_path / "bars.parquet"
+        _bars("AAL", ["2026-08-13", "2026-08-14", "2026-08-17"]).to_parquet(out, index=False)
+        stub = _bars("AAL", ["2026-08-17"]).assign(
+            timestamp=pd.Timestamp("2026-08-17 20:00:03", tz="UTC")
+        )
+        FakeYahoo(monkeypatch, {"AAL": stub, "AAPL": _bars("AAPL", ["2026-10-22"])})
+        summary = self._refresh(out)
+
+        aal = pd.read_parquet(out).query("symbol == 'AAL'")
+        assert list(aal["timestamp"].dt.strftime("%Y-%m-%d %H:%M")) == [
+            "2026-08-13 13:30",
+            "2026-08-14 13:30",
+            "2026-08-17 20:00",  # the overlapping session comes from the fetch
+        ]
+        assert dict(summary.kept_history) == {"AAL": 2}
+        assert dict(summary.discarded_history) == {}
+
+    def test_a_small_restatement_still_counts_as_the_same_series(self, tmp_path, monkeypatch):
+        out = tmp_path / "bars.parquet"
+        _bars("AAL", ["2026-08-14", "2026-08-17"], close=100.0).to_parquet(out, index=False)
+        FakeYahoo(
+            monkeypatch,
+            {
+                "AAL": _bars("AAL", ["2026-08-17", "2026-10-22"], close=100.2),
+                "AAPL": _bars("AAPL", ["2026-10-22"]),
+            },
+        )
+        summary = self._refresh(out)
+        assert dict(summary.kept_history) == {"AAL": 1}
+
+    def test_held_history_with_no_overlap_to_check_is_discarded_and_named(
+        self, tmp_path, monkeypatch, caplog
+    ):
+        """Without a shared session there is no way to rule out a split in the gap."""
+        out = tmp_path / "bars.parquet"
+        _bars("AAL", ["2026-08-13", "2026-08-14"]).to_parquet(out, index=False)
+        FakeYahoo(
+            monkeypatch,
+            {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": _bars("AAPL", ["2026-10-22"])},
+        )
+        with caplog.at_level(logging.WARNING):
+            summary = self._refresh(out)
+
+        assert set(pd.read_parquet(out).query("symbol == 'AAL'")["timestamp"].dt.month) == {10}
+        assert dict(summary.discarded_history) == {"AAL": 2}
+        message = " ".join(r.getMessage() for r in caplog.records)
+        assert "AAL" in message and "discarded" in message
 
     def test_a_qualifying_symbol_that_failed_keeps_its_rows(self, tmp_path, monkeypatch):
         out = tmp_path / "bars.parquet"

@@ -67,6 +67,12 @@ MIN_ACTIVITY_DATES = 40
 # room for the holidays and missing bars inside the window.
 HISTORY_SESSIONS = 40
 
+# Held bars before a refreshed symbol's fetched window are kept only if the two agree on
+# every session they share, to within this relative difference in the close. A split moves
+# every close by a third or more; in the October 2026 refresh every shared close agreed
+# exactly.
+SPLICE_TOLERANCE = 0.005
+
 # Daily bars are stamped at the open, so the session a bar belongs to is its New York date.
 _MARKET_TZ = ZoneInfo("America/New_York")
 _SESSION_CLOSE = time(16, 0)
@@ -85,6 +91,11 @@ class BarsRefresh:
     symbols the file held that are no longer in the qualifying set. ``late_starts`` are
     refreshed symbols whose bars begin after ``history_start``, the session the panel's
     first activity date needs: a later listing, or history the provider cut short.
+
+    ``kept_history`` and ``discarded_history`` count, per symbol, the held rows from before
+    the fetched window: kept where the held and fetched bars agree on the sessions they
+    share, discarded (and lost, since the provider no longer serves them) where they do
+    not or share none.
     """
 
     path: Path
@@ -95,13 +106,17 @@ class BarsRefresh:
     history_start: pd.Timestamp
     late_starts: tuple[str, ...]
     rows: int
+    kept_history: Mapping[str, int]
+    discarded_history: Mapping[str, int]
 
     def describe(self) -> str:
         return (
             f"refreshed {len(self.refreshed)} of {len(self.requested)} underlyings "
             f"({self.rows:,} rows) into {self.path}; {len(self.failed)} failed, "
             f"{len(self.dropped)} dropped as outside the qualifying set, "
-            f"{len(self.late_starts)} starting after {self.history_start:%Y-%m-%d}"
+            f"{len(self.late_starts)} starting after {self.history_start:%Y-%m-%d}; "
+            f"earlier held history kept for {len(self.kept_history)}, "
+            f"discarded for {len(self.discarded_history)}"
         )
 
 
@@ -221,8 +236,9 @@ def snapshot_partition(snapshot: BarSnapshot, as_of: datetime | None = None) -> 
 def flex_underlyings(panel: pd.DataFrame, min_dates: int = MIN_ACTIVITY_DATES) -> list[str]:
     """Underlyings of the equity FLEX report seen on at least ``min_dates`` activity dates.
 
-    Index underlyings (SPX, NDX, RUT, ...) are left out: the daily bars come from the
-    equity quote feed, which has no series for them under these symbols.
+    Index underlyings (SPX, NDX, RUT, ...) are left out: bars are fetched by the report's
+    own ticker, and a bare index symbol names another security on the provider, or none
+    (the indices themselves are ^SPX, ^NDX and so on there).
     """
     needed = {"kind", "underlying", "report_date"}
     missing = needed - set(panel.columns)
@@ -327,11 +343,14 @@ def refresh_flex_underlying_bars(
     volatility controls need; a refreshed symbol whose bars start later is named in a
     warning.
 
-    A refreshed symbol's rows are replaced wholesale rather than appended to, because
-    the provider restates history after a split and splicing would leave a jump that is
-    not a return. A qualifying symbol the provider refuses keeps whatever rows it already
-    had; a symbol outside the qualifying set is dropped. The file is replaced atomically,
-    and a refresh that could fetch nothing raises rather than reporting success.
+    A refreshed symbol's rows within the fetched window are replaced, not appended to,
+    because the provider restates history after a split. Held rows from before the window
+    (a delisted name can come back as a single bar) cannot be fetched again, so they are
+    kept when the held and fetched closes agree on every shared session, and otherwise
+    discarded and named: splicing across a split would leave a jump that is not a return.
+    A qualifying symbol the provider refuses keeps whatever rows it already had; a symbol
+    outside the qualifying set is dropped. The file is replaced atomically, and a refresh
+    that could fetch nothing raises rather than reporting success.
     """
     symbols = flex_underlyings(panel)
     if not symbols:
@@ -348,7 +367,15 @@ def refresh_flex_underlying_bars(
 
     qualifying = held["symbol"].isin(symbols)
     kept = held[qualifying & ~held["symbol"].isin(fetched)]
-    merged = pd.concat([kept, *fetched.values()], ignore_index=True)
+    earlier: dict[str, pd.DataFrame] = {}
+    discarded: dict[str, int] = {}
+    for symbol, frame in fetched.items():
+        before, spliced = _history_before(held[held["symbol"] == symbol], frame)
+        if spliced:
+            earlier[symbol] = before
+        elif len(before):
+            discarded[symbol] = len(before)
+    merged = pd.concat([kept, *earlier.values(), *fetched.values()], ignore_index=True)
     merged = _conform(merged).sort_values(["symbol", "timestamp"]).reset_index(drop=True)
     write_frame(merged, out)
 
@@ -361,9 +388,38 @@ def refresh_flex_underlying_bars(
         history_start=needed,
         late_starts=_late_starts(fetched, needed),
         rows=len(merged),
+        kept_history={symbol: len(frame) for symbol, frame in sorted(earlier.items())},
+        discarded_history=dict(sorted(discarded.items())),
     )
     _log_refresh(summary)
     return summary
+
+
+def _sessions(frame: pd.DataFrame) -> pd.Series:
+    stamps = pd.to_datetime(frame["timestamp"], utc=True)
+    sessions: pd.Series = stamps.dt.tz_convert(_MARKET_TZ).dt.date
+    return sessions
+
+
+def _history_before(held: pd.DataFrame, fetched: pd.DataFrame) -> tuple[pd.DataFrame, bool]:
+    """Held rows from before the fetched window, and whether they may be kept.
+
+    They may when the two sets of bars share at least one session and agree on the close
+    of every shared session to within ``SPLICE_TOLERANCE``.
+    """
+    held_sessions, fetched_sessions = _sessions(held), _sessions(fetched)
+    before: pd.DataFrame = held[held_sessions < fetched_sessions.min()]
+    if before.empty:
+        return before, False
+    shared = pd.merge(
+        pd.DataFrame({"session": held_sessions, "held": held["close"].to_numpy()}),
+        pd.DataFrame({"session": fetched_sessions, "fetched": fetched["close"].to_numpy()}),
+        on="session",
+    )
+    if shared.empty:
+        return before, False
+    difference = (shared["fetched"] / shared["held"] - 1).abs()
+    return before, bool(difference.max() <= SPLICE_TOLERANCE)
 
 
 def _late_starts(fetched: Mapping[str, pd.DataFrame], needed: pd.Timestamp) -> tuple[str, ...]:
@@ -384,6 +440,13 @@ def _log_refresh(summary: BarsRefresh) -> None:
             len(summary.failed),
             "; ".join(f"{symbol} ({reason})" for symbol, reason in summary.failed.items()),
         )
+    if summary.discarded_history:
+        logger.warning(
+            "held history discarded for %d underlyings (no shared session, or closes that "
+            "disagree on one): %s",
+            len(summary.discarded_history),
+            "; ".join(f"{s} ({n} rows)" for s, n in summary.discarded_history.items()),
+        )
     if summary.late_starts:
         logger.warning(
             "%d refreshed underlyings have no bars as early as %s: %s",
@@ -399,6 +462,7 @@ __all__ = [
     "HISTORY_SESSIONS",
     "INTERVAL_MAX_RANGE",
     "MIN_ACTIVITY_DATES",
+    "SPLICE_TOLERANCE",
     "BarParseError",
     "BarSnapshot",
     "BarsRefresh",

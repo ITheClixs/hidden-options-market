@@ -263,6 +263,8 @@ def _refresh_summary(out: Path, **overrides: object) -> BarsRefresh:
         "history_start": pd.Timestamp("2024-10-07"),
         "late_starts": ("AAPL",),
         "rows": 1000,
+        "kept_history": {"EA": 450},
+        "discarded_history": {"SATS": 3},
     }
     fields.update(overrides)
     return BarsRefresh(**fields)  # type: ignore[arg-type]
@@ -306,6 +308,8 @@ class TestRefreshBars:
         assert "2 of 3" in printed
         assert "BRKB" in printed and "404" in printed
         assert "NDX" in printed
+        assert "EA" in printed and "450" in printed
+        assert "SATS" in printed and "3" in printed
 
     def test_defaults_to_the_data_directory(self, stub_refresh):
         calls = stub_refresh()
