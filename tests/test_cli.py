@@ -9,11 +9,14 @@ from __future__ import annotations
 
 import json
 from datetime import date
+from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from hidden_options import cli
 from hidden_options.collect.backfill import BackfillSummary
+from hidden_options.collect.bars import BarsRefresh
 from hidden_options.collect.lock import single_instance
 from hidden_options.collect.runner import SymbolOutcome
 
@@ -248,3 +251,78 @@ class TestBackfillFlex:
             code = cli.main(["backfill-flex", "--start", "2026-08-10", "--root", str(tmp_path)])
         assert code == 3
         assert calls == []
+
+
+def _refresh_summary(out: Path, **overrides: object) -> BarsRefresh:
+    fields: dict[str, object] = {
+        "path": out,
+        "requested": ("AAL", "AAPL", "BRKB"),
+        "refreshed": ("AAL", "AAPL"),
+        "failed": {"BRKB": "FetchError: 404 (resource absent)"},
+        "dropped": ("NDX",),
+        "history_start": pd.Timestamp("2024-10-07"),
+        "late_starts": ("AAPL",),
+        "rows": 1000,
+    }
+    fields.update(overrides)
+    return BarsRefresh(**fields)  # type: ignore[arg-type]
+
+
+@pytest.fixture
+def stub_refresh(monkeypatch):
+    """Replace the panel load and the bar refresh, recording how they were called."""
+    calls: dict[str, object] = {}
+
+    def _install(outcome: BarsRefresh | Exception | None = None, *, panel_error=None):
+        def fake_load(root):
+            calls["raw"] = root
+            if panel_error is not None:
+                raise panel_error
+            return "panel"
+
+        def fake_refresh(panel, out, **kwargs):
+            calls["panel"] = panel
+            calls["out"] = out
+            if isinstance(outcome, Exception):
+                raise outcome
+            return outcome or _refresh_summary(out)
+
+        monkeypatch.setattr(cli, "load_panel", fake_load)
+        monkeypatch.setattr(cli, "refresh_flex_underlying_bars", fake_refresh)
+        return calls
+
+    return _install
+
+
+class TestRefreshBars:
+    def test_refreshes_from_the_panel_into_the_bars_file(self, stub_refresh, tmp_path, capsys):
+        calls = stub_refresh()
+        out = tmp_path / "bars.parquet"
+        code = cli.main(["refresh-bars", "--raw", str(tmp_path / "raw"), "--out", str(out)])
+
+        assert code == 0
+        assert calls == {"raw": tmp_path / "raw", "panel": "panel", "out": out}
+        printed = capsys.readouterr().out
+        assert "2 of 3" in printed
+        assert "BRKB" in printed and "404" in printed
+        assert "NDX" in printed
+
+    def test_defaults_to_the_data_directory(self, stub_refresh):
+        calls = stub_refresh()
+        assert cli.main(["refresh-bars"]) == 0
+        assert calls["raw"] == cli.RAW_DIR
+        assert calls["out"] == cli.BARS_PATH
+
+    def test_nothing_refreshed_returns_one(self, stub_refresh, tmp_path, capsys):
+        stub_refresh(RuntimeError("no symbol could be refreshed (3 failed)"))
+        assert cli.main(["refresh-bars", "--out", str(tmp_path / "b.parquet")]) == 1
+        assert "no symbol" in capsys.readouterr().err
+
+    def test_no_panel_returns_two(self, stub_refresh, tmp_path, capsys):
+        stub_refresh(panel_error=FileNotFoundError("no FLEX reports found under raw/occ_flex"))
+        assert cli.main(["refresh-bars", "--out", str(tmp_path / "b.parquet")]) == 2
+        assert "no FLEX reports" in capsys.readouterr().err
+
+    def test_a_bars_file_of_another_shape_returns_two(self, stub_refresh, tmp_path):
+        stub_refresh(ValueError("b.parquet has columns ['px'], expected [...]"))
+        assert cli.main(["refresh-bars", "--out", str(tmp_path / "b.parquet")]) == 2

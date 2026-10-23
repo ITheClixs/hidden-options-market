@@ -20,6 +20,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, time
 from pathlib import Path
@@ -61,6 +62,11 @@ INTERVAL_MAX_RANGE = {
 # worth holding: the panel regressions drop anything with a shorter history anyway.
 MIN_ACTIVITY_DATES = 40
 
+# The longest trailing control averages the twenty-two sessions before an activity date.
+# The bars reach this many sessions before the panel's first date, which covers it with
+# room for the holidays and missing bars inside the window.
+HISTORY_SESSIONS = 40
+
 # Daily bars are stamped at the open, so the session a bar belongs to is its New York date.
 _MARKET_TZ = ZoneInfo("America/New_York")
 _SESSION_CLOSE = time(16, 0)
@@ -69,6 +75,34 @@ _PRICE_COLUMNS = ("open", "high", "low", "close", "volume")
 
 # A full refresh is over a thousand paced requests; say how far along it is.
 _PROGRESS_EVERY = 100
+
+
+@dataclass(frozen=True)
+class BarsRefresh:
+    """What one refresh of the daily bars did, symbol by symbol.
+
+    ``failed`` maps each symbol the provider refused to the reason; ``dropped`` are the
+    symbols the file held that are no longer in the qualifying set. ``late_starts`` are
+    refreshed symbols whose bars begin after ``history_start``, the session the panel's
+    first activity date needs: a later listing, or history the provider cut short.
+    """
+
+    path: Path
+    requested: tuple[str, ...]
+    refreshed: tuple[str, ...]
+    failed: Mapping[str, str]
+    dropped: tuple[str, ...]
+    history_start: pd.Timestamp
+    late_starts: tuple[str, ...]
+    rows: int
+
+    def describe(self) -> str:
+        return (
+            f"refreshed {len(self.refreshed)} of {len(self.requested)} underlyings "
+            f"({self.rows:,} rows) into {self.path}; {len(self.failed)} failed, "
+            f"{len(self.dropped)} dropped as outside the qualifying set, "
+            f"{len(self.late_starts)} starting after {self.history_start:%Y-%m-%d}"
+        )
 
 
 class BarParseError(ValueError):
@@ -200,6 +234,28 @@ def flex_underlyings(panel: pd.DataFrame, min_dates: int = MIN_ACTIVITY_DATES) -
     return sorted(dates[dates >= min_dates].index)
 
 
+def history_start(panel: pd.DataFrame, sessions: int = HISTORY_SESSIONS) -> pd.Timestamp:
+    """The first session the bars must hold: ``sessions`` weekdays before the first date.
+
+    Weekdays stand in for sessions; the holidays among them only make the reach longer.
+    """
+    if panel.empty:
+        raise ValueError("the panel is empty; there is no first activity date to reach back from")
+    first = pd.Timestamp(panel["report_date"].min())
+    start: pd.Timestamp = first - pd.offsets.BDay(sessions)
+    return start
+
+
+def lookback_since(start: pd.Timestamp, now: datetime | None = None) -> str:
+    """A provider range that reaches back to ``start`` from today's New York date.
+
+    Yahoo reads an ``Nd`` range on daily bars as N sessions. Counting calendar days gives
+    the larger number, so the range reaches ``start`` under either reading.
+    """
+    today = (now or datetime.now(UTC)).astimezone(_MARKET_TZ).date()
+    return f"{max((today - start.date()).days, 1)}d"
+
+
 def settled_daily_bars(frame: pd.DataFrame, now: datetime | None = None) -> pd.DataFrame:
     """Drop a daily bar whose session has not closed.
 
@@ -258,23 +314,24 @@ def _conform(frame: pd.DataFrame) -> pd.DataFrame:
 def refresh_flex_underlying_bars(
     panel: pd.DataFrame,
     out: Path,
-    lookback: str = "2y",
+    lookback: str | None = None,
     *,
     session: requests.Session | None = None,
     now: datetime | None = None,
-) -> Path:
+) -> BarsRefresh:
     """Re-download daily bars for every FLEX underlying and write them to ``out``.
 
     ``panel`` is the assembled FLEX panel; the underlyings are those of the equity report
-    with at least ``MIN_ACTIVITY_DATES`` activity dates. The default two-year lookback
-    reaches back past the panel's first date, leaving room for the trailing windows the
-    volatility controls need.
+    with at least ``MIN_ACTIVITY_DATES`` activity dates. By default the lookback reaches
+    ``HISTORY_SESSIONS`` sessions before the panel's first date, the room the trailing
+    volatility controls need; a refreshed symbol whose bars start later is named in a
+    warning.
 
     A refreshed symbol's rows are replaced wholesale rather than appended to, because
     the provider restates history after a split and splicing would leave a jump that is
-    not a return. A symbol the provider refuses keeps whatever rows it already had and is
-    named in the log. The file is replaced atomically, and a refresh that could fetch
-    nothing raises rather than reporting success.
+    not a return. A qualifying symbol the provider refuses keeps whatever rows it already
+    had; a symbol outside the qualifying set is dropped. The file is replaced atomically,
+    and a refresh that could fetch nothing raises rather than reporting success.
     """
     symbols = flex_underlyings(panel)
     if not symbols:
@@ -282,41 +339,73 @@ def refresh_flex_underlying_bars(
             f"no equity underlying has {MIN_ACTIVITY_DATES} activity dates; nothing to refresh"
         )
 
+    needed = history_start(panel)
     held = _held_bars(out)
-    fetched, failed = _fetch_daily(session or build_session(), symbols, lookback, now)
+    window = lookback or lookback_since(needed, now)
+    fetched, failed = _fetch_daily(session or build_session(), symbols, window, now)
     if not fetched:
         raise RuntimeError(f"no symbol could be refreshed ({len(failed)} failed)")
 
-    kept = held[~held["symbol"].isin(fetched)]
+    qualifying = held["symbol"].isin(symbols)
+    kept = held[qualifying & ~held["symbol"].isin(fetched)]
     merged = pd.concat([kept, *fetched.values()], ignore_index=True)
     merged = _conform(merged).sort_values(["symbol", "timestamp"]).reset_index(drop=True)
     write_frame(merged, out)
 
-    logger.info(
-        "refreshed daily bars for %d of %d underlyings (%d rows) in %s",
-        len(fetched),
-        len(symbols),
-        len(merged),
-        out,
+    summary = BarsRefresh(
+        path=out,
+        requested=tuple(symbols),
+        refreshed=tuple(sorted(fetched)),
+        failed=dict(sorted(failed.items())),
+        dropped=tuple(sorted(set(held.loc[~qualifying, "symbol"]))),
+        history_start=needed,
+        late_starts=_late_starts(fetched, needed),
+        rows=len(merged),
     )
-    if failed:
+    _log_refresh(summary)
+    return summary
+
+
+def _late_starts(fetched: Mapping[str, pd.DataFrame], needed: pd.Timestamp) -> tuple[str, ...]:
+    """Symbols whose first fetched session falls after ``needed``."""
+    late = []
+    for symbol, frame in fetched.items():
+        first = frame["timestamp"].min().tz_convert(_MARKET_TZ).date()
+        if first > needed.date():
+            late.append(symbol)
+    return tuple(sorted(late))
+
+
+def _log_refresh(summary: BarsRefresh) -> None:
+    logger.info("%s", summary.describe())
+    if summary.failed:
         logger.warning(
             "%d underlyings not refreshed: %s",
-            len(failed),
-            "; ".join(f"{symbol} ({reason})" for symbol, reason in sorted(failed.items())),
+            len(summary.failed),
+            "; ".join(f"{symbol} ({reason})" for symbol, reason in summary.failed.items()),
         )
-    return out
+    if summary.late_starts:
+        logger.warning(
+            "%d refreshed underlyings have no bars as early as %s: %s",
+            len(summary.late_starts),
+            f"{summary.history_start:%Y-%m-%d}",
+            ", ".join(summary.late_starts),
+        )
 
 
 __all__ = [
     "BAR_COLUMNS",
     "CHART_URL",
+    "HISTORY_SESSIONS",
     "INTERVAL_MAX_RANGE",
     "MIN_ACTIVITY_DATES",
     "BarParseError",
     "BarSnapshot",
+    "BarsRefresh",
     "fetch_bars",
     "flex_underlyings",
+    "history_start",
+    "lookback_since",
     "parse_chart",
     "refresh_flex_underlying_bars",
     "settled_daily_bars",

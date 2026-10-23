@@ -74,6 +74,32 @@ class TestDailyInventory:
         far = _panel([("2026-08-13", "BBB", "C", "2027-06-18", 50.0, 1.0, 400)])
         assert daily_inventory(far).iloc[0]["near_dated_open_interest"] == 0
 
+    def test_carries_the_panels_available_at(self):
+        """load_panel dates availability on the full calendar; a subset keeps those dates."""
+        panel = BASE.assign(
+            available_at=BASE["report_date"].map(
+                {
+                    pd.Timestamp("2026-08-13"): pd.Timestamp("2026-08-14"),
+                    pd.Timestamp("2026-08-14"): pd.Timestamp("2026-08-18"),
+                }
+            )
+        )
+        out = daily_inventory(panel).sort_values("report_date")
+        assert list(out["available_at"]) == [pd.Timestamp("2026-08-14"), pd.Timestamp("2026-08-18")]
+
+    def test_derives_available_at_from_the_calendar_when_the_panel_has_none(self):
+        out = daily_inventory(BASE).sort_values("report_date")
+        # The next activity date, and for the last date the next weekday.
+        assert list(out["available_at"]) == [pd.Timestamp("2026-08-14"), pd.Timestamp("2026-08-17")]
+
+    def test_available_at_is_one_date_per_activity_date(self):
+        mixed = pd.concat(
+            [BASE, _panel([("2026-08-14", "ZZZ", "C", "2026-09-18", 10.0, 1.0, 999)])]
+        )
+        out = daily_inventory(mixed)
+        assert out.groupby("report_date")["available_at"].nunique().eq(1).all()
+        assert (out["available_at"] > out["report_date"]).all()
+
 
 class TestInventoryChanges:
     def test_computes_day_over_day_change(self):
@@ -87,6 +113,11 @@ class TestInventoryChanges:
             if hasattr(pd, "np")
             else out.iloc[0]["d_log_oi"] > 0
         )
+
+    def test_near_dated_share_change_is_a_change_in_share(self):
+        """BASE goes from 1000 of 1500 to 1200 of 1700 contracts within sixty days."""
+        out = inventory_changes(daily_inventory(BASE), min_history=1)
+        assert out.iloc[0]["d_near_share"] == pytest.approx(1200 / 1700 - 1000 / 1500)
 
     def test_first_observation_is_dropped(self):
         """A change needs a prior level; the first date cannot supply one."""
@@ -250,7 +281,7 @@ class TestExerciseStyle:
 class TestGapSafeChanges:
     """A change across a missing activity date spans several days of flow, not one."""
 
-    CHANGES = ("d_open_interest", "d_mark_value", "d_log_oi", "d_near_dated")
+    CHANGES = ("d_open_interest", "d_mark_value", "d_log_oi", "d_near_dated", "d_near_share")
 
     @staticmethod
     def _daily(presence):

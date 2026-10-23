@@ -16,9 +16,12 @@ import pytest
 from hidden_options.collect import bars
 from hidden_options.collect.bars import (
     BAR_COLUMNS,
+    HISTORY_SESSIONS,
     BarParseError,
     BarSnapshot,
     flex_underlyings,
+    history_start,
+    lookback_since,
     refresh_flex_underlying_bars,
     settled_daily_bars,
 )
@@ -102,6 +105,33 @@ class TestFlexUnderlyings:
             flex_underlyings(pd.DataFrame({"kind": ["equity"], "underlying": ["AAL"]}))
 
 
+class TestHistoryLookback:
+    def test_history_starts_forty_sessions_before_the_first_activity_date(self):
+        panel = _panel({("equity", "AAL"): 45, ("index", "SPX"): 45})
+        assert HISTORY_SESSIONS == 40
+        assert history_start(panel) == pd.Timestamp("2024-11-07")
+
+    def test_sessions_are_counted_as_weekdays(self):
+        """1 January is a holiday but a weekday; counting it only reaches further back."""
+        panel = _panel({("equity", "AAL"): 5})
+        assert history_start(panel, sessions=1) == pd.Timestamp("2025-01-01")
+
+    def test_an_empty_panel_has_no_history_to_reach(self):
+        with pytest.raises(ValueError, match="empty"):
+            history_start(_panel({("equity", "AAL"): 0}))
+
+    def test_lookback_counts_calendar_days_to_the_new_york_date(self):
+        """Yahoo reads an `Nd` range on daily bars as N sessions; a calendar-day count is
+        the larger number, so it reaches the start under either reading."""
+        assert lookback_since(pd.Timestamp("2024-11-07"), AFTER_CLOSE) == "715d"
+        # 02:00 UTC on the 24th is still the 23rd in New York.
+        late = datetime(2026, 10, 24, 2, 0, tzinfo=UTC)
+        assert lookback_since(pd.Timestamp("2024-11-07"), late) == "715d"
+
+    def test_lookback_is_at_least_one_day(self):
+        assert lookback_since(pd.Timestamp("2026-10-23"), AFTER_CLOSE) == "1d"
+
+
 class TestSettledDailyBars:
     FRAME = _bars("AAL", ["2026-10-21", "2026-10-22", "2026-10-23"])
 
@@ -137,7 +167,20 @@ class TestRefresh:
             {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": _bars("AAPL", ["2026-10-22"])},
         )
         self._refresh(tmp_path / "bars.parquet")
-        assert sorted(yahoo.requests) == [("AAL", "1d", "2y"), ("AAPL", "1d", "2y")]
+        assert [request[:2] for request in sorted(yahoo.requests)] == [
+            ("AAL", "1d"),
+            ("AAPL", "1d"),
+        ]
+
+    def test_default_lookback_reaches_the_history_the_panel_needs(self, tmp_path, monkeypatch):
+        """The panel starts 2025-01-02, so the bars must start forty sessions earlier."""
+        yahoo = FakeYahoo(
+            monkeypatch,
+            {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": _bars("AAPL", ["2026-10-22"])},
+        )
+        summary = self._refresh(tmp_path / "bars.parquet")
+        assert summary.history_start == pd.Timestamp("2024-11-07")
+        assert {lookback for *_, lookback in yahoo.requests} == {"715d"}
 
     def test_lookback_is_passed_through(self, tmp_path, monkeypatch):
         yahoo = FakeYahoo(
@@ -153,7 +196,7 @@ class TestRefresh:
             {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": _bars("AAPL", ["2026-10-22"])},
         )
         out = tmp_path / "bars.parquet"
-        assert self._refresh(out) == out
+        assert self._refresh(out).path == out
         written = pd.read_parquet(out)
         assert list(written.columns) == list(BAR_COLUMNS)
         assert str(written["timestamp"].dtype) == "datetime64[ms, UTC]"
@@ -222,12 +265,9 @@ class TestRefresh:
         assert list(aal["timestamp"].dt.strftime("%Y-%m-%d")) == ["2026-08-18", "2026-10-22"]
         assert set(aal["close"]) == {50.0}
 
-    def test_keeps_rows_for_symbols_it_did_not_refresh(self, tmp_path, monkeypatch):
+    def test_a_qualifying_symbol_that_failed_keeps_its_rows(self, tmp_path, monkeypatch):
         out = tmp_path / "bars.parquet"
-        existing = pd.concat(
-            [_bars("OLD", ["2026-08-18"]), _bars("AAPL", ["2026-08-18"], close=1.0)]
-        )
-        existing.to_parquet(out, index=False)
+        _bars("AAPL", ["2026-08-18"], close=1.0).to_parquet(out, index=False)
         FakeYahoo(
             monkeypatch,
             {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": FetchError("404")},
@@ -235,9 +275,70 @@ class TestRefresh:
         self._refresh(out)
 
         written = pd.read_parquet(out)
-        assert set(written["symbol"]) == {"AAL", "AAPL", "OLD"}
+        assert set(written["symbol"]) == {"AAL", "AAPL"}
         # AAPL failed, so its previous rows are the best data there is.
         assert list(written.query("symbol == 'AAPL'")["close"]) == [1.0]
+
+    def test_symbols_outside_the_qualifying_set_are_dropped(self, tmp_path, monkeypatch):
+        """A series nobody asks for any more (an index under an equity ticker, a name
+        that fell below the date threshold) would otherwise sit in the file for good."""
+        out = tmp_path / "bars.parquet"
+        pd.concat([_bars("NDX", ["2026-08-14"]), _bars("FEW", ["2026-08-14"])]).to_parquet(
+            out, index=False
+        )
+        FakeYahoo(
+            monkeypatch,
+            {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": _bars("AAPL", ["2026-10-22"])},
+        )
+        summary = self._refresh(out)
+
+        assert set(pd.read_parquet(out)["symbol"]) == {"AAL", "AAPL"}
+        assert summary.dropped == ("FEW", "NDX")
+
+    def test_the_summary_names_each_failed_symbol_and_why(self, tmp_path, monkeypatch):
+        FakeYahoo(
+            monkeypatch,
+            {"AAL": _bars("AAL", ["2026-10-22"]), "AAPL": FetchError("404 (resource absent)")},
+        )
+        summary = self._refresh(tmp_path / "bars.parquet")
+
+        assert summary.requested == ("AAL", "AAPL")
+        assert summary.refreshed == ("AAL",)
+        assert dict(summary.failed) == {"AAPL": "FetchError: 404 (resource absent)"}
+        assert summary.rows == 1
+        assert "1 of 2" in summary.describe()
+
+    def test_warns_when_fetched_history_starts_after_the_needed_session(
+        self, tmp_path, monkeypatch, caplog
+    ):
+        FakeYahoo(
+            monkeypatch,
+            {
+                "AAL": _bars("AAL", ["2024-11-07", "2026-10-22"]),
+                "AAPL": _bars("AAPL", ["2025-06-02", "2026-10-22"]),
+            },
+        )
+        with caplog.at_level(logging.WARNING):
+            summary = self._refresh(tmp_path / "bars.parquet")
+
+        assert summary.late_starts == ("AAPL",)
+        message = " ".join(r.getMessage() for r in caplog.records)
+        assert "AAPL" in message and "2024-11-07" in message
+
+    def test_no_warning_when_every_history_reaches_back_far_enough(
+        self, tmp_path, monkeypatch, caplog
+    ):
+        FakeYahoo(
+            monkeypatch,
+            {
+                "AAL": _bars("AAL", ["2024-11-07", "2026-10-22"]),
+                "AAPL": _bars("AAPL", ["2024-11-01", "2026-10-22"]),
+            },
+        )
+        with caplog.at_level(logging.WARNING):
+            summary = self._refresh(tmp_path / "bars.parquet")
+        assert summary.late_starts == ()
+        assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
 
     def test_never_stores_the_session_in_progress(self, tmp_path, monkeypatch):
         FakeYahoo(

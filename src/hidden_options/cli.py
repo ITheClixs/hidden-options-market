@@ -9,9 +9,17 @@ from datetime import date
 from pathlib import Path
 
 from hidden_options.collect.backfill import DEFAULT_KINDS, backfill_flex
+from hidden_options.collect.bars import refresh_flex_underlying_bars
 from hidden_options.collect.lock import AlreadyRunning, single_instance
 from hidden_options.collect.runner import run_daily_collection
-from hidden_options.config import PROJECT_ROOT, RAW_DIR, load_programmes, load_universe
+from hidden_options.config import (
+    BARS_PATH,
+    PROJECT_ROOT,
+    RAW_DIR,
+    load_programmes,
+    load_universe,
+)
+from hidden_options.measure.flex_panel import load_panel
 from hidden_options.publish import check_drift, publish, registry
 
 LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
@@ -68,6 +76,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     backfill.add_argument("--verbose", action="store_true", help="Debug logging")
     backfill.set_defaults(handler=_backfill_flex)
+
+    refresh = commands.add_parser(
+        "refresh-bars",
+        help="re-download daily bars for the FLEX underlyings",
+        description=(
+            "Re-download daily bars for every equity FLEX underlying with enough activity "
+            "dates, far enough back to cover the panel's first date and the trailing "
+            "windows before it, and rewrite the bars file. Symbols the provider refuses "
+            "are listed; symbols no longer in the set are dropped from the file."
+        ),
+    )
+    refresh.add_argument(
+        "--raw", type=Path, default=RAW_DIR, help=f"FLEX report root. Default: {RAW_DIR}"
+    )
+    refresh.add_argument(
+        "--out", type=Path, default=BARS_PATH, help=f"Bars file. Default: {BARS_PATH}"
+    )
+    refresh.add_argument("--verbose", action="store_true", help="Debug logging")
+    refresh.set_defaults(handler=_refresh_bars)
 
     results = commands.add_parser(
         "results",
@@ -207,6 +234,33 @@ def _backfill_flex(args: argparse.Namespace) -> int:
         # Not published yet (or a holiday), not a fault; a later run asks again.
         logging.info("%d reports not available from the source", summary.absent)
     return 1 if summary.failed else 0
+
+
+def _refresh_bars(args: argparse.Namespace) -> int:
+    """Refresh the daily bars. 1 if nothing could be fetched, 2 for bad inputs."""
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format=LOG_FORMAT,
+        stream=sys.stderr,
+    )
+    try:
+        summary = refresh_flex_underlying_bars(load_panel(args.raw), args.out)
+    except RuntimeError as exc:
+        print(exc, file=sys.stderr)
+        return 1
+    except (FileNotFoundError, ValueError) as exc:
+        print(exc, file=sys.stderr)
+        return 2
+
+    print(summary.describe())
+    for symbol, reason in summary.failed.items():
+        print(f"  failed   {symbol}: {reason}")
+    if summary.dropped:
+        print(f"  dropped  {', '.join(summary.dropped)}")
+    if summary.late_starts:
+        since = f"{summary.history_start:%Y-%m-%d}"
+        print(f"  starting after {since}: {', '.join(summary.late_starts)}")
+    return 0
 
 
 def _results(args: argparse.Namespace) -> int:

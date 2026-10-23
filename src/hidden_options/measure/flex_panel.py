@@ -28,6 +28,7 @@ import pandas as pd
 
 DAILY_COLUMNS = (
     "report_date",
+    "available_at",
     "underlying",
     "series",
     "open_interest",
@@ -40,7 +41,7 @@ DAILY_COLUMNS = (
 
 NEAR_DATED_DAYS = 60
 
-CHANGE_COLUMNS = ("d_open_interest", "d_mark_value", "d_log_oi", "d_near_dated")
+CHANGE_COLUMNS = ("d_open_interest", "d_mark_value", "d_log_oi", "d_near_dated", "d_near_share")
 
 # Exercise-style markers in a class heading, as OCC spells them. The heading field is cut
 # at thirty characters, so a marker is often clipped ("(AMER/F", "(EUR"), and a continued
@@ -166,6 +167,9 @@ def daily_inventory(panel: pd.DataFrame) -> pd.DataFrame:
     ``mark_value`` is open interest valued at the report's own mark price and is the
     dollar size of hidden inventory. ``near_dated_open_interest`` isolates contracts
     expiring within sixty days, where any hedging response is most concentrated.
+
+    ``available_at`` is the panel's own (see ``load_panel``), dated on the full calendar
+    it was loaded with; a panel without the column has it derived from its calendar.
     """
     # reset_index matters: concatenated reports carry duplicate index labels, and any
     # aggregation that indexes back into the parent frame misaligns silently.
@@ -174,9 +178,11 @@ def daily_inventory(panel: pd.DataFrame) -> pd.DataFrame:
     frame["mark_value"] = frame["open_interest"] * 100 * frame["mark_price"]
     frame["call_oi"] = frame["open_interest"].where(frame["right"] == "C", 0)
     frame["put_oi"] = frame["open_interest"].where(frame["right"] == "P", 0)
+    if "available_at" not in frame.columns:
+        frame["available_at"] = _available_at(frame["report_date"])
 
     daily = (
-        frame.groupby(["report_date", "underlying"], sort=False)
+        frame.groupby(["report_date", "available_at", "underlying"], sort=False)
         .agg(
             series=("strike", "size"),
             open_interest=("open_interest", "sum"),
@@ -202,7 +208,8 @@ def inventory_changes(daily: pd.DataFrame, min_history: int = 20) -> pd.DataFram
     """Day-over-day changes in hidden inventory, per underlying.
 
     ``d_log_oi`` is the change in log open interest, which is comparable across
-    underlyings of very different size. Underlyings observed on fewer than
+    underlyings of very different size. ``d_near_share`` is the change in the share of
+    open interest expiring within sixty days. Underlyings observed on fewer than
     ``min_history`` dates are dropped: a change series needs a base to be meaningful.
 
     A change is only one day of flow if the previous row is the immediately preceding
@@ -221,6 +228,8 @@ def inventory_changes(daily: pd.DataFrame, min_history: int = 20) -> pd.DataFram
     frame["d_mark_value"] = grouped["mark_value"].diff()
     frame["d_log_oi"] = grouped["open_interest"].transform(lambda s: np.log(s.clip(lower=1)).diff())
     frame["d_near_dated"] = grouped["near_dated_open_interest"].diff()
+    near_share = frame["near_dated_open_interest"] / frame["open_interest"].clip(lower=1)
+    frame["d_near_share"] = near_share.groupby(frame["underlying"], sort=False).diff()
 
     # get_indexer takes any array-like at runtime; the stubs ask for an Index.
     positions = calendar.get_indexer(frame["report_date"])  # type: ignore[arg-type]

@@ -16,6 +16,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = Path(os.environ.get("HIDDEN_OPTIONS_DATA_ROOT", PROJECT_ROOT / "data"))
 RAW_DIR = DATA_ROOT / "raw"
 INTERIM_DIR = DATA_ROOT / "interim"
+# Daily bars for the FLEX underlyings, rewritten whole by `hidden-options refresh-bars`.
+BARS_PATH = DATA_ROOT / "flex_underlying_bars.parquet"
 CONFIG_DIR = PROJECT_ROOT / "configs"
 UNIVERSE_FILE = CONFIG_DIR / "universe.json"
 FUNDS_FILE = CONFIG_DIR / "funds.json"
