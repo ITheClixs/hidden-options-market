@@ -48,13 +48,27 @@ def collect_macros(results: Mapping[str, Result]) -> dict[str, str]:
 
 
 def _check_value(macro: str, value: object) -> None:
+    """Reject a value that would end its own `\\newcommand` or comment out the rest of it.
+
+    A backslash escapes the character after it, so `\\}` and `\\%` are fine and are
+    skipped as a pair, while a bare `%` starts a comment, a bare `#` is a parameter, and
+    a final backslash would escape the closing brace.
+    """
     if not isinstance(value, str) or "\n" in value:
         raise ValueError(f"Macro {macro!r} must be a single-line string, got {value!r}")
+
     depth = 0
-    for char in value:
-        depth += (char == "{") - (char == "}")
-        if depth < 0:
-            break
+    chars = iter(value)
+    for char in chars:
+        if char == "\\":
+            if next(chars, None) is None:
+                raise ValueError(f"Macro {macro!r} ends with a trailing backslash: {value!r}")
+        elif char in "%#":
+            raise ValueError(f"Macro {macro!r} has an unescaped {char}: {value!r}")
+        elif char in "{}":
+            depth += 1 if char == "{" else -1
+            if depth < 0:
+                break
     if depth != 0:
         raise ValueError(f"Macro {macro!r} has unbalanced braces: {value!r}")
 

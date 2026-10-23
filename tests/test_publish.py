@@ -180,10 +180,32 @@ class TestMacros:
         with pytest.raises(ValueError, match="Shared"):
             render_macros({"a": a, "b": b})
 
-    @pytest.mark.parametrize("value", ["two\nlines", "unbalanced}", "{open"])
-    def test_value_that_would_break_the_macro_is_rejected(self, value):
-        with pytest.raises(ValueError, match="Bad"):
+    @pytest.mark.parametrize(
+        "value, reason",
+        [
+            ("two\nlines", "single-line"),
+            ("unbalanced}", "unbalanced"),
+            ("{open", "unbalanced"),
+            ("{\\}", "unbalanced"),
+            ("100%", "unescaped %"),
+            ("a\\\\%", "unescaped %"),
+            ("item #1", "unescaped #"),
+            ("ends with \\", "trailing backslash"),
+            ("\\\\\\", "trailing backslash"),
+        ],
+    )
+    def test_value_that_would_break_the_macro_is_rejected(self, value, reason):
+        with pytest.raises(ValueError, match=rf"Bad.*{reason}"):
             render_macros({"p": make_result("p", macros={"Bad": value})})
+
+    @pytest.mark.parametrize(
+        "value",
+        [r"\}", r"\{", r"50\%", r"item \#1", r"\$596bn", r"line\\", r"{kept}", "-0.5", ""],
+    )
+    def test_escaped_characters_and_balanced_braces_are_accepted(self, value):
+        text = render_macros({"p": make_result("p", macros={"Ok": value})})
+
+        assert text.endswith(f"\\newcommand{{\\Ok}}{{{value}}}\n")
 
     def test_lines_are_sorted_by_name_across_results(self):
         a = make_result("a", macros={"Zeta": "1"})
