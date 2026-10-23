@@ -1,0 +1,446 @@
+{
+  "generated_at": "2026-10-23T20:19:16+00:00",
+  "inputs": {
+    "dates": 475,
+    "first_date": "2024-12-02",
+    "kinds": [
+      "equity",
+      "index"
+    ],
+    "last_date": "2026-10-22",
+    "rows": 15179194,
+    "source": "data/raw/occ_flex"
+  },
+  "macros": {
+    "BreakDate": "6 June 2025",
+    "BreakMonth": "June 2025",
+    "BreakShiftDays": "22",
+    "CallShare": "59\\%",
+    "CallShareStart": "54\\%",
+    "DropExpiries": "7",
+    "DropHigh": "12.6\\%",
+    "DropLow": "9.9\\%",
+    "DropsOnExpiry": "10",
+    "ExpiringRatioHigh": "1.4",
+    "ExpiringRatioLow": "1.2",
+    "GrowthMultiple": "2.1",
+    "OICycleLatest": "71.8",
+    "OICycleLatestEnd": "16 October 2026",
+    "OIEnd": "67.9",
+    "OIFlatHigh": "35.5",
+    "OIFlatLevel": "34.5",
+    "OIFlatLow": "33.4",
+    "OIPeak": "79.2",
+    "OIPeakDate": "16 July 2026",
+    "OIQuarterChange": "+1.5\\%",
+    "OIStart": "35.2",
+    "PanelDates": "475",
+    "PanelEnd": "22 October 2026",
+    "PanelMissingWeekdays": "19",
+    "PanelMonths": "23",
+    "PanelSeriesDays": "15,179,194",
+    "PanelSeriesDaysMillions": "15.2",
+    "PanelStart": "2 December 2024",
+    "PanelUnderlyings": "1,954",
+    "PostBreakGrowth": "+81\\%",
+    "PostBreakGrowthQuarter": "+16\\%",
+    "PreBreakGrowth": "-10\\%",
+    "SeriesEnd": "43,606",
+    "SeriesStart": "25,667",
+    "TopFiveUnderlyings": "SPY, SPX, NVDA, EWZ and EFA",
+    "TopHundredShare": "80\\%",
+    "TopTenShare": "30\\%",
+    "TopTenShareStart": "44\\%",
+    "TopTwentyFiveShare": "48\\%",
+    "UnderlyingsEnd": "1,030",
+    "UnderlyingsStart": "738",
+    "ValueEnd": "\\$547bn",
+    "ValueStart": "\\$298bn",
+    "WithinSixtyHigh": "66\\%",
+    "WithinSixtyLow": "41\\%",
+    "WithinSixtyMean": "52\\%",
+    "WithinSixtyShare": "50\\%",
+    "WithinSixtyShareStart": "62\\%"
+  },
+  "name": "market",
+  "values": {
+    "concentration": {
+      "date": "2026-10-22",
+      "largest": [
+        "SPY",
+        "SPX",
+        "NVDA",
+        "EWZ",
+        "EFA"
+      ],
+      "top_shares": {
+        "10": 0.2971542160574557,
+        "100": 0.7950902413112513,
+        "25": 0.48282318262280616
+      }
+    },
+    "cycles": {
+      "flat_cycles": 5,
+      "flat_high": 35501060.0,
+      "flat_level": 34515623.300144926,
+      "flat_low": 33358214.217391305,
+      "latest_end": "2026-10-16",
+      "latest_level": 71765457.0,
+      "multiple": 2.079216602172694,
+      "quarter_change": 0.015096251145857886,
+      "table": [
+        {
+          "dates": 18,
+          "end": "2025-01-17",
+          "open_interest": 35162725.333333336,
+          "start": "2024-12-23"
+        },
+        {
+          "dates": 23,
+          "end": "2025-02-21",
+          "open_interest": 33358214.217391305,
+          "start": "2025-01-21"
+        },
+        {
+          "dates": 20,
+          "end": "2025-03-21",
+          "open_interest": 35501060.0,
+          "start": "2025-02-24"
+        },
+        {
+          "dates": 19,
+          "end": "2025-04-17",
+          "open_interest": 35056324.0,
+          "start": "2025-03-24"
+        },
+        {
+          "dates": 20,
+          "end": "2025-05-16",
+          "open_interest": 33499792.95,
+          "start": "2025-04-21"
+        },
+        {
+          "dates": 23,
+          "end": "2025-06-20",
+          "open_interest": 34751103.69565217,
+          "start": "2025-05-19"
+        },
+        {
+          "dates": 19,
+          "end": "2025-07-18",
+          "open_interest": 34981960.315789476,
+          "start": "2025-06-23"
+        },
+        {
+          "dates": 20,
+          "end": "2025-08-15",
+          "open_interest": 36562831.65,
+          "start": "2025-07-21"
+        },
+        {
+          "dates": 24,
+          "end": "2025-09-19",
+          "open_interest": 39626443.75,
+          "start": "2025-08-18"
+        },
+        {
+          "dates": 20,
+          "end": "2025-10-17",
+          "open_interest": 41371552.35,
+          "start": "2025-09-22"
+        },
+        {
+          "dates": 25,
+          "end": "2025-11-21",
+          "open_interest": 45528668.28,
+          "start": "2025-10-20"
+        },
+        {
+          "dates": 19,
+          "end": "2025-12-19",
+          "open_interest": 47814216.84210526,
+          "start": "2025-11-24"
+        },
+        {
+          "dates": 18,
+          "end": "2026-01-16",
+          "open_interest": 45776903.722222224,
+          "start": "2025-12-22"
+        },
+        {
+          "dates": 23,
+          "end": "2026-02-20",
+          "open_interest": 46933991.04347826,
+          "start": "2026-01-20"
+        },
+        {
+          "dates": 20,
+          "end": "2026-03-20",
+          "open_interest": 51635364.35,
+          "start": "2026-02-23"
+        },
+        {
+          "dates": 19,
+          "end": "2026-04-17",
+          "open_interest": 52490101.05263158,
+          "start": "2026-03-23"
+        },
+        {
+          "dates": 20,
+          "end": "2026-05-15",
+          "open_interest": 55001308.85,
+          "start": "2026-04-20"
+        },
+        {
+          "dates": 23,
+          "end": "2026-06-18",
+          "open_interest": 63864283.69565217,
+          "start": "2026-05-18"
+        },
+        {
+          "dates": 19,
+          "end": "2026-07-17",
+          "open_interest": 70698179.5263158,
+          "start": "2026-06-22"
+        },
+        {
+          "dates": 25,
+          "end": "2026-08-21",
+          "open_interest": 70141300.64,
+          "start": "2026-07-20"
+        },
+        {
+          "dates": 19,
+          "end": "2026-09-18",
+          "open_interest": 70174474.10526316,
+          "start": "2026-08-24"
+        },
+        {
+          "dates": 20,
+          "end": "2026-10-16",
+          "open_interest": 71765457.0,
+          "start": "2026-09-21"
+        }
+      ]
+    },
+    "drops": {
+      "distinct_expiries": 7,
+      "expiring_ratio_high": 1.3596719375033697,
+      "expiring_ratio_low": 1.1738304158410509,
+      "fall_high": 0.12568716387711454,
+      "fall_low": 0.09886949367782638,
+      "largest": [
+        {
+          "change": -5636420,
+          "date": "2026-01-20",
+          "expiring_decline": 6656159.0,
+          "expiring_ratio": 1.180919626287608,
+          "expiry": "2026-01-16",
+          "on_expiry": true,
+          "pct_change": -0.12568716387711454,
+          "previous_date": "2026-01-16"
+        },
+        {
+          "change": -4306381,
+          "date": "2025-06-23",
+          "expiring_decline": 5054961.0,
+          "expiring_ratio": 1.1738304158410509,
+          "expiry": "2025-06-20",
+          "on_expiry": true,
+          "pct_change": -0.12529902092686773,
+          "previous_date": "2025-06-20"
+        },
+        {
+          "change": -4772656,
+          "date": "2025-01-17",
+          "expiring_decline": 5980916.0,
+          "expiring_ratio": 1.2531630186629834,
+          "expiry": "2025-01-17",
+          "on_expiry": true,
+          "pct_change": -0.12351596760164962,
+          "previous_date": "2025-01-16"
+        },
+        {
+          "change": -4173845,
+          "date": "2025-01-21",
+          "expiring_decline": 4989432.0,
+          "expiring_ratio": 1.195404237579498,
+          "expiry": "2025-01-17",
+          "on_expiry": true,
+          "pct_change": -0.12324101901608087,
+          "previous_date": "2025-01-17"
+        },
+        {
+          "change": -6095274,
+          "date": "2026-01-16",
+          "expiring_decline": 8119925.0,
+          "expiring_ratio": 1.3321673480142155,
+          "expiry": "2026-01-16",
+          "on_expiry": true,
+          "pct_change": -0.11965569448733793,
+          "previous_date": "2026-01-15"
+        },
+        {
+          "change": -4747696,
+          "date": "2025-09-22",
+          "expiring_decline": 6005506.0,
+          "expiring_ratio": 1.2649306105529925,
+          "expiry": "2025-09-19",
+          "on_expiry": true,
+          "pct_change": -0.11462389920331284,
+          "previous_date": "2025-09-19"
+        },
+        {
+          "change": -4370122,
+          "date": "2024-12-20",
+          "expiring_decline": 5174347.0,
+          "expiring_ratio": 1.1840280431530288,
+          "expiry": "2024-12-20",
+          "on_expiry": true,
+          "pct_change": -0.10846230825323744,
+          "previous_date": "2024-12-19"
+        },
+        {
+          "change": -5607682,
+          "date": "2025-12-19",
+          "expiring_decline": 6854610.0,
+          "expiring_ratio": 1.2223606830772502,
+          "expiry": "2025-12-19",
+          "on_expiry": true,
+          "pct_change": -0.10624334603368235,
+          "previous_date": "2025-12-18"
+        },
+        {
+          "change": -4068999,
+          "date": "2025-06-20",
+          "expiring_decline": 5090992.0,
+          "expiring_ratio": 1.2511657043906868,
+          "expiry": "2025-06-20",
+          "on_expiry": true,
+          "pct_change": -0.10585922499112921,
+          "previous_date": "2025-06-18"
+        },
+        {
+          "change": -5712692,
+          "date": "2026-03-20",
+          "expiring_decline": 7767387.0,
+          "expiring_ratio": 1.3596719375033697,
+          "expiry": "2026-03-20",
+          "on_expiry": true,
+          "pct_change": -0.09886949367782638,
+          "previous_date": "2026-03-19"
+        }
+      ],
+      "on_expiry": 10
+    },
+    "end": {
+      "call_share": 0.5918445706404826,
+      "date": "2026-10-22",
+      "mark_value": 546939996602.5,
+      "open_interest": 67879222,
+      "series": 43606,
+      "top10_share": 0.2971542160574557,
+      "underlyings": 1030,
+      "within60d_share": 0.501742624569268
+    },
+    "expiries": [
+      "2024-12-20",
+      "2025-01-17",
+      "2025-02-21",
+      "2025-03-21",
+      "2025-04-17",
+      "2025-05-16",
+      "2025-06-20",
+      "2025-07-18",
+      "2025-08-15",
+      "2025-09-19",
+      "2025-10-17",
+      "2025-11-21",
+      "2025-12-19",
+      "2026-01-16",
+      "2026-02-20",
+      "2026-03-20",
+      "2026-04-17",
+      "2026-05-15",
+      "2026-06-18",
+      "2026-07-17",
+      "2026-08-21",
+      "2026-09-18",
+      "2026-10-16"
+    ],
+    "growth": {
+      "break_date": "2025-06-06",
+      "break_on_mark_value": "2025-01-30",
+      "break_on_peaks": "2025-05-15",
+      "break_on_troughs": "2025-06-23",
+      "break_shift_days": 22,
+      "intercept": 17.386977177389483,
+      "post_growth": 0.8094140495355022,
+      "post_growth_log": 0.593003063327619,
+      "post_growth_quarter": 0.1598036990391983,
+      "pre_growth": -0.09555421759634651,
+      "pre_growth_log": -0.10043291800678585,
+      "sse": 2.0172832008076167
+    },
+    "panel": {
+      "dates": 475,
+      "first_date": "2024-12-02",
+      "last_date": "2026-10-22",
+      "missing_weekdays": [
+        "2024-12-25",
+        "2025-01-01",
+        "2025-01-20",
+        "2025-02-17",
+        "2025-04-18",
+        "2025-05-26",
+        "2025-06-19",
+        "2025-07-04",
+        "2025-09-01",
+        "2025-11-27",
+        "2025-12-25",
+        "2026-01-01",
+        "2026-01-19",
+        "2026-02-16",
+        "2026-04-03",
+        "2026-05-25",
+        "2026-06-19",
+        "2026-07-03",
+        "2026-09-07"
+      ],
+      "months": 23,
+      "series_days": 15179194,
+      "underlyings": 1954
+    },
+    "peak": {
+      "date": "2026-07-16",
+      "open_interest": 79188171
+    },
+    "shares_over_panel": {
+      "call_share": {
+        "max": 0.6019946924054308,
+        "mean": 0.5544914172268368,
+        "min": 0.5014867295026767
+      },
+      "top10_share": {
+        "max": 0.45618607040335307,
+        "mean": 0.3756340491337072,
+        "min": 0.279564749357
+      },
+      "within60d_share": {
+        "max": 0.6649393423273627,
+        "mean": 0.5230269735890465,
+        "min": 0.4077228078051343
+      }
+    },
+    "start": {
+      "call_share": 0.5416771752318064,
+      "date": "2024-12-02",
+      "mark_value": 298198159873.13,
+      "open_interest": 35213339,
+      "series": 25667,
+      "top10_share": 0.4396464078569772,
+      "underlyings": 738,
+      "within60d_share": 0.6193153111666008
+    }
+  }
+}

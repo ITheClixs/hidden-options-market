@@ -8,16 +8,23 @@ Options Clearing Corporation publishes a free daily report of every cleared FLEX
 root, strike, expiry, mark price and open interest — and this repository turns it into a
 panel.
 
-![FLEX open interest and mark value, July 2025 to August 2026](docs/figures/growth.png)
+![FLEX open interest and mark value, {{PanelStart}} to {{PanelEnd}}](docs/figures/growth.png)
 
-| | 23 Jul 2025 | 17 Aug 2026 |
+| | {{PanelStart}} | {{PanelEnd}} |
 |---|---:|---:|
-| Open interest | 34.8m contracts | **73.0m contracts** |
-| Mark value | \$319bn | **\$596bn** |
+| Open interest | {{OIStart}}m contracts | **{{OIEnd}}m contracts** |
+| Mark value | {{ValueStart}} | **{{ValueEnd}}** |
 
-269 activity dates, 1,691 underlyings, 9.06m series-days. On the last date, 42,740 series
-across 1,023 underlyings: the ten largest underlyings hold 29% of open interest, 56%
-expires within sixty days, and 57% is calls.
+{{PanelDates}} activity dates, {{PanelUnderlyings}} underlyings,
+{{PanelSeriesDaysMillions}}m series-days. Open interest was flat until {{BreakMonth}} and
+has since risen by a factor of {{GrowthMultiple}}: averaged over a monthly expiry cycle,
+from {{OIFlatLevel}}m contracts before the turn to {{OICycleLatest}}m in the latest cycle.
+The sawtooth in the chart is the expiry cycle; of the ten largest one-day falls in open
+interest, {{DropsOnExpiry}} land on a monthly expiry ({{DropExpiries}} expiries between
+them). On the last date, {{SeriesEnd}}
+series across {{UnderlyingsEnd}} underlyings: the ten largest underlyings hold
+{{TopTenShare}} of open interest, {{WithinSixtyShare}} expires within sixty days, and
+{{CallShare}} is calls.
 
 ## Does hidden inventory predict the visible market?
 
