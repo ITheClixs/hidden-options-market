@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from hidden_options import cli
@@ -131,6 +132,67 @@ class TestResults:
         write_result(make_result(), tmp_path)
 
         assert read_results(tmp_path) == {"panel": make_result()}
+
+    def test_numpy_numbers_are_written_as_plain_json_numbers(self, tmp_path):
+        values = {
+            "count": np.int64(3),
+            "beta": np.float32(0.5),
+            "significant": np.bool_(True),
+            "mean": np.float64(1.5),
+            "series": [np.int32(1), np.float64(2.5)],
+            "nested": {"rank": np.uint8(7)},
+        }
+        result = make_result(values=values)
+
+        stored = json.loads(write_result(result, tmp_path).read_text())["values"]
+
+        assert stored == {
+            "count": 3,
+            "beta": 0.5,
+            "significant": True,
+            "mean": 1.5,
+            "series": [1, 2.5],
+            "nested": {"rank": 7},
+        }
+        assert [type(stored[k]) for k in ("count", "significant")] == [int, bool]
+
+    def test_rewriting_numpy_values_is_byte_stable(self, tmp_path):
+        result = make_result(values={"count": np.int64(3), "beta": np.float32(0.5)})
+        path = write_result(result, tmp_path)
+        first = path.read_bytes()
+
+        later = make_result(values=result.values, generated_at="2026-11-01T09:30:00+00:00")
+        write_result(later, tmp_path)
+
+        assert path.read_bytes() == first
+
+    @pytest.mark.parametrize(
+        "field, value, where",
+        [
+            ("values", {"when": datetime(2026, 8, 17)}, "when"),
+            ("values", {"weights": np.array([1.0, 2.0])}, "weights"),
+            ("values", {"deep": {"inner": [1, {2, 3}]}}, "inner"),
+            ("values", {"beta": float("nan")}, "beta"),
+            ("values", {"beta": np.float32("inf")}, "beta"),
+            ("values", {"root": 1 + 2j}, "root"),
+            ("values", {"anything": object()}, "anything"),
+            ("inputs", {"first_date": date(2025, 7, 23)}, "first_date"),
+        ],
+    )
+    def test_unserialisable_value_names_the_result_and_the_key(self, tmp_path, field, value, where):
+        with pytest.raises(ValueError, match=rf"'panel'.*{field}.*{where}"):
+            write_result(make_result(**{field: value}), tmp_path)
+
+        assert not (tmp_path / "panel.json").exists()
+
+    def test_unserialisable_key_is_named(self, tmp_path):
+        with pytest.raises(ValueError, match=r"'panel'.*values\[\(1, 2\)\]"):
+            write_result(make_result(values={(1, 2): "pair"}), tmp_path)
+
+    def test_error_without_a_single_culprit_still_names_the_result(self, tmp_path):
+        """Keys of different types cannot be sorted, though each is fine on its own."""
+        with pytest.raises(ValueError, match="'panel' cannot be written as JSON: "):
+            write_result(make_result(values={1: "a", "b": 2}), tmp_path)
 
     def test_now_iso_is_a_utc_timestamp_to_the_second(self):
         stamp = datetime.fromisoformat(now_iso())

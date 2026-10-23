@@ -16,6 +16,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from hidden_options.config import PROJECT_ROOT
 
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -84,8 +86,64 @@ def read_results(root: Path = RESULTS_DIR) -> dict[str, Result]:
 
 def _serialise(result: Result) -> str:
     payload = {field: getattr(result, field) for field in _FIELDS}
-    text = json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False, allow_nan=False)
+    try:
+        text = json.dumps(
+            payload,
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+            allow_nan=False,
+            default=_numpy_to_python,
+        )
+    except (TypeError, ValueError) as exc:
+        where = _unserialisable_path(payload, "")
+        place = f" at {where}" if where else ""
+        raise ValueError(f"Result {result.name!r} cannot be written as JSON{place}: {exc}") from exc
     return f"{text}\n"
+
+
+def _numpy_to_python(value: object) -> object:
+    """`json.dumps` hook: numpy booleans, integers and floats become Python ones.
+
+    Analyses compute with numpy, so a count or coefficient reaches `values` as a numpy
+    scalar, which `json` refuses. Anything else it cannot write (a date, an array, a
+    complex number) is left to raise, so the caller learns about it rather than getting a
+    guessed representation.
+    """
+    if isinstance(value, np.bool_):
+        return bool(value)
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.floating):
+        return float(value)
+    raise TypeError(f"{type(value).__name__} is not JSON serialisable")
+
+
+def _unserialisable_path(node: object, path: str) -> str | None:
+    """Where in the payload the first value `json` cannot write sits, e.g. `values['beta']`.
+
+    None when no single value is to blame (a key that cannot be sorted against its
+    siblings, say), in which case the caller reports the error without a location.
+    """
+    if isinstance(node, dict):
+        for key, child in node.items():
+            if not (key is None or isinstance(key, str | int | float | bool)):
+                return f"{path}[{key!r}]"
+            found = _unserialisable_path(child, f"{path}[{key!r}]" if path else str(key))
+            if found:
+                return found
+        return None
+    if isinstance(node, list | tuple):
+        for position, child in enumerate(node):
+            found = _unserialisable_path(child, f"{path}[{position}]")
+            if found:
+                return found
+        return None
+    try:
+        json.dumps(node, allow_nan=False, default=_numpy_to_python)
+    except (TypeError, ValueError):
+        return path
+    return None
 
 
 def _load(path: Path) -> Result:
