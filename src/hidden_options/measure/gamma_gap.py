@@ -29,6 +29,8 @@ in the same expiry where available.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
+from typing import cast
 
 import numpy as np
 import pandas as pd
@@ -65,7 +67,7 @@ def bs_gamma(spot: float, strike: float, years: float, vol: float) -> float:
     return float(norm.pdf(d1) / (spot * vol * np.sqrt(years)))
 
 
-def local_vol(chain: pd.DataFrame, expiry, strike: float, fallback: float) -> float:
+def local_vol(chain: pd.DataFrame, expiry: date, strike: float, fallback: float) -> float:
     """Implied volatility near a strike, taken from the nearest listed strikes.
 
     Falls back to the expiry's median, then the chain's median, then a constant.
@@ -122,17 +124,21 @@ def gamma_gap(
     n_oi = 0
 
     for row in open_interest.itertuples():
-        if (row.expiry, round(row.strike, 2)) in listed_keys:
+        # itertuples types every attribute as the union of all column types.
+        expiry = cast(date, row.expiry)
+        strike = cast(float, row.strike)
+        if (expiry, round(strike, 2)) in listed_keys:
             continue
-        days = (pd.Timestamp(row.expiry) - as_of).days
+        days = (pd.Timestamp(expiry) - as_of).days
         if days < cfg.min_days or days > cfg.max_days:
             continue
 
-        vol = local_vol(chain, row.expiry, row.strike, cfg.fallback_vol)
-        gamma = bs_gamma(spot, row.strike, days / 365.0, vol)
+        vol = local_vol(chain, expiry, strike, cfg.fallback_vol)
+        gamma = bs_gamma(spot, strike, days / 365.0, vol)
         scale = gamma * 100 * spot * (spot * 0.01)
 
-        call, put = float(row.call_open_interest), float(row.put_open_interest)
+        call = float(cast(float, row.call_open_interest))
+        put = float(cast(float, row.put_open_interest))
         gross += scale * (call + put)
         residual += scale * abs(call - put)
         n_series += 1

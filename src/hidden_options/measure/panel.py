@@ -145,7 +145,7 @@ def fit(
         dimension has few groups, which here means entities: a panel of a few dozen
         names over-rejects noticeably. Verified by simulation before adding.
         """
-        total = np.zeros_like(xtx)
+        total: np.ndarray = np.zeros_like(xtx)
         scores = x * resid[:, None]
         keys = group_key.to_numpy()
         for _, idx in pd.Series(range(len(scores))).groupby(keys):

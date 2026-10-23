@@ -106,7 +106,7 @@ def _exercise_styles(panel: pd.DataFrame) -> np.ndarray:
     return np.where(index_default, "european", styles)
 
 
-def _available_at(report_dates: pd.Series) -> pd.DatetimeIndex:
+def _available_at(report_dates: pd.Series) -> pd.Index:
     """When each activity date's report can first be acted on.
 
     OCC publishes the report for activity date T overnight, so an observer has it before
@@ -116,7 +116,8 @@ def _available_at(report_dates: pd.Series) -> pd.DatetimeIndex:
     """
     calendar = pd.DatetimeIndex(report_dates.unique()).sort_values()
     following = calendar[1:].append(pd.DatetimeIndex([calendar[-1] + pd.offsets.BDay(1)]))
-    return following.take(calendar.get_indexer(report_dates))
+    # get_indexer takes any array-like at runtime; the stubs ask for an Index.
+    return following.take(calendar.get_indexer(report_dates))  # type: ignore[arg-type]
 
 
 def load_panel(root: Path, kinds: tuple[str, ...] = ("equity", "index")) -> pd.DataFrame:
@@ -221,7 +222,9 @@ def inventory_changes(daily: pd.DataFrame, min_history: int = 20) -> pd.DataFram
     frame["d_log_oi"] = grouped["open_interest"].transform(lambda s: np.log(s.clip(lower=1)).diff())
     frame["d_near_dated"] = grouped["near_dated_open_interest"].diff()
 
-    position = pd.Series(calendar.get_indexer(frame["report_date"]), index=frame.index)
+    # get_indexer takes any array-like at runtime; the stubs ask for an Index.
+    positions = calendar.get_indexer(frame["report_date"])  # type: ignore[arg-type]
+    position = pd.Series(positions, index=frame.index)
     previous = position.groupby(frame["underlying"], sort=False).shift(1)
     skipped = previous.notna() & (position - previous != 1)
 

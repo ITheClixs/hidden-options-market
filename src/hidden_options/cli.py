@@ -278,7 +278,8 @@ def _describe(exc: Exception) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    return args.handler(args)
+    exit_code: int = args.handler(args)
+    return exit_code
 
 
 def collect_alias(argv: list[str] | None = None) -> int:

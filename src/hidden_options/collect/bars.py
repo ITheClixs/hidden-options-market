@@ -211,7 +211,8 @@ def settled_daily_bars(frame: pd.DataFrame, now: datetime | None = None) -> pd.D
     if clock.time() >= _SESSION_CLOSE:
         return frame
     sessions = frame["timestamp"].dt.tz_convert(_MARKET_TZ).dt.date
-    return frame[sessions < clock.date()].reset_index(drop=True)
+    settled: pd.DataFrame = frame[sessions < clock.date()]
+    return settled.reset_index(drop=True)
 
 
 def _fetch_daily(

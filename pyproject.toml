@@ -20,6 +20,10 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.5",
     "linearmodels>=6.0",
+    "mypy>=1.11",
+    "pandas-stubs",
+    "scipy-stubs",
+    "types-requests",
 ]
 
 [project.scripts]
@@ -47,3 +51,9 @@ known-local-folder = ["run_stage1"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+# Bare `dict` and `list` annotations read better than `dict[str, Any]` in pandas code.
+disallow_any_generics = false

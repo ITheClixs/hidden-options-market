@@ -28,6 +28,7 @@ exposure --- contracts times spot --- is the scale that survives both.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 
 import numpy as np
 import pandas as pd
@@ -109,16 +110,20 @@ def group_structures(
 
     records = []
     for (symbol, expiry), group in census.groupby(["symbol", "expiry"], sort=False):
-        spot = spot_by_symbol.get(symbol)
+        spot = spot_by_symbol.get(cast(str, symbol))
         if not spot or not np.isfinite(spot):
             continue
 
         legs = []
         for row in group.itertuples():
-            if row.call_open_interest > 0:
-                legs.append((float(row.call_open_interest), float(row.strike), "C"))
-            if row.put_open_interest > 0:
-                legs.append((float(row.put_open_interest), float(row.strike), "P"))
+            # itertuples types every attribute as the union of all column types.
+            call_oi = cast(float, row.call_open_interest)
+            put_oi = cast(float, row.put_open_interest)
+            strike = cast(float, row.strike)
+            if call_oi > 0:
+                legs.append((float(call_oi), float(strike), "C"))
+            if put_oi > 0:
+                legs.append((float(put_oi), float(strike), "P"))
         legs = [leg for leg in legs if leg[0] >= cfg.min_contracts]
         if len(legs) < cfg.min_legs:
             continue

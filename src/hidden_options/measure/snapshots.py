@@ -26,9 +26,9 @@ def frame_fingerprint(frame: pd.DataFrame) -> str:
     if frame.empty:
         return hashlib.sha256(b"").hexdigest()
     ordered = frame.sort_values(list(frame.columns)).reset_index(drop=True)
-    return hashlib.sha256(
-        pd.util.hash_pandas_object(ordered, index=False).values.tobytes()
-    ).hexdigest()
+    hashes = pd.util.hash_pandas_object(ordered, index=False).values
+    # `.values` of uint64 hashes is a numpy array, which the stubs do not narrow to.
+    return hashlib.sha256(hashes.tobytes()).hexdigest()  # type: ignore[union-attr]
 
 
 def distinct_snapshots(paths: list[Path]) -> dict[str, list[Path]]:

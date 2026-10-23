@@ -42,6 +42,7 @@ measuring separately — but it is not the fund detector.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 
 import pandas as pd
 
@@ -194,22 +195,29 @@ def reconcile_with_holdings(
     disclosed: list[float | None] = []
 
     for leg in legs.itertuples():
+        # itertuples types every attribute as the union of all column types.
+        strike = cast(float, leg.strike)
+        leg_open_interest = cast(float, leg.leg_open_interest)
         # A written leg is negative in the fund's book; a held leg is positive.
         hit = option_legs[
             (option_legs["underlying"] == leg.symbol)
             & (option_legs["expiry"] == leg.expiry)
             & (option_legs["right"] == leg.leg_right)
-            & ((option_legs["strike"] - leg.strike).abs() <= strike_tolerance)
+            & ((option_legs["strike"] - strike).abs() <= strike_tolerance)
         ]
         if len(hit):
-            best = hit.iloc[(hit["contracts"].abs() - leg.leg_open_interest).abs().argsort()[:1]]
+            best = hit.iloc[(hit["contracts"].abs() - leg_open_interest).abs().argsort()[:1]]
             matched_fund.append(str(best["fund"].iloc[0]))
             disclosed.append(float(best["contracts"].iloc[0]))
         else:
             matched_fund.append(None)
             disclosed.append(None)
 
-    return legs.assign(matched_fund=matched_fund, disclosed_contracts=disclosed)
+    # pandas-stubs types assign() keywords too narrowly to accept a list holding None.
+    return legs.assign(
+        matched_fund=matched_fund,  # type: ignore[arg-type]
+        disclosed_contracts=disclosed,  # type: ignore[arg-type]
+    )
 
 
 __all__ = [
