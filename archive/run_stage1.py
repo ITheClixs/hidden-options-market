@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 """Stage 1 of the pilot: does a fund programme leave a volume footprint?
 
-Design and thresholds are fixed in `docs/PILOT_SPEC.md`, written before this was run.
+Design and thresholds are fixed in `docs/log/2026-08-17-pilot-spec.md`, written before this
+was run.
 
 Estimand: the coefficient on post x friday in
 
@@ -19,18 +20,15 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.collect.bars import fetch_bars  # noqa: E402
-from hidden_options.collect.http import FetchError, build_session, fetch  # noqa: E402
-from hidden_options.config import load_programmes, load_universe  # noqa: E402
-from hidden_options.measure.panel import fit  # noqa: E402
+from hidden_options.collect.bars import fetch_bars
+from hidden_options.collect.http import FetchError, build_session, fetch
+from hidden_options.config import load_programmes, load_universe
+from hidden_options.measure.panel import fit
 
 CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 

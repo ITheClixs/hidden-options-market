@@ -8,7 +8,6 @@ rather than taken from whatever happens to be on disk.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import matplotlib
@@ -16,12 +15,10 @@ import numpy as np
 import pandas as pd
 
 matplotlib.use("Agg")
-import matplotlib.dates as mdates  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
+from hidden_options.measure.flex_panel import daily_inventory, load_panel
 
 OUT = Path("docs/figures")
 WINDOW = (pd.Timestamp("2025-07-23"), pd.Timestamp("2026-08-17"))

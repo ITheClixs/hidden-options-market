@@ -14,7 +14,7 @@ PY=.venv/bin/python
 
 if [[ "${1:-}" != "--quick" ]]; then
   echo "==> 1/5  OCC clearing data for the optionable universe (~682 symbols)"
-  HIDDEN_OPTIONS_REQUEST_SPACING=0.12 $PY scripts/flex_census.py
+  HIDDEN_OPTIONS_REQUEST_SPACING=0.12 $PY archive/flex_census.py
 
   echo "==> 2/5  listed chains, fund holdings and bars for the study universe"
   $PY -m hidden_options.cli collect --root data/raw

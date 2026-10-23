@@ -4,7 +4,7 @@
 that the outcome cannot be rationalised after the fact.
 
 Supersedes §25 of the research plan, whose pass criterion (4 bp, t ≥ 3.0) was built on
-an undderived power figure and is unachievable — see `POWER_AND_DATA_LIMITS.md`.
+an undderived power figure and is unachievable — see [`2026-08-17-power-and-data-limits.md`](2026-08-17-power-and-data-limits.md).
 
 ## What changed and why
 

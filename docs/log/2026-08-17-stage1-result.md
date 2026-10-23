@@ -1,6 +1,6 @@
 # Stage 1 Result — 2026-08-17
 
-Run against the thresholds fixed in `PILOT_SPEC.md` before any estimation.
+Run against the thresholds fixed in [`2026-08-17-pilot-spec.md`](2026-08-17-pilot-spec.md) before any estimation.
 
 Panel: 64,553 observations, 52 names (25 treated, 27 control), 1,253 trading days,
 2021-08-19 to 2026-08-17. Outcome is log dollar volume with name and date fixed

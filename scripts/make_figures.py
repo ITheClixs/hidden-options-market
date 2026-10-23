@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 import matplotlib
@@ -11,11 +10,9 @@ import numpy as np
 import pandas as pd
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
+from hidden_options.measure.flex_panel import daily_inventory, load_panel
 
 OUT = Path("paper/figures")
 GREY, DARK, MID = "#b0b0b0", "#2b2b2b", "#707070"

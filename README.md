@@ -69,7 +69,8 @@ strike looks like a FLEX tell. Scored against the OCC report over 486,895 cleare
 that rule has precision 0.67 and recall 0.34. FLEX is routinely struck *on* the grid —
 `1AAON` at \$99.00 is FLEX — so two thirds of it is invisible to any strike-based test,
 and a third of what the rule flags is not FLEX at all. This project used the rule first;
-the superseded census is kept as it was in [`docs/FLEX_CENSUS.md`](docs/FLEX_CENSUS.md).
+the superseded census is kept as it was in
+[`docs/log/2026-08-18-flex-census.md`](docs/log/2026-08-18-flex-census.md).
 
 **A cleared series is not a position.** Open interest is reported per series, and
 positions span series. Conflating them produced errors in both directions that do not
@@ -115,10 +116,14 @@ src/hidden_options/measure/flex_panel.py    panel assembly and inventory measure
 src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
 src/hidden_options/collect/                 chains, holdings, bars and N-PORT collectors
 scripts/                                    backfill, regressions, figures
-docs/                                       results and corrections, as they happened
+docs/                                       the current result and how the data is collected
+docs/log/                                   superseded work and corrections, dated, as written
+archive/                                    the scripts behind the log's results
 ```
 
-The earlier strike-heuristic census is rebuilt by `scripts/reproduce.sh`. Raw snapshots
+The earlier strike-heuristic census is rebuilt by `scripts/reproduce.sh`; the write-ups
+of what was tried and what replaced it are indexed in [`docs/log/`](docs/log/README.md),
+and the scripts that produced them in [`archive/`](archive/README.md). Raw snapshots
 from the collectors are vendor-sourced and not redistributed here; the scheduled capture
 is described in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 

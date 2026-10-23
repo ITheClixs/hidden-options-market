@@ -14,8 +14,9 @@ import pytest
 from hidden_options import cli
 from hidden_options.collect.runner import SymbolOutcome
 
-# The alias entry point lives in pyproject.toml; docs/ holds historical write-ups.
-ALLOWED = ("pyproject.toml", "docs/")
+# The alias entry point lives in pyproject.toml; the research log and the archived scripts
+# are kept as they were written.
+ALLOWED = ("pyproject.toml", "docs/log/", "archive/")
 OLD_NAME = "absorb"
 
 

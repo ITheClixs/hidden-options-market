@@ -5,9 +5,9 @@ Why this exists
 The roll-window test needs intraday returns on the underlying. Free intraday history
 is shallow — 5-minute bars reach back 60 days and 1-minute bars 7 days — so two years
 of it cannot be downloaded, only accumulated. The power arithmetic in
-`docs/POWER_AND_DATA_LIMITS.md` shows the achievable minimum detectable effect falls
-from roughly 27 bp on the free 60-day window to roughly 9 bp after a year of
-accumulation, which is the difference between a test that can see the hypothesised
+`docs/log/2026-08-17-power-and-data-limits.md` shows the achievable minimum detectable
+effect falls from roughly 27 bp on the free 60-day window to roughly 9 bp after a year
+of accumulation, which is the difference between a test that can see the hypothesised
 effect and one that cannot.
 
 Each run fetches an overlapping window rather than only the current day. Re-fetching

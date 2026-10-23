@@ -4,8 +4,8 @@
 # Captures are published as one asset per trading day under a monthly release tag
 # (data-YYYY-MM) in a private repository, because the raw snapshots are
 # vendor-sourced and not redistributable. Access to that repository is required;
-# set KFA_DATA_REPO to use a different store. This pulls them back down and unpacks them, so a fresh clone can
-# reconstruct the full panel with one command.
+# set KFA_DATA_REPO to use a different store. This pulls them back down and unpacks
+# them, so a fresh clone can reconstruct the full panel with one command.
 #
 # Usage:
 #   scripts/fetch_captures.sh                 # every month available
@@ -26,10 +26,11 @@ fi
 if [[ $# -gt 0 ]]; then
   months=("$@")
 else
+  # Month releases are tagged data-YYYY-MM. The store also holds a flex-archive release
+  # (the OCC FLEX reports, see docs/OPERATIONS.md); it is not a month and is left out.
   mapfile -t months < <(
-    gh release list -R "${DATA_REPO}" --limit 200 |
-      awk '{print $1}' |
-      grep '^data-' |
+    gh release list -R "${DATA_REPO}" --limit 200 --json tagName --jq '.[].tagName' |
+      grep -E '^data-[0-9]{4}-[0-9]{2}$' |
       sed 's/^data-//' |
       sort
   )

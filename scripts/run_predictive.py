@@ -27,16 +27,13 @@ dominated by persistent cross-sectional differences that the fixed effects remov
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
-from hidden_options.measure.panel import fit  # noqa: E402
+from hidden_options.measure.flex_panel import daily_inventory, load_panel
+from hidden_options.measure.panel import fit
 
 
 def build(

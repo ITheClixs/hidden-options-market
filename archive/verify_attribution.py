@@ -15,7 +15,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 import time
 import urllib.parse
 import urllib.request
@@ -23,9 +22,7 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.config import USER_AGENT  # noqa: E402
+from hidden_options.config import USER_AGENT
 
 UA = {"User-Agent": USER_AGENT}
 FTS = "https://efts.sec.gov/LATEST/search-index?q={q}&forms=NPORT-P"

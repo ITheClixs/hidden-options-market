@@ -14,11 +14,9 @@ import logging
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.collect.http import build_session  # noqa: E402
-from hidden_options.collect.occ import fetch_open_interest  # noqa: E402
-from hidden_options.config import RAW_DIR  # noqa: E402
+from hidden_options.collect.http import build_session
+from hidden_options.collect.occ import fetch_open_interest
+from hidden_options.config import RAW_DIR
 
 
 def main(argv: list[str] | None = None) -> int:

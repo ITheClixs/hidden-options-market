@@ -26,19 +26,16 @@ from __future__ import annotations
 
 import argparse
 import logging
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.collect.bars import fetch_bars  # noqa: E402
-from hidden_options.collect.http import build_session  # noqa: E402
-from hidden_options.collect.nport import as_of_series  # noqa: E402
-from hidden_options.config import RAW_DIR, load_programmes, load_universe  # noqa: E402
-from hidden_options.measure.panel import fit  # noqa: E402
+from hidden_options.collect.bars import fetch_bars
+from hidden_options.collect.http import build_session
+from hidden_options.collect.nport import as_of_series
+from hidden_options.config import RAW_DIR, load_programmes, load_universe
+from hidden_options.measure.panel import fit
 
 BIN_MINUTES = 30
 REFERENCE_BIN = "12:00"  # mid-session, the quietest and least mechanical period

@@ -24,16 +24,13 @@ from __future__ import annotations
 
 import argparse
 import glob
-import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.config import RAW_DIR, load_programmes  # noqa: E402
+from hidden_options.config import RAW_DIR, load_programmes
 
 RISK_FREE = 0.04
 

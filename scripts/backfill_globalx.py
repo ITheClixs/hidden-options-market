@@ -27,10 +27,8 @@ import sys
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from hidden_options.collect.http import FetchError, build_session, fetch  # noqa: E402
-from hidden_options.config import RAW_DIR  # noqa: E402
+from hidden_options.collect.http import FetchError, build_session, fetch
+from hidden_options.config import RAW_DIR
 
 URL = "https://assets.globalxetfs.com/funds/holdings/{fund}_full-holdings_{day:%Y%m%d}.csv"
 
