@@ -22,8 +22,9 @@ from hidden_options.config import PROJECT_ROOT
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 
-# The name becomes `results/<name>.json`, so it must not be able to leave the directory.
-_NAME = re.compile(r"[A-Za-z0-9_-]+")
+# A name becomes a file stem (`results/<name>.json`, `paper/tables/<name>.tex`), so it must
+# not be able to leave its directory. Anything that names an output file uses this rule.
+NAME_PATTERN = re.compile(r"[A-Za-z0-9_-]+")
 _FIELDS = ("name", "values", "macros", "inputs", "generated_at")
 
 
@@ -58,7 +59,7 @@ def write_result(result: Result, root: Path = RESULTS_DIR) -> Path:
     dirty every file on every run, so when the stored file differs only in its
     timestamp it is left untouched: the stamp then says when the content last changed.
     """
-    if not _NAME.fullmatch(result.name):
+    if not NAME_PATTERN.fullmatch(result.name):
         raise ValueError(f"Result name {result.name!r} must be letters, digits, _ or -")
 
     path = root / f"{result.name}.json"

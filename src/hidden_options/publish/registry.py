@@ -15,16 +15,20 @@ An analysis module registers its pieces with a decorator when it is imported:
 new analysis is wired in by listing its module in REGISTRATION_MODULES and nothing
 else. Registration modules are named explicitly rather than discovered, so what the
 paper depends on can be read off one tuple.
+
+A table name becomes `paper/tables/<name>.tex`, so TABLES accepts only the characters a
+result name may use: letters, digits, `_` and `-`.
 """
 
 from __future__ import annotations
 
 import importlib
+import re
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Generic, TypeVar
 
-from hidden_options.publish.results import Result, write_result
+from hidden_options.publish.results import NAME_PATTERN, Result, write_result
 
 T = TypeVar("T")
 
@@ -38,13 +42,23 @@ REGISTRATION_MODULES: tuple[str, ...] = ()
 
 
 class Registry(Generic[T]):  # noqa: UP046 - PEP 695 syntax needs Python 3.12
-    """An insertion-ordered name -> callable map that refuses duplicate names."""
+    """An insertion-ordered name -> callable map that refuses duplicate names.
 
-    def __init__(self, kind: str) -> None:
+    With a `name_pattern`, a name must match it in full, which is how a registry whose
+    names become file names keeps them inside their folder.
+    """
+
+    def __init__(self, kind: str, *, name_pattern: re.Pattern[str] | None = None) -> None:
         self.kind = kind
+        self.name_pattern = name_pattern
         self._entries: dict[str, T] = {}
 
     def register(self, name: str) -> Callable[[T], T]:
+        if self.name_pattern is not None and not self.name_pattern.fullmatch(name):
+            raise ValueError(
+                f"Invalid {self.kind} name {name!r}: must match {self.name_pattern.pattern}"
+            )
+
         def decorator(fn: T) -> T:
             if name in self._entries:
                 raise ValueError(f"A {self.kind} named {name!r} is already registered")
@@ -65,7 +79,8 @@ class Registry(Generic[T]):  # noqa: UP046 - PEP 695 syntax needs Python 3.12
 
 ANALYSES: Registry[AnalysisFn] = Registry("analysis")
 FIGURES: Registry[FigureFn] = Registry("figure builder")
-TABLES: Registry[TableFn] = Registry("table")
+# A table name becomes `paper/tables/<name>.tex`.
+TABLES: Registry[TableFn] = Registry("table", name_pattern=NAME_PATTERN)
 
 
 def load_registrations() -> None:

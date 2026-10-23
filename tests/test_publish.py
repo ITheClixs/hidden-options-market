@@ -31,6 +31,7 @@ from hidden_options.publish import (
     render_table,
     write_result,
 )
+from hidden_options.publish.results import NAME_PATTERN
 
 TEMPLATE = "# Title\n\nOpen interest reached {{OiEnd}} contracts, worth {{MarkEnd}}.\n"
 
@@ -485,6 +486,29 @@ class TestRegistry:
 
         with pytest.raises(ValueError, match="panel"):
             analyses.register("panel")(lambda: make_result())
+
+    def test_a_registry_can_restrict_its_names(self):
+        tables = registry.Registry("table", name_pattern=NAME_PATTERN)
+
+        tables.register("predictive_2-a")(lambda results: "")
+
+        for name in ("../escape", "a/b", "", "has space", "dot.tex", "..", "x\n"):
+            with pytest.raises(ValueError, match="table name"):
+                tables.register(name)
+        assert list(tables.select()) == ["predictive_2-a"]
+
+    def test_registry_without_a_pattern_accepts_any_name(self):
+        figures = registry.Registry("figure builder")
+
+        figures.register("growth.v2")(lambda: None)
+
+        assert list(figures.select()) == ["growth.v2"]
+
+    def test_table_names_follow_the_result_name_rule(self):
+        """A table name becomes `paper/tables/<name>.tex`, so it cannot leave that folder."""
+        assert registry.TABLES.name_pattern is NAME_PATTERN
+        with pytest.raises(ValueError, match=r"'\.\./escape'"):
+            registry.TABLES.register("../escape")
 
     def test_load_registrations_imports_the_listed_modules(self, tmp_path, monkeypatch):
         (tmp_path / "fake_analysis.py").write_text(
