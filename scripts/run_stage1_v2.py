@@ -41,10 +41,10 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.collect.http import build_session  # noqa: E402
-from absorb.collect.nport import as_of_series  # noqa: E402
-from absorb.config import RAW_DIR, load_programmes, load_universe  # noqa: E402
-from absorb.measure.panel import fit  # noqa: E402
+from hidden_options.collect.http import build_session  # noqa: E402
+from hidden_options.collect.nport import as_of_series  # noqa: E402
+from hidden_options.config import RAW_DIR, load_programmes, load_universe  # noqa: E402
+from hidden_options.measure.panel import fit  # noqa: E402
 
 WEEKDAYS = {"Mon": 0, "Tue": 1, "Wed": 2, "Thu": 3, "Fri": 4}
 

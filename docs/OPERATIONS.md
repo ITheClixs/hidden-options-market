@@ -13,7 +13,7 @@ there. The raw snapshots are vendor-sourced and are not redistributed, so this
 public repository contains code and derived results only. The workflow
 refuses to publish if fewer than 80% of symbols were captured.
 
-To rebuild the panel yourself, run the collector (`absorb-collect --root data/raw`)
+To rebuild the panel yourself, run the collector (`hidden-options collect --root data/raw`)
 on your own schedule. With access to the private store, retrieve captures with:
 
 ```bash

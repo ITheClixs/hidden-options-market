@@ -13,7 +13,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from absorb.collect.nport import (
+from hidden_options.collect.nport import (
     NportParseError,
     NportReport,
     as_of_series,

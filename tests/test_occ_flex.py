@@ -12,7 +12,7 @@ from datetime import date
 
 import pytest
 
-from absorb.collect.occ_flex import (
+from hidden_options.collect.occ_flex import (
     FlexReportError,
     parse_report,
     snapshot_path,

@@ -27,7 +27,7 @@ from datetime import date
 import pandas as pd
 import requests
 
-from absorb.collect.http import fetch
+from hidden_options.collect.http import fetch
 
 FILING_INDEX_URL = "https://www.sec.gov/cgi-bin/browse-edgar"
 DOCUMENT_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/primary_doc.xml"

@@ -13,7 +13,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-DATA_ROOT = Path(os.environ.get("ABSORB_DATA_ROOT", PROJECT_ROOT / "data"))
+DATA_ROOT = Path(os.environ.get("HIDDEN_OPTIONS_DATA_ROOT", PROJECT_ROOT / "data"))
 RAW_DIR = DATA_ROOT / "raw"
 INTERIM_DIR = DATA_ROOT / "interim"
 CONFIG_DIR = PROJECT_ROOT / "configs"
@@ -27,19 +27,19 @@ CBOE_CHAIN_URL = "https://cdn.cboe.com/api/global/delayed_quotes/options/{symbol
 # OCC series search returns authoritative per-series open interest for one underlying.
 OCC_SERIES_URL = "https://marketdata.theocc.com/series-search"
 
-# SEC EDGAR asks automated clients to declare a contact address. Set ABSORB_USER_AGENT
-# to include one before running the N-PORT collectors.
+# SEC EDGAR asks automated clients to declare a contact address. Set
+# HIDDEN_OPTIONS_USER_AGENT to include one before running the N-PORT collectors.
 _DEFAULT_USER_AGENT = (
-    "absorb-research/0.1 (academic study of FLEX option data; "
-    "+https://github.com/ITheClixs/known-flow-alpha)"
+    "hidden-options/0.2 (academic study of FLEX option data; "
+    "+https://github.com/ITheClixs/hidden-options-market)"
 )
-USER_AGENT = os.environ.get("ABSORB_USER_AGENT", _DEFAULT_USER_AGENT)
+USER_AGENT = os.environ.get("HIDDEN_OPTIONS_USER_AGENT", _DEFAULT_USER_AGENT)
 
 REQUEST_TIMEOUT_SECONDS = 45
 REQUEST_MAX_ATTEMPTS = 4
 REQUEST_BACKOFF_SECONDS = 2.0
 # Politeness delay between successive requests to the same host.
-REQUEST_SPACING_SECONDS = float(os.environ.get("ABSORB_REQUEST_SPACING", "0.6"))
+REQUEST_SPACING_SECONDS = float(os.environ.get("HIDDEN_OPTIONS_REQUEST_SPACING", "0.6"))
 
 
 @dataclass(frozen=True)

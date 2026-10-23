@@ -1,7 +1,7 @@
 [project]
-name = "absorb"
-version = "0.1.0"
-description = "FLEX options from OCC clearing data: panel assembly and predictive tests"
+name = "hidden-options-market"
+version = "0.2.0"
+description = "The hidden options market: OCC FLEX clearing data as a panel, measured and decoded"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -23,14 +23,16 @@ dev = [
 ]
 
 [project.scripts]
-absorb-collect = "absorb.cli:main"
+hidden-options = "hidden_options.cli:main"
+# Legacy name, still called by scheduled jobs; removed once they use `hidden-options collect`.
+absorb-collect = "hidden_options.cli:collect_alias"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/absorb"]
+packages = ["src/hidden_options"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

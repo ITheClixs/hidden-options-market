@@ -8,7 +8,7 @@ sample launched before that window opens. There is no pre/post variation inside 
 the difference-in-differences that identified Stage 1 collapses.
 
 Identification instead comes from the interaction of dose with time of day. Name fixed
-effects absorb each name's overall liquidity, and date x bin fixed effects absorb the
+effects remove each name's overall liquidity, and date x bin fixed effects remove the
 market-wide intraday shape on every session. What remains is whether names with larger
 programmes carry a *different* volume profile across the session:
 
@@ -34,11 +34,11 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.collect.bars import fetch_bars  # noqa: E402
-from absorb.collect.http import build_session  # noqa: E402
-from absorb.collect.nport import as_of_series  # noqa: E402
-from absorb.config import RAW_DIR, load_programmes, load_universe  # noqa: E402
-from absorb.measure.panel import fit  # noqa: E402
+from hidden_options.collect.bars import fetch_bars  # noqa: E402
+from hidden_options.collect.http import build_session  # noqa: E402
+from hidden_options.collect.nport import as_of_series  # noqa: E402
+from hidden_options.config import RAW_DIR, load_programmes, load_universe  # noqa: E402
+from hidden_options.measure.panel import fit  # noqa: E402
 
 BIN_MINUTES = 30
 REFERENCE_BIN = "12:00"  # mid-session, the quietest and least mechanical period

@@ -17,8 +17,8 @@ from datetime import date, datetime
 import pandas as pd
 import requests
 
-from absorb.collect.http import fetch
-from absorb.config import OCC_SERIES_URL
+from hidden_options.collect.http import fetch
+from hidden_options.config import OCC_SERIES_URL
 
 _HEADER_TOKEN = "ProductSymbol"
 _EXPECTED_FIELDS = 10

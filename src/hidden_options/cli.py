@@ -1,4 +1,4 @@
-"""Command-line entry point for the daily collector."""
+"""Command-line entry point: the `hidden-options` command and its subcommands."""
 
 from __future__ import annotations
 
@@ -7,34 +7,44 @@ import logging
 import sys
 from pathlib import Path
 
-from absorb.collect.lock import AlreadyRunning, single_instance
-from absorb.collect.runner import run_daily_collection
-from absorb.config import RAW_DIR, load_programmes, load_universe
+from hidden_options.collect.lock import AlreadyRunning, single_instance
+from hidden_options.collect.runner import run_daily_collection
+from hidden_options.config import RAW_DIR, load_programmes, load_universe
 
 LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="absorb-collect",
+        prog="hidden-options",
+        description="Collect and measure OCC FLEX clearing data.",
+    )
+    commands = parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
+
+    collect = commands.add_parser(
+        "collect",
+        help="capture one daily snapshot of free option-chain and open-interest data",
         description="Capture one daily snapshot of free option-chain and open-interest data.",
     )
-    parser.add_argument(
+    collect.add_argument(
         "--sources",
         default="holdings,cboe,occ,bars",
         help="Comma-separated sources (holdings, cboe, occ, bars). Default: all",
     )
-    parser.add_argument(
+    collect.add_argument(
         "--root", type=Path, default=RAW_DIR, help=f"Output root. Default: {RAW_DIR}"
     )
-    parser.add_argument("--universe", type=Path, default=None, help="Override universe config path")
-    parser.add_argument("--funds", type=Path, default=None, help="Override fund registry path")
-    parser.add_argument("--verbose", action="store_true", help="Debug logging")
+    collect.add_argument(
+        "--universe", type=Path, default=None, help="Override universe config path"
+    )
+    collect.add_argument("--funds", type=Path, default=None, help="Override fund registry path")
+    collect.add_argument("--verbose", action="store_true", help="Debug logging")
+    collect.set_defaults(handler=_collect)
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+def _collect(args: argparse.Namespace) -> int:
+    """Run one collection pass. Exit codes are the contract with the scheduler."""
     logging.basicConfig(
         level=logging.DEBUG if args.verbose else logging.INFO,
         format=LOG_FORMAT,
@@ -80,6 +90,21 @@ def main(argv: list[str] | None = None) -> int:
         logging.error("No snapshots captured; treating run as failed")
         return 1
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    return args.handler(args)
+
+
+def collect_alias(argv: list[str] | None = None) -> int:
+    """Entry point for the pre-rename collector command, which scheduled jobs still call.
+
+    It forwards to `hidden-options collect` so an existing cron or workflow line keeps
+    working unchanged until it is moved to the new command.
+    """
+    forwarded = sys.argv[1:] if argv is None else argv
+    return main(["collect", *forwarded])
 
 
 if __name__ == "__main__":

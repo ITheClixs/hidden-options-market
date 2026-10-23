@@ -10,7 +10,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from absorb.measure.snapshots import deduplicate, distinct_snapshots, frame_fingerprint
+from hidden_options.measure.snapshots import deduplicate, distinct_snapshots, frame_fingerprint
 
 
 def _write(tmp_path, name, frame):

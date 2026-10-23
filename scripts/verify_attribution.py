@@ -25,7 +25,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.config import USER_AGENT  # noqa: E402
+from hidden_options.config import USER_AGENT  # noqa: E402
 
 UA = {"User-Agent": USER_AGENT}
 FTS = "https://efts.sec.gov/LATEST/search-index?q={q}&forms=NPORT-P"

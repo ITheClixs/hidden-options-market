@@ -12,7 +12,7 @@ import pandas as pd
 import pytest
 from scipy import stats
 
-from absorb.measure.panel import absorb_two_way, fit
+from hidden_options.measure.panel import fit, partial_out_two_way
 
 
 def _panel(beta: float = 0.30, n_names: int = 25, n_dates: int = 200, seed: int = 0):
@@ -40,10 +40,10 @@ def _panel(beta: float = 0.30, n_names: int = 25, n_dates: int = 200, seed: int 
     return pd.DataFrame(rows)
 
 
-class TestAbsorbTwoWay:
+class TestPartialOutTwoWay:
     def test_removes_entity_and_time_means(self):
         frame = _panel()
-        out = absorb_two_way(frame, ["y"], entity="symbol", time="date")
+        out = partial_out_two_way(frame, ["y"], entity="symbol", time="date")
         joined = frame[["symbol", "date"]].join(out)
         assert joined.groupby("symbol")["y"].mean().abs().max() < 1e-8
         assert joined.groupby("date")["y"].mean().abs().max() < 1e-8
@@ -51,7 +51,7 @@ class TestAbsorbTwoWay:
     def test_handles_unbalanced_panels(self):
         """One pass of alternating demeaning is not enough when groups differ in size."""
         frame = _panel().drop(index=range(0, 400, 3))
-        out = absorb_two_way(frame, ["y"], entity="symbol", time="date")
+        out = partial_out_two_way(frame, ["y"], entity="symbol", time="date")
         joined = frame[["symbol", "date"]].reset_index(drop=True).join(out.reset_index(drop=True))
         assert joined.groupby("symbol")["y"].mean().abs().max() < 1e-6
 
@@ -140,9 +140,9 @@ class TestFit:
         """The whole point of clustering: naive OLS understates the error here."""
         frame = _panel(beta=0.30)
         est = fit(frame, "y", ["treat"])["treat"]
-        absorbed = absorb_two_way(frame, ["y", "treat"], entity="symbol", time="date")
-        x = absorbed[["treat"]].to_numpy()
-        y = absorbed["y"].to_numpy()
+        purged = partial_out_two_way(frame, ["y", "treat"], entity="symbol", time="date")
+        x = purged[["treat"]].to_numpy()
+        y = purged["y"].to_numpy()
         b = np.linalg.lstsq(x, y, rcond=None)[0]
         resid = y - x @ b
         naive_se = float(np.sqrt((resid @ resid) / (len(y) - 1) / (x.T @ x)[0, 0]))
@@ -163,7 +163,7 @@ class TestFit:
         with pytest.raises(ValueError, match="no complete observations"):
             fit(frame, "y", ["treat"])
 
-    def test_absorbed_regressor_is_reported_as_collinear(self):
+    def test_fixed_effect_regressor_is_reported_as_collinear(self):
         """A time-invariant regressor is wiped out by entity effects; that must fail
         loudly rather than return a meaningless coefficient."""
         frame = _panel()

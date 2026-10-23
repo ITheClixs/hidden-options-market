@@ -24,8 +24,8 @@ from datetime import date, datetime
 import pandas as pd
 import requests
 
-from absorb.collect.cboe import ChainParseError, parse_contract
-from absorb.collect.http import fetch
+from hidden_options.collect.cboe import ChainParseError, parse_contract
+from hidden_options.collect.http import fetch
 
 HOLDINGS_COLUMNS = (
     "fund",

@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
+from hidden_options.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
 
 OUT = Path("docs/figures")
 WINDOW = (pd.Timestamp("2025-07-23"), pd.Timestamp("2026-08-17"))

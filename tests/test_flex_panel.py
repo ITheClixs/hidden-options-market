@@ -5,7 +5,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from absorb.measure.flex_panel import (
+from hidden_options.measure.flex_panel import (
     daily_inventory,
     inventory_changes,
     load_panel,

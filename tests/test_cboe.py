@@ -7,7 +7,7 @@ from datetime import date, datetime
 
 import pytest
 
-from absorb.collect.cboe import (
+from hidden_options.collect.cboe import (
     ChainParseError,
     parse_chain,
     parse_contract,

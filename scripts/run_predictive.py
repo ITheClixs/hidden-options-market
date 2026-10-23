@@ -21,7 +21,7 @@ Specification, with underlying and date fixed effects and errors two-way cluster
 Outcomes are next-day absolute return and next-day squared return, both standard
 proxies for realised volatility at daily frequency. Predictors enter as innovations
 relative to the underlying's own recent level, because the level of FLEX inventory is
-dominated by persistent cross-sectional differences that the fixed effects absorb.
+dominated by persistent cross-sectional differences that the fixed effects remove.
 """
 
 from __future__ import annotations
@@ -35,8 +35,8 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
-from absorb.measure.panel import fit  # noqa: E402
+from hidden_options.measure.flex_panel import daily_inventory, load_panel  # noqa: E402
+from hidden_options.measure.panel import fit  # noqa: E402
 
 
 def build(

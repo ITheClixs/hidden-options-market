@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from absorb.collect.bars import (
+from hidden_options.collect.bars import (
     INTERVAL_MAX_RANGE,
     BarParseError,
     fetch_bars,

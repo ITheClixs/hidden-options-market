@@ -79,7 +79,7 @@ def _demean(frame: pd.DataFrame, columns: list[str], group: str) -> pd.DataFrame
     return frame[columns] - frame.groupby(group, observed=True)[columns].transform("mean")
 
 
-def absorb_two_way(
+def partial_out_two_way(
     frame: pd.DataFrame, columns: list[str], *, entity: str, time: str, iterations: int = 30
 ) -> pd.DataFrame:
     """Remove entity and time fixed effects by alternating projection.
@@ -122,14 +122,14 @@ def fit(
     if data.empty:
         raise ValueError("panel has no complete observations")
 
-    absorbed = absorb_two_way(data, [outcome, *regressors], entity=entity, time=time)
-    y = absorbed[outcome].to_numpy()
-    x = absorbed[regressors].to_numpy()
+    purged = partial_out_two_way(data, [outcome, *regressors], entity=entity, time=time)
+    y = purged[outcome].to_numpy()
+    x = purged[regressors].to_numpy()
 
     xtx = x.T @ x
     if np.linalg.matrix_rank(xtx) < xtx.shape[0]:
         raise ValueError(
-            f"regressors are collinear after absorbing {entity} and {time} effects: {regressors}"
+            f"regressors are collinear after removing {entity} and {time} effects: {regressors}"
         )
 
     xtx_inv = np.linalg.inv(xtx)
@@ -184,4 +184,4 @@ def fit(
     }
 
 
-__all__ = ["Estimate", "absorb_two_way", "fit"]
+__all__ = ["Estimate", "fit", "partial_out_two_way"]

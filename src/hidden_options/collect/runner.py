@@ -12,9 +12,9 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-from absorb.collect import bars, cboe, holdings, occ
-from absorb.collect.http import build_session
-from absorb.config import RAW_DIR, Programme, Universe
+from hidden_options.collect import bars, cboe, holdings, occ
+from hidden_options.collect.http import build_session
+from hidden_options.config import RAW_DIR, Programme, Universe
 
 
 @dataclass(frozen=True)

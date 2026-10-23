@@ -11,8 +11,8 @@ import json
 
 import pytest
 
-from absorb import cli
-from absorb.collect.runner import SymbolOutcome
+from hidden_options import cli
+from hidden_options.collect.runner import SymbolOutcome
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def stub_run(monkeypatch):
 class TestExitCodes:
     def test_success_returns_zero(self, stub_run, tmp_path):
         stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=10),))
-        assert cli.main(["--root", str(tmp_path)]) == 0
+        assert cli.main(["collect", "--root", str(tmp_path)]) == 0
 
     def test_partial_failure_still_returns_zero(self, stub_run, tmp_path):
         """A run that captured most symbols is a good run; the manifest records gaps."""
@@ -47,42 +47,44 @@ class TestExitCodes:
                 SymbolOutcome("cboe_chain", "NVDA", "error", detail="FetchError: 503"),
             )
         )
-        assert cli.main(["--root", str(tmp_path)]) == 0
+        assert cli.main(["collect", "--root", str(tmp_path)]) == 0
 
     def test_total_failure_returns_one(self, stub_run, tmp_path):
         stub_run((SymbolOutcome("cboe_chain", "MSTR", "error", detail="down"),))
-        assert cli.main(["--root", str(tmp_path)]) == 1
+        assert cli.main(["collect", "--root", str(tmp_path)]) == 1
 
     def test_bad_universe_path_returns_two(self, tmp_path):
-        code = cli.main(["--universe", str(tmp_path / "missing.json"), "--root", str(tmp_path)])
+        code = cli.main(
+            ["collect", "--universe", str(tmp_path / "missing.json"), "--root", str(tmp_path)]
+        )
         assert code == 2
 
     def test_malformed_config_returns_two(self, tmp_path):
         bad = tmp_path / "bad.json"
         bad.write_text("{")
-        assert cli.main(["--universe", str(bad), "--root", str(tmp_path)]) == 2
+        assert cli.main(["collect", "--universe", str(bad), "--root", str(tmp_path)]) == 2
 
 
 class TestArgumentHandling:
     def test_defaults_to_every_source(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=1),))
-        cli.main(["--root", str(tmp_path)])
+        cli.main(["collect", "--root", str(tmp_path)])
         assert captured["sources"] == ("holdings", "cboe", "occ", "bars")
 
     def test_source_subset_is_honoured(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("occ_oi", "MSTR", "ok", rows=1),))
-        cli.main(["--root", str(tmp_path), "--sources", "occ"])
+        cli.main(["collect", "--root", str(tmp_path), "--sources", "occ"])
         assert captured["sources"] == ("occ",)
 
     def test_programmes_not_loaded_when_holdings_disabled(self, stub_run, tmp_path):
         """Avoids failing a chain-only run because the fund registry is absent."""
         captured = stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=1),))
-        cli.main(["--root", str(tmp_path), "--sources", "cboe"])
+        cli.main(["collect", "--root", str(tmp_path), "--sources", "cboe"])
         assert captured["programmes"] == ()
 
     def test_programmes_loaded_when_holdings_enabled(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("fund_holdings", "MSTY", "ok", rows=1),))
-        cli.main(["--root", str(tmp_path), "--sources", "holdings"])
+        cli.main(["collect", "--root", str(tmp_path), "--sources", "holdings"])
         assert len(captured["programmes"]) > 10
 
     def test_custom_fund_registry_is_used(self, stub_run, tmp_path):
@@ -97,9 +99,11 @@ class TestArgumentHandling:
             )
         )
         captured = stub_run((SymbolOutcome("fund_holdings", "AAA", "ok", rows=1),))
-        cli.main(["--root", str(tmp_path), "--sources", "holdings", "--funds", str(registry)])
+        cli.main(
+            ["collect", "--root", str(tmp_path), "--sources", "holdings", "--funds", str(registry)]
+        )
         assert [p.fund for p in captured["programmes"]] == ["AAA"]
 
     def test_verbose_flag_is_accepted(self, stub_run, tmp_path):
         stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=1),))
-        assert cli.main(["--root", str(tmp_path), "--verbose"]) == 0
+        assert cli.main(["collect", "--root", str(tmp_path), "--verbose"]) == 0

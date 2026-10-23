@@ -12,7 +12,7 @@ from dataclasses import dataclass
 
 import requests
 
-from absorb.config import (
+from hidden_options.config import (
     REQUEST_BACKOFF_SECONDS,
     REQUEST_MAX_ATTEMPTS,
     REQUEST_SPACING_SECONDS,

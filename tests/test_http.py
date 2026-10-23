@@ -11,8 +11,8 @@ from __future__ import annotations
 import pytest
 import requests
 
-from absorb.collect import http
-from absorb.collect.http import FetchError, build_session, fetch
+from hidden_options.collect import http
+from hidden_options.collect.http import FetchError, build_session, fetch
 
 
 class _Response:
@@ -102,7 +102,7 @@ class TestBuildSession:
     def test_sets_an_identifying_user_agent(self):
         """Free public endpoints deserve an identifiable, contactable client."""
         session = build_session()
-        assert "absorb-research" in session.headers["User-Agent"]
+        assert "hidden-options" in session.headers["User-Agent"]
 
     def test_requests_compression(self):
         assert "gzip" in build_session().headers["Accept-Encoding"]

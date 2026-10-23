@@ -10,7 +10,7 @@ from datetime import date, datetime
 
 import pytest
 
-from absorb.collect.occ import OccParseError, parse_open_interest, snapshot_partition
+from hidden_options.collect.occ import OccParseError, parse_open_interest, snapshot_partition
 
 REPORT = (
     b"Series Search Results for AAPL\n"

@@ -12,7 +12,7 @@ import os
 
 import pytest
 
-from absorb.collect.lock import AlreadyRunning, single_instance
+from hidden_options.collect.lock import AlreadyRunning, single_instance
 
 
 class TestSingleInstance:

@@ -17,8 +17,8 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TEMPLATE="${PROJECT_DIR}/scripts/local.absorb.collect.plist"
-LABEL="local.absorb.collect"
+TEMPLATE="${PROJECT_DIR}/scripts/local.hidden-options.collect.plist"
+LABEL="local.hidden-options.collect"
 TARGET="${HOME}/Library/LaunchAgents/${LABEL}.plist"
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
@@ -44,14 +44,14 @@ if [[ ! -f "${TEMPLATE}" ]]; then
   exit 1
 fi
 
-if [[ ! -x "${PROJECT_DIR}/.venv/bin/absorb-collect" ]]; then
-  echo "absorb-collect not installed. Run: uv venv && uv pip install -e '.[dev]'" >&2
+if [[ ! -x "${PROJECT_DIR}/.venv/bin/hidden-options" ]]; then
+  echo "hidden-options not installed. Run: uv venv && uv pip install -e '.[dev]'" >&2
   exit 1
 fi
 
 mkdir -p "${HOME}/Library/LaunchAgents" "${PROJECT_DIR}/logs"
 
-rendered="$(mktemp -t absorb-plist)"
+rendered="$(mktemp -t hidden-options-plist)"
 trap 'rm -f "${rendered}"' EXIT
 sed "s|REPLACE_WITH_PROJECT_DIR|${PROJECT_DIR}|g" "${TEMPLATE}" >"${rendered}"
 

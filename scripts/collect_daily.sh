@@ -13,17 +13,17 @@ set -uo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${PROJECT_DIR}/logs"
 LOG_FILE="${LOG_DIR}/collect_$(date +%Y-%m-%d).log"
-PYTHON="${PROJECT_DIR}/.venv/bin/absorb-collect"
+CLI="${PROJECT_DIR}/.venv/bin/hidden-options"
 
 mkdir -p "${LOG_DIR}"
 
-if [[ ! -x "${PYTHON}" ]]; then
-  echo "$(date -u +%FT%TZ) FATAL absorb-collect not found at ${PYTHON}" >>"${LOG_FILE}"
+if [[ ! -x "${CLI}" ]]; then
+  echo "$(date -u +%FT%TZ) FATAL hidden-options not found at ${CLI}" >>"${LOG_FILE}"
   exit 127
 fi
 
 echo "$(date -u +%FT%TZ) starting collection" >>"${LOG_FILE}"
-"${PYTHON}" --root "${PROJECT_DIR}/data/raw" >>"${LOG_FILE}" 2>&1
+"${CLI}" collect --root "${PROJECT_DIR}/data/raw" >>"${LOG_FILE}" 2>&1
 status=$?
 echo "$(date -u +%FT%TZ) finished with exit ${status}" >>"${LOG_FILE}"
 

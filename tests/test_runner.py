@@ -12,9 +12,9 @@ from datetime import UTC, datetime
 import pandas as pd
 import pytest
 
-from absorb.collect import cboe, runner
-from absorb.collect.http import FetchError
-from absorb.config import Universe, load_universe
+from hidden_options.collect import cboe, runner
+from hidden_options.collect.http import FetchError
+from hidden_options.config import Universe, load_universe
 
 AS_OF = datetime(2026, 8, 16, 21, 5, tzinfo=UTC)
 

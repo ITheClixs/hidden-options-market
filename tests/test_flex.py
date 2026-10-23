@@ -12,7 +12,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from absorb.measure.flex import (
+from hidden_options.measure.flex import (
     ClassifierConfig,
     build_census,
     classify,

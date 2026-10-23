@@ -14,22 +14,22 @@ PY=.venv/bin/python
 
 if [[ "${1:-}" != "--quick" ]]; then
   echo "==> 1/5  OCC clearing data for the optionable universe (~682 symbols)"
-  ABSORB_REQUEST_SPACING=0.12 $PY scripts/flex_census.py
+  HIDDEN_OPTIONS_REQUEST_SPACING=0.12 $PY scripts/flex_census.py
 
   echo "==> 2/5  listed chains, fund holdings and bars for the study universe"
-  $PY -m absorb.cli --root data/raw
+  $PY -m hidden_options.cli collect --root data/raw
 
   echo "==> 3/5  fund net assets from N-PORT"
-  ABSORB_REQUEST_SPACING=0.2 $PY scripts/fetch_nport.py
+  HIDDEN_OPTIONS_REQUEST_SPACING=0.2 $PY scripts/fetch_nport.py
 fi
 
 echo "==> 4/5  census, structures and spots"
 $PY - <<'PYEOF'
 import glob, json, logging, pandas as pd
 logging.basicConfig(level=logging.ERROR)
-from absorb.collect.http import build_session, fetch
-from absorb.measure.flex import build_census, detect_multileg, summarise
-from absorb.measure.structures import group_structures
+from hidden_options.collect.http import build_session, fetch
+from hidden_options.measure.flex import build_census, detect_multileg, summarise
+from hidden_options.measure.structures import group_structures
 
 occ = pd.concat([pd.read_parquet(f) for f in glob.glob("data/raw/occ_census/*.parquet")],
                 ignore_index=True).drop_duplicates(

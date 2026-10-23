@@ -17,14 +17,14 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.collect.http import build_session, fetch  # noqa: E402
-from absorb.collect.nport import (  # noqa: E402
+from hidden_options.collect.http import build_session, fetch  # noqa: E402
+from hidden_options.collect.nport import (  # noqa: E402
     TICKER_MAP_URL,
     fetch_report,
     list_accessions,
     to_frame,
 )
-from absorb.config import RAW_DIR, load_programmes  # noqa: E402
+from hidden_options.config import RAW_DIR, load_programmes  # noqa: E402
 
 
 def ticker_map(session) -> dict[str, tuple[int, str]]:

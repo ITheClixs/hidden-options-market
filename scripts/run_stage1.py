@@ -8,8 +8,8 @@ Estimand: the coefficient on post x friday in
     log(dollar volume)_it = a_i + d_t + b1 post_it + b2 (post_it x friday_t)
                             + b3 (friday_t x ever_treated_i) + g |return|_it + e_it
 
-Name effects absorb persistent liquidity differences, date effects absorb market-wide
-variation including the common Friday pattern, and |return| absorbs the mechanical
+Name effects remove persistent liquidity differences, date effects remove market-wide
+variation including the common Friday pattern, and |return| controls for the mechanical
 link between volume and volatility. b2 is therefore identified from whether treated
 names gain *extra* Friday volume once their fund exists.
 """
@@ -27,10 +27,10 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.collect.bars import fetch_bars  # noqa: E402
-from absorb.collect.http import FetchError, build_session, fetch  # noqa: E402
-from absorb.config import load_programmes, load_universe  # noqa: E402
-from absorb.measure.panel import fit  # noqa: E402
+from hidden_options.collect.bars import fetch_bars  # noqa: E402
+from hidden_options.collect.http import FetchError, build_session, fetch  # noqa: E402
+from hidden_options.config import load_programmes, load_universe  # noqa: E402
+from hidden_options.measure.panel import fit  # noqa: E402
 
 CHART = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 

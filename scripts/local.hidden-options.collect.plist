@@ -7,20 +7,20 @@
   refresh their holdings files overnight".
 
   Install:
-    cp scripts/local.absorb.collect.plist ~/Library/LaunchAgents/
-    launchctl load -w ~/Library/LaunchAgents/local.absorb.collect.plist
+    cp scripts/local.hidden-options.collect.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/local.hidden-options.collect.plist
 
   Verify:
-    launchctl list | grep absorb
+    launchctl list | grep hidden-options
     tail -f logs/collect_$(date +%F).log
 
   Remove:
-    launchctl unload -w ~/Library/LaunchAgents/local.absorb.collect.plist
+    launchctl unload -w ~/Library/LaunchAgents/local.hidden-options.collect.plist
 -->
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>local.absorb.collect</string>
+    <string>local.hidden-options.collect</string>
 
     <key>ProgramArguments</key>
     <array>

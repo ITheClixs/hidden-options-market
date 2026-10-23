@@ -31,7 +31,7 @@ from datetime import date
 import pandas as pd
 import requests
 
-from absorb.collect.http import fetch
+from hidden_options.collect.http import fetch
 
 REPORT_URL = "https://marketdata.theocc.com/flex-reports"
 

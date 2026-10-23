@@ -25,7 +25,7 @@ from datetime import UTC, datetime
 import pandas as pd
 import requests
 
-from absorb.collect.http import fetch
+from hidden_options.collect.http import fetch
 
 CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 

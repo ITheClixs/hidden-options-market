@@ -13,13 +13,13 @@ from datetime import date, datetime
 import pandas as pd
 import pytest
 
-from absorb.collect.holdings import (
+from hidden_options.collect.holdings import (
     HoldingsParseError,
     parse_holdings,
     snapshot_partition,
     split_option_ticker,
 )
-from absorb.config import load_programmes
+from hidden_options.config import load_programmes
 
 HEADER = (
     "Date,Account,StockTicker,CUSIP,SecurityName,Shares,Price,MarketValue,"

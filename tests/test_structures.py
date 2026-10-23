@@ -12,7 +12,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from absorb.measure.structures import GroupingConfig, group_structures
+from hidden_options.measure.structures import GroupingConfig, group_structures
 
 EXPIRY = date(2026, 9, 30)
 SPOT = {"SPY": 765.0, "MSFT": 495.25, "MSTR": 93.10}
@@ -112,7 +112,7 @@ class TestGrouping:
         assert len(out) == 1
         assert out.iloc[0]["contracts"] == pytest.approx(50000)
 
-    def test_tolerance_absorbs_small_mismatches(self):
+    def test_tolerance_forgives_small_mismatches(self):
         """Real legs drift apart through exercise and assignment."""
         census = _census([("SPY", 700.0, 38317, 0), ("SPY", 750.0, 0, 37540)])
         assert len(group_structures(census, SPOT)) == 1

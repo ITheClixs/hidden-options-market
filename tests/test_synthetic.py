@@ -12,7 +12,7 @@ from datetime import date
 import pandas as pd
 import pytest
 
-from absorb.measure.synthetic import (
+from hidden_options.measure.synthetic import (
     DetectionConfig,
     find_combo_candidates,
     find_synthetic_legs,

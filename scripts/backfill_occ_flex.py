@@ -19,9 +19,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.collect.http import FetchError, build_session  # noqa: E402
-from absorb.collect.occ_flex import FlexReportError, fetch_report, snapshot_path  # noqa: E402
-from absorb.config import RAW_DIR  # noqa: E402
+from hidden_options.collect.http import FetchError, build_session  # noqa: E402
+from hidden_options.collect.occ_flex import (  # noqa: E402
+    FlexReportError,
+    fetch_report,
+    snapshot_path,
+)
+from hidden_options.config import RAW_DIR  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:

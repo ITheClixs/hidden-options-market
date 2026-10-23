@@ -19,8 +19,8 @@ from datetime import date, datetime
 import pandas as pd
 import requests
 
-from absorb.collect.http import FetchError, fetch
-from absorb.config import CBOE_CHAIN_URL
+from hidden_options.collect.http import FetchError, fetch
+from hidden_options.config import CBOE_CHAIN_URL
 
 # OSI-style contract identifier, e.g. MSTR260814C00030000
 _CONTRACT_RE = re.compile(

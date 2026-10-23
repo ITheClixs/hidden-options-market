@@ -103,17 +103,17 @@ under its own activity date, not the date it was fetched. OCC publishes overnigh
 capture taken during a session returns the previous settlement; partitioning by fetch
 date would enter one settlement twice as two suspiciously stable days.
 `run_predictive.py` joins the panel to daily bars for the underlyings
-(`data/flex_underlying_bars.parquet`, fetched with `absorb.collect.bars.fetch_bars`).
+(`data/flex_underlying_bars.parquet`, fetched with `hidden_options.collect.bars.fetch_bars`).
 
 ## Layout
 
 ```
-src/absorb/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
-src/absorb/measure/flex_panel.py    panel assembly and inventory measures
-src/absorb/measure/structures.py    leg grouping and valuation on the underlying
-src/absorb/collect/                 chains, holdings, bars and N-PORT collectors
-scripts/                            backfill, regressions, figures
-docs/                               results and corrections, as they happened
+src/hidden_options/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
+src/hidden_options/measure/flex_panel.py    panel assembly and inventory measures
+src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
+src/hidden_options/collect/                 chains, holdings, bars and N-PORT collectors
+scripts/                                    backfill, regressions, figures
+docs/                                       results and corrections, as they happened
 ```
 
 The earlier strike-heuristic census is rebuilt by `scripts/reproduce.sh`. Raw snapshots

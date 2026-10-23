@@ -33,7 +33,7 @@ from scipy.stats import norm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from absorb.config import RAW_DIR, load_programmes  # noqa: E402
+from hidden_options.config import RAW_DIR, load_programmes  # noqa: E402
 
 RISK_FREE = 0.04
 
