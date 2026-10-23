@@ -25,6 +25,8 @@ dev = [
     "scipy-stubs",
     "types-requests",
 ]
+# For the figure builders. CI installs it so they can be imported and type-checked.
+paper = ["matplotlib>=3.9"]
 
 [project.scripts]
 hidden-options = "hidden_options.cli:main"

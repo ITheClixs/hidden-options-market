@@ -1,0 +1,54 @@
+
+ THE OPTIONS CLEARING CORPORATION - CHICAGO, ILLINOIS                             SYSTEM DATE 10/22/26    TIME 19:19:17    PAGE     1
+ INDEX FLEX OPEN INTEREST REPORT                                                ACTIVITY DATE 10/22/26    PROGRAM ID BV2C0210   V005
+
+ MARK PRICES NOTED ON THIS REPORT ARE DERIVED BY THE CORPORATION FROM FACTORS
+ AND DATA DEEMED PERTINENT WHENEVER APPROPRIATE CLOSING PRICES IN FLEX
+ OPTIONS ARE NOT AVAILABLE.
+
+                   EXPIRATION  STRIKE        MARK     OPEN
+      SYMBOL  P/C  MO DAY  YR  PRICE         PRICE    INTEREST
+
+ Cboe Bitcoin U.S. ETF Index Op
+      2CBTX    C   12 18 2026  01514 000    433.9931         8
+      2CBTX    P   12 18 2026  01514 000     15.5580         8
+
+                          ***  CLASS TOTALS  ***            16
+
+ CBOE MINI S&P 500 (AM SETTLED)
+      2XSP     P   12 31 2026  00481 660      0.0011       209
+      2XSP     P   12 31 2026  00550 470      0.0729       227
+
+                          ***  CLASS TOTALS  ***           436
+
+ DOW JONES INDEX PM/EURO (FLEX)
+      4DJX     C   02 22 2027  00307 060    224.7646       956
+      4DJX     P   02 22 2027  00307 060      0.3866       956
+      4DJX     C   02 23 2027  00307 340    224.5142       954
+      4DJX     P   02 23 2027  00307 340      0.3927       954
+
+                          ***  CLASS TOTALS  ***          3820
+
+ Nasdaq-100 Micro Index (EURO/F
+      4XND     C   10 22 2026  00300 710      0.0000        18
+      4XND     C   10 23 2026  00293 930      0.6118        18
+      4XND     C   12 18 2026  00002 530    287.0418       404
+      4XND     C   12 18 2026  00010 020    279.5987        56
+      4XND     C   12 18 2026  00010 440    279.1813        51
+      4XND     P   12 18 2026  00215 440      1.4582       404
+      4XND     P   12 18 2026  00253 460      2.3243       404
+      4XND     C   12 18 2026  00287 070     13.3332       404
+      4XND     C   03 19 2027  00004 780    285.4555        48
+      4XND     P   03 19 2027  00203 130      2.6807        48
+      4XND     P   03 19 2027  00238 980      4.1231        48
+      4XND     C   03 19 2027  00277 650     27.8778        48
+      4XND     C   06 17 2027  00003 040    287.2195      3604
+      4XND     P   06 17 2027  00258 450      9.1797      3604
+      4XND     P   06 17 2027  00304 060     24.0888      3604
+      4XND     C   06 17 2027  00363 020      2.8113      3604
+      4XND     C   09 17 2027  00002 960    287.2432       469
+      4XND     P   09 17 2027  00251 970      9.9404       469
+      4XND     P   09 17 2027  00296 440     22.9584       469
+      4XND     C   09 17 2027  00347 250      9.3217       469
+
+                          ***  CLASS TOTALS  ***         18243
