@@ -86,10 +86,10 @@ Python 3.11+. Every input is free: no WRDS, no OptionMetrics, no vendor feed, no
 
 ```bash
 uv venv && uv pip install -e '.[dev]'
-.venv/bin/pytest                                     # 283 tests
+.venv/bin/pytest                                     # 374 tests
 
 # the OCC FLEX report, equity and index classes
-.venv/bin/python scripts/backfill_occ_flex.py --start 2025-07-23 --end 2026-08-17
+.venv/bin/hidden-options backfill-flex --start 2025-07-23 --end 2026-08-17
 
 # the regression table above
 .venv/bin/python scripts/run_predictive.py --start 2025-09-09 --end 2026-08-17
@@ -103,12 +103,14 @@ under its own activity date, not the date it was fetched. OCC publishes overnigh
 capture taken during a session returns the previous settlement; partitioning by fetch
 date would enter one settlement twice as two suspiciously stable days.
 `run_predictive.py` joins the panel to daily bars for the underlyings
-(`data/flex_underlying_bars.parquet`, fetched with `hidden_options.collect.bars.fetch_bars`).
+(`data/flex_underlying_bars.parquet`, refreshed with
+`hidden_options.collect.bars.refresh_flex_underlying_bars`).
 
 ## Layout
 
 ```
 src/hidden_options/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
+src/hidden_options/collect/backfill.py      fetch the FLEX reports missing for a span of dates
 src/hidden_options/measure/flex_panel.py    panel assembly and inventory measures
 src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
 src/hidden_options/collect/                 chains, holdings, bars and N-PORT collectors

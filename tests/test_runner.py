@@ -6,13 +6,16 @@ snapshots with no history, one failing symbol must never cost the whole capture.
 
 from __future__ import annotations
 
+import dataclasses
 import json
+import logging
 from datetime import UTC, date, datetime
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
+from flex_stub import FlexStub, flex_report
 from hidden_options.collect import cboe, occ_flex, runner
 from hidden_options.collect.http import FetchError
 from hidden_options.config import Universe, load_universe
@@ -174,47 +177,6 @@ class TestSweepUp:
         assert all(count == 1 for count in attempts.values())
 
 
-def _flex_report(report_date: date, kind: str) -> occ_flex.FlexReport:
-    frame = pd.DataFrame(
-        {
-            "report_date": [report_date],
-            "kind": [kind],
-            "root": ["1AAL"],
-            "open_interest": [100],
-        }
-    )
-    return occ_flex.FlexReport(
-        report_date=report_date,
-        kind=kind,
-        frame=frame,
-        payload_sha256="f" * 64,
-        class_totals_checked=1,
-        class_totals_matched=1,
-    )
-
-
-class FlexStub:
-    """Stands in for OCC: records every request and answers from a script.
-
-    ``answers`` maps a requested date to the report date OCC answers with, or to
-    ``None`` for "no report available". Unlisted dates answer with their own report.
-    """
-
-    def __init__(self, monkeypatch, answers=None):
-        self.calls: list[tuple[date, str]] = []
-        self.answers = answers or {}
-        monkeypatch.setattr(occ_flex, "fetch_report", self._fetch)
-
-    def _fetch(self, _session, requested, kind="equity"):
-        self.calls.append((requested, kind))
-        answer = self.answers.get(requested, requested)
-        if answer is None:
-            raise occ_flex.FlexReportAbsent(f"{kind} {requested}: no report available")
-        if isinstance(answer, Exception):
-            raise answer
-        return _flex_report(answer, kind)
-
-
 def _flex_files(root) -> set[str]:
     return {str(p.relative_to(root)) for p in (root / "occ_flex").rglob("*.parquet")}
 
@@ -365,11 +327,36 @@ class TestCollectOccFlex:
         assert {o.status for o in outcomes} == {"write_error"}
         assert not list((tmp_path / "occ_flex").rglob("*.parquet*"))
 
+    def test_warns_when_a_stored_report_does_not_reconcile_with_its_own_totals(
+        self, tmp_path, monkeypatch, caplog
+    ):
+        """A report whose rows disagree with its class totals is stored, since the data may
+        still be good, but it has to be visible to whoever reads the log."""
+        unreconciled = dataclasses.replace(
+            flex_report(date(2026, 8, 14), "equity"),
+            class_totals_checked=5,
+            class_totals_matched=4,
+        )
+        monkeypatch.setattr(occ_flex, "fetch_report", lambda *_a, **_k: unreconciled)
+
+        with caplog.at_level(logging.WARNING):
+            outcomes = runner.collect_occ_flex(FRIDAY, tmp_path, lookback_days=0)
+
+        warned = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+        assert any("4/5" in message for message in warned)
+        assert {o.status for o in outcomes} == {"ok"}
+
+    def test_reconciled_reports_do_not_warn(self, tmp_path, monkeypatch, caplog):
+        FlexStub(monkeypatch)
+        with caplog.at_level(logging.WARNING):
+            runner.collect_occ_flex(FRIDAY, tmp_path, lookback_days=0)
+        assert not [r for r in caplog.records if r.levelno == logging.WARNING]
+
     def test_builds_its_own_session_when_none_is_given(self, tmp_path, monkeypatch):
         seen = []
         monkeypatch.setattr(runner, "build_session", lambda: "built")
         monkeypatch.setattr(
-            occ_flex, "fetch_report", lambda s, d, k: seen.append(s) or _flex_report(d, k)
+            occ_flex, "fetch_report", lambda s, d, k: seen.append(s) or flex_report(d, k)
         )
         runner.collect_occ_flex(FRIDAY, tmp_path, lookback_days=0)
         runner.collect_occ_flex(FRIDAY, tmp_path / "other", lookback_days=0, session="mine")

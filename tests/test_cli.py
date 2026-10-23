@@ -8,10 +8,13 @@ collector or generate noise every time one symbol hiccups.
 from __future__ import annotations
 
 import json
+from datetime import date
 
 import pytest
 
 from hidden_options import cli
+from hidden_options.collect.backfill import BackfillSummary
+from hidden_options.collect.lock import single_instance
 from hidden_options.collect.runner import SymbolOutcome
 
 
@@ -134,3 +137,114 @@ class TestArgumentHandling:
     def test_verbose_flag_is_accepted(self, stub_run, tmp_path):
         stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=1),))
         assert cli.main(["collect", "--root", str(tmp_path), "--verbose"]) == 0
+
+
+@pytest.fixture
+def stub_backfill(monkeypatch):
+    """Replace the backfill walk with a scripted summary, recording how it was called."""
+    calls: list[dict[str, object]] = []
+
+    def _install(*outcomes: SymbolOutcome, skipped: int = 0):
+        def fake(start, end, root, kinds, **kwargs):
+            calls.append({"start": start, "end": end, "root": root, "kinds": kinds})
+            return BackfillSummary(skipped=skipped, outcomes=tuple(outcomes))
+
+        monkeypatch.setattr(cli, "backfill_flex", fake)
+        return calls
+
+    return _install
+
+
+class TestBackfillFlex:
+    def test_success_returns_zero_and_passes_the_span_through(self, stub_backfill, tmp_path):
+        calls = stub_backfill(SymbolOutcome("flex", "equity:2026-08-14", "ok", rows=1))
+        code = cli.main(
+            [
+                "backfill-flex",
+                "--start",
+                "2026-08-10",
+                "--end",
+                "2026-08-14",
+                "--root",
+                str(tmp_path),
+            ]
+        )
+        assert code == 0
+        assert calls == [
+            {
+                "start": date(2026, 8, 10),
+                "end": date(2026, 8, 14),
+                "root": tmp_path,
+                "kinds": ("equity", "index"),
+            }
+        ]
+
+    def test_end_defaults_to_today(self, stub_backfill, tmp_path):
+        calls = stub_backfill()
+        cli.main(["backfill-flex", "--start", "2026-08-10", "--root", str(tmp_path)])
+        assert calls[0]["end"] == date.today()
+
+    def test_kinds_can_be_restricted(self, stub_backfill, tmp_path):
+        calls = stub_backfill()
+        cli.main(
+            ["backfill-flex", "--start", "2026-08-10", "--kinds", "equity", "--root", str(tmp_path)]
+        )
+        assert calls[0]["kinds"] == ("equity",)
+
+    def test_start_is_required(self, stub_backfill, tmp_path):
+        stub_backfill()
+        with pytest.raises(SystemExit) as raised:
+            cli.main(["backfill-flex", "--root", str(tmp_path)])
+        assert raised.value.code == 2
+
+    def test_a_malformed_date_is_a_usage_error(self, stub_backfill, tmp_path):
+        stub_backfill()
+        with pytest.raises(SystemExit) as raised:
+            cli.main(["backfill-flex", "--start", "last tuesday", "--root", str(tmp_path)])
+        assert raised.value.code == 2
+
+    def test_nothing_new_to_fetch_is_still_success(self, stub_backfill, tmp_path):
+        """Re-running a finished backfill saves nothing; that is the point of it."""
+        stub_backfill(skipped=94)
+        assert cli.main(["backfill-flex", "--start", "2026-08-10", "--root", str(tmp_path)]) == 0
+
+    def test_unpublished_dates_are_not_failures(self, stub_backfill, tmp_path, caplog):
+        stub_backfill(
+            SymbolOutcome("flex", "equity:2026-08-14", "ok", rows=1),
+            SymbolOutcome("flex", "equity:2026-08-17", "absent"),
+        )
+        with caplog.at_level("INFO"):
+            assert (
+                cli.main(["backfill-flex", "--start", "2026-08-10", "--root", str(tmp_path)]) == 0
+            )
+        assert not [r for r in caplog.records if r.levelname == "WARNING"]
+
+    def test_any_failed_request_returns_one(self, stub_backfill, tmp_path):
+        """A backfill that silently skipped dates would leave a hole nobody looks for."""
+        stub_backfill(
+            SymbolOutcome("flex", "equity:2026-08-14", "ok", rows=1),
+            SymbolOutcome("flex", "equity:2026-08-13", "error", detail="FetchError: 503"),
+        )
+        assert cli.main(["backfill-flex", "--start", "2026-08-10", "--root", str(tmp_path)]) == 1
+
+    def test_a_span_that_ends_before_it_starts_returns_two(self, tmp_path):
+        code = cli.main(
+            [
+                "backfill-flex",
+                "--start",
+                "2026-08-14",
+                "--end",
+                "2026-08-10",
+                "--root",
+                str(tmp_path),
+            ]
+        )
+        assert code == 2
+
+    def test_declines_while_a_collector_holds_the_lock(self, stub_backfill, tmp_path):
+        """The nightly collector and a backfill write the same partitions."""
+        calls = stub_backfill()
+        with single_instance(tmp_path / ".collector.lock"):
+            code = cli.main(["backfill-flex", "--start", "2026-08-10", "--root", str(tmp_path)])
+        assert code == 3
+        assert calls == []

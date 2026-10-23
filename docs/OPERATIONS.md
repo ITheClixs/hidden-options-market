@@ -2,7 +2,8 @@
 
 The snapshot sources (listed chains, fund holdings, intraday bars) cannot be recovered
 once they age out, so they are accumulated daily rather than downloaded. The OCC FLEX
-report is the exception: it can be backfilled with `scripts/backfill_occ_flex.py`.
+report is the exception: it can be backfilled with
+`hidden-options backfill-flex --start YYYY-MM-DD`, which skips dates already held.
 
 ## Scheduled capture
 

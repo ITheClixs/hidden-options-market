@@ -8,6 +8,7 @@ each symbol, records every outcome, and exits non-zero only if nothing was captu
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
@@ -16,7 +17,10 @@ import requests
 
 from hidden_options.collect import bars, cboe, holdings, occ, occ_flex
 from hidden_options.collect.http import build_session
+from hidden_options.collect.storage import write_frame
 from hidden_options.config import RAW_DIR, Programme, Universe
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -29,22 +33,6 @@ class SymbolOutcome:
     rows: int = 0
     sha256: str = ""
     detail: str = ""
-
-
-def _write_frame(frame, destination: Path) -> None:
-    """Write via a staging file so a crash never leaves a truncated parquet in place.
-
-    Most sources overwrite their file the next day, but the FLEX collector treats an
-    existing file as proof the date is held, so a half-written one would never be redone.
-    """
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    staging = destination.with_name(destination.name + ".partial")
-    try:
-        frame.to_parquet(staging, index=False, compression="zstd")
-        staging.replace(destination)
-    except BaseException:
-        staging.unlink(missing_ok=True)
-        raise
 
 
 def collect_cboe_chains(
@@ -64,7 +52,7 @@ def collect_cboe_chains(
 
         destination = root / cboe.snapshot_partition(snapshot, as_of)
         try:
-            _write_frame(snapshot.frame, destination)
+            write_frame(snapshot.frame, destination)
         except OSError as exc:
             outcomes.append(SymbolOutcome("cboe_chain", symbol, "write_error", detail=str(exc)))
             continue
@@ -99,7 +87,7 @@ def collect_occ_open_interest(
 
         destination = root / occ.snapshot_partition(snapshot, as_of)
         try:
-            _write_frame(snapshot.frame, destination)
+            write_frame(snapshot.frame, destination)
         except OSError as exc:
             outcomes.append(SymbolOutcome("occ_oi", symbol, "write_error", detail=str(exc)))
             continue
@@ -140,7 +128,7 @@ def collect_fund_holdings(
 
         destination = root / holdings.snapshot_partition(snapshot, as_of)
         try:
-            _write_frame(snapshot.frame, destination)
+            write_frame(snapshot.frame, destination)
         except OSError as exc:
             outcomes.append(
                 SymbolOutcome("fund_holdings", programme.fund, "write_error", detail=str(exc))
@@ -194,7 +182,7 @@ def collect_underlying_bars(
 
         destination = root / bars.snapshot_partition(snapshot, as_of)
         try:
-            _write_frame(snapshot.frame, destination)
+            write_frame(snapshot.frame, destination)
         except OSError as exc:
             outcomes.append(SymbolOutcome(source, symbol, "write_error", detail=str(exc)))
             continue
@@ -213,7 +201,7 @@ def collect_underlying_bars(
     return tuple(outcomes)
 
 
-def _weekdays(end: date, lookback_days: int) -> list[date]:
+def weekdays(end: date, lookback_days: int) -> list[date]:
     """Weekdays in ``[end - lookback_days, end]``, newest first."""
     days = (end - timedelta(days=offset) for offset in range(lookback_days + 1))
     return [day for day in days if day.weekday() < 5]
@@ -224,9 +212,18 @@ def _store_flex_report(report: occ_flex.FlexReport, root: Path) -> SymbolOutcome
     symbol = f"{report.kind}:{report.report_date:%Y-%m-%d}"
     destination = root / occ_flex.snapshot_path(report)
     try:
-        _write_frame(report.frame, destination)
+        write_frame(report.frame, destination)
     except OSError as exc:
         return SymbolOutcome("flex", symbol, "write_error", detail=str(exc))
+    if report.class_totals_matched != report.class_totals_checked:
+        # Stored anyway, since the rows may be sound, but a disagreement with the report's
+        # own totals is the first sign of a parse problem and has to be visible.
+        logger.warning(
+            "%s: %d/%d class totals reconcile",
+            symbol,
+            report.class_totals_matched,
+            report.class_totals_checked,
+        )
     return SymbolOutcome(
         "flex",
         symbol,
@@ -237,9 +234,15 @@ def _store_flex_report(report: occ_flex.FlexReport, root: Path) -> SymbolOutcome
     )
 
 
-def _collect_flex_report(
+def collect_flex_report(
     session: requests.Session, day: date, kind: str, root: Path
 ) -> tuple[SymbolOutcome, ...]:
+    """Fetch one date's report of one kind and file it under the date it states.
+
+    This is the unit both the nightly window and the historical backfill are built from.
+    It never raises: an unpublished date is an "absent" outcome and anything else that
+    goes wrong is an "error" or "write_error" one, so a long walk survives a bad request.
+    """
     symbol = f"{kind}:{day:%Y-%m-%d}"
     try:
         report = occ_flex.fetch_report(session, day, kind)
@@ -285,11 +288,11 @@ def collect_occ_flex(
     http = session or build_session()
     outcomes: list[SymbolOutcome] = []
 
-    for day in _weekdays(as_of.date(), lookback_days):
+    for day in weekdays(as_of.date(), lookback_days):
         for kind in occ_flex.REPORT_KINDS:
             if (root / occ_flex.snapshot_path_for(day, kind)).exists():
                 continue
-            outcomes.extend(_collect_flex_report(http, day, kind, root))
+            outcomes.extend(collect_flex_report(http, day, kind, root))
 
     return tuple(outcomes)
 
@@ -402,10 +405,12 @@ def run_daily_collection(
 __all__ = [
     "SymbolOutcome",
     "collect_cboe_chains",
+    "collect_flex_report",
     "collect_fund_holdings",
     "collect_occ_flex",
     "collect_underlying_bars",
     "collect_occ_open_interest",
     "run_daily_collection",
+    "weekdays",
     "write_manifest",
 ]

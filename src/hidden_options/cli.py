@@ -5,8 +5,10 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from datetime import date
 from pathlib import Path
 
+from hidden_options.collect.backfill import DEFAULT_KINDS, backfill_flex
 from hidden_options.collect.lock import AlreadyRunning, single_instance
 from hidden_options.collect.runner import run_daily_collection
 from hidden_options.config import RAW_DIR, load_programmes, load_universe
@@ -40,7 +42,39 @@ def build_parser() -> argparse.ArgumentParser:
     collect.add_argument("--funds", type=Path, default=None, help="Override fund registry path")
     collect.add_argument("--verbose", action="store_true", help="Debug logging")
     collect.set_defaults(handler=_collect)
+
+    backfill = commands.add_parser(
+        "backfill-flex",
+        help="download the OCC FLEX reports for a span of past dates",
+        description=(
+            "Download the OCC FLEX open-interest reports for every weekday in a span, "
+            "skipping dates already held. OCC keeps roughly twenty months of history."
+        ),
+    )
+    backfill.add_argument("--start", type=_iso_date, required=True, help="First date, YYYY-MM-DD")
+    backfill.add_argument(
+        "--end", type=_iso_date, default=None, help="Last date, YYYY-MM-DD. Default: today"
+    )
+    backfill.add_argument(
+        "--kinds",
+        nargs="+",
+        choices=DEFAULT_KINDS,
+        default=list(DEFAULT_KINDS),
+        help="Report kinds. Default: all",
+    )
+    backfill.add_argument(
+        "--root", type=Path, default=RAW_DIR, help=f"Output root. Default: {RAW_DIR}"
+    )
+    backfill.add_argument("--verbose", action="store_true", help="Debug logging")
+    backfill.set_defaults(handler=_backfill_flex)
     return parser
+
+
+def _iso_date(text: str) -> date:
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"not a YYYY-MM-DD date: {text!r}") from None
 
 
 def _collect(args: argparse.Namespace) -> int:
@@ -94,6 +128,33 @@ def _collect(args: argparse.Namespace) -> int:
         logging.error("No snapshots captured; treating run as failed")
         return 1
     return 0
+
+
+def _backfill_flex(args: argparse.Namespace) -> int:
+    """Fetch missing FLEX reports for a span. Non-zero means a request failed."""
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format=LOG_FORMAT,
+        stream=sys.stderr,
+    )
+    end = args.end or date.today()
+
+    try:
+        # The nightly collector writes the same partitions, so the two take turns.
+        with single_instance(args.root / ".collector.lock"):
+            summary = backfill_flex(args.start, end, args.root, tuple(args.kinds))
+    except AlreadyRunning as exc:
+        logging.error("%s", exc)
+        return 3
+    except ValueError as exc:
+        logging.error("%s", exc)
+        return 2
+
+    logging.info("%s (%s to %s)", summary.describe(), args.start, end)
+    if summary.absent:
+        # Not published yet (or a holiday), not a fault; a later run asks again.
+        logging.info("%d reports not available from the source", summary.absent)
+    return 1 if summary.failed else 0
 
 
 def main(argv: list[str] | None = None) -> int:

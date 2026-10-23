@@ -138,19 +138,49 @@ class TestFetchReport:
         _serve(monkeypatch, FULL_SIZE)
         assert fetch_report(object(), date(2026, 8, 14), "equity").report_date == date(2026, 8, 14)
 
-    def test_falls_back_to_the_requested_date_without_a_header_date(self, monkeypatch):
+    def test_a_report_without_a_header_date_is_an_error_not_the_requested_date(self, monkeypatch):
+        """Guessing the date from the request is how one settlement gets filed under two
+        dates, so a report that does not say which day it is for cannot be filed at all."""
         headerless = FULL_SIZE.replace(b"ACTIVITY DATE 08/14/26", b"")
         _serve(monkeypatch, headerless)
-        assert fetch_report(object(), date(2026, 8, 17), "equity").report_date == date(2026, 8, 17)
+        with pytest.raises(FlexReportError, match="ACTIVITY DATE") as raised:
+            fetch_report(object(), date(2026, 8, 17), "equity")
+        assert not isinstance(raised.value, FlexReportAbsent)
 
-    def test_unparseable_header_date_falls_back_to_the_requested_date(self, monkeypatch):
+    def test_an_unparseable_header_date_is_an_error_not_the_requested_date(self, monkeypatch):
         _serve(monkeypatch, FULL_SIZE.replace(b"ACTIVITY DATE 08/14/26", b"ACTIVITY DATE 13/45/26"))
-        assert fetch_report(object(), date(2026, 8, 14), "equity").report_date == date(2026, 8, 14)
+        with pytest.raises(FlexReportError, match="ACTIVITY DATE") as raised:
+            fetch_report(object(), date(2026, 8, 14), "equity")
+        assert not isinstance(raised.value, FlexReportAbsent)
 
-    def test_short_body_means_no_report_is_available(self, monkeypatch):
+    def test_short_body_that_says_the_file_does_not_exist_means_no_report_is_available(
+        self, monkeypatch
+    ):
         _serve(monkeypatch, b"File requested does not exist.")
         with pytest.raises(FlexReportAbsent, match="no report available"):
             fetch_report(object(), date(2026, 8, 14), "equity")
+
+    def test_the_not_found_message_is_matched_regardless_of_case_and_padding(self, monkeypatch):
+        _serve(monkeypatch, b"\r\n  FILE REQUESTED DOES NOT EXIST.  \r\n")
+        with pytest.raises(FlexReportAbsent):
+            fetch_report(object(), date(2026, 8, 14), "equity")
+
+    @pytest.mark.parametrize(
+        "body",
+        [
+            b"",
+            b"<html>Service Unavailable</html>",
+            b"Internal error, please retry later.",
+            b"EQUITY FLEX OPEN INTEREST REPORT ACTIVITY DATE 08/14/26",
+        ],
+    )
+    def test_any_other_short_body_is_an_error_not_absence(self, monkeypatch, body):
+        """A truncated download or an error page must not read as 'OCC has no report',
+        or a bad day is silently recorded as an ordinary gap."""
+        _serve(monkeypatch, body)
+        with pytest.raises(FlexReportError) as raised:
+            fetch_report(object(), date(2026, 8, 14), "equity")
+        assert not isinstance(raised.value, FlexReportAbsent)
 
     def test_absence_is_still_a_flex_report_error(self):
         """Existing callers catch FlexReportError and must keep working."""
