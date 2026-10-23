@@ -11,7 +11,8 @@ from pathlib import Path
 from hidden_options.collect.backfill import DEFAULT_KINDS, backfill_flex
 from hidden_options.collect.lock import AlreadyRunning, single_instance
 from hidden_options.collect.runner import run_daily_collection
-from hidden_options.config import RAW_DIR, load_programmes, load_universe
+from hidden_options.config import PROJECT_ROOT, RAW_DIR, load_programmes, load_universe
+from hidden_options.publish import check_drift, publish, registry
 
 LOG_FORMAT = "%(asctime)s %(levelname)-7s %(message)s"
 
@@ -67,7 +68,58 @@ def build_parser() -> argparse.ArgumentParser:
     )
     backfill.add_argument("--verbose", action="store_true", help="Debug logging")
     backfill.set_defaults(handler=_backfill_flex)
+
+    results = commands.add_parser(
+        "results",
+        help="run the registered analyses and write results/*.json",
+        description=(
+            "Run every registered analysis (or one, with --only) and write its result "
+            "file. The paper and README are rendered from these files."
+        ),
+    )
+    results.add_argument("--only", metavar="NAME", help="Run only this analysis")
+    _add_root(results)
+    results.set_defaults(handler=_results)
+
+    figures = commands.add_parser(
+        "figures",
+        help="build the registered figures",
+        description="Run every registered figure builder, or one with --only.",
+    )
+    figures.add_argument("--only", metavar="NAME", help="Build only this figure")
+    figures.set_defaults(handler=_figures)
+
+    publish_cmd = commands.add_parser(
+        "publish",
+        help="render paper/numbers.tex, paper/tables and README.md from results/",
+        description=(
+            "Render the paper macros, the paper tables and the README from results/ and "
+            "docs/readme.template.md. Needs no raw data."
+        ),
+    )
+    _add_root(publish_cmd)
+    publish_cmd.set_defaults(handler=_publish)
+
+    check = commands.add_parser(
+        "check",
+        help="fail if a generated file differs from a fresh render of results/",
+        description=(
+            "Re-render the generated files in memory and exit 1, listing the paths, if "
+            "any committed file differs. Run `hidden-options publish` to fix it."
+        ),
+    )
+    _add_root(check)
+    check.set_defaults(handler=_check)
     return parser
+
+
+def _add_root(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--root",
+        type=Path,
+        default=PROJECT_ROOT,
+        help=f"Project root holding results/, paper/ and docs/. Default: {PROJECT_ROOT}",
+    )
 
 
 def _iso_date(text: str) -> date:
@@ -155,6 +207,75 @@ def _backfill_flex(args: argparse.Namespace) -> int:
         # Not published yet (or a holiday), not a fault; a later run asks again.
         logging.info("%d reports not available from the source", summary.absent)
     return 1 if summary.failed else 0
+
+
+def _results(args: argparse.Namespace) -> int:
+    """Run registered analyses. Exit 2 for an unknown name or a mislabelled result."""
+    registry.load_registrations()
+    if args.only is None and not registry.ANALYSES.select():
+        print("No analyses are registered; nothing to do.")
+        return 0
+    try:
+        written = registry.run_analyses(registry.ANALYSES, args.root / "results", args.only)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+    for path in written:
+        print(f"wrote {path}")
+    return 0
+
+
+def _figures(args: argparse.Namespace) -> int:
+    """Run registered figure builders. Exit 2 for an unknown name."""
+    registry.load_registrations()
+    if args.only is None and not registry.FIGURES.select():
+        print("No figure builders are registered; nothing to do.")
+        return 0
+    try:
+        built = registry.run_figures(registry.FIGURES, args.only)
+    except ValueError as exc:
+        print(exc, file=sys.stderr)
+        return 2
+    for name in built:
+        print(f"built {name}")
+    return 0
+
+
+def _publish(args: argparse.Namespace) -> int:
+    registry.load_registrations()
+    try:
+        changed = publish(args.root)
+    except (FileNotFoundError, ValueError, KeyError) as exc:
+        print(f"Cannot publish: {_describe(exc)}", file=sys.stderr)
+        return 2
+    for path in changed:
+        print(f"updated {path}")
+    if not changed:
+        print("Everything is up to date.")
+    return 0
+
+
+def _check(args: argparse.Namespace) -> int:
+    """Exit 1, listing the paths, when a generated file differs from its render."""
+    registry.load_registrations()
+    try:
+        drifted = check_drift(args.root)
+    except (FileNotFoundError, ValueError, KeyError) as exc:
+        print(f"Cannot check: {_describe(exc)}", file=sys.stderr)
+        return 2
+    if not drifted:
+        print("Generated files match results/.")
+        return 0
+    print("Generated files differ from results/:", file=sys.stderr)
+    for path in drifted:
+        print(f"  {path}", file=sys.stderr)
+    print("Run `hidden-options publish` and commit the result.", file=sys.stderr)
+    return 1
+
+
+def _describe(exc: Exception) -> str:
+    """KeyError wraps its message in quotes; show it plainly."""
+    return str(exc.args[0]) if isinstance(exc, KeyError) and exc.args else str(exc)
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -66,5 +66,5 @@ PYEOF
 
 echo "==> 5/5  figures and paper"
 $PY scripts/make_figures.py
-( cd paper && tectonic known_flow.tex >/dev/null 2>&1 && echo "  paper/known_flow.pdf rebuilt" )
+( cd paper && tectonic hidden_options_market.tex >/dev/null 2>&1 && echo "  paper/hidden_options_market.pdf rebuilt" )
 echo "done."
