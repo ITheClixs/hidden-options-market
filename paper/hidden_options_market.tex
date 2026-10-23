@@ -32,12 +32,14 @@ option chains on which most empirical option research is built. The Options Clea
 Corporation publishes a daily FLEX open-interest report, and we use it to assemble a
 panel of \PanelDates{} activity dates, \PanelUnderlyings{} underlyings and
 \PanelSeriesDaysMillions{} million series-days, from \PanelStart{} to \PanelEnd{}. The
-market is large, and from \BreakMonth{} it grew fast: open interest held near
-\OIFlatLevel{} million contracts until then, and its average over the latest monthly
-expiry cycle, \OICycleLatest{} million, is \GrowthMultiple{} times that level. On the
-last date its mark value was \ValueEnd{}. It is also short-dated: on an average date
-\WithinSixtyMean{} of open interest expires within sixty days, and its monthly
-sawtooth is the expiry cycle. We then ask whether this hidden inventory predicts the
+market is large. A one-break fit dates the start of its growth to \BreakMonth{}:
+averaged over a monthly expiry cycle, open interest was \OIFlatLevel{} million contracts
+before the turn and \OICycleLatest{} million in the latest cycle, \GrowthMultiple{}
+times as much, though the latest quarter added only $\OIQuarterChange$. On the last
+date its mark value was \ValueEnd{}. On an average date \WithinSixtyMean{} of open
+interest expires within sixty days, and the monthly sawtooth in its size is the expiry
+cycle; the share more than a year from expiry, meanwhile, rose from \OverOneYearStart{}
+to \OverOneYear{}. We then ask whether this hidden inventory predicts the
 visible market, and find that it does not: per-underlying
 inventory innovations carry no information about next-day or next-fortnight realised
 volatility, with a placebo using inventory dated \emph{after} the outcome returning the
@@ -75,16 +77,22 @@ systematic empirical work using it.
 This paper assembles that report into a panel and asks what is in it and whether it
 matters.
 
-\paragraph{What the market looks like.} It is large, short-dated and growing. Across
-\PanelDates{} activity dates from \PanelStart{} to \PanelEnd{}, open interest was flat
-until \BreakMonth{} and then rose by a factor of \GrowthMultiple{}: averaged over a monthly expiry cycle, it was
-\OIFlatLevel{} million contracts before the turn and \OICycleLatest{} million in the
-latest cycle. On the last date, \SeriesEnd{} series across \UnderlyingsEnd{}
+\paragraph{What the market looks like.} It is large, and far larger than when the panel
+begins, though it has barely grown in the latest cycles. Across \PanelDates{} activity
+dates from \PanelStart{} to \PanelEnd{}, a one-break fit dates the turn to
+\BreakMonth{}: averaged over a monthly expiry cycle, open interest was \OIFlatLevel{}
+million contracts before it and \OICycleLatest{} million in the latest cycle,
+\GrowthMultiple{} times as much, with the latest quarter adding $\OIQuarterChange$. On
+the last date, \SeriesEnd{} series across \UnderlyingsEnd{}
 underlyings carry \OIEnd{} million contracts worth \ValueEnd{} at the report's marks.
 The ten largest underlyings hold \TopTenShare{} of that open interest, down from
-\TopTenShareStart{} when the panel begins, and calls are \CallShare{} of it. The
-market's monthly sawtooth is its expiry cycle: of the ten largest one-day falls in open
-interest, \DropsOnExpiry{} land on a standard monthly expiry.
+\TopTenShareStart{} when the panel begins, and calls are \CallShare{} of it. Much of
+the book is near expiry: on an average date \WithinSixtyMean{} of open interest expires
+within sixty days. A long-dated tail has grown beside it, from \OverOneYearStart{} of
+open interest more than a year from expiry on the first date to \OverOneYear{} on the
+last. The market's monthly sawtooth is its expiry cycle: of the ten largest one-day
+falls in open interest, \DropsOnExpiry{} land on a standard monthly expiry or the
+activity date after it, where only \ExpiryWindowShare{} of all day-to-day changes do.
 
 \paragraph{Whether it predicts anything.} The economic reason to care is that a dealer
 taking the other side of a FLEX trade hedges it in the listed market and carries the
@@ -141,12 +149,12 @@ class with per-class totals. FLEX roots are the listed root with a numeric prefi
 (\texttt{1AAL}, \texttt{2DJX}, \texttt{4SPY}), which identifies them exactly.
 
 We parse both the equity and index reports and validate each against the totals the
-report itself carries. On the reference date all 1,184 class totals reconcile.
+report itself carries. On the reference date every class total reconciles.
 
 Files are stored under the report's own activity date rather than the date they were
 fetched. This is not pedantry: OCC publishes overnight, so a capture taken during a
 session returns the previous settlement, and two of our early captures were
-byte-identical across 113,610 series for exactly this reason. Partitioning by capture
+byte-identical across every series for exactly this reason. Partitioning by capture
 date would have entered one settlement into the panel twice as two apparently stable
 days.
 
@@ -224,8 +232,10 @@ prices of the underlyings.
 
 The second is the average over each complete expiry cycle, from the day after one
 monthly expiry to the next. Before the break the cycle averages lie between
-\OIFlatLow{} and \OIFlatHigh{} million contracts, a mean of \OIFlatLevel{} million. The
-latest complete cycle, which ended on \OICycleLatestEnd{}, averages \OICycleLatest{}
+\OIFlatLow{} and \OIFlatHigh{} million contracts, a mean of \OIFlatLevel{} million, and
+they stay inside that band through the cycle ending \FlatBandEnd{}: the fitted break
+dates a change of slope, not the first cycle above the old level. The latest complete
+cycle, which ended on \OICycleLatestEnd{}, averages \OICycleLatest{}
 million, \GrowthMultiple{} times that level. The highest reading on any single date is
 \OIPeak{} million, on \OIPeakDate{}.
 
@@ -242,31 +252,40 @@ through each month and falls when the standard monthly expiry, the third Friday,
 clears. The fall is spread over two reports: an expiring series is still listed on its
 expiry date with part of its open interest, and gone on the next activity date. Of the
 ten largest one-day falls in the panel, measured against the previous date's level,
-\DropsOnExpiry{} land on a monthly expiry or the activity date after it. They come
-from \DropExpiries{} expiries, and each removes between \DropLow{} and \DropHigh{} of
-open interest. On each of those days the
-series expiring lose more open interest than the market as a whole, between
+\DropsOnExpiry{} land on a monthly expiry or the activity date after it:
+\DropsOnExpiryDate{} on the expiry date and \DropsDayAfter{} on the date after. Few would
+by chance, since only \ExpiryWindowChanges{} of the \DailyChanges{} day-to-day changes in
+the panel, \ExpiryWindowShare{}, span an expiry in this way. The ten falls come from
+\DropExpiries{} expiries, and each removes between \DropLow{} and \DropHigh{} of open
+interest. On each of those days the series expiring lose more open interest than the market as a whole, between
 \ExpiringRatioLow{} and \ExpiringRatioHigh{} times the net fall; the rest of the book
 grew on the same days.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\textwidth]{figures/cohorts.pdf}
-\caption{Open interest by expiry month (rows) and activity date (columns), in million
-contracts on a logarithmic scale. A row fills as its month approaches and empties at
-the diagonal, where it expires. Expiries more than two years after the last activity
-date are not shown.}
-\label{fig:cohorts}
+\includegraphics[width=\textwidth]{figures/maturity.pdf}
+\caption{Each activity date's open interest by calendar months until its expiry month
+(0 is the activity date's own month), as a share of that date's total, on a linear
+scale. The top row gathers every expiry \MapHorizonMonths{} or more months ahead:
+\BeyondHorizonMean{} of open interest on an average date and \BeyondHorizonShare{} on
+the last.}
+\label{fig:maturity}
 \end{figure}
 
-Figure~\ref{fig:cohorts} shows the same cycle from the side of the cohorts. Each row is
-the open interest expiring in one month, followed across activity dates. It fills as
-the month approaches, darkest in the last few weeks, and empties at the diagonal. Much
-of the market sits close to that diagonal: on an average date \WithinSixtyMean{} of
-open interest expires within sixty days. That share is not stable. Over the panel it
-ranges from \WithinSixtyLow{} to \WithinSixtyHigh{}, so the maturity profile of any one
-date can sit well away from the typical one. The book is short-dated and rebuilt every
-month.
+Figure~\ref{fig:maturity} shows where that open interest sits in maturity. The two
+bottom rows, the current month and the next, hold the largest shares, and they alternate
+within each month as the third Friday clears the front cohort; the faint diagonal
+stripes above them are single cohorts moving towards expiry. On an average date
+\WithinSixtyMean{} of open interest expires within sixty days, and the
+open-interest-weighted median time to expiry is \MedianDaysMean{} days, between
+\MedianDaysLow{} and \MedianDaysHigh{} depending on the date. Roughly half the book
+therefore rolls off within two months and is replaced.
+
+Behind that front sits a long-dated tail that has grown faster than the market: open interest more than a year from expiry was
+\OverOneYearStart{} of the total on the first date and \OverOneYear{} on the last, and
+more than two years out \OverTwoYearsStart{} and \OverTwoYears{}. The sixty-day share
+itself ranges from \WithinSixtyLow{} to \WithinSixtyHigh{} over the panel, so the
+maturity profile of any one date can sit well away from the typical one.
 
 \subsection{Concentration}
 
@@ -437,8 +456,8 @@ the listed surface, where a dealer actually lays off risk.
 \item \textbf{Gross, unsigned inventory.} Open interest does not identify who is long,
 and is aggregated across holders. No measure here is a dealer position.
 \item \textbf{A short panel.} \PanelMonths{} months, set by how far back OCC's rolling
-retention reached when collection began. It shows one turn in growth and nothing about
-longer cycles.
+retention reached when collection began. That is enough to date one turn in growth, and
+too short to say whether the levelling of the latest cycles will last.
 \item \textbf{One outcome family.} Realised volatility in the underlying, not the option
 surface.
 \item \textbf{No structure decomposition in the panel.} The measurement section shows
@@ -449,11 +468,13 @@ inherit none of that decomposition.
 \section{Conclusion}
 
 The FLEX market is publicly reported and larger than its absence from chain data
-suggests. Its open interest was flat until \BreakMonth{} and has since risen by a factor
-of \GrowthMultiple{}, to an average of \OICycleLatest{} million contracts over the latest
-expiry cycle, with \ValueEnd{} of mark value on the last date. It is short-dated, with
-\WithinSixtyMean{} of open interest expiring within sixty days on an average date, and
-its monthly sawtooth is that expiry cycle.
+suggests. A one-break fit dates the start of its growth to \BreakMonth{}. Averaged over
+the latest expiry cycle, its open interest is \OICycleLatest{} million contracts,
+\GrowthMultiple{} times the level before, though the latest quarter added only
+$\OIQuarterChange$, and on the last date it carried \ValueEnd{} of mark value. Much of
+it is near expiry, with \WithinSixtyMean{} expiring within sixty days on an average
+date, and its monthly sawtooth is that expiry cycle. Beside that front, the share more
+than a year from expiry has grown from \OverOneYearStart{} to \OverOneYear{}.
 
 Whether it tells us anything about the visible market is a separate question, and at
 the resolution available the answer is no. Per-underlying hidden inventory does not

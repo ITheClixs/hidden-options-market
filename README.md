@@ -16,15 +16,18 @@ panel.
 | Mark value | \$298bn | **\$547bn** |
 
 475 activity dates, 1,954 underlyings,
-15.2m series-days. Open interest was flat until June 2025 and
-has since risen by a factor of 2.1: averaged over a monthly expiry cycle,
-from 34.5m contracts before the turn to 71.8m in the latest cycle.
-The sawtooth in the chart is the expiry cycle; of the ten largest one-day falls in open
-interest, 10 land on a monthly expiry (7 expiries between
-them). On the last date, 43,606
+15.2m series-days. A one-break fit dates the turn in growth to
+June 2025; averaged over a monthly expiry cycle, open interest stays in its
+pre-break band of 33.4–35.5m contracts through the cycle ending
+18 July 2025, and the latest cycle averages 71.8m, 2.1 times
+the pre-break mean of 34.5m. The latest quarter added only +1.5\%.
+The sawtooth in the chart is the expiry cycle: of the ten largest one-day falls in open
+interest, all land on a monthly expiry or the activity date after it, where
+only 9.7\% of day-to-day changes do. On the last date, 43,606
 series across 1,030 underlyings: the ten largest underlyings hold
-30\% of open interest, 50\% expires within sixty days, and
-59\% is calls.
+30\% of open interest, 50\% expires within sixty days,
+22\% is more than a year from expiry (up from 13\% on the first
+date), and 59\% is calls.
 
 ## Does hidden inventory predict the visible market?
 

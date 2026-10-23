@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T20:19:16+00:00",
+  "generated_at": "2026-10-23T22:35:18+00:00",
   "inputs": {
     "dates": 475,
     "first_date": "2024-12-02",
@@ -12,18 +12,30 @@
     "source": "data/raw/occ_flex"
   },
   "macros": {
+    "BeyondHorizonMean": "11\\%",
+    "BeyondHorizonShare": "16\\%",
     "BreakDate": "6 June 2025",
     "BreakMonth": "June 2025",
     "BreakShiftDays": "22",
     "CallShare": "59\\%",
     "CallShareStart": "54\\%",
+    "DailyChanges": "474",
     "DropExpiries": "7",
     "DropHigh": "12.6\\%",
     "DropLow": "9.9\\%",
-    "DropsOnExpiry": "10",
+    "DropsDayAfter": "4",
+    "DropsOnExpiry": "all",
+    "DropsOnExpiryDate": "6",
     "ExpiringRatioHigh": "1.4",
     "ExpiringRatioLow": "1.2",
+    "ExpiryWindowChanges": "46",
+    "ExpiryWindowShare": "9.7\\%",
+    "FlatBandEnd": "18 July 2025",
     "GrowthMultiple": "2.1",
+    "MapHorizonMonths": "24",
+    "MedianDaysHigh": "88",
+    "MedianDaysLow": "28",
+    "MedianDaysMean": "53",
     "OICycleLatest": "71.8",
     "OICycleLatestEnd": "16 October 2026",
     "OIEnd": "67.9",
@@ -34,6 +46,10 @@
     "OIPeakDate": "16 July 2026",
     "OIQuarterChange": "+1.5\\%",
     "OIStart": "35.2",
+    "OverOneYear": "22\\%",
+    "OverOneYearStart": "13\\%",
+    "OverTwoYears": "16\\%",
+    "OverTwoYearsStart": "7\\%",
     "PanelDates": "475",
     "PanelEnd": "22 October 2026",
     "PanelMissingWeekdays": "19",
@@ -80,6 +96,7 @@
       }
     },
     "cycles": {
+      "flat_band_end": "2025-07-18",
       "flat_cycles": 5,
       "flat_high": 35501060.0,
       "flat_level": 34515623.300144926,
@@ -224,6 +241,8 @@
       ]
     },
     "drops": {
+      "changes": 474,
+      "day_after_expiry": 4,
       "distinct_expiries": 7,
       "expiring_ratio_high": 1.3596719375033697,
       "expiring_ratio_low": 1.1738304158410509,
@@ -331,7 +350,10 @@
           "previous_date": "2026-03-19"
         }
       ],
-      "on_expiry": 10
+      "on_expiry": 10,
+      "on_expiry_date": 6,
+      "window_changes": 46,
+      "window_share": 0.0970464135021097
     },
     "end": {
       "call_share": 0.5918445706404826,
@@ -381,6 +403,37 @@
       "pre_growth": -0.09555421759634651,
       "pre_growth_log": -0.10043291800678585,
       "sse": 2.0172832008076167
+    },
+    "maturity": {
+      "beyond_horizon": {
+        "end": 0.15964120802680973,
+        "max": 0.16586315464273077,
+        "mean": 0.11194505041262166,
+        "min": 0.06524859259352524,
+        "start": 0.0726662984160633
+      },
+      "horizon_months": 24,
+      "median_days": {
+        "end": 60.0,
+        "max": 88.0,
+        "mean": 53.09473684210526,
+        "min": 28.0,
+        "start": 46.0
+      },
+      "over_one_year": {
+        "end": 0.2232065211354367,
+        "max": 0.2249059825401744,
+        "mean": 0.15971460766193918,
+        "min": 0.10018431163236266,
+        "start": 0.1322318511175552
+      },
+      "over_two_years": {
+        "end": 0.15695064978794246,
+        "max": 0.16238274774388986,
+        "mean": 0.11037294826002197,
+        "min": 0.05564971216470602,
+        "start": 0.07266343018479446
+      }
     },
     "panel": {
       "dates": 475,

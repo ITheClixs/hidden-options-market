@@ -16,15 +16,18 @@ panel.
 | Mark value | {{ValueStart}} | **{{ValueEnd}}** |
 
 {{PanelDates}} activity dates, {{PanelUnderlyings}} underlyings,
-{{PanelSeriesDaysMillions}}m series-days. Open interest was flat until {{BreakMonth}} and
-has since risen by a factor of {{GrowthMultiple}}: averaged over a monthly expiry cycle,
-from {{OIFlatLevel}}m contracts before the turn to {{OICycleLatest}}m in the latest cycle.
-The sawtooth in the chart is the expiry cycle; of the ten largest one-day falls in open
-interest, {{DropsOnExpiry}} land on a monthly expiry ({{DropExpiries}} expiries between
-them). On the last date, {{SeriesEnd}}
+{{PanelSeriesDaysMillions}}m series-days. A one-break fit dates the turn in growth to
+{{BreakMonth}}; averaged over a monthly expiry cycle, open interest stays in its
+pre-break band of {{OIFlatLow}}–{{OIFlatHigh}}m contracts through the cycle ending
+{{FlatBandEnd}}, and the latest cycle averages {{OICycleLatest}}m, {{GrowthMultiple}} times
+the pre-break mean of {{OIFlatLevel}}m. The latest quarter added only {{OIQuarterChange}}.
+The sawtooth in the chart is the expiry cycle: of the ten largest one-day falls in open
+interest, {{DropsOnExpiry}} land on a monthly expiry or the activity date after it, where
+only {{ExpiryWindowShare}} of day-to-day changes do. On the last date, {{SeriesEnd}}
 series across {{UnderlyingsEnd}} underlyings: the ten largest underlyings hold
-{{TopTenShare}} of open interest, {{WithinSixtyShare}} expires within sixty days, and
-{{CallShare}} is calls.
+{{TopTenShare}} of open interest, {{WithinSixtyShare}} expires within sixty days,
+{{OverOneYear}} is more than a year from expiry (up from {{OverOneYearStart}} on the first
+date), and {{CallShare}} is calls.
 
 ## Does hidden inventory predict the visible market?
 
