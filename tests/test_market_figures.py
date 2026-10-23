@@ -148,7 +148,7 @@ def test_figures_register_under_their_stems():
     from hidden_options.publish import registry
 
     # Figures load only for the figures command, so publishing never needs matplotlib.
-    assert registry.FIGURE_MODULES == ("hidden_options.figures.market",)
+    assert "hidden_options.figures.market" in registry.FIGURE_MODULES
     assert "hidden_options.figures.market" not in registry.REGISTRATION_MODULES
     assert "hidden_options.measure.market_result" in registry.REGISTRATION_MODULES
     assert results_module.market.__name__ == "market"

@@ -2,7 +2,9 @@
 # Rebuild every number in the paper from free public sources.
 #
 # Nothing here requires credentials, a subscription, or an account. Runtime is
-# dominated by ~1,000 polite HTTP requests and is roughly 30-45 minutes from cold.
+# dominated by ~2,500 polite HTTP requests and is roughly an hour from cold. The FLEX
+# reports themselves are not fetched here: `hidden-options backfill-flex` does that, and
+# OCC keeps only about twenty months of them online.
 #
 #   scripts/reproduce.sh          full rebuild
 #   scripts/reproduce.sh --quick  skip collection, rebuild analysis from existing captures
@@ -64,7 +66,9 @@ print(f"  overstatement        {census.notional.sum()/structures.exposure.sum():
 print(summarise(census).round(3).to_string(index=False))
 PYEOF
 
-echo "==> 5/5  figures and paper"
-$PY scripts/make_figures.py
-( cd paper && tectonic hidden_options_market.tex >/dev/null 2>&1 && echo "  paper/hidden_options_market.pdf rebuilt" )
+echo "==> 5/5  FLEX panel results, figures, generated numbers and paper"
+if [[ "${1:-}" != "--quick" ]]; then
+  $PY -m hidden_options.cli refresh-bars
+fi
+make PY="$PY" results figures publish paper
 echo "done."

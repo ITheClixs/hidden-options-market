@@ -86,6 +86,17 @@ def registered_oi_table(tmp_path_factory, monkeypatch):
     sys.modules.pop("oi_table_registration", None)
 
 
+@pytest.fixture
+def no_registered_tables(monkeypatch):
+    """No table specs at all, as for a project that registers none.
+
+    The repository's own tables need its own results, which a temporary project lacks,
+    so a test publishing one must not pick them up from the registration modules.
+    """
+    monkeypatch.setattr(registry, "TABLES", registry.Registry("table"))
+    monkeypatch.setattr(registry, "REGISTRATION_MODULES", ())
+
+
 class TestResults:
     def test_result_roundtrip_is_byte_stable(self, tmp_path):
         result = make_result()
@@ -355,6 +366,7 @@ class TestReadme:
 
 
 class TestDrift:
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_fresh_publish_has_no_drift(self, tmp_path):
         make_project(tmp_path, make_result())
 
@@ -363,6 +375,7 @@ class TestDrift:
         assert check_drift(tmp_path) == []
         assert (tmp_path / "README.md").read_text().startswith("# Title")
 
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_check_drift_reports_edited_readme(self, tmp_path):
         make_project(tmp_path, make_result())
         publish(tmp_path)
@@ -371,6 +384,7 @@ class TestDrift:
 
         assert check_drift(tmp_path) == ["README.md"]
 
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_edited_numbers_file_is_reported(self, tmp_path):
         make_project(tmp_path, make_result())
         publish(tmp_path)
@@ -380,11 +394,13 @@ class TestDrift:
 
         assert check_drift(tmp_path) == ["paper/numbers.tex"]
 
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_outputs_that_were_never_published_are_reported(self, tmp_path):
         make_project(tmp_path, make_result())
 
         assert check_drift(tmp_path) == ["README.md", "paper/numbers.tex"]
 
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_changed_result_without_republishing_is_reported(self, tmp_path):
         make_project(tmp_path, make_result())
         publish(tmp_path)
@@ -393,6 +409,7 @@ class TestDrift:
 
         assert check_drift(tmp_path) == ["README.md", "paper/numbers.tex"]
 
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_publish_reports_only_the_files_it_changed(self, tmp_path):
         make_project(tmp_path, make_result())
 
@@ -416,6 +433,7 @@ class TestDrift:
         table.write_text("edited\n")
         assert check_drift(tmp_path, tables=tables) == ["paper/tables/oi.tex"]
 
+    @pytest.mark.usefixtures("no_registered_tables")
     def test_table_without_a_spec_is_stale_and_removed_by_publish(self, tmp_path):
         make_project(tmp_path, make_result())
         publish(tmp_path)
@@ -490,7 +508,7 @@ class TestDrift:
         )
 
         assert run.returncode == 0, run.stderr
-        assert run.stdout.strip() == "[] ['market']"
+        assert run.stdout.strip() == "[] ['market', 'predictive']"
 
 
 class TestRegistry:

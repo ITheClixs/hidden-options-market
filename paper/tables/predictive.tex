@@ -1,0 +1,18 @@
+\begin{table}[t]
+\centering
+\caption{Hidden inventory at $T$ and the underlying's volatility from $T+1$.}
+\label{tab:pred}
+\begin{tabular}{llrrrr}
+\toprule
+Predictor & Outcome & $\beta\times10^4$ & $t$ & MDE80$\times10^4$ & Perm.\ $p$ \\
+\midrule
+Inventory innovation & next-day $|r|$ & $-0.37$ & $-0.68$ & 1.53 & 0.454 \\
+Inventory change & next-day $|r|$ & $-0.68$ & $-0.64$ & 2.99 & 0.464 \\
+Near-dated share change & next-day $|r|$ & $-1.67$ & $-0.44$ & 10.74 & 0.667 \\
+Put share & next-day $|r|$ & $+0.56$ & $+0.22$ & 7.19 & 0.614 \\
+Inventory innovation & next-day $r^2$ & $+0.06$ & $+0.47$ & 0.34 & 0.711 \\
+Placebo: innovation at $T+2$ & next-day $|r|$ & $+1.02$ & $+1.86$ & 1.53 & 0.057 \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Underlying and date fixed effects; standard errors clustered by underlying and by date. Controls: mean absolute return over the previous 5 and 22 sessions, the same day's absolute return, and log dollar volume. 377,332 underlying-days, 1,407 underlyings, 468 activity dates; the placebo row loses the last two dates. Coefficients and MDE80, the effect detectable with 80\% power at the 5\% level, are multiplied by $10^4$, which for $|r|$ is basis points. The permutation $p$ is from 1,000 re-estimations with the predictor shuffled across underlyings within each date.\par}
+\end{table}

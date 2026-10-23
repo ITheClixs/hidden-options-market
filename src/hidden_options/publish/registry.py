@@ -43,10 +43,17 @@ TableFn = Callable[[Mapping[str, Result]], str]
 
 # Modules whose import registers analyses and tables. Each analysis task adds its module
 # here. None of them may import matplotlib.
-REGISTRATION_MODULES: tuple[str, ...] = ("hidden_options.measure.market_result",)
+REGISTRATION_MODULES: tuple[str, ...] = (
+    "hidden_options.measure.market_result",
+    "hidden_options.predict.result",
+    "hidden_options.predict.tables",
+)
 
 # Modules whose import registers figure builders, loaded only to draw figures.
-FIGURE_MODULES: tuple[str, ...] = ("hidden_options.figures.market",)
+FIGURE_MODULES: tuple[str, ...] = (
+    "hidden_options.figures.market",
+    "hidden_options.figures.predictive",
+)
 
 
 class Registry(Generic[T]):  # noqa: UP046 - PEP 695 syntax needs Python 3.12

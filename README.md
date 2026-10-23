@@ -33,44 +33,57 @@ date), and 59\% is calls.
 
 A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published
-overnight for day *T* should say something about day *T+1*.
+overnight for day *T* should say something about the underlying from day *T+1*, the first
+day the report can be read.
 
-It does not. Underlying and date fixed effects, errors two-way clustered, controls for
-trailing realised volatility at 5 and 22 days, same-day absolute return and log dollar
-volume; 58,014 underlying-days across 281 underlyings.
+It does not. The test covers 377,332 underlying-days across
+1,407 underlyings and 468 activity dates, 9 December 2024 to
+22 October 2026, with underlying and date fixed effects, errors clustered by underlying
+and by date, and controls for trailing volatility over 5 and 22 sessions, the same day's
+absolute return and log dollar volume. Each report meets the returns realised from the
+day it became usable, and an inventory change across a date the underlying did not report
+is dropped. Index underlyings are left out: the bars come from an equity quote feed.
+Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis points.
 
-| predictor | outcome | β | *t* | MDE80 |
-|---|---|---:|---:|---:|
-| inventory innovation | next-day \|r\| | −0.00030 | −1.37 | 0.00062 |
-| inventory change | next-day \|r\| | −0.00016 | −0.40 | 0.00115 |
-| near-dated share change | next-day \|r\| | +0.00081 | +0.58 | 0.00390 |
-| put share | next-day \|r\| | −0.00189 | −1.73 | 0.00307 |
-| inventory innovation | next-day r² | −0.00003 | −0.81 | 0.00011 |
-| **placebo: inventory dated *after* the outcome** | next-day \|r\| | **−0.00032** | **−1.37** | 0.00065 |
+| predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | permutation *p* |
+|---|---|---:|---:|---:|---:|
+| inventory innovation | next-day \|r\| | -0.37 | -0.68 | 1.53 | 0.45 |
+| inventory change | next-day \|r\| | -0.68 | -0.64 | 2.99 | 0.46 |
+| near-dated share change | next-day \|r\| | -1.67 | -0.44 | 10.74 | 0.67 |
+| put share | next-day \|r\| | 0.56 | 0.22 | 7.19 | 0.61 |
+| inventory innovation | next-day r² | 0.06 | 0.47 | 0.34 | 0.71 |
+| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **1.02** | **1.86** | 1.53 | 0.057 |
 
-![Coefficients on next-day absolute return with 95% intervals](docs/figures/placebo.png)
+![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 
-The placebo cannot carry information, and on this sample it reproduces the genuine
-estimate to two decimal places. On an earlier, smaller panel the same predictor reached
-*t* = −1.95 — the kind of number that gets written up as suggestive when no placebo is
-run. The minimum detectable effect at 80% power is about 0.0006 against a typical daily
-|r| near 0.02, so effects of 3–5% would have shown up. Longer horizons are weaker still.
+The permutation *p* comes from 1,000 re-estimations with the predictor
+shuffled across underlyings within each date; on every row it reads the same as *t*.
+The innovation sits in the middle of its shuffled distribution. The placebo, inventory
+from two dates later and so dated after the outcome it is asked to predict, comes closer
+to significance than any genuine predictor, at *t* = 1.86: here a *t* near two
+arises without any forward information. No genuine estimate gets close; the largest
+|*t*| among them, across every specification below, is 0.87.
 
-**The null does not depend on the window.** Loading the panel from different start dates
-changes the estimates, but no predictor reaches |*t*| = 2 on any of them:
+Longer horizons say the same: mean |r| over the next 3, 5 and 10 sessions gives
+*t* = -0.55, -0.57 and -0.18. Keeping only the
+tenth of underlying-days with the largest inventory changes gives *t* = -0.87.
+The close-to-close return includes an overnight move that partly precedes the report;
+the open-to-close return of the day it becomes usable gives *t* = -0.77. The
+minimum detectable effect at 80% power is 1.53 basis points per log point of
+innovation, 0.8\% of the mean next-day |r| of 201 basis points.
+
+Loading the panel from later start dates moves the estimates, not the conclusion:
 
 | panel loaded from | underlying-days | inventory innovation | placebo |
 |---|---:|---:|---:|
-| 2025-09-09 (table above) | 58,014 | −0.00030 (*t* −1.37) | −0.00032 (*t* −1.37) |
-| 2025-07-23 | 65,356 | −0.00039 (*t* −1.86) | −0.00032 (*t* −1.48) |
-| 2024-12-02 (all on disk) | 99,097 | −0.00026 (*t* −1.29) | +0.00004 (*t* +0.26) |
-
-The exact placebo match is specific to the first sample; the absence of predictability is
-not.
+| 2024-12-02 (table above) | 377,332 | -0.37 (*t* -0.68) | 1.02 (*t* 1.86) |
+| 2025-07-23 | 264,825 | -0.19 (*t* -0.27) | 0.98 (*t* 1.38) |
+| 2025-09-09 | 239,318 | 0.16 (*t* 0.22) | 0.93 (*t* 1.23) |
 
 Not ruled out: strike-local effects, intraday responses, and effects on the listed option
 surface rather than the underlying. Each needs data that cannot be collected
-retrospectively for free. Details in [`docs/PREDICTIVE_RESULT.md`](docs/PREDICTIVE_RESULT.md).
+retrospectively for free. The first version of this test, on a shorter panel, is kept in
+[`docs/log/`](docs/log/2026-08-19-predictive-result.md).
 
 ## Two measurement results that travel
 
@@ -96,26 +109,25 @@ cancel:
 Python 3.11+. Every input is free: no WRDS, no OptionMetrics, no vendor feed, no account.
 
 ```bash
-uv venv && uv pip install -e '.[dev]'
-.venv/bin/pytest                                     # 374 tests
+uv venv && uv pip install -e '.[dev,paper]'
+.venv/bin/pytest
 
-# the OCC FLEX report, equity and index classes
-.venv/bin/hidden-options backfill-flex --start 2025-07-23 --end 2026-08-17
+# the OCC FLEX report, equity and index classes, for every date OCC still serves
+.venv/bin/hidden-options backfill-flex --start 2024-12-02
 
-# the regression table above
-.venv/bin/python scripts/run_predictive.py --start 2025-09-09 --end 2026-08-17
+# daily bars for the FLEX underlyings, far enough back for the trailing controls
+.venv/bin/hidden-options refresh-bars
 
-# the figures in this README
-.venv/bin/python scripts/make_readme_figures.py
+# results, figures, the generated paper numbers and this README, then the PDF
+make all
 ```
 
 Every downloaded report is checked against the per-class totals it carries and stored
 under its own activity date, not the date it was fetched. OCC publishes overnight, so a
 capture taken during a session returns the previous settlement; partitioning by fetch
-date would enter one settlement twice as two suspiciously stable days.
-`run_predictive.py` joins the panel to daily bars for the underlyings
-(`data/flex_underlying_bars.parquet`, refreshed with
-`hidden_options.collect.bars.refresh_flex_underlying_bars`).
+date would enter one settlement twice as two suspiciously stable days. The numbers in this
+README and the paper are rendered from `results/` by `make publish`, and `make check`
+fails if any of them differs from its result file.
 
 ## Layout
 
@@ -124,9 +136,11 @@ src/hidden_options/collect/occ_flex.py      OCC FLEX report: fetch, parse, valid
 src/hidden_options/collect/backfill.py      fetch the FLEX reports missing for a span of dates
 src/hidden_options/measure/flex_panel.py    panel assembly and inventory measures
 src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
+src/hidden_options/predict/                 the predictive panel, regressions and permutation test
+src/hidden_options/publish/                 results/ to the paper's numbers and tables and this README
 src/hidden_options/collect/                 chains, holdings, bars and N-PORT collectors
-scripts/                                    backfill, regressions, figures
-docs/                                       the current result and how the data is collected
+scripts/                                    scheduling, one-off back-fills, reproduce.sh
+docs/                                       how the data is collected; the template for this README
 docs/log/                                   superseded work and corrections, dated, as written
 archive/                                    the scripts behind the log's results
 ```
