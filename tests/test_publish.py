@@ -9,6 +9,7 @@ produce invalid or colliding LaTeX, and an edited output is always reported as d
 from __future__ import annotations
 
 import json
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -52,6 +53,34 @@ def make_project(root: Path, *results: Result, template: str = TEMPLATE) -> Path
     for result in results:
         write_result(result, root / "results")
     return root
+
+
+TABLE_MODULE = """\
+from hidden_options.publish import Column, registry, render_table
+
+
+@registry.TABLES.register("oi")
+def oi_table(results):
+    rows = [{"oi": results["panel"].values["oi_end"]}]
+    return render_table(rows, [Column("oi", "OI", ".1f")], caption="c", label="tab:oi")
+"""
+
+
+@pytest.fixture
+def registered_oi_table(tmp_path_factory, monkeypatch):
+    """A registration module that puts one table into an otherwise empty registry.
+
+    Nothing has imported the module when a test starts, which is the state of a fresh
+    process that calls the library without going through the CLI.
+    """
+    module_dir = tmp_path_factory.mktemp("registrations")
+    (module_dir / "oi_table_registration.py").write_text(TABLE_MODULE)
+    monkeypatch.syspath_prepend(str(module_dir))
+    monkeypatch.setattr(registry, "TABLES", registry.Registry("table"))
+    monkeypatch.setattr(registry, "REGISTRATION_MODULES", ("oi_table_registration",))
+    sys.modules.pop("oi_table_registration", None)
+    yield "oi_table_registration"
+    sys.modules.pop("oi_table_registration", None)
 
 
 class TestResults:
@@ -313,6 +342,39 @@ class TestDrift:
         assert not stale.exists()
         assert (tmp_path / "paper" / "tables" / ".gitkeep").exists()
 
+    def test_publish_sees_registered_tables_without_the_cli(self, tmp_path, registered_oi_table):
+        make_project(tmp_path, make_result())
+
+        assert publish(tmp_path) == ["README.md", "paper/numbers.tex", "paper/tables/oi.tex"]
+        assert "73.0" in (tmp_path / "paper" / "tables" / "oi.tex").read_text()
+
+    def test_check_drift_sees_registered_tables_without_the_cli(
+        self, tmp_path, registered_oi_table
+    ):
+        make_project(tmp_path, make_result())
+
+        assert check_drift(tmp_path) == ["README.md", "paper/numbers.tex", "paper/tables/oi.tex"]
+
+    def test_committed_table_survives_publishing_from_a_fresh_process(
+        self, tmp_path, monkeypatch, registered_oi_table
+    ):
+        make_project(tmp_path, make_result())
+        publish(tmp_path)
+        sys.modules.pop(registered_oi_table)
+        monkeypatch.setattr(registry, "TABLES", registry.Registry("table"))
+
+        assert publish(tmp_path) == []
+        assert (tmp_path / "paper" / "tables" / "oi.tex").is_file()
+
+    def test_explicit_tables_are_used_as_given(self, tmp_path, registered_oi_table):
+        make_project(tmp_path, make_result())
+
+        assert publish(tmp_path, tables=registry.Registry("table")) == [
+            "README.md",
+            "paper/numbers.tex",
+        ]
+        assert "oi_table_registration" not in sys.modules
+
     def test_missing_template_is_an_error(self, tmp_path):
         with pytest.raises(FileNotFoundError, match="readme.template.md"):
             check_drift(tmp_path)
@@ -420,6 +482,14 @@ class TestCli:
         root = ["--root", str(tmp_path)]
 
         assert cli.main(["publish", *root]) == 0
+        assert cli.main(["check", *root]) == 0
+
+    def test_publish_and_check_include_registered_tables(self, tmp_path, registered_oi_table):
+        make_project(tmp_path, make_result())
+        root = ["--root", str(tmp_path)]
+
+        assert cli.main(["publish", *root]) == 0
+        assert (tmp_path / "paper" / "tables" / "oi.tex").is_file()
         assert cli.main(["check", *root]) == 0
 
     def test_check_exits_one_and_lists_drifted_paths(self, empty_registries, tmp_path, capsys):

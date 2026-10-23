@@ -242,7 +242,6 @@ def _figures(args: argparse.Namespace) -> int:
 
 
 def _publish(args: argparse.Namespace) -> int:
-    registry.load_registrations()
     try:
         changed = publish(args.root)
     except (FileNotFoundError, ValueError, KeyError) as exc:
@@ -257,7 +256,6 @@ def _publish(args: argparse.Namespace) -> int:
 
 def _check(args: argparse.Namespace) -> int:
     """Exit 1, listing the paths, when a generated file differs from its render."""
-    registry.load_registrations()
     try:
         drifted = check_drift(args.root)
     except (FileNotFoundError, ValueError, KeyError) as exc:

@@ -44,8 +44,7 @@ def check_drift(root: Path = PROJECT_ROOT, *, tables: Registry[TableFn] | None =
     produces any more, since a stale table would keep printing numbers that no result
     backs.
     """
-    tables = registry.TABLES if tables is None else tables
-    expected = render_outputs(root, tables)
+    expected = render_outputs(root, _tables_or_registered(tables))
     drifted = [path for path, text in expected.items() if _read(root / path) != text]
     drifted += sorted(set(_table_files(root)) - set(expected))
     return sorted(drifted)
@@ -57,8 +56,7 @@ def publish(root: Path = PROJECT_ROOT, *, tables: Registry[TableFn] | None = Non
     Files already holding the right content are not touched, so an up-to-date
     checkout stays clean and the return value says exactly what a commit will contain.
     """
-    tables = registry.TABLES if tables is None else tables
-    expected = render_outputs(root, tables)
+    expected = render_outputs(root, _tables_or_registered(tables))
     changed = []
     for path, text in expected.items():
         target = root / path
@@ -70,6 +68,18 @@ def publish(root: Path = PROJECT_ROOT, *, tables: Registry[TableFn] | None = Non
         (root / path).unlink()
         changed.append(path)
     return sorted(changed)
+
+
+def _tables_or_registered(tables: Registry[TableFn] | None) -> Registry[TableFn]:
+    """The given tables, or every table the registration modules define.
+
+    Registration happens when a module is imported, so a caller that never imported them
+    would otherwise see an empty registry and `publish` would delete the committed tables.
+    """
+    if tables is not None:
+        return tables
+    registry.load_registrations()
+    return registry.TABLES
 
 
 def _read(path: Path) -> str | None:
