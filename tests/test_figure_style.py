@@ -20,6 +20,8 @@ import matplotlib as mpl
 import numpy as np
 import pytest
 from matplotlib import font_manager
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from matplotlib.patches import Rectangle
 
 from hidden_options.config import PROJECT_ROOT
 from hidden_options.figures import style
@@ -180,6 +182,64 @@ class TestFigureSize:
     def test_new_figure_rejects_a_flat_aspect(self):
         with pytest.raises(ValueError, match="Aspect"):
             new_figure(aspect=0)
+
+
+class TestDateAxis:
+    """A daily series over the panel window, drawn by plain `ax.plot` on a date axis."""
+
+    DAYS = np.arange("2025-07-23", "2026-08-18", dtype="datetime64[D]")
+
+    def drawn_labels(self, share: float):
+        fig = new_figure(share, aspect=0.8)
+        ax = fig.subplots()
+        ax.plot(self.DAYS, np.arange(len(self.DAYS)))
+        canvas = FigureCanvasAgg(fig)
+        canvas.draw()
+        renderer = canvas.get_renderer()
+        texts = [*ax.xaxis.get_ticklabels(), ax.xaxis.get_offset_text()]
+        return [
+            (t.get_text(), t.get_window_extent(renderer))
+            for t in texts
+            if t.get_visible() and t.get_text()
+        ]
+
+    @pytest.mark.parametrize("share", [1.0, 0.5, 0.45])
+    def test_tick_labels_do_not_collide_at_any_figure_width(self, styled, share):
+        labels = self.drawn_labels(share)
+        assert len(labels) >= 3
+        for i, (first, box) in enumerate(labels):
+            for second, other in labels[i + 1 :]:
+                assert not box.overlaps(other), f"{first!r} runs into {second!r}"
+
+
+class TestOutlineMarks:
+    """Marks that are only an outline must stay visible; filled ones carry none."""
+
+    def test_unfilled_arrow_has_a_line(self, styled):
+        ax = new_figure().subplots()
+        note = ax.annotate("", xy=(1, 1), xytext=(0, 0), arrowprops={"arrowstyle": "-"})
+        assert note.arrow_patch.get_linewidth() > 0
+
+    def test_step_histogram_has_a_line(self, styled):
+        ax = new_figure().subplots()
+        _, _, patches = ax.hist(np.linspace(0, 1, 50), histtype="step")
+        assert patches[0].get_linewidth() > 0
+
+    def test_unfilled_rectangle_and_stairs_have_a_line(self, styled):
+        ax = new_figure().subplots()
+        box = ax.add_patch(Rectangle((0, 0), 1, 1, fill=False))
+        (stairs,) = [ax.stairs([1, 2, 1], [0, 1, 2, 3])]
+        assert box.get_linewidth() > 0
+        assert stairs.get_linewidth() > 0
+
+    def test_filled_marks_get_no_outline(self, styled):
+        ax = new_figure().subplots()
+        bars = ax.bar([0, 1], [1, 2])
+        _, _, hist = ax.hist(np.linspace(0, 1, 50))
+        band = ax.fill_between([0, 1], [0, 0], [1, 2])
+        for mark in (*bars, *hist, band):
+            edge = mpl.colors.to_rgba_array(mark.get_edgecolor())
+            assert len(edge) == 0 or edge[:, 3].max() == 0
 
 
 class TestSave:

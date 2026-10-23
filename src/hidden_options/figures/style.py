@@ -11,6 +11,11 @@ grey does the gridlines and reference lines.
 Direct labels (`label_line_end`) stand in for legends, and a figure never carries a
 second y-axis: two measures get two panels.
 
+Dates on an axis use matplotlib's concise formatter, so a plain `ax.plot(dates, y)` has
+labels that fit down to about 0.45 of the text width; a narrower panel should thin its
+own ticks. Filled bars, histograms and bands have no outline; marks that are only an
+outline (a step histogram, an unfilled box, an annotation arrow) draw at 0.8 pt.
+
 Typical use:
 
     apply_style()
@@ -109,6 +114,9 @@ _RC: Mapping[Any, Any] = MappingProxyType(
         "font.size": _FONT_SIZE,
         "mathtext.fontset": "cm",
         "text.usetex": False,
+        # The default date labels ("2025-09") are too wide to sit side by side on a
+        # half-width axis; the concise formatter drops the repeated year and month.
+        "date.converter": "concise",
         "text.color": PALETTE["ink"],
         # Tick labels go through mathtext so the minus sign and exponents are Computer
         # Modern as well, which cmr10 alone cannot draw.
@@ -148,8 +156,11 @@ _RC: Mapping[Any, Any] = MappingProxyType(
         "lines.markersize": 4.0,
         "lines.solid_capstyle": "round",
         "lines.solid_joinstyle": "round",
-        # Bars and bands are filled marks; an outline would add ink that is not data.
-        "patch.linewidth": 0.0,
+        # Filled bars, histograms and bands carry no edge whatever this is (matplotlib draws
+        # an edge on a filled patch only if asked), so none of them gains an outline. What
+        # it sets is the line of marks that are only an outline: a step histogram, an
+        # unfilled box, stairs, an annotation arrow. At zero those vanish.
+        "patch.linewidth": 0.8,
         "legend.frameon": False,
         "legend.fontsize": _FONT_SIZE,
         "figure.facecolor": PALETTE["surface"],
