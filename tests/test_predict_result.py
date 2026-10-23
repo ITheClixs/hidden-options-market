@@ -67,6 +67,18 @@ class TestResult:
         assert values["top_decile"]["share"] == 0.1
         assert values["max_abs_t"] >= abs(values["rows"][0]["t_stat"])
 
+    def test_qualifying_names_without_bars_are_counted_and_named(self):
+        """A name the bar provider no longer serves drops out at the join; the sample is
+        then tilted towards names still trading, so the result says how many."""
+        bars = BARS[BARS["symbol"] != "N05"]
+        found = result_module.predictive_result(FLEX, bars, n_perm=10, later_starts=STARTS)
+        sample = found.values["sample"]
+        assert sample["qualifying_underlyings"] == 30
+        assert sample["without_bars"] == ["N05"]
+        assert found.macros["PredQualifying"] == "30"
+        assert found.macros["PredNoBars"] == "1"
+        assert sample["underlyings"] == 29
+
     def test_inputs_record_the_data(self, result):
         assert result.inputs["first_date"] == "2025-01-02"
         assert result.inputs["bar_symbols"] == 30
@@ -87,6 +99,13 @@ class TestMacros:
         assert macros["PredMDEShare"] == f"{share * 100:.1f}\\%"
         assert macros["PredMeanAbsRet"] == f"{sample['mean_abs_ret'] * 1e4:.0f}"
         assert "PredDetectable" not in macros
+
+    def test_smallest_p_values_in_the_table_are_printed(self, result):
+        rows = result.values["rows"]
+        assert result.macros["PredMinPermP"] == p_value(min(r["permutation_p"] for r in rows))
+        assert result.macros["PredMinClusterP"] == p_value(min(r["p_value"] for r in rows))
+        genuine = [r["permutation_p"] for r in rows if not r["placebo"]]
+        assert result.macros["PredMinGenuinePermP"] == p_value(min(genuine))
 
     def test_rows_print_their_clustered_standard_error(self, result):
         main = result.values["rows"][0]

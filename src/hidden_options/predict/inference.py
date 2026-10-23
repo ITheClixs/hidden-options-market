@@ -1,11 +1,12 @@
 """Randomization inference for a two-way fixed-effects coefficient.
 
 The clustered t-statistic leans on asymptotics in the number of underlyings and dates.
-The permutation test leans on none: it shuffles the predictor across underlyings within
-each date, which keeps every date's set of predictor values (and so anything common to a
-date) and breaks only the link between an underlying's inventory and its own outcome.
-The coefficient is re-estimated on each shuffle, with the same fixed effects and
-controls, and the observed coefficient is placed in that distribution.
+The permutation test leans instead on underlyings being exchangeable within a date: it
+shuffles the predictor across underlyings within each date, which keeps every date's set
+of predictor values (and so anything common to a date) and breaks each underlying's own
+inventory persistence along with any link between its inventory and its outcome. The
+coefficient is re-estimated on each shuffle, with the same fixed effects and controls,
+and the observed coefficient is placed in that distribution.
 
 A thousand re-estimations are cheap because only the shuffled predictor changes. The
 outcome and the controls are purged of the fixed effects once, and the predictor is

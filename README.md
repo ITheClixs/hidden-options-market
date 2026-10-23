@@ -42,8 +42,10 @@ It does not. The test covers 377,332 underlying-days across
 and by date, and controls for trailing volatility over 5 and 22 sessions, the same day's
 absolute return and log dollar volume. Each report meets the returns realised from the
 day it became usable, and an inventory change across a date the underlying did not report
-is dropped. Index underlyings are left out: the bars come from an equity quote feed.
-Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis points.
+is dropped. Bars are fetched by the equity report's tickers, so index underlyings are left
+out (a bare index symbol names another security, or none), and so are 80 of the
+1,547 qualifying equity names, whose tickers the bar provider no longer
+serves. Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis points.
 
 | predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | permutation *p* |
 |---|---|---:|---:|---:|---:|
@@ -57,12 +59,13 @@ Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis points.
 ![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 
 The permutation *p* comes from 1,000 re-estimations with the predictor
-shuffled across underlyings within each date; on every row it reads the same as *t*.
-The innovation sits in the middle of its shuffled distribution. The placebo, inventory
-from two dates later and so dated after the outcome it is asked to predict, comes closer
-to significance than any genuine predictor, at *t* = 1.86: here a *t* near two
-arises without any forward information. No genuine estimate gets close; the largest
-|*t*| among them, across every specification below, is 0.87.
+shuffled across underlyings within each date, which treats underlyings as exchangeable
+within a date. The smallest permutation *p* in the table is 0.057 and the
+smallest clustered *p* 0.063; among the genuine predictors the smallest
+permutation *p* is 0.45. The placebo is inventory from two dates later,
+dated after the outcome, so it cannot predict it; what it picks up runs from volatility
+to later inventory, or through something common to both. The largest |*t*| among the
+genuine estimates, across every specification below, is 0.87.
 
 Longer horizons say the same: mean |r| over the next 3, 5 and 10 sessions gives
 *t* = -0.55, -0.57 and -0.18. Keeping only the

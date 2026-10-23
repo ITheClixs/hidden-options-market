@@ -6,8 +6,11 @@ permutation distribution, longer horizons, the restriction to large inventory ch
 the open-to-close timing check, and the main row and placebo with the panel loaded from
 later start dates.
 
-Index underlyings are left out. Their daily bars are not in the equity quote feed the
-bars come from, so the sample is the equity report's underlyings.
+Index underlyings are left out. Bars are fetched only for the equity report's tickers,
+and a bare index symbol (SPX, NDX) names another security on the bar provider, or none;
+the index itself is a different symbol there. Equity underlyings whose tickers the
+provider no longer serves (delisted or renamed) have no bars and drop out at the join;
+the result counts and names them, since the sample is tilted towards names still trading.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from hidden_options.collect.bars import flex_underlyings
 from hidden_options.config import BARS_PATH, RAW_DIR
 from hidden_options.measure.flex_panel import daily_inventory, load_panel
 from hidden_options.predict.inference import N_PERM, SEED, permutation_test
@@ -83,7 +87,7 @@ def predictive_result(
     windows = window_robustness(daily, bars, [first, *later_starts])
 
     values: dict[str, Any] = {
-        "sample": _sample(panel, rows[0], flex_panel, kinds),
+        "sample": _sample(panel, rows[0], flex_panel, kinds, bars),
         "controls": list(CONTROLS),
         "rows": [
             {"key": key, **asdict(row), "permutation_p": permutations[key].p_value}
@@ -141,11 +145,19 @@ def predictive() -> Result:
 
 
 def _sample(
-    panel: pd.DataFrame, main: PredictiveRow, flex_panel: pd.DataFrame, kinds: pd.Series
+    panel: pd.DataFrame,
+    main: PredictiveRow,
+    flex_panel: pd.DataFrame,
+    kinds: pd.Series,
+    bars: pd.DataFrame,
 ) -> dict[str, Any]:
-    """The main row's estimation sample, and the scale its coefficients are read against."""
+    """The main row's estimation sample, what was left out of it, and the scale its
+    coefficients are read against."""
     used = panel.dropna(subset=[MAIN_PREDICTOR, MAIN_OUTCOME, *CONTROLS])
+    qualifying = flex_underlyings(flex_panel)
     return {
+        "qualifying_underlyings": len(qualifying),
+        "without_bars": sorted(set(qualifying) - set(bars["symbol"])),
         "underlying_days": main.n_obs,
         "underlyings": main.n_underlyings,
         "dates": main.n_dates,

@@ -66,6 +66,8 @@ def _sample_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PredFirstDate": formats.long_date(pd.Timestamp(sample["first_date"])),
         "PredLastDate": formats.long_date(pd.Timestamp(sample["last_date"])),
         "PredIndexUnderlyings": formats.count(sample["index_underlyings"]),
+        "PredQualifying": formats.count(sample["qualifying_underlyings"]),
+        "PredNoBars": formats.count(len(sample["without_bars"])),
         "PredMeanAbsRet": formats.decimal(mean_abs * BASIS_POINTS, 0),
         # The main row's MDE80 per log point of innovation, as a share of the mean outcome.
         "PredMDEShare": formats.percent(main["mde80"] / mean_abs, 1),
@@ -74,7 +76,14 @@ def _sample_macros(values: Mapping[str, Any]) -> dict[str, str]:
 
 
 def _row_macros(values: Mapping[str, Any]) -> dict[str, str]:
-    macros: dict[str, str] = {}
+    rows = values["rows"]
+    macros = {
+        "PredMinPermP": p_value(min(row["permutation_p"] for row in rows)),
+        "PredMinClusterP": p_value(min(row["p_value"] for row in rows)),
+        "PredMinGenuinePermP": p_value(
+            min(row["permutation_p"] for row in rows if not row["placebo"])
+        ),
+    }
     for row in values["rows"]:
         stem = f"Pred{ROW_STEMS[row['key']]}"
         macros[f"{stem}Beta"] = bp(row["coefficient"])

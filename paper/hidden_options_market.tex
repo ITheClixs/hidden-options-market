@@ -42,9 +42,9 @@ cycle; the share more than a year from expiry, meanwhile, rose from \OverOneYear
 to \OverOneYear{}. We then ask whether this hidden inventory predicts the
 visible market, and find that it does not: across \PredUnderlyingDays{} underlying-days,
 no per-underlying inventory measure predicts next-day or next-fortnight realised
-volatility (the largest $|t|$ is \PredMaxAbsT{}), by clustered or by permutation
-inference, and a placebo using inventory dated \emph{after} the outcome comes closer to
-significance than any of them. Along the way we
+volatility (the largest $|t|$ is \PredMaxAbsT{}), a permutation test on the next-day
+regressions agrees, and a placebo using inventory dated \emph{after} the outcome has a
+larger $|t|$ than any of them. Along the way we
 report two measurement results with wider application. First, a natural
 identification heuristic --- treating strikes off the standard listing grid as FLEX ---
 achieves precision $0.67$ and recall $0.34$ against the authoritative report, missing
@@ -105,14 +105,11 @@ It does not, at least at the resolution available here. Across \PredUnderlyingDa
 underlying-days and \PredUnderlyings{} underlyings, per-underlying inventory does not
 predict next-day absolute or squared returns, nor mean absolute returns over the
 following three, five or ten sessions. The largest $|t|$ among the genuine estimates is
-\PredMaxAbsT{}, and a permutation test that shuffles inventory across underlyings within
-each date reads the same. A placebo using inventory dated \emph{after} the outcome, which
-cannot predict it by construction, comes closer to significance than any of them, at
-$t=\PredPlaceboT$.
-
-We report the placebo beside the null because it shows what the design produces without
-any forward information: a genuine predictor at $t$ near two would not have been
-evidence here.
+\PredMaxAbsT{}, and on the next-day regressions a permutation test that shuffles
+inventory across underlyings within each date finds no $p$ below \PredMinGenuinePermP{}. A
+placebo using inventory dated \emph{after} the outcome, which cannot predict it by
+construction, has a larger $|t|$ than any of them, \PredPlaceboT{}; what it picks up runs
+from volatility to later inventory, or through something common to both.
 
 \paragraph{Two measurement results.} Both emerged from building the census and both
 apply beyond FLEX.
@@ -367,10 +364,8 @@ valuation half of the problem directly, since they price each series as cleared.
 \section{Does hidden inventory predict the visible market?}
 \label{sec:predict}
 
-A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
-residual convexity while the position lives. If that matters, inventory observed at $T$
-should say something about what the underlying does once the report can be read. We
-estimate
+If the hedging of FLEX inventory in the listed market matters, inventory at $T$ should
+say something about the underlying once the report can be read. We estimate
 \begin{equation}
 y_{i,t+1}
 = \alpha_i + \delta_t
@@ -379,77 +374,55 @@ y_{i,t+1}
 + \varepsilon_{i,t},
 \label{eq:pred}
 \end{equation}
-with underlying and date fixed effects and standard errors clustered by underlying and by
-date \citep{cameron2011}. The controls are known by the close of $T$: mean absolute return
-over the previous five and twenty-two sessions, the same day's absolute return, and log
-dollar volume. Each report meets the returns realised from the date it could first be
-acted on, the next activity date (Section~\ref{sec:panel}), and a change in inventory
-that spans a date the underlying did not report is dropped rather than read as one day of
-flow.
-
-Inventory enters four ways. The innovation is log open interest less its mean over the
-underlying's previous twenty reports, since the level is dominated by persistent
-differences between underlyings that the fixed effects remove. The others are the day's
-change in log open interest, the change in the share expiring within sixty days, and the
-put share. Index underlyings, \PredIndexUnderlyings{} of them, are left out, because the
-daily bars come from an equity quote feed that does not carry them. The sample is
-\PredUnderlyingDays{} underlying-days across \PredUnderlyings{} underlyings and
-\PredDates{} activity dates, from \PredFirstDate{} to \PredLastDate{}.
+with the controls and errors of Table~\ref{tab:pred} \citep{cameron2011}. Each report meets
+the returns realised from the date it could first be acted on (Section~\ref{sec:panel}),
+and a change spanning a date the underlying did not report is dropped. The innovation is
+log open interest less its mean over the previous twenty reports. Bars are fetched by the
+equity report's tickers, and a bare index symbol names another security or none, so the
+\PredIndexUnderlyings{} index underlyings are out; so are \PredNoBars{} of the
+\PredQualifying{} qualifying equity names, whose tickers the provider no longer serves.
+That leaves \PredUnderlyingDays{} underlying-days, \PredUnderlyings{} underlyings and
+\PredDates{} activity dates.
 
 \input{tables/predictive}
 
-Nothing predicts (Table~\ref{tab:pred}). The innovation's coefficient on next-day
-absolute return is $\PredInnovBeta\times10^{-4}$ at $t=\PredInnovT$. Mean absolute return
-over the next three, five and ten sessions gives $t=\PredHorizonThreeT$,
-$\PredHorizonFiveT$ and $\PredHorizonTenT$. Keeping only the tenth of underlying-days with
-the largest inventory changes, an absolute change in log open interest of at least
-\PredDecileCut{}, so that only large creations and extinguishments enter, gives
-$t=\PredDecileT$ on \PredDecileDays{} underlying-days. The close-to-close outcome includes
-the overnight move, part of which comes before the report is out; on the open-to-close
-return of the session the report becomes usable the coefficient is
-$\PredOpenCloseBeta\times10^{-4}$ at $t=\PredOpenCloseT$. Rebuilding the panel from two
-later start dates moves the estimates but not the conclusion (Table~\ref{tab:windows}).
-Across every specification here, the largest $|t|$ of a genuine predictor is
-\PredMaxAbsT{}.
+Nothing predicts. The innovation's coefficient on next-day absolute return is
+$\PredInnovBeta\times10^{-4}$ at $t=\PredInnovT$, and $\PredOpenCloseBeta\times10^{-4}$ at
+$t=\PredOpenCloseT$ on the open-to-close return, which leaves out the overnight move
+before publication. Mean absolute return over three, five and ten sessions gives
+$t=\PredHorizonThreeT$, $\PredHorizonFiveT$ and $\PredHorizonTenT$, and the tenth of
+underlying-days with the largest inventory changes $t=\PredDecileT$. Later start dates
+move the estimates, not the conclusion (Table~\ref{tab:windows}). The largest genuine
+$|t|$ in all of these is \PredMaxAbsT{}.
 
 \input{tables/windows}
 
-The clustered errors lean on asymptotics in the number of underlyings and of dates, so we
-check them with a test that does not. Each predictor is shuffled across underlyings
-within each date, which keeps whatever a date's predictor values have in common and
-breaks only the link between an underlying's inventory and its own volatility, and the
-regression is re-estimated \PredPermutations{} times (Figure~\ref{fig:placebo}). The
-innovation's estimate sits in the body of its shuffled distribution, at permutation
-$p=\PredInnovPermP$. The draws have a standard deviation of $\PredNullSd\times10^{-4}$,
-against a clustered standard error of $\PredInnovSE\times10^{-4}$, and on every row of
-Table~\ref{tab:pred} the permutation $p$ gives the same reading as the $t$-statistic.
+The permutation test shuffles the predictor across underlyings within each date
+(Figure~\ref{fig:placebo}). It treats underlyings as exchangeable within a date, and it
+breaks each underlying's own inventory persistence along with any link to its
+volatility. For the innovation the draws have a standard deviation of
+$\PredNullSd\times10^{-4}$, against a clustered standard error of
+$\PredInnovSE\times10^{-4}$. The smallest permutation $p$ in Table~\ref{tab:pred} is
+\PredMinPermP{}, the smallest clustered $p$ \PredMinClusterP{}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.68\textwidth]{figures/placebo.pdf}
-\caption{Top: the inventory innovation's coefficient on next-day absolute return,
-re-estimated with the predictor shuffled across underlyings within each date. Bottom: the
-estimates with 95\% intervals, on the same axis. The placebo is the innovation two
-activity dates later, dated after the outcome. The share predictors are in other units
-and appear only in Table~\ref{tab:pred}.}
+\caption{Top: the innovation's coefficient on next-day $|r|$ with the predictor shuffled
+within dates. Bottom: estimates and 95\% intervals on the same axis; the share predictors,
+in other units, are omitted.}
 \label{fig:placebo}
 \end{figure}
 
-The placebo is the innovation two activity dates later, dated after the outcome it is
-asked to predict, so it cannot predict it; whatever association it shows runs from the
-outcome to inventory, or through something common to both. It comes closer to
-significance than any genuine predictor: $\PredPlaceboBeta\times10^{-4}$ at
-$t=\PredPlaceboT$, permutation $p=\PredPlaceboPermP$. A coefficient of that size arises
-in this design without any forward information, so a genuine estimate would have had to
-clear it to mean anything; none comes near.
+The placebo is the innovation two activity dates later, dated after its outcome, so it
+cannot predict it: $\PredPlaceboBeta\times10^{-4}$ at $t=\PredPlaceboT$, permutation
+$p=\PredPlaceboPermP$. What it picks up runs from the outcome to later inventory, or
+through something common to both.
 
-The null is a bound rather than an absence. The minimum detectable effect at 80\% power is
-$\PredInnovMDE\times10^{-4}$ per log point of innovation, \PredMDEShare{} of the mean
-next-day absolute return of \PredMeanAbsRet{} basis points. Three things it does not rule
-out each need data that cannot be had free after the fact. Inventory is aggregated to the
-underlying, so a hedging response concentrated at the strikes traded would be averaged
-away. Daily bars cannot see a response completed within a session. And we predict the
-underlying, not the listed option surface, where a dealer actually lays off risk.
+The minimum detectable effect at 80\% power is $\PredInnovMDE\times10^{-4}$ per log point
+of innovation, \PredMDEShare{} of the mean next-day absolute return. Strike-local effects,
+responses within a session and effects on the listed surface are not ruled out; each
+needs data that cannot be had free after the fact.
 
 \section{Limitations}
 
@@ -479,9 +452,9 @@ than a year from expiry has grown from \OverOneYearStart{} to \OverOneYear{}.
 
 Whether it tells us anything about the visible market is a separate question, and at
 the resolution available the answer is no. Per-underlying hidden inventory does not
-predict subsequent realised volatility, by clustered or by permutation inference, and a
-placebo dated after its outcome comes closer to significance than any genuine
-predictor. An effect of \PredMDEShare{} of the mean daily absolute return per log point
+predict subsequent realised volatility: neither the clustered errors nor, on next-day
+volatility, a permutation test finds a predictor, and a placebo dated after its outcome
+has a larger $|t|$ than any of them. An effect of \PredMDEShare{} of the mean daily absolute return per log point
 of inventory would have been found four times in five.
 
 Two measurement findings travel further than the setting. A natural strike-based rule
