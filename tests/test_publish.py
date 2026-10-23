@@ -535,8 +535,12 @@ class TestRegistry:
 
 @pytest.fixture
 def empty_registries(monkeypatch):
+    """Empty registries that stay empty: the CLI imports the registration modules, and
+    the first import of a real one would otherwise register its analysis here and run it
+    against raw data a test does not have."""
     for attr, kind in (("ANALYSES", "analysis"), ("FIGURES", "figure"), ("TABLES", "table")):
         monkeypatch.setattr(registry, attr, registry.Registry(kind))
+    monkeypatch.setattr(registry, "REGISTRATION_MODULES", ())
 
 
 class TestCli:

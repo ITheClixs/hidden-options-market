@@ -38,7 +38,10 @@ TableFn = Callable[[Mapping[str, Result]], str]
 
 # Modules whose import registers analyses, figures and tables. Each analysis task adds
 # its module here.
-REGISTRATION_MODULES: tuple[str, ...] = ()
+REGISTRATION_MODULES: tuple[str, ...] = (
+    "hidden_options.measure.market_result",
+    "hidden_options.figures.market",
+)
 
 
 class Registry(Generic[T]):  # noqa: UP046 - PEP 695 syntax needs Python 3.12
