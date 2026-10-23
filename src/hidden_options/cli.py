@@ -28,8 +28,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     collect.add_argument(
         "--sources",
-        default="holdings,cboe,occ,bars",
-        help="Comma-separated sources (holdings, cboe, occ, bars). Default: all",
+        default="holdings,cboe,occ,bars,flex",
+        help="Comma-separated sources (holdings, cboe, occ, bars, flex). Default: all",
     )
     collect.add_argument(
         "--root", type=Path, default=RAW_DIR, help=f"Output root. Default: {RAW_DIR}"
@@ -77,10 +77,14 @@ def _collect(args: argparse.Namespace) -> int:
         return 3
 
     ok = [o for o in outcomes if o.status == "ok"]
-    failed = [o for o in outcomes if o.status != "ok"]
+    absent = [o for o in outcomes if o.status == "absent"]
+    failed = [o for o in outcomes if o.status not in ("ok", "absent")]
     logging.info(
         "Captured %d/%d snapshots (%d rows)", len(ok), len(outcomes), sum(o.rows for o in ok)
     )
+    if absent:
+        # Not published yet (or a holiday), not a fault; the next run asks again.
+        logging.info("%d reports not available from the source yet", len(absent))
     for outcome in failed:
         logging.warning(
             "%s %s: %s %s", outcome.source, outcome.symbol, outcome.status, outcome.detail

@@ -49,6 +49,23 @@ class TestExitCodes:
         )
         assert cli.main(["collect", "--root", str(tmp_path)]) == 0
 
+    def test_unpublished_reports_are_not_failures(self, stub_run, tmp_path, caplog):
+        """FLEX for the day just ended is normally not out yet; that is not worth a warning."""
+        stub_run(
+            (
+                SymbolOutcome("cboe_chain", "MSTR", "ok", rows=10),
+                SymbolOutcome("flex", "equity:2026-08-14", "absent", detail="no report"),
+            )
+        )
+        with caplog.at_level("INFO"):
+            assert cli.main(["collect", "--root", str(tmp_path)]) == 0
+        assert not [r for r in caplog.records if r.levelname == "WARNING"]
+
+    def test_only_absent_reports_still_returns_one(self, stub_run, tmp_path):
+        """Nothing captured is nothing captured, whatever the reason."""
+        stub_run((SymbolOutcome("flex", "equity:2026-08-14", "absent"),))
+        assert cli.main(["collect", "--root", str(tmp_path)]) == 1
+
     def test_total_failure_returns_one(self, stub_run, tmp_path):
         stub_run((SymbolOutcome("cboe_chain", "MSTR", "error", detail="down"),))
         assert cli.main(["collect", "--root", str(tmp_path)]) == 1
@@ -69,7 +86,17 @@ class TestArgumentHandling:
     def test_defaults_to_every_source(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("cboe_chain", "MSTR", "ok", rows=1),))
         cli.main(["collect", "--root", str(tmp_path)])
-        assert captured["sources"] == ("holdings", "cboe", "occ", "bars")
+        assert captured["sources"] == ("holdings", "cboe", "occ", "bars", "flex")
+
+    def test_flex_alone_can_be_selected(self, stub_run, tmp_path):
+        captured = stub_run((SymbolOutcome("flex", "equity:2026-08-14", "ok", rows=1),))
+        cli.main(["collect", "--root", str(tmp_path), "--sources", "flex"])
+        assert captured["sources"] == ("flex",)
+
+    def test_flex_is_listed_in_the_help_text(self, capsys):
+        with pytest.raises(SystemExit):
+            cli.main(["collect", "--help"])
+        assert "flex" in capsys.readouterr().out
 
     def test_source_subset_is_honoured(self, stub_run, tmp_path):
         captured = stub_run((SymbolOutcome("occ_oi", "MSTR", "ok", rows=1),))

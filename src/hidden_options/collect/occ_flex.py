@@ -59,6 +59,9 @@ _ROW = re.compile(
     r"(?P<mark>[-\d.]+)\s+(?P<oi>\d+)\s*$"
 )
 _CLASS_TOTAL = re.compile(r"\*\*\*\s+CLASS TOTALS\s+\*\*\*\s+(\d+)")
+# " EQUITY FLEX OPEN INTEREST REPORT                         ACTIVITY DATE 08/14/26"
+_ACTIVITY_DATE = re.compile(r"ACTIVITY DATE\s+(\d{2})/(\d{2})/(\d{2})")
+_HEADER_BYTES = 4096
 _LEADING_DIGITS = re.compile(r"^\d+")
 
 # Lines that are report furniture rather than the name of an option class.
@@ -84,6 +87,15 @@ def _is_class_heading(stripped: str) -> bool:
 
 class FlexReportError(ValueError):
     """Raised when the report does not match the expected layout."""
+
+
+class FlexReportAbsent(FlexReportError):
+    """OCC holds no report for the requested date.
+
+    That is the ordinary answer for a date not yet published, a market holiday, or a date
+    beyond retention. It is kept apart from a report that exists but cannot be read,
+    which means the layout has moved and must not be mistaken for a quiet day.
+    """
 
 
 @dataclass(frozen=True)
@@ -172,11 +184,29 @@ def parse_report(payload: bytes, kind: str, report_date: date) -> FlexReport:
     )
 
 
+def stated_activity_date(payload: bytes) -> date | None:
+    """The activity date a report's own header states, or None if it states none."""
+    header = payload[:_HEADER_BYTES].decode("utf-8", errors="replace").upper()
+    match = _ACTIVITY_DATE.search(header)
+    if match is None:
+        return None
+    month, day, year = (int(group) for group in match.groups())
+    try:
+        return date(2000 + year, month, day)
+    except ValueError:
+        return None
+
+
 def fetch_report(session: requests.Session, report_date: date, kind: str = "equity") -> FlexReport:
     """Retrieve and parse one day's report.
 
     Dates before the retention window return a short 'File requested does not exist'
     body rather than an HTTP error, so that case is detected on content.
+
+    The returned report carries the activity date its header states, which can differ
+    from the date asked for: a request for a date OCC has not published may be answered
+    with an earlier day's report. Stamping that report with the requested date would
+    file one settlement under two dates, so the report's own statement wins.
     """
     if kind not in REPORT_KINDS:
         raise ValueError(f"kind must be one of {sorted(REPORT_KINDS)}")
@@ -192,16 +222,22 @@ def fetch_report(session: requests.Session, report_date: date, kind: str = "equi
         },
     )
     if len(result.content) < 2000:
-        raise FlexReportError(
+        raise FlexReportAbsent(
             f"{kind} {report_date}: no report available ({result.text.strip()[:60]})"
         )
-    return parse_report(result.content, kind, report_date)
+    stated = stated_activity_date(result.content)
+    return parse_report(result.content, kind, stated or report_date)
+
+
+def snapshot_path_for(report_date: date, kind: str) -> str:
+    """Storage path for a date and kind, so a caller can test for a file before fetching."""
+    return f"occ_flex/date={report_date:%Y-%m-%d}/{kind}.parquet"
 
 
 def snapshot_path(report: FlexReport) -> str:
     """Storage path, partitioned by the report's own activity date rather than by
     capture time, which is what the settlement-lag problem requires."""
-    return f"occ_flex/date={report.report_date:%Y-%m-%d}/{report.kind}.parquet"
+    return snapshot_path_for(report.report_date, report.kind)
 
 
 __all__ = [
@@ -209,9 +245,12 @@ __all__ = [
     "REPORT_KINDS",
     "REPORT_URL",
     "FlexReport",
+    "FlexReportAbsent",
     "FlexReportError",
     "fetch_report",
     "parse_report",
     "snapshot_path",
+    "snapshot_path_for",
+    "stated_activity_date",
     "strip_flex_prefix",
 ]

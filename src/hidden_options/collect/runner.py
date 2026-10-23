@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
-from hidden_options.collect import bars, cboe, holdings, occ
+import requests
+
+from hidden_options.collect import bars, cboe, holdings, occ, occ_flex
 from hidden_options.collect.http import build_session
 from hidden_options.config import RAW_DIR, Programme, Universe
 
@@ -30,8 +32,19 @@ class SymbolOutcome:
 
 
 def _write_frame(frame, destination: Path) -> None:
+    """Write via a staging file so a crash never leaves a truncated parquet in place.
+
+    Most sources overwrite their file the next day, but the FLEX collector treats an
+    existing file as proof the date is held, so a half-written one would never be redone.
+    """
     destination.parent.mkdir(parents=True, exist_ok=True)
-    frame.to_parquet(destination, index=False, compression="zstd")
+    staging = destination.with_name(destination.name + ".partial")
+    try:
+        frame.to_parquet(staging, index=False, compression="zstd")
+        staging.replace(destination)
+    except BaseException:
+        staging.unlink(missing_ok=True)
+        raise
 
 
 def collect_cboe_chains(
@@ -200,6 +213,87 @@ def collect_underlying_bars(
     return tuple(outcomes)
 
 
+def _weekdays(end: date, lookback_days: int) -> list[date]:
+    """Weekdays in ``[end - lookback_days, end]``, newest first."""
+    days = (end - timedelta(days=offset) for offset in range(lookback_days + 1))
+    return [day for day in days if day.weekday() < 5]
+
+
+def _store_flex_report(report: occ_flex.FlexReport, root: Path) -> SymbolOutcome:
+    """File a report under its own activity date, never under the date it was asked for."""
+    symbol = f"{report.kind}:{report.report_date:%Y-%m-%d}"
+    destination = root / occ_flex.snapshot_path(report)
+    try:
+        _write_frame(report.frame, destination)
+    except OSError as exc:
+        return SymbolOutcome("flex", symbol, "write_error", detail=str(exc))
+    return SymbolOutcome(
+        "flex",
+        symbol,
+        "ok",
+        rows=report.n_series,
+        sha256=report.payload_sha256,
+        detail=f"{report.class_totals_matched}/{report.class_totals_checked} class totals match",
+    )
+
+
+def _collect_flex_report(
+    session: requests.Session, day: date, kind: str, root: Path
+) -> tuple[SymbolOutcome, ...]:
+    symbol = f"{kind}:{day:%Y-%m-%d}"
+    try:
+        report = occ_flex.fetch_report(session, day, kind)
+    except occ_flex.FlexReportAbsent as exc:
+        return (SymbolOutcome("flex", symbol, "absent", detail=str(exc)),)
+    except Exception as exc:  # noqa: BLE001 - one bad report must not stop the run
+        return (SymbolOutcome("flex", symbol, "error", detail=f"{type(exc).__name__}: {exc}"),)
+
+    if report.report_date == day:
+        return (_store_flex_report(report, root),)
+
+    # OCC answered with another day's report. It is never filed under the requested
+    # date (that would enter one settlement twice as two stable days); under its own
+    # date it is a good capture if that date is not already held.
+    outcomes = [
+        SymbolOutcome(
+            "flex",
+            symbol,
+            "absent",
+            detail=f"OCC answered with the report for {report.report_date:%Y-%m-%d}",
+        )
+    ]
+    if not (root / occ_flex.snapshot_path(report)).exists():
+        outcomes.append(_store_flex_report(report, root))
+    return tuple(outcomes)
+
+
+def collect_occ_flex(
+    as_of: datetime,
+    root: Path,
+    *,
+    lookback_days: int = 7,
+    session: requests.Session | None = None,
+) -> tuple[SymbolOutcome, ...]:
+    """Capture the OCC FLEX open-interest reports for every weekday in the window.
+
+    OCC publishes the report for activity date T overnight, so a run at the close of T
+    usually finds T not out yet. Unlike the snapshot sources this is recoverable (OCC
+    keeps ~20 months), so the window re-asks for any date still missing and a later run
+    catches up. A date already on disk is not fetched again; "absent" (not published,
+    a holiday, or OCC answering with a different day) is an ordinary outcome, not an error.
+    """
+    http = session or build_session()
+    outcomes: list[SymbolOutcome] = []
+
+    for day in _weekdays(as_of.date(), lookback_days):
+        for kind in occ_flex.REPORT_KINDS:
+            if (root / occ_flex.snapshot_path_for(day, kind)).exists():
+                continue
+            outcomes.extend(_collect_flex_report(http, day, kind, root))
+
+    return tuple(outcomes)
+
+
 def write_manifest(outcomes: tuple[SymbolOutcome, ...], as_of: datetime, root: Path) -> Path:
     """Persist the run log. The manifest is the audit trail for data provenance."""
     destination = root / "manifests" / f"{as_of:%Y-%m-%d}T{as_of:%H%M%S}.json"
@@ -231,8 +325,12 @@ def _sweep_up(
     symbols fail for reasons unrelated to the symbol. Because a missed capture cannot
     be recovered later, a second attempt after the burst has subsided is worth more
     than any amount of in-loop retrying.
+
+    An absent FLEX report is not a failure and is not retried: asking again within the
+    same run cannot change OCC's answer. A FLEX request that errors is not retried here
+    either, because the next run's lookback window asks for it again.
     """
-    failed = {(o.source, o.symbol) for o in outcomes if o.status != "ok"}
+    failed = {(o.source, o.symbol) for o in outcomes if o.status not in ("ok", "absent")}
     if not failed:
         return outcomes
 
@@ -269,7 +367,7 @@ def run_daily_collection(
     *,
     root: Path | None = None,
     as_of: datetime | None = None,
-    sources: tuple[str, ...] = ("holdings", "cboe", "occ", "bars"),
+    sources: tuple[str, ...] = ("holdings", "cboe", "occ", "bars", "flex"),
     sweep_up: bool = True,
 ) -> tuple[SymbolOutcome, ...]:
     """Run every enabled source once, retry failures, and write a manifest.
@@ -286,6 +384,8 @@ def run_daily_collection(
         outcomes += collect_cboe_chains(universe, timestamp, target_root)
     if "occ" in sources:
         outcomes += collect_occ_open_interest(universe, timestamp, target_root)
+    if "flex" in sources:
+        outcomes += collect_occ_flex(timestamp, target_root)
     if "bars" in sources:
         outcomes += collect_underlying_bars(universe, timestamp, target_root, interval="5m")
         outcomes += collect_underlying_bars(
@@ -303,6 +403,7 @@ __all__ = [
     "SymbolOutcome",
     "collect_cboe_chains",
     "collect_fund_holdings",
+    "collect_occ_flex",
     "collect_underlying_bars",
     "collect_occ_open_interest",
     "run_daily_collection",
