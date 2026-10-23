@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -9,6 +10,7 @@ from hidden_options.measure.flex_panel import (
     daily_inventory,
     inventory_changes,
     load_panel,
+    parse_exercise_style,
     summarise_panel,
 )
 
@@ -114,3 +116,203 @@ class TestLoadPanel:
         assert summary.dates == 2
         assert summary.underlyings == 1
         assert "2026-08-13" in summary.describe()
+
+
+def _store(root, date, classes, kind="equity"):
+    """Write one activity date's report the way the collector files it.
+
+    ``classes`` is a list of ``(class_name, underlying)``; each gets one call series.
+    """
+    folder = root / f"occ_flex/date={date}"
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = [
+        {
+            "report_date": date,
+            "kind": kind,
+            "class_name": class_name,
+            "root": "1" + underlying,
+            "underlying": underlying,
+            "right": "C",
+            "expiry": "2026-12-18",
+            "strike": 100.0,
+            "mark_price": 1.0,
+            "open_interest": 10,
+        }
+        for class_name, underlying in classes
+    ]
+    pd.DataFrame(rows).to_parquet(folder / f"{kind}.parquet")
+
+
+class TestAvailability:
+    """OCC publishes the report for activity date T overnight, so it is in hand before
+    the next session. Anything joined to T must wait until ``available_at``."""
+
+    def test_available_at_is_next_activity_date(self, tmp_path):
+        # Mon, Tue, Thu: Wednesday has no report, so Tuesday's is available on Thursday.
+        for date in ("2026-08-10", "2026-08-11", "2026-08-13"):
+            _store(tmp_path, date, [("AAA INC", "AAA")])
+        panel = load_panel(tmp_path)
+        assert list(panel["available_at"]) == [
+            pd.Timestamp("2026-08-11"),
+            pd.Timestamp("2026-08-13"),
+            pd.Timestamp("2026-08-14"),
+        ]
+
+    def test_last_date_falls_to_the_next_weekday(self, tmp_path):
+        """Friday's report is in hand on Monday, not on the weekend."""
+        for date in ("2026-08-13", "2026-08-14"):
+            _store(tmp_path, date, [("AAA INC", "AAA")])
+        panel = load_panel(tmp_path)
+        assert panel["available_at"].iloc[-1] == pd.Timestamp("2026-08-17")
+
+    def test_calendar_is_the_whole_panels_not_the_underlyings(self, tmp_path):
+        """AAA is absent on Tuesday, but the report still exists then; AAA's Monday row is
+        available Tuesday. Index reports share the same calendar."""
+        _store(tmp_path, "2026-08-10", [("AAA INC", "AAA")])
+        _store(tmp_path, "2026-08-11", [("BBB INC", "BBB")])
+        _store(tmp_path, "2026-08-11", [("SPX INDEX", "SPX")], kind="index")
+        panel = load_panel(tmp_path)
+        monday = panel[panel["report_date"] == pd.Timestamp("2026-08-10")]
+        assert set(monday["available_at"]) == {pd.Timestamp("2026-08-11")}
+        assert panel["available_at"].dtype == panel["report_date"].dtype
+
+    def test_available_at_is_never_before_the_report_date(self, tmp_path):
+        for date in ("2026-08-10", "2026-08-11", "2026-08-13"):
+            _store(tmp_path, date, [("AAA INC", "AAA")])
+        panel = load_panel(tmp_path)
+        assert (panel["available_at"] > panel["report_date"]).all()
+
+
+class TestExerciseStyle:
+    def test_exercise_style_parsed_from_class_name(self, tmp_path):
+        _store(
+            tmp_path,
+            "2026-08-10",
+            [
+                ("AAON INC (AMER/FLEX)", "AAON"),
+                ("APPLE INC (EURO/FLEX)", "AAPL"),
+                ("PLAIN HOLDINGS CORP", "PLN"),
+            ],
+        )
+        panel = load_panel(tmp_path).set_index("underlying")
+        assert panel.loc["AAON", "exercise_style"] == "american"
+        assert panel.loc["AAPL", "exercise_style"] == "european"
+        # Unmarked equity headings carry no information; they must not be guessed.
+        assert panel.loc["PLN", "exercise_style"] is None
+
+    def test_unmarked_index_classes_default_to_european(self, tmp_path):
+        _store(
+            tmp_path,
+            "2026-08-10",
+            [("S&P 500 INDEX AM/EURO (FLEX)", "SPX"), ("Cboe Bitcoin U.S. ETF Index Op", "CBTX")],
+            kind="index",
+        )
+        panel = load_panel(tmp_path)
+        assert set(panel["exercise_style"]) == {"european"}
+
+    def test_an_explicit_index_marker_wins_over_the_default(self, tmp_path):
+        _store(tmp_path, "2026-08-10", [("ODD INDEX (AMER/FLEX)", "ODD")], kind="index")
+        assert load_panel(tmp_path)["exercise_style"].iloc[0] == "american"
+
+    @pytest.mark.parametrize(
+        ("class_name", "expected"),
+        [
+            ("AAON INC (AMER/FLEX)", "american"),
+            ("Apple Inc (Euro Flex)", "european"),
+            ("Adobe Inc. (Euro/Flex)", "european"),
+            ("Apple Inc (Euro Flex)          (CONT)", "european"),
+            # The heading field is cut at thirty characters, so many markers arrive clipped.
+            ("UNITED STATES STEEL (AMER/FLEX (CONT)", "american"),
+            ("ADVANCED MICRO-DEVICES (EURO/F (CONT)", "european"),
+            ("ISHARES BITCOIN TRUST ETF (AME", "american"),
+            ("Accenture PLC (EUR", "european"),
+            # Further text may follow the marker.
+            ("3M (EURO/FLEX) (Spinoff)", "european"),
+            ("Aptiv PLC (EURO/FLEX)(Spinoff)", "european"),
+            # Stubs too short to tell apart from other parentheticals stay unknown.
+            ("Ionis Pharmaceuticals, Inc. (A", None),
+            ("Discover Financial Services (E", None),
+            ("ChargePoint Holdings, Inc. (AM", None),
+            ("Truist Financial Corporation (", None),
+            ("AMERICAN INTERNATIONAL GROUP (", None),
+            ("Foo Depositary Shares (ADR)", None),
+            ("Foo Holdings (EUR)", None),
+            ("PLAIN HOLDINGS CORP", None),
+            ("Apple Inc (AMER/FLEX) (EURO/FLEX)", None),
+            (None, None),
+            (np.nan, None),
+        ],
+    )
+    def test_parse_exercise_style(self, class_name, expected):
+        assert parse_exercise_style(class_name) == expected
+
+
+class TestGapSafeChanges:
+    """A change across a missing activity date spans several days of flow, not one."""
+
+    CHANGES = ("d_open_interest", "d_mark_value", "d_log_oi", "d_near_dated")
+
+    @staticmethod
+    def _daily(presence):
+        """presence: {underlying: [dates]}; open interest rises 100 a day within each."""
+        rows = [
+            (date, name, "C", "2026-09-18", 100.0, 2.0, 1000 + 100 * i)
+            for name, dates in presence.items()
+            for i, date in enumerate(dates)
+        ]
+        return daily_inventory(_panel(rows))
+
+    def test_changes_are_nan_across_missing_activity_date(self):
+        # AAA is present Mon, Tue, Thu while BBB's presence makes the panel Mon..Thu.
+        daily = self._daily(
+            {
+                "AAA": ["2026-08-10", "2026-08-11", "2026-08-13"],
+                "BBB": ["2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13"],
+            }
+        )
+        out = inventory_changes(daily, min_history=1).set_index(["underlying", "report_date"])
+        thursday = out.loc[("AAA", pd.Timestamp("2026-08-13"))]
+        assert thursday[list(self.CHANGES)].isna().all()
+        # The level on Thursday is still reported; only the change is withheld.
+        assert thursday["open_interest"] == 1200
+        # Contiguous days keep their changes.
+        assert out.loc[("AAA", pd.Timestamp("2026-08-11")), "d_open_interest"] == 100
+        assert out.loc[("BBB", pd.Timestamp("2026-08-13")), "d_open_interest"] == 100
+
+    def test_change_resumes_the_day_after_a_gap(self):
+        daily = self._daily(
+            {
+                "AAA": ["2026-08-10", "2026-08-11", "2026-08-13", "2026-08-14"],
+                "BBB": ["2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14"],
+            }
+        )
+        out = inventory_changes(daily, min_history=1).set_index(["underlying", "report_date"])
+        assert pd.isna(out.loc[("AAA", pd.Timestamp("2026-08-13")), "d_log_oi"])
+        assert out.loc[("AAA", pd.Timestamp("2026-08-14")), "d_open_interest"] == 100
+
+    def test_a_market_wide_holiday_is_not_a_gap(self):
+        """No report at all on Wednesday: Thursday follows Tuesday in the calendar."""
+        dates = ["2026-08-10", "2026-08-11", "2026-08-13"]
+        out = inventory_changes(self._daily({"AAA": dates, "BBB": dates}), min_history=1)
+        thursday = out[out["report_date"] == pd.Timestamp("2026-08-13")]
+        assert len(thursday) == 2
+        assert (thursday["d_open_interest"] == 100).all()
+
+    def test_calendar_comes_from_every_underlying_not_the_ones_kept(self):
+        """BBB alone reports on Wednesday and is dropped for short history; Wednesday is
+        still a date the panel has, so AAA's Thursday change is still across a gap."""
+        daily = self._daily(
+            {
+                "AAA": ["2026-08-10", "2026-08-11", "2026-08-13"],
+                "BBB": ["2026-08-12"],
+            }
+        )
+        out = inventory_changes(daily, min_history=3)
+        assert set(out["underlying"]) == {"AAA"}
+        thursday = out[out["report_date"] == pd.Timestamp("2026-08-13")]
+        assert thursday["d_log_oi"].isna().all()
+
+    def test_first_observation_is_still_dropped_not_nan(self):
+        daily = self._daily({"AAA": ["2026-08-10", "2026-08-11"]})
+        out = inventory_changes(daily, min_history=1)
+        assert list(out["report_date"]) == [pd.Timestamp("2026-08-11")]
