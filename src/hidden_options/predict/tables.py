@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from hidden_options.predict.macros import BASIS_POINTS
+from hidden_options.predict.macros import BASIS_POINTS, p_value
 from hidden_options.publish import formats
 from hidden_options.publish.latex import Column, render_table
 from hidden_options.publish.registry import TABLES
@@ -21,7 +21,7 @@ ROW_LABELS = {
     "innovation_squared": "Inventory innovation",
     "placebo": "Placebo: innovation at $T+2$",
 }
-OUTCOME_LABELS = {"abs_ret_next": "next-day $|r|$", "sq_ret_next": "next-day $r^2$"}
+OUTCOME_LABELS = {"abs_ret_next": "$|r_{t+1}|$", "sq_ret_next": "$r_{t+1}^2$"}
 
 _SIGNED = "${:+.2f}$"
 _SPECIFICATION = (
@@ -33,7 +33,11 @@ _SPECIFICATION = (
 
 @TABLES.register("predictive")
 def predictive_table(results: Mapping[str, Result]) -> str:
-    """The six regressions, with a permutation p-value for each."""
+    """The six regressions, with the clustered and the permutation p-value of each.
+
+    p-values print as the macros print them, so a value the text quotes reads the same
+    in the table.
+    """
     values = _values(results)
     rows = [
         {
@@ -42,17 +46,19 @@ def predictive_table(results: Mapping[str, Result]) -> str:
             "beta": _scaled(row["coefficient"]),
             "t": _rounded(row["t_stat"]),
             "mde": _scaled(row["mde80"]),
-            "p": row["permutation_p"],
+            "clustered_p": p_value(row["p_value"]),
+            "permutation_p": p_value(row["permutation_p"]),
         }
         for row in values["rows"]
     ]
     columns = [
         Column("label", "Predictor", "{}", "l"),
         Column("outcome", "Outcome", "{}", "l"),
-        Column("beta", "$\\beta\\times10^4$", _SIGNED),
+        Column("beta", "$10^4\\beta$", _SIGNED),
         Column("t", "$t$", _SIGNED),
-        Column("mde", "MDE80$\\times10^4$", ".2f"),
-        Column("p", "Perm.\\ $p$", ".3f"),
+        Column("mde", "$10^4\\,$MDE80", ".2f"),
+        Column("clustered_p", "Clust.\\ $p$", "{}"),
+        Column("permutation_p", "Perm.\\ $p$", "{}"),
     ]
     sample = values["sample"]
     notes = (
@@ -60,9 +66,10 @@ def predictive_table(results: Mapping[str, Result]) -> str:
         f"{formats.count(sample['underlyings'])} underlyings, "
         f"{formats.count(sample['dates'])} activity dates; the placebo row loses the last "
         "two dates. Coefficients and MDE80, the effect detectable with 80\\% power at the "
-        "5\\% level, are multiplied by $10^4$, which for $|r|$ is basis points. The "
-        f"permutation $p$ is from {formats.count(values['permutation']['n_perm'])} "
-        "re-estimations with the predictor shuffled across underlyings within each date."
+        "5\\% level, are multiplied by $10^4$, which for $|r|$ is basis points. Clust.\\ $p$ "
+        "uses the clustered errors; Perm.\\ $p$ comes from "
+        f"{formats.count(values['permutation']['n_perm'])} re-estimations with the "
+        "predictor shuffled across underlyings within each date."
     )
     return render_table(
         rows,
@@ -91,9 +98,9 @@ def windows_table(results: Mapping[str, Result]) -> str:
     columns = [
         Column("start", "Panel from", "{}", "l"),
         Column("days", "Underlying-days", ",d"),
-        Column("beta", "Innovation $\\beta\\times10^4$", _SIGNED),
+        Column("beta", "Innovation $10^4\\beta$", _SIGNED),
         Column("t", "$t$", _SIGNED),
-        Column("placebo_beta", "Placebo $\\beta\\times10^4$", _SIGNED),
+        Column("placebo_beta", "Placebo $10^4\\beta$", _SIGNED),
         Column("placebo_t", "$t$", _SIGNED),
     ]
     notes = (

@@ -155,6 +155,16 @@ class TestTables:
         assert "Placebo" in body
         assert "60 re-estimations" in tex
 
+    def test_both_p_values_print_as_the_text_cites_them(self, result):
+        """Every p-value the prose quotes is a cell of the table, in the same string."""
+        tex = predictive_table({"predictive": result})
+        head = tex.split("\\toprule")[1].split("\\midrule")[0]
+        assert "Clust.\\ $p$" in head and "Perm.\\ $p$" in head
+        body = tex.split("\\midrule")[1].split("\\bottomrule")[0].strip().splitlines()
+        for line, row in zip(body, result.values["rows"], strict=True):
+            cells = [cell.strip(" \\") for cell in line.split("&")]
+            assert cells[-2:] == [p_value(row["p_value"]), p_value(row["permutation_p"])]
+
     def test_windows_table_has_one_row_per_start(self, result):
         tex = windows_table({"predictive": result})
         body = tex.split("\\midrule")[1].split("\\bottomrule")[0]

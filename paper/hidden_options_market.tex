@@ -382,9 +382,11 @@ log open interest less its mean over the previous twenty reports. Bars are fetch
 equity report's tickers, and a bare index symbol names another security or none, so the
 \PredIndexUnderlyings{} index underlyings are out. Of the \PredQualifying{} equity names
 with at least \PredQualifyingDates{} activity dates, \PredNoBars{} have symbols the
-provider does not serve: \PredNoBarsAdjusted{} adjusted-deliverable roots,
-\PredNoBarsShareClass{} share-class spelling and \PredNoBarsOther{} other tickers,
-delisted and renamed names among them. That leaves \PredUnderlyingDays{}
+provider does not serve. Adjusted-deliverable roots, option classes renamed with a digit
+after a corporate action changed their deliverable (\texttt{GME1}), account for
+\PredNoBarsAdjusted{}; share-class spellings such as \texttt{BRKB} for
+\PredNoBarsShareClass{}; other tickers, delisted and renamed names among them, for
+\PredNoBarsOther{}. That leaves \PredUnderlyingDays{}
 underlying-days, \PredUnderlyings{} underlyings and \PredDates{} activity dates.
 
 \input{tables/predictive}
@@ -405,8 +407,7 @@ The permutation test shuffles the predictor across underlyings within each date
 breaks each underlying's own inventory persistence along with any link to its
 volatility. For the innovation the draws have a standard deviation of
 $\PredNullSd\times10^{-4}$, against a clustered standard error of
-$\PredInnovSE\times10^{-4}$. Among the genuine predictors the smallest permutation $p$
-is \PredMinGenuinePermP{} and the smallest clustered $p$ \PredMinGenuineClusterP{}.
+$\PredInnovSE\times10^{-4}$; Table~\ref{tab:pred} gives both $p$-values for each row.
 
 \begin{figure}[t]
 \centering

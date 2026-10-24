@@ -45,19 +45,21 @@ day it became usable, and an inventory change across a date the underlying did n
 is dropped. Bars are fetched by the equity report's tickers, so index underlyings are left
 out (a bare index symbol names another security, or none). Of the 1,547
 equity names with at least 40 activity dates, 80 have
-symbols the bar provider does not serve: 33 OCC adjusted-deliverable
-roots such as `GME1`, 1 share-class spelling (`BRKB`) and
-46 other tickers, delisted and renamed names among them. Coefficients and
-MDE80 are multiplied by 10⁴, which for |r| is basis points.
+symbols the bar provider does not serve. OCC adjusted-deliverable roots, option classes
+renamed with a digit after a corporate action changed their deliverable (`GME1`), account
+for 33; share-class spellings such as `BRKB` for
+1; other tickers, delisted and renamed names among them, for
+46. Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis
+points.
 
-| predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | permutation *p* |
-|---|---|---:|---:|---:|---:|
-| inventory innovation | next-day \|r\| | -0.37 | -0.68 | 1.53 | 0.45 |
-| inventory change | next-day \|r\| | -0.68 | -0.64 | 2.99 | 0.46 |
-| near-dated share change | next-day \|r\| | -1.67 | -0.44 | 10.74 | 0.67 |
-| put share | next-day \|r\| | 0.56 | 0.22 | 7.19 | 0.61 |
-| inventory innovation | next-day r² | 0.06 | 0.47 | 0.34 | 0.71 |
-| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **1.02** | **1.86** | 1.53 | 0.057 |
+| predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | clustered *p* | permutation *p* |
+|---|---|---:|---:|---:|---:|---:|
+| inventory innovation | next-day \|r\| | -0.37 | -0.68 | 1.53 | 0.50 | 0.45 |
+| inventory change | next-day \|r\| | -0.68 | -0.64 | 2.99 | 0.52 | 0.46 |
+| near-dated share change | next-day \|r\| | -1.67 | -0.44 | 10.74 | 0.66 | 0.67 |
+| put share | next-day \|r\| | 0.56 | 0.22 | 7.19 | 0.83 | 0.61 |
+| inventory innovation | next-day r² | 0.06 | 0.47 | 0.34 | 0.64 | 0.71 |
+| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **1.02** | **1.86** | 1.53 | 0.063 | 0.057 |
 
 ![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 

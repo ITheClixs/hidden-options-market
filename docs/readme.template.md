@@ -45,19 +45,21 @@ day it became usable, and an inventory change across a date the underlying did n
 is dropped. Bars are fetched by the equity report's tickers, so index underlyings are left
 out (a bare index symbol names another security, or none). Of the {{PredQualifying}}
 equity names with at least {{PredQualifyingDates}} activity dates, {{PredNoBars}} have
-symbols the bar provider does not serve: {{PredNoBarsAdjusted}} OCC adjusted-deliverable
-roots such as `GME1`, {{PredNoBarsShareClass}} share-class spelling (`BRKB`) and
-{{PredNoBarsOther}} other tickers, delisted and renamed names among them. Coefficients and
-MDE80 are multiplied by 10⁴, which for |r| is basis points.
+symbols the bar provider does not serve. OCC adjusted-deliverable roots, option classes
+renamed with a digit after a corporate action changed their deliverable (`GME1`), account
+for {{PredNoBarsAdjusted}}; share-class spellings such as `BRKB` for
+{{PredNoBarsShareClass}}; other tickers, delisted and renamed names among them, for
+{{PredNoBarsOther}}. Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis
+points.
 
-| predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | permutation *p* |
-|---|---|---:|---:|---:|---:|
-| inventory innovation | next-day \|r\| | {{PredInnovBeta}} | {{PredInnovT}} | {{PredInnovMDE}} | {{PredInnovPermP}} |
-| inventory change | next-day \|r\| | {{PredChangeBeta}} | {{PredChangeT}} | {{PredChangeMDE}} | {{PredChangePermP}} |
-| near-dated share change | next-day \|r\| | {{PredNearBeta}} | {{PredNearT}} | {{PredNearMDE}} | {{PredNearPermP}} |
-| put share | next-day \|r\| | {{PredPutBeta}} | {{PredPutT}} | {{PredPutMDE}} | {{PredPutPermP}} |
-| inventory innovation | next-day r² | {{PredInnovSqBeta}} | {{PredInnovSqT}} | {{PredInnovSqMDE}} | {{PredInnovSqPermP}} |
-| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **{{PredPlaceboBeta}}** | **{{PredPlaceboT}}** | {{PredPlaceboMDE}} | {{PredPlaceboPermP}} |
+| predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | clustered *p* | permutation *p* |
+|---|---|---:|---:|---:|---:|---:|
+| inventory innovation | next-day \|r\| | {{PredInnovBeta}} | {{PredInnovT}} | {{PredInnovMDE}} | {{PredInnovClusterP}} | {{PredInnovPermP}} |
+| inventory change | next-day \|r\| | {{PredChangeBeta}} | {{PredChangeT}} | {{PredChangeMDE}} | {{PredChangeClusterP}} | {{PredChangePermP}} |
+| near-dated share change | next-day \|r\| | {{PredNearBeta}} | {{PredNearT}} | {{PredNearMDE}} | {{PredNearClusterP}} | {{PredNearPermP}} |
+| put share | next-day \|r\| | {{PredPutBeta}} | {{PredPutT}} | {{PredPutMDE}} | {{PredPutClusterP}} | {{PredPutPermP}} |
+| inventory innovation | next-day r² | {{PredInnovSqBeta}} | {{PredInnovSqT}} | {{PredInnovSqMDE}} | {{PredInnovSqClusterP}} | {{PredInnovSqPermP}} |
+| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **{{PredPlaceboBeta}}** | **{{PredPlaceboT}}** | {{PredPlaceboMDE}} | {{PredPlaceboClusterP}} | {{PredPlaceboPermP}} |
 
 ![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 
