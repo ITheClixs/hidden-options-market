@@ -67,17 +67,28 @@ class TestResult:
         assert values["top_decile"]["share"] == 0.1
         assert values["max_abs_t"] >= abs(values["rows"][0]["t_stat"])
 
-    def test_qualifying_names_without_bars_are_counted_and_named(self):
-        """A name the bar provider no longer serves drops out at the join; the sample is
-        then tilted towards names still trading, so the result says how many."""
-        bars = BARS[BARS["symbol"] != "N05"]
-        found = result_module.predictive_result(FLEX, bars, n_perm=10, later_starts=STARTS)
+    def test_qualifying_names_without_bars_are_counted_by_reason(self):
+        """A name whose symbol the bar provider does not serve drops out at the join. Only
+        delisted and renamed tickers tilt the sample, so the reasons are counted apart."""
+        names = {"N05": "GME1", "N06": "BRKB", "N07": "XYZ"}
+        flex = FLEX.replace({"underlying": names})
+        bars = BARS[~BARS["symbol"].isin(names)]
+        found = result_module.predictive_result(flex, bars, n_perm=10, later_starts=STARTS)
         sample = found.values["sample"]
         assert sample["qualifying_underlyings"] == 30
-        assert sample["without_bars"] == ["N05"]
-        assert found.macros["PredQualifying"] == "30"
-        assert found.macros["PredNoBars"] == "1"
-        assert sample["underlyings"] == 29
+        assert sample["qualifying_min_dates"] == 40
+        assert sample["without_bars"] == ["BRKB", "GME1", "XYZ"]
+        assert sample["without_bars_by_reason"] == {
+            "adjusted_deliverable": 1,
+            "share_class": 1,
+            "other": 1,
+        }
+        macros = found.macros
+        assert (macros["PredQualifying"], macros["PredQualifyingDates"]) == ("30", "40")
+        assert macros["PredNoBars"] == "3"
+        assert (macros["PredNoBarsAdjusted"], macros["PredNoBarsShareClass"]) == ("1", "1")
+        assert macros["PredNoBarsOther"] == "1"
+        assert sample["underlyings"] == 27
 
     def test_inputs_record_the_data(self, result):
         assert result.inputs["first_date"] == "2025-01-02"
@@ -100,12 +111,15 @@ class TestMacros:
         assert macros["PredMeanAbsRet"] == f"{sample['mean_abs_ret'] * 1e4:.0f}"
         assert "PredDetectable" not in macros
 
-    def test_smallest_p_values_in_the_table_are_printed(self, result):
+    def test_smallest_genuine_p_values_and_each_rows_clustered_p_are_printed(self, result):
         rows = result.values["rows"]
-        assert result.macros["PredMinPermP"] == p_value(min(r["permutation_p"] for r in rows))
-        assert result.macros["PredMinClusterP"] == p_value(min(r["p_value"] for r in rows))
-        genuine = [r["permutation_p"] for r in rows if not r["placebo"]]
-        assert result.macros["PredMinGenuinePermP"] == p_value(min(genuine))
+        genuine = [r for r in rows if not r["placebo"]]
+        macros = result.macros
+        assert macros["PredMinGenuinePermP"] == p_value(min(r["permutation_p"] for r in genuine))
+        assert macros["PredMinGenuineClusterP"] == p_value(min(r["p_value"] for r in genuine))
+        assert macros["PredPlaceboClusterP"] == p_value(rows[-1]["p_value"])
+        # Table-wide minima would point the reader at the placebo row without saying so.
+        assert "PredMinPermP" not in macros and "PredMinClusterP" not in macros
 
     def test_rows_print_their_clustered_standard_error(self, result):
         main = result.values["rows"][0]

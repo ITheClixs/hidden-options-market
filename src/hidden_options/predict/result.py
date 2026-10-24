@@ -8,9 +8,12 @@ later start dates.
 
 Index underlyings are left out. Bars are fetched only for the equity report's tickers,
 and a bare index symbol (SPX, NDX) names another security on the bar provider, or none;
-the index itself is a different symbol there. Equity underlyings whose tickers the
-provider no longer serves (delisted or renamed) have no bars and drop out at the join;
-the result counts and names them, since the sample is tilted towards names still trading.
+the index itself is a different symbol there. Equity underlyings whose symbols the
+provider does not serve have no bars and drop out at the join. The result names them and
+counts them by reason: OCC's adjusted-deliverable roots (GME1) and share-class spellings
+(BRKB), whose stocks still trade under other symbols, and other tickers, which include
+delisted and renamed names. Only that last group tilts the sample towards names still
+trading.
 """
 
 from __future__ import annotations
@@ -24,7 +27,12 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from hidden_options.collect.bars import flex_underlyings
+from hidden_options.collect.bars import (
+    MIN_ACTIVITY_DATES,
+    MISSING_BAR_REASONS,
+    flex_underlyings,
+    missing_bar_reason,
+)
 from hidden_options.config import BARS_PATH, RAW_DIR
 from hidden_options.measure.flex_panel import daily_inventory, load_panel
 from hidden_options.predict.inference import N_PERM, SEED, permutation_test
@@ -155,9 +163,13 @@ def _sample(
     coefficients are read against."""
     used = panel.dropna(subset=[MAIN_PREDICTOR, MAIN_OUTCOME, *CONTROLS])
     qualifying = flex_underlyings(flex_panel)
+    without_bars = sorted(set(qualifying) - set(bars["symbol"]))
+    reasons = [missing_bar_reason(symbol) for symbol in without_bars]
     return {
         "qualifying_underlyings": len(qualifying),
-        "without_bars": sorted(set(qualifying) - set(bars["symbol"])),
+        "qualifying_min_dates": MIN_ACTIVITY_DATES,
+        "without_bars": without_bars,
+        "without_bars_by_reason": {reason: reasons.count(reason) for reason in MISSING_BAR_REASONS},
         "underlying_days": main.n_obs,
         "underlyings": main.n_underlyings,
         "dates": main.n_dates,

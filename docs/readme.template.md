@@ -43,9 +43,12 @@ and by date, and controls for trailing volatility over 5 and 22 sessions, the sa
 absolute return and log dollar volume. Each report meets the returns realised from the
 day it became usable, and an inventory change across a date the underlying did not report
 is dropped. Bars are fetched by the equity report's tickers, so index underlyings are left
-out (a bare index symbol names another security, or none), and so are {{PredNoBars}} of the
-{{PredQualifying}} qualifying equity names, whose tickers the bar provider no longer
-serves. Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis points.
+out (a bare index symbol names another security, or none). Of the {{PredQualifying}}
+equity names with at least {{PredQualifyingDates}} activity dates, {{PredNoBars}} have
+symbols the bar provider does not serve: {{PredNoBarsAdjusted}} OCC adjusted-deliverable
+roots such as `GME1`, {{PredNoBarsShareClass}} share-class spelling (`BRKB`) and
+{{PredNoBarsOther}} other tickers, delisted and renamed names among them. Coefficients and
+MDE80 are multiplied by 10⁴, which for |r| is basis points.
 
 | predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | permutation *p* |
 |---|---|---:|---:|---:|---:|
@@ -60,12 +63,13 @@ serves. Coefficients and MDE80 are multiplied by 10⁴, which for |r| is basis p
 
 The permutation *p* comes from {{PredPermutations}} re-estimations with the predictor
 shuffled across underlyings within each date, which treats underlyings as exchangeable
-within a date. The smallest permutation *p* in the table is {{PredMinPermP}} and the
-smallest clustered *p* {{PredMinClusterP}}; among the genuine predictors the smallest
-permutation *p* is {{PredMinGenuinePermP}}. The placebo is inventory from two dates later,
-dated after the outcome, so it cannot predict it; what it picks up runs from volatility
-to later inventory, or through something common to both. The largest |*t*| among the
-genuine estimates, across every specification below, is {{PredMaxAbsT}}.
+within a date. Among the genuine predictors the smallest permutation *p* is
+{{PredMinGenuinePermP}} and the smallest clustered *p* {{PredMinGenuineClusterP}}. The
+placebo is inventory from two dates later, dated after the outcome, so it cannot predict
+it; its clustered *p* is {{PredPlaceboClusterP}}, and whatever association it shows can
+only run from volatility to later inventory, or through something common to both. The
+largest |*t*| among the genuine estimates, across every specification below, is
+{{PredMaxAbsT}}.
 
 Longer horizons say the same: mean |r| over the next 3, 5 and 10 sessions gives
 *t* = {{PredHorizonThreeT}}, {{PredHorizonFiveT}} and {{PredHorizonTenT}}. Keeping only the

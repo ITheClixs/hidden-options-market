@@ -59,6 +59,7 @@ def _sample_macros(values: Mapping[str, Any]) -> dict[str, str]:
     sample = values["sample"]
     main = values["rows"][0]
     mean_abs = sample["mean_abs_ret"]
+    reasons = sample["without_bars_by_reason"]
     return {
         "PredUnderlyingDays": formats.count(sample["underlying_days"]),
         "PredUnderlyings": formats.count(sample["underlyings"]),
@@ -67,7 +68,11 @@ def _sample_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PredLastDate": formats.long_date(pd.Timestamp(sample["last_date"])),
         "PredIndexUnderlyings": formats.count(sample["index_underlyings"]),
         "PredQualifying": formats.count(sample["qualifying_underlyings"]),
+        "PredQualifyingDates": formats.count(sample["qualifying_min_dates"]),
         "PredNoBars": formats.count(len(sample["without_bars"])),
+        "PredNoBarsAdjusted": formats.count(reasons["adjusted_deliverable"]),
+        "PredNoBarsShareClass": formats.count(reasons["share_class"]),
+        "PredNoBarsOther": formats.count(reasons["other"]),
         "PredMeanAbsRet": formats.decimal(mean_abs * BASIS_POINTS, 0),
         # The main row's MDE80 per log point of innovation, as a share of the mean outcome.
         "PredMDEShare": formats.percent(main["mde80"] / mean_abs, 1),
@@ -76,19 +81,17 @@ def _sample_macros(values: Mapping[str, Any]) -> dict[str, str]:
 
 
 def _row_macros(values: Mapping[str, Any]) -> dict[str, str]:
-    rows = values["rows"]
+    genuine = [row for row in values["rows"] if not row["placebo"]]
     macros = {
-        "PredMinPermP": p_value(min(row["permutation_p"] for row in rows)),
-        "PredMinClusterP": p_value(min(row["p_value"] for row in rows)),
-        "PredMinGenuinePermP": p_value(
-            min(row["permutation_p"] for row in rows if not row["placebo"])
-        ),
+        "PredMinGenuinePermP": p_value(min(row["permutation_p"] for row in genuine)),
+        "PredMinGenuineClusterP": p_value(min(row["p_value"] for row in genuine)),
     }
     for row in values["rows"]:
         stem = f"Pred{ROW_STEMS[row['key']]}"
         macros[f"{stem}Beta"] = bp(row["coefficient"])
         macros[f"{stem}T"] = t_stat(row["t_stat"])
         macros[f"{stem}SE"] = bp(row["std_error"])
+        macros[f"{stem}ClusterP"] = p_value(row["p_value"])
         macros[f"{stem}MDE"] = bp(row["mde80"])
         macros[f"{stem}PermP"] = p_value(row["permutation_p"])
     return macros
