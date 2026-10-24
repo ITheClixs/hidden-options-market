@@ -45,6 +45,8 @@ TableFn = Callable[[Mapping[str, Result]], str]
 # here. None of them may import matplotlib.
 REGISTRATION_MODULES: tuple[str, ...] = (
     "hidden_options.measure.market_result",
+    "hidden_options.measure.hidden_share_result",
+    "hidden_options.measure.hidden_share_table",
     "hidden_options.predict.result",
     "hidden_options.predict.tables",
 )
@@ -52,6 +54,7 @@ REGISTRATION_MODULES: tuple[str, ...] = (
 # Modules whose import registers figure builders, loaded only to draw figures.
 FIGURE_MODULES: tuple[str, ...] = (
     "hidden_options.figures.market",
+    "hidden_options.figures.measurement",
     "hidden_options.figures.predictive",
 )
 

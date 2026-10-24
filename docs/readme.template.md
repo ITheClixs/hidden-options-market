@@ -8,7 +8,31 @@ Options Clearing Corporation publishes a free daily report of every cleared FLEX
 root, strike, expiry, mark price and open interest — and this repository turns it into a
 panel.
 
-![FLEX open interest and mark value, {{PanelStart}} to {{PanelEnd}}](docs/figures/growth.png)
+![FLEX against listed open interest per underlying on {{HiddenCensusDate}}, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
+
+**For many underlyings, a large part of the options market is not in the listed chain.**
+For {{HiddenStableTen}} of the {{HiddenDailyComplete}} underlyings followed daily, FLEX is
+at least 10% of option open interest on every one of {{HiddenDailyDates}} settlements from
+{{HiddenDailyFirst}} to {{HiddenDailyLast}}; for {{HiddenStableQuarter}} of them
+({{HiddenStableQuarterNames}}) it is at least 25%, and for {{HiddenStableHalfNames}} at
+least half. Those underlyings were chosen mostly for the option-income programmes written
+on them: {{HiddenStableTenProgramme}} of {{HiddenCompleteProgramme}} programme names clear
+10% on every date, against {{HiddenStableTenControl}} of {{HiddenCompleteControl}}
+controls. A one-date census of {{HiddenCensusUnderlyings}} underlyings with listed weekly
+options, on {{HiddenCensusDate}}, gives the wider picture: the median FLEX share is
+{{HiddenCensusMedian}}, {{HiddenCensusTen}} underlyings are at 10% or more and
+{{HiddenCensusHalf}} at half or more ({{HiddenCensusHalfNames}}).
+
+OCC's series search and its FLEX report count the same FLEX open interest twice, and they
+agree to the contract on {{HiddenReconAgreeing}} of {{HiddenReconSymbolDates}}
+symbol-dates. Valued at the report's marks and at listed mid quotes, FLEX holds
+{{HiddenValueLow}}–{{HiddenValueHigh}} of the followed underlyings' option value, against
+{{HiddenValueOpenInterestLow}}–{{HiddenValueOpenInterestHigh}} of their open interest.
+Value weighs deep in-the-money legs heavily: one {{HiddenLineSymbol}}
+{{HiddenLineRight}} struck at {{HiddenLineStrike}} is marked at {{HiddenLineValue}}, against
+{{HiddenLineListed}} for every listed {{HiddenLineSymbol}} option together.
+
+## The FLEX market over {{PanelMonths}} months
 
 | | {{PanelStart}} | {{PanelEnd}} |
 |---|---:|---:|
@@ -144,6 +168,7 @@ fails if any of them differs from its result file.
 src/hidden_options/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
 src/hidden_options/collect/backfill.py      fetch the FLEX reports missing for a span of dates
 src/hidden_options/measure/flex_panel.py    panel assembly and inventory measures
+src/hidden_options/measure/hidden_share*.py how much of each options market is FLEX
 src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
 src/hidden_options/predict/                 the predictive panel, regressions and permutation test
 src/hidden_options/publish/                 results/ to the paper's numbers and tables and this README

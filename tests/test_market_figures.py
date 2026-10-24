@@ -112,7 +112,7 @@ class TestBuilders:
     @pytest.mark.parametrize(
         ("build", "outputs"),
         [
-            (figures.build_growth, ["paper/figures/growth.pdf", "docs/figures/growth.png"]),
+            (figures.build_growth, ["paper/figures/growth.pdf"]),
             (figures.build_maturity, ["paper/figures/maturity.pdf"]),
             (figures.build_concentration, ["paper/figures/concentration.pdf"]),
         ],
@@ -123,6 +123,12 @@ class TestBuilders:
 
         for output in outputs:
             assert (project / output).is_file()
+
+    def test_growth_is_no_longer_the_readme_figure(self, project):
+        # F3 (`hidden_share`) leads the README now; F1 is drawn for the paper only.
+        with mpl.rc_context():
+            figures.build_growth(raw=project, results=project / "results", root=project)
+        assert not (project / "docs/figures/growth.png").exists()
 
     def test_builder_without_a_result_says_what_to_run(self, tmp_path, monkeypatch):
         monkeypatch.setattr(figures, "load_panel", lambda root: PANEL)

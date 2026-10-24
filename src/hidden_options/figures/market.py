@@ -149,14 +149,14 @@ def cached_panel(raw: Path) -> pd.DataFrame:
 def build_growth(
     raw: Path = RAW_DIR, results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT
 ) -> None:
-    """F1, for the paper and as the README's figure."""
+    """F1, for the paper. The README leads with F3 instead."""
     values = _market_values(results)
     daily = _checked_daily(cached_panel(raw), values)
     apply_style()
     fig = fig_growth(
         daily, pd.Timestamp(values["growth"]["break_date"]), pd.DatetimeIndex(values["expiries"])
     )
-    save(fig, "growth", paper=True, readme=True, root=root)
+    save(fig, "growth", paper=True, root=root)
 
 
 @FIGURES.register("maturity")

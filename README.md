@@ -8,7 +8,31 @@ Options Clearing Corporation publishes a free daily report of every cleared FLEX
 root, strike, expiry, mark price and open interest — and this repository turns it into a
 panel.
 
-![FLEX open interest and mark value, 2 December 2024 to 22 October 2026](docs/figures/growth.png)
+![FLEX against listed open interest per underlying on 14 August 2026, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
+
+**For many underlyings, a large part of the options market is not in the listed chain.**
+For 24 of the 69 underlyings followed daily, FLEX is
+at least 10% of option open interest on every one of 40 settlements from
+14 August 2026 to 22 October 2026; for 3 of them
+(EFA, MSFT and RUT) it is at least 25%, and for RUT at
+least half. Those underlyings were chosen mostly for the option-income programmes written
+on them: 21 of 42 programme names clear
+10% on every date, against 3 of 27
+controls. A one-date census of 680 underlyings with listed weekly
+options, on 14 August 2026, gives the wider picture: the median FLEX share is
+3.2\%, 184 underlyings are at 10% or more and
+6 at half or more (VOO, IVV, PNC, DNN, NDAQ and EFA).
+
+OCC's series search and its FLEX report count the same FLEX open interest twice, and they
+agree to the contract on 3,327 of 3,327
+symbol-dates. Valued at the report's marks and at listed mid quotes, FLEX holds
+32.3\%–34.3\% of the followed underlyings' option value, against
+12.4\%–14.2\% of their open interest.
+Value weighs deep in-the-money legs heavily: one SPY
+put struck at 10,010.01 is marked at \$14.7bn, against
+\$19.7bn for every listed SPY option together.
+
+## The FLEX market over 23 months
 
 | | 2 December 2024 | 22 October 2026 |
 |---|---:|---:|
@@ -144,6 +168,7 @@ fails if any of them differs from its result file.
 src/hidden_options/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
 src/hidden_options/collect/backfill.py      fetch the FLEX reports missing for a span of dates
 src/hidden_options/measure/flex_panel.py    panel assembly and inventory measures
+src/hidden_options/measure/hidden_share*.py how much of each options market is FLEX
 src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
 src/hidden_options/predict/                 the predictive panel, regressions and permutation test
 src/hidden_options/publish/                 results/ to the paper's numbers and tables and this README
