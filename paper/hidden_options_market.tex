@@ -109,14 +109,20 @@ underlyings have at least a tenth of their open interest in FLEX and \HiddenCens
 at least half. A share on one date could flatter, so we count again over
 \HiddenDailyDates{} settlements: for \HiddenStableTen{} of the \HiddenDailyComplete{}
 underlyings we follow daily, FLEX is at least a tenth of open interest on every one of
-those settlements, and for \HiddenStableHalfNames{} at least half. Most of these
+those settlements, and for \HiddenStableHalfNames{} at least half, counting only series
+that expire after each date. Most of these
 underlyings were chosen for the option-income programmes written on them, and
 \HiddenStableTenProgramme{} of the \HiddenCompleteProgramme{} programme underlyings clear
 the 10\% mark on every date, against \HiddenStableTenControl{} of the
 \HiddenCompleteControl{} controls. Valued at the report's marks and at listed quotes,
 FLEX holds \HiddenValueLow{} to \HiddenValueHigh{} of the option value of the
 underlyings we follow, against \HiddenValueOpenInterestLow{} to
-\HiddenValueOpenInterestHigh{} of their open interest.
+\HiddenValueOpenInterestHigh{} of their open interest. The gap comes mostly from deep
+in-the-money legs and from call and put lines paired at the same strike: on
+\HiddenValueCompositionDate{}, \HiddenValueIntrinsic{} of \HiddenValueFlexTotal{} of FLEX
+value is intrinsic, \HiddenValueDeep{} sits in series worth more than
+\HiddenValueDeepThreshold{} intrinsic and \HiddenValuePaired{} in paired lines
+(Section~\ref{sec:hidden}).
 
 \paragraph{Whether it predicts anything.} The economic reason to care is that a dealer
 taking the other side of a FLEX trade hedges it in the listed market and carries the
@@ -339,23 +345,32 @@ FLEX share is its FLEX open interest over all of its open interest.
 
 We measure it twice. The census is one search across the \HiddenCensusSymbols{} symbols
 with listed weekly options. The daily set is the \HiddenDailyUniverse{} underlyings our
-collector follows, captured once a day from \HiddenDailyFirst{} to
-\HiddenDailyLast{}: \HiddenDailyProgramme{} chosen for the option-income programmes
+collector follows: \HiddenDailyProgramme{} chosen for the option-income programmes
 written on them and \HiddenDailyControl{} liquid names chosen as controls.
 
 A search shows the latest settlement OCC has processed, which during or soon after a
 session is the previous one, so the date a capture was taken does not say which
 settlement it holds. We date each capture by its listed side, which the FLEX report does
 not touch. A Cboe chain carries a quote timestamp and the open interest of the
-settlement before that day, and for every capture at least \HiddenDailySupportLow{} of
-the \HiddenDailyCompared{} symbols the two sources share match one chain's listed open
-interest series for series. The census holds the settlement of \HiddenCensusDate{}. Of
-the \HiddenDailyCaptures{} daily captures, \HiddenDailyDuplicates{} repeat a settlement
-already captured, identically, which leaves \HiddenDailyDates{} settlements. With the
-dates fixed this way, the FLEX side of each capture is a second reading of the FLEX
-report: on \HiddenReconAgreeing{} of the \HiddenReconSymbolDates{} symbol-dates where
-either source shows FLEX, the two agree to the contract, and the largest relative
-difference is \HiddenReconMax{}.
+settlement before that day, and for every capture kept at least \HiddenDailySupportLow{}
+of the \HiddenDailyCompared{} symbols the two sources share match one chain's listed open
+interest series for series. The census holds the settlement of \HiddenCensusDate{}.
+
+The daily captures come from two places: \HiddenDailyLocalCaptures{} from our own
+collector, which holds \HiddenDailyLocalSettlements{} settlements, and
+\HiddenDailyCICaptures{} from a second, scheduled run of the same collector, which adds
+\HiddenDailyFromCI{} more. Together they hold \HiddenDailyDates{} of the
+\HiddenDailySpan{} settlements from \HiddenDailyFirst{} to \HiddenDailyLast{}; missing
+are \HiddenDailyMissingDates{}. On the \HiddenDailyBothRoots{} settlements both hold,
+all \HiddenDailyCrossRoot{} readings of a symbol from the second run equal our own, and
+a capture that repeated a settlement with different open interest would stop the
+analysis. Set aside, because they cannot be dated, are captures taken while OCC was
+publishing, whose symbols hold two different settlements (\HiddenDailyMixed{}), and
+captures whose settlement no chain reading covers (\HiddenDailyUndated{}). With the dates fixed
+this way, the FLEX side of each capture is a second reading of the FLEX report: on
+\HiddenReconAgreeing{} of the \HiddenReconSymbolDates{} symbol-dates where either
+source shows FLEX, the two agree to the contract, and the largest relative difference
+is \HiddenReconMax{}. A median difference above 1\% would stop the analysis.
 
 Two kinds of product need a rule. An adjusted-deliverable class, renamed with a trailing
 digit after a corporate action changed what a contract delivers (\texttt{HON2},
@@ -363,8 +378,8 @@ digit after a corporate action changed what a contract delivers (\texttt{HON2},
 count it below. The census has \HiddenAdjustedCensus{} such classes, \HiddenAdjustedCensusFlex{}
 of them with FLEX open interest (\HiddenAdjustedCensusNames{}), together
 \HiddenAdjustedCensusShare{} of the census's FLEX open interest. Neither the census nor
-the daily captures search the index products, so for SPX, NDX and RUT the listed side
-comes from the Cboe chain instead, counting the monthly product and its
+the daily captures include SPX, NDX or RUT, so for those three the listed side comes
+from the Cboe chain instead, counting the monthly product and its
 weekly sibling (SPX and SPXW, NDX and NDXP, RUT and RUTW) against every FLEX root on the
 index; mini and micro products such as XSP stay separate. A chain read after a
 settlement no longer lists the series that expired on it, so for the indices both sides
@@ -401,13 +416,15 @@ interest.}
 \end{figure}
 
 One date could flatter, and the daily set shows how far a share moves. Of the
-\HiddenDailyComplete{} underlyings observed on all \HiddenDailyDates{} settlements (the
-chains for \HiddenDailyIncompleteNames{} are missing on some, so they are left out of
-the counts), \HiddenStableTen{} have a FLEX share of at least 10\% on every one of them,
-and \HiddenStableQuarter{} of those at least 25\%: \HiddenQuarterRanges{}, each given as
-its lowest and highest share over the dates. At least half on every date:
-\HiddenStableHalfNames{}. RUT's shares, like those of the other index products, count
-only series expiring after each date. Across the \HiddenDailySearch{} names in the series search,
+\HiddenDailyComplete{} underlyings observed on all \HiddenDailyDates{} settlements (left
+out: \HiddenDailyIncompleteNames{}, whose chains are missing on some of them),
+\HiddenStableTen{} have a FLEX share of at least 10\% on every one of them, and
+\HiddenStableQuarter{} of those at least 25\%: \HiddenQuarterRanges{}, each given as its
+lowest and highest share over the dates. At least half on every date:
+\HiddenStableHalfNames{}, but only under the index rule. Counted as the equity shares
+are, with the series expiring on a date included at their last reading, RUT's lowest
+share is \HiddenRutFullLow{}, on \HiddenRutFullLowDate{}; SPX, the other index product
+in the 10\% count, stays at or above \HiddenSpxFullLow{} counted either way. Across the \HiddenDailySearch{} names in the series search,
 FLEX is between \HiddenDailyAggregateLow{} and \HiddenDailyAggregateHigh{} of all their
 open interest on each date. The set is not a random draw:
 \HiddenStableTenProgramme{} of the \HiddenCompleteProgramme{} programme underlyings
@@ -423,7 +440,12 @@ value, against \HiddenValueOpenInterestLow{} to \HiddenValueOpenInterestHigh{} o
 open interest. The median underlying's value share is \HiddenValueMedianName{}, against
 \HiddenValueMedianNameOpenInterest{} of open interest, and value is the larger share for
 \HiddenValueAbove{} of the \HiddenValueNames{}. Value weighs deep in-the-money legs
-heavily (Section~\ref{sec:positions}). On \HiddenValueLastDate{} the largest single FLEX
+heavily (Section~\ref{sec:positions}), and the FLEX book holds many of them. On
+\HiddenValueCompositionDate{}, \HiddenValueIntrinsic{} of the \HiddenValueFlexTotal{} of
+FLEX value on these underlyings is intrinsic at that day's spot. Of the FLEX value,
+\HiddenValueDeep{} sits in series worth more than \HiddenValueDeepThreshold{} intrinsic,
+and \HiddenValuePaired{} in series whose strike and expiry carry both a call and a put
+line, as conversions and boxes do. That day the largest single FLEX
 series by value is the \HiddenLineSymbol{} \HiddenLineRight{} struck at
 \HiddenLineStrike{} and expiring \HiddenLineExpiry{}, with \HiddenLineOpenInterest{}
 contracts open beside a \HiddenLineOpposite{} line of \HiddenLineOppositeOpenInterest{}
@@ -581,8 +603,9 @@ than a year from expiry has grown from \OverOneYearStart{} to \OverOneYear{}.
 
 It is also a large part of many single options markets. On every one of
 \HiddenDailyDates{} settlements FLEX is at least a tenth of option open interest for
-\HiddenStableTen{} of the \HiddenDailyComplete{} underlyings we follow daily, and across
-a census of \HiddenCensusUnderlyings{} underlyings the median share is
+\HiddenStableTen{} of the \HiddenDailyComplete{} underlyings we follow daily, most of them
+chosen for the option-income programmes written on them, and across a census of
+\HiddenCensusUnderlyings{} underlyings the median share is
 \HiddenCensusMedian{}. Research built on listed chains sees none of it.
 
 Whether it tells us anything about the visible market is a separate question, and at

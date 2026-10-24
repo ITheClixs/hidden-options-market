@@ -11,8 +11,10 @@ from hidden_options.measure import hidden_share_data as data
 from hidden_options.measure.hidden_share_data import (
     chain_dates,
     chain_open_interest,
+    ci_roots,
     date_capture,
     date_captures,
+    expiring_series,
     index_rows,
     load_captures,
     load_census,
@@ -54,7 +56,7 @@ class TestChainDates:
 
 
 def chain_frame(rows):
-    """rows: (key, quote_timestamp, root, expiry, right, oi, bid, ask)"""
+    """rows: (key, quote_timestamp, root, expiry, right, oi, bid, ask[, underlying_price])"""
     return pd.DataFrame(
         [
             {
@@ -69,9 +71,12 @@ def chain_frame(rows):
                 "ask": ask,
                 "theo": 1.0,
                 "open_interest": oi,
+                "underlying_price": spot,
                 **chain_dates(pd.Series([ts]), CALENDAR).iloc[0].to_dict(),
             }
-            for key, ts, root, e, r, oi, bid, ask in rows
+            for key, ts, root, e, r, oi, bid, ask, spot in (
+                (*row, 100.0) if len(row) == 8 else row for row in rows
+            )
         ]
     )
 
@@ -94,15 +99,17 @@ class TestChainOpenInterest:
         chains = chain_frame(
             [
                 # Quotes from 2 September, open interest of 1 September.
-                ("SPY", "2026-09-02 20:15:00", "SPY", "2026-09-18", "C", 10, 2.0, 2.2),
+                ("SPY", "2026-09-02 20:15:00", "SPY", "2026-09-18", "C", 10, 2.0, 2.2, 101.0),
                 # Quotes from 3 September, open interest of 2 September.
-                ("SPY", "2026-09-03 20:15:00", "SPY", "2026-09-18", "C", 12, 3.0, 3.2),
+                ("SPY", "2026-09-03 20:15:00", "SPY", "2026-09-18", "C", 12, 3.0, 3.2, 102.0),
             ]
         )
         priced = priced_chains(chains).set_index("date")
 
         assert priced.loc[pd.Timestamp("2026-09-02"), "open_interest"] == 12
         assert priced.loc[pd.Timestamp("2026-09-02"), "bid"] == 2.0
+        # The spot is the one quoted with those prices.
+        assert priced.loc[pd.Timestamp("2026-09-02"), "underlying_price"] == 101.0
         # 1 September's settlement has no quotes from its own session in the data.
         assert pd.isna(priced.loc[pd.Timestamp("2026-09-01"), "bid"])
 
@@ -165,7 +172,7 @@ class TestDateCapture:
         dated = date_capture(frame, self.CHAIN)
 
         assert dated.date == pd.Timestamp("2026-09-02")
-        assert (dated.support, dated.compared) == (2, 2)
+        assert (dated.support, dated.compared, dated.others) == (2, 2, 0)
 
     def test_an_ambiguous_capture_is_refused(self):
         chain = chain_oi(
@@ -210,6 +217,117 @@ class TestDateCapture:
             date_captures(pd.concat([first, other]), self.CHAIN)
 
 
+class TestTwoRoots:
+    """Captures from the local collector (source 0) and from CI (source 1)."""
+
+    CHAIN = TestDateCapture.CHAIN
+
+    @staticmethod
+    def tag(frame, folder, source):
+        return frame.assign(capture=pd.Timestamp(folder), source=source)
+
+    def test_the_local_capture_is_kept_and_the_ci_one_checked_against_it(self):
+        local = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
+        ci = self.tag(
+            pd.concat(
+                [
+                    capture([("AAA", "2026-09-18", 12, 5)]),
+                    capture([("BBB", "2026-09-18", 8, 0)], symbol="BBB"),
+                ]
+            ),
+            "2026-09-03",
+            1,
+        )
+
+        dated, log = date_captures(pd.concat([ci, local]), self.CHAIN)
+
+        # One settlement: AAA as the local root holds it, BBB from CI where local has none.
+        assert sorted(dated["symbol"].unique()) == ["AAA", "BBB"]
+        assert set(dated["date"]) == {pd.Timestamp("2026-09-02")}
+        assert log["source"].tolist() == [0, 1]
+        assert log["symbols_compared"].tolist() == [0, 1]
+        assert log["symbols_added"].tolist() == [1, 1]
+        assert log["duplicate"].tolist() == [False, True]
+
+    def test_a_ci_capture_fills_a_settlement_the_local_root_lacks(self):
+        local = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
+        ci = self.tag(capture([("AAA", "2026-09-18", 10, 5)]), "2026-09-02", 1)
+
+        dated, log = date_captures(pd.concat([local, ci]), self.CHAIN)
+
+        assert sorted(dated["date"].unique()) == [
+            pd.Timestamp("2026-09-01"),
+            pd.Timestamp("2026-09-02"),
+        ]
+        assert log.set_index("source").loc[1, "date"] == pd.Timestamp("2026-09-01")
+
+    def test_roots_that_disagree_on_a_settlement_are_refused(self):
+        local = self.tag(
+            capture([("AAA", "2026-09-18", 12, 5), ("2AAA", "2026-09-18", 3, 0)]), "2026-09-03", 0
+        )
+        ci = self.tag(
+            capture([("AAA", "2026-09-18", 12, 5), ("2AAA", "2026-09-18", 4, 0)]), "2026-09-03", 1
+        )
+        with pytest.raises(ValueError, match="AAA"):
+            date_captures(pd.concat([local, ci]), self.CHAIN)
+
+    def test_a_capture_taken_while_a_settlement_was_published_is_set_aside(self):
+        """Symbols that match different settlements mean the search changed mid-capture."""
+        chain = pd.concat(
+            [
+                self.CHAIN,
+                chain_oi(
+                    [
+                        ("2026-09-01", "CCC", "2026-09-18", "C", 20),
+                        ("2026-09-02", "CCC", "2026-09-18", "C", 21),
+                    ]
+                ),
+            ]
+        )
+        mixed = self.tag(
+            pd.concat(
+                [
+                    capture([("AAA", "2026-09-18", 12, 5)]),
+                    capture([("BBB", "2026-09-18", 7, 0)], symbol="BBB"),
+                    capture([("CCC", "2026-09-18", 21, 0)], symbol="CCC"),
+                ]
+            ),
+            "2026-09-03",
+            1,
+        )
+        clean = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
+
+        dated, log = date_captures(pd.concat([clean, mixed]), chain)
+
+        assert log["mixed"].tolist() == [False, True]
+        assert log["reason"].tolist() == ["", "mixed"]
+        # Nothing from the mixed capture is kept: BBB's 1 September reading would be
+        # filed under 2 September otherwise.
+        assert sorted(dated["symbol"].unique()) == ["AAA"]
+
+    def test_a_capture_no_chain_can_date_is_set_aside_and_logged(self):
+        dated_ok = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
+        undatable = self.tag(capture([("AAA", "2026-09-18", 99, 99)]), "2026-09-04", 1)
+
+        dated, log = date_captures(pd.concat([dated_ok, undatable]), self.CHAIN)
+
+        assert set(dated["date"]) == {pd.Timestamp("2026-09-02")}
+        assert log["dated"].tolist() == [True, False]
+        assert "no chain" in log["reason"].iloc[1]
+        assert pd.isna(log["date"].iloc[1])
+
+    def test_ci_roots_are_the_raw_folders_under_the_ci_directory(self, tmp_path):
+        for name in ("2026-09-03", "2026-09-02"):
+            (tmp_path / "ci" / name / "raw").mkdir(parents=True)
+        (tmp_path / "ci" / "archives").mkdir()
+
+        assert ci_roots(tmp_path / "ci") == [
+            tmp_path / "ci/2026-09-02/raw",
+            tmp_path / "ci/2026-09-03/raw",
+        ]
+        assert ci_roots(tmp_path / "absent") == []
+
+
 class TestIndexRows:
     def test_listed_and_flex_index_products_after_the_date(self):
         chain = chain_oi(
@@ -248,6 +366,46 @@ class TestIndexRows:
         total = rows["call_open_interest"] + rows["put_open_interest"]
         assert total.sum() == 10 + 20 + 3 + 4
 
+    def test_with_the_expiring_series_both_sides_count_the_whole_book(self):
+        chain = chain_oi([("2026-09-01", "SPX", "2026-09-18", "C", 10)])
+        # The last reading of a series expiring on the date: the chain read that day.
+        expiring = chain_oi([("2026-09-01", "SPX", "2026-09-01", "C", 7)])
+        reports = pd.DataFrame(
+            {
+                "report_date": pd.Timestamp("2026-09-01"),
+                "kind": "index",
+                "root": "2SPX",
+                "underlying": "SPX",
+                "right": "C",
+                "expiry": [pd.Timestamp("2026-09-18"), pd.Timestamp("2026-09-01")],
+                "strike": 100.0,
+                "mark_price": 1.0,
+                "open_interest": [3, 2],
+            }
+        )
+
+        later = index_rows(chain, reports)
+        whole = index_rows(chain, reports, expiring=expiring)
+
+        def total(rows):
+            return int((rows["call_open_interest"] + rows["put_open_interest"]).sum())
+
+        assert total(later) == 10 + 3
+        assert total(whole) == 10 + 7 + 3 + 2
+
+    def test_expiring_series_come_from_the_chain_of_their_expiry_session(self):
+        chains = chain_frame(
+            [
+                ("SPX", "2026-09-02 20:15:00", "SPX", "2026-09-02", "C", 7, 0.0, 0.0),
+                ("SPX", "2026-09-02 20:15:00", "SPX", "2026-09-18", "C", 9, 1.0, 1.2),
+            ]
+        )
+        expiring = expiring_series(chains)
+
+        assert expiring[["date", "expiry", "open_interest"]].values.tolist() == [
+            [pd.Timestamp("2026-09-02"), pd.Timestamp("2026-09-02"), 7]
+        ]
+
     def test_an_unknown_listed_index_root_is_refused(self):
         chain = chain_oi([("2026-09-01", "SPX", "2026-09-18", "C", 10)])
         chain["root"] = "SPXQ"
@@ -285,6 +443,7 @@ class TestLoaders:
             {
                 "symbol": ["_SPX"],
                 "quote_timestamp": ["2026-09-02 20:15:00"],
+                "underlying_price": [100.0],
                 "contract": ["SPXW260918C00100000"],
                 "expiry": [pd.Timestamp("2026-09-18").date()],
                 "right": ["C"],
@@ -316,6 +475,39 @@ class TestLoaders:
             pd.Timestamp("2026-09-01"),
         )
 
+    def test_captures_and_chains_from_two_roots(self, tmp_path):
+        local, ci = tmp_path / "raw", tmp_path / "ci" / "2026-09-03" / "raw"
+        oi = capture([("AAA", "2026-09-18", 1, 2)])
+        self.write(local / "occ_open_interest/date=2026-09-02/AAA.parquet", oi)
+        self.write(ci / "occ_open_interest/date=2026-09-03/AAA.parquet", oi)
+        for root, stamp in ((local, "2026-09-02 20:15:00"), (ci, "2026-09-03 20:15:00")):
+            chain = pd.DataFrame(
+                {
+                    "symbol": ["AAA"],
+                    "quote_timestamp": [stamp],
+                    "underlying_price": [100.0],
+                    "contract": ["AAA260918C00100000"],
+                    "expiry": [pd.Timestamp("2026-09-18").date()],
+                    "right": ["C"],
+                    "strike": [100.0],
+                    "bid": [1.0],
+                    "ask": [1.2],
+                    "theo": [1.1],
+                    "open_interest": [7.0],
+                }
+            )
+            self.write(root / f"cboe_chain/date={stamp[:10]}/equity_AAA.parquet", chain)
+
+        captures = load_captures([local, ci])
+        chains = load_chains([local, ci], CALENDAR)
+
+        assert captures["source"].tolist() == [0, 1]
+        assert captures["capture"].tolist() == [
+            pd.Timestamp("2026-09-02"),
+            pd.Timestamp("2026-09-03"),
+        ]
+        assert sorted(chains["oi_date"]) == [pd.Timestamp("2026-09-01"), pd.Timestamp("2026-09-02")]
+
     def test_missing_inputs_are_named(self, tmp_path):
         with pytest.raises(FileNotFoundError, match="occ_flex"):
             trading_calendar(tmp_path)
@@ -333,6 +525,7 @@ class TestLoaders:
             {
                 "symbol": ["SPY"],
                 "quote_timestamp": ["2026-09-02 20:15:00"],
+                "underlying_price": [100.0],
                 "contract": ["SPY-SEP-100"],
                 "expiry": [pd.Timestamp("2026-09-18").date()],
                 "right": ["C"],

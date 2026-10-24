@@ -66,8 +66,11 @@ _CANDIDATES = tuple(
 # Where along its visible run, as a fraction of the run in log terms, an iso-share line
 # may be named; tried in this order.
 ISO_PLACES = tuple(round(0.9 - 0.05 * step, 2) for step in range(16))
-# Added to a position's cost when its label would sit nearer another named point.
+# Added to a position's cost when its label would not sit clearly nearer its own point.
 _AMBIGUOUS = 1e3
+# How much nearer its own point than any other named point a label without a leader
+# must sit, in points.
+AMBIGUITY_MARGIN_PT = 6.0
 # Half the side of the square kept clear around a named point, in points.
 _MARKER_PT = 3.0
 _UNITS = ((1e6, "m"), (1e3, "k"))
@@ -146,11 +149,11 @@ def fig_hidden_share(share: pd.DataFrame, indices: pd.DataFrame | None) -> Figur
 
     fig.draw_without_rendering()
     order = pd.concat([accented, index, named]).drop_duplicates("symbol")
-    placed = _marker_boxes(fig, ax, order)
+    markers = _marker_boxes(fig, ax, order)
     required = set(accented["symbol"]) | set(index["symbol"])
-    _place_labels(fig, ax, order, placed, required)
+    placed = _place_labels(fig, ax, order, markers, required)
     dots = ax.transData.transform(both[["listed_oi", "flex_oi"]].to_numpy(dtype=float))
-    _iso_labels(ax, limits, placed, dots)
+    _iso_labels(ax, limits, [*markers, *placed], dots)
     return fig
 
 
@@ -322,29 +325,35 @@ def _leader_boxes(label: Annotation, box: Bbox, pieces: int) -> list[Bbox]:
 
 
 def _place_labels(
-    fig: Figure, ax: Axes, points: pd.DataFrame, placed: list[Bbox], required: set[str]
-) -> None:
-    """Name each point at the first nearby position that touches no other label.
+    fig: Figure, ax: Axes, points: pd.DataFrame, markers: list[Bbox], required: set[str]
+) -> list[Bbox]:
+    """Name each point at the first nearby position that touches no other label or mark.
 
     Positions next to the point come first; further out, a hairline leads back to it.
-    A label without a hairline must sit nearer its own point than any other named
-    point, or it would read as that one's. A label is kept inside the axes. Should
-    every position fail, a `required` label takes the one failing least, and any other
-    label is left off: a large name without its ticker is better than a wrong one.
+    `markers` are the named points' marks, in the order of `points`; a label must clear
+    every mark but its own, which its hairline reaches by design. A label without a
+    hairline must sit nearer its own point than any other named point by
+    AMBIGUITY_MARGIN_PT, or it could read as that one's. A label is kept inside the axes.
+    Should every position fail, a `required` label takes the one failing least, and any
+    other label is left off: a large name without its ticker is better than a wrong one.
+    Returns the boxes of the labels placed.
     """
     renderer = _renderer(fig)
     frame = ax.get_window_extent(renderer)
     pad = _PAD_PT * fig.dpi / 72
+    margin = AMBIGUITY_MARGIN_PT * fig.dpi / 72
     centres = ax.transData.transform(points[["listed_oi", "flex_oi"]].to_numpy(dtype=float))
+    placed: list[Bbox] = []
     for position, row in enumerate(points.itertuples()):
         others = np.delete(centres, position, axis=0)
+        obstacles = [*placed, *markers[:position], *markers[position + 1 :]]
         best: tuple[float, Annotation] | None = None
         for radius, (dx, dy) in _CANDIDATES:
             far = radius > _NEAR_RADIUS
             label = _label(ax, row, dx, dy, far=far)
             boxes = label_boxes(label, renderer)
-            cost = sum(_overlap(box.padded(pad), placed) + _outside(box, frame) for box in boxes)
-            if not far and _nearer_to_another(boxes[0], centres[position], others):
+            cost = sum(_overlap(box.padded(pad), obstacles) + _outside(box, frame) for box in boxes)
+            if not far and _nearer_to_another(boxes[0], centres[position], others, margin):
                 cost += _AMBIGUOUS
             if best is not None and cost >= best[0]:
                 label.remove()
@@ -359,13 +368,14 @@ def _place_labels(
             best[1].remove()
             continue
         placed.extend(label_boxes(best[1], renderer))
+    return placed
 
 
-def _nearer_to_another(box: Bbox, own: np.ndarray, others: np.ndarray) -> bool:
-    """True when some point in `others` is closer to `box` than `own` is."""
+def _nearer_to_another(box: Bbox, own: np.ndarray, others: np.ndarray, margin: float) -> bool:
+    """True unless every point in `others` is at least `margin` farther from `box` than `own`."""
     if len(others) == 0:
         return False
-    return bool(_distance(box, others).min() < _distance(box, own[None, :])[0])
+    return bool(_distance(box, others).min() < _distance(box, own[None, :])[0] + margin)
 
 
 def _distance(box: Bbox, points: np.ndarray) -> np.ndarray:

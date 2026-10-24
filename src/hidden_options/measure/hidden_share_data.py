@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import glob
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -44,6 +45,7 @@ CAPTURE_LOOKBACK_DAYS = 7
 CHAIN_READ_COLUMNS = (
     "symbol",
     "quote_timestamp",
+    "underlying_price",
     "contract",
     "expiry",
     "right",
@@ -74,6 +76,7 @@ PRICED_COLUMNS = (
     "bid",
     "ask",
     "theo",
+    "underlying_price",
 )
 REPORT_COLUMNS = (
     "report_date",
@@ -103,11 +106,17 @@ _PARTITION = re.compile(r"date=(\d{4}-\d{2}-\d{2})")
 
 @dataclass(frozen=True)
 class CaptureDate:
-    """The settlement a capture shows, and how many symbols vouch for it."""
+    """The settlement a capture shows, and how many symbols vouch for it.
+
+    `others` counts the symbols that match one other settlement and not this one: a
+    capture taken while OCC was publishing a settlement holds some symbols at the old
+    one and some at the new.
+    """
 
     date: pd.Timestamp
     support: int
     compared: int
+    others: int = 0
 
 
 def trading_calendar(raw: Path) -> pd.DatetimeIndex:
@@ -146,11 +155,31 @@ def chain_dates(timestamps: pd.Series, calendar: pd.DatetimeIndex) -> pd.DataFra
     )
 
 
-def load_chains(raw: Path, calendar: pd.DatetimeIndex) -> pd.DataFrame:
-    """Every stored Cboe chain row, with its root, its dates and the symbol without `_`."""
-    paths = sorted(glob.glob(str(raw / "cboe_chain/date=*/*.parquet")))
+def ci_roots(ci: Path) -> list[Path]:
+    """The `raw` folder of every unpacked CI capture under `ci`, oldest first.
+
+    The private CI collector publishes one archive per run; each is unpacked into
+    `<ci>/<run date>/raw` with the collectors' own layout. A missing `ci` means none.
+    """
+    if not ci.is_dir():
+        return []
+    return sorted(path for path in ci.glob("*/raw") if path.is_dir())
+
+
+def load_chains(roots: Path | Sequence[Path], calendar: pd.DatetimeIndex) -> pd.DataFrame:
+    """Every stored Cboe chain row under `roots`, with its root, dates and symbol without `_`.
+
+    A settlement read in more than one place keeps its latest reading (see
+    `chain_open_interest`), wherever it was stored.
+    """
+    folders = _as_roots(roots)
+    paths = [
+        path
+        for folder in folders
+        for path in sorted(glob.glob(str(folder / "cboe_chain/date=*/*.parquet")))
+    ]
     if not paths:
-        raise FileNotFoundError(f"No Cboe chains under {raw}/cboe_chain")
+        raise FileNotFoundError(f"No Cboe chains under {_names(folders)}/cboe_chain")
     chains = pd.concat(
         [pd.read_parquet(path, columns=list(CHAIN_READ_COLUMNS)) for path in paths],
         ignore_index=True,
@@ -191,7 +220,7 @@ def priced_chains(chains: pd.DataFrame) -> pd.DataFrame:
     quotes = chains[chains["quote_timestamp"] == latest]
     quotes = quotes.drop_duplicates(["symbol", "session", "contract"]).rename(
         columns={"session": "date"}
-    )[["date", "symbol", "contract", "bid", "ask", "theo"]]
+    )[["date", "symbol", "contract", "bid", "ask", "theo", "underlying_price"]]
     priced = oi.merge(quotes, on=["date", "symbol", "contract"], how="left")
     return priced[list(PRICED_COLUMNS)]
 
@@ -204,14 +233,22 @@ def load_census(raw: Path) -> pd.DataFrame:
     return pd.concat([pd.read_parquet(path) for path in paths], ignore_index=True)
 
 
-def load_captures(raw: Path) -> pd.DataFrame:
-    """Every daily series-search capture, with the folder date as `capture`."""
-    paths = sorted(glob.glob(str(raw / "occ_open_interest/date=*/*.parquet")))
-    if not paths:
-        raise FileNotFoundError(f"No series-search captures under {raw}/occ_open_interest")
+def load_captures(roots: Path | Sequence[Path]) -> pd.DataFrame:
+    """Every daily series-search capture under `roots`.
+
+    Each row carries its folder date as `capture` and the position of its root in
+    `roots` as `source`, so the local collector (first) can be preferred to CI.
+    """
+    folders = _as_roots(roots)
     frames = [
-        pd.read_parquet(path).assign(capture=pd.Timestamp(_partition_date(path))) for path in paths
+        pd.read_parquet(path).assign(capture=pd.Timestamp(_partition_date(path)), source=source)
+        for source, folder in enumerate(folders)
+        for path in sorted(glob.glob(str(folder / "occ_open_interest/date=*/*.parquet")))
     ]
+    if not frames:
+        raise FileNotFoundError(
+            f"No series-search captures under {_names(folders)}/occ_open_interest"
+        )
     return pd.concat(frames, ignore_index=True)
 
 
@@ -264,48 +301,110 @@ def date_capture(
         raise ValueError(f"the capture is ambiguous between settlements {tied}")
     if 2 * int(votes.iloc[0]) <= compared:
         raise ValueError(f"only {int(votes.iloc[0])} of {compared} symbols agree on a settlement")
-    return CaptureDate(pd.Timestamp(votes.index[0]), int(votes.iloc[0]), compared)
+    winner = pd.Timestamp(votes.index[0])
+    matched = agrees[agrees].reset_index().groupby("symbol")["date"].agg(["nunique", "first"])
+    others = int(((matched["nunique"] == 1) & (matched["first"] != winner)).sum())
+    return CaptureDate(winner, int(votes.iloc[0]), compared, others)
 
 
 def date_captures(
     captures: pd.DataFrame, chain_oi: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Date every capture and keep one capture per settlement.
+    """Date every capture and keep one reading of each symbol on each settlement.
 
-    Returns the kept rows with their `date`, and a log of every capture: its settlement,
-    the symbols that vouched for it out of those compared, and whether it repeats one
-    already kept. Two captures of one settlement must be identical, since the search
-    shows a settlement as OCC processed it.
+    Captures are taken source by source (the first root before the others, so the local
+    collector before CI) and, within a source, in folder order. A symbol's rows on a
+    settlement come from the first capture that has them; every later capture of the
+    same settlement must show identical open interest for it, since the search shows a
+    settlement as OCC processed it, and a difference raises. A later capture can still
+    add symbols the earlier ones lack.
+
+    Returns the kept rows with their `date`, and a log of every capture: its source and
+    settlement, the symbols that vouched for the date out of those compared, whether the
+    settlement was already captured, and how many of its symbols were checked against an
+    earlier reading or added. A capture whose symbols match different settlements was
+    taken while OCC was publishing one; it is logged as `mixed` and nothing from it is
+    kept, since its majority date would be wrong for the rest. A capture that cannot be
+    dated at all (no chain reading of its settlement exists, or the symbols do not agree)
+    is logged with the reason and set aside too.
     """
-    kept: dict[pd.Timestamp, pd.DataFrame] = {}
+    if "source" not in captures.columns:
+        captures = captures.assign(source=0)
+    kept: dict[pd.Timestamp, dict[str, pd.DataFrame]] = {}
     log = []
-    for key, rows in captures.groupby("capture", sort=True):
+    for (source, key), rows in captures.groupby(["source", "capture"], sort=True):
         folder = pd.Timestamp(str(key))
         window = (folder - pd.Timedelta(days=CAPTURE_LOOKBACK_DAYS), folder)
-        dated = date_capture(rows, chain_oi, window)
-        content = _content(rows)
-        duplicate = dated.date in kept
-        if duplicate and not content.equals(_content(kept[dated.date])):
-            raise ValueError(
-                f"Captures of the {dated.date:%Y-%m-%d} settlement differ "
-                f"(folder {folder:%Y-%m-%d})"
-            )
-        if not duplicate:
-            kept[dated.date] = rows
-        log.append(
-            {
-                "capture": folder,
-                "date": dated.date,
-                "support": dated.support,
-                "compared": dated.compared,
-                "duplicate": duplicate,
-            }
+        entry: dict[str, object] = {
+            "capture": folder,
+            "source": int(str(source)),
+            "date": pd.NaT,
+            "dated": False,
+            "reason": "",
+            "support": 0,
+            "compared": 0,
+            "mixed": False,
+            "duplicate": False,
+            "symbols_compared": 0,
+            "symbols_added": 0,
+        }
+        log.append(entry)
+        try:
+            dated = date_capture(rows, chain_oi, window)
+        except ValueError as exc:
+            entry["reason"] = f"undated: {exc}"
+            continue
+        entry.update(
+            date=dated.date,
+            dated=True,
+            support=dated.support,
+            compared=dated.compared,
+            mixed=dated.others > 0,
+            duplicate=dated.date in kept,
+            reason="mixed" if dated.others > 0 else "",
         )
-    frames = [rows.drop(columns="capture").assign(date=day) for day, rows in kept.items()]
+        if dated.others > 0:
+            continue
+        symbols = kept.setdefault(dated.date, {})
+        compared = added = 0
+        for symbol, symbol_rows in rows.groupby("symbol", sort=True):
+            name = str(symbol)
+            if name not in symbols:
+                symbols[name] = symbol_rows
+                added += 1
+                continue
+            compared += 1
+            if not _content(symbol_rows).equals(_content(symbols[name])):
+                raise ValueError(
+                    f"Captures of the {dated.date:%Y-%m-%d} settlement differ for {name} "
+                    f"(folder {folder:%Y-%m-%d}, source {source})"
+                )
+        entry["symbols_compared"], entry["symbols_added"] = compared, added
+    frames = [
+        rows.drop(columns=["capture", "source"]).assign(date=day)
+        for day, symbols in kept.items()
+        for rows in symbols.values()
+    ]
     return pd.concat(frames, ignore_index=True), pd.DataFrame(log)
 
 
-def index_rows(chain_oi: pd.DataFrame, reports: pd.DataFrame) -> pd.DataFrame:
+def expiring_series(chains: pd.DataFrame) -> pd.DataFrame:
+    """Series on the day they expire, as the latest chain of that session lists them.
+
+    A chain read after a settlement no longer lists what expired on it, so the last
+    reading of an expiring series is the chain read on its expiry day, whose open
+    interest is the settlement before. The frame has CHAIN_OI_COLUMNS with `date` the
+    expiry day.
+    """
+    latest = chains.groupby(["symbol", "session"])["quote_timestamp"].transform("max")
+    frame = chains[(chains["quote_timestamp"] == latest) & (chains["expiry"] == chains["session"])]
+    frame = frame.drop_duplicates(["symbol", "session", "contract"])
+    return frame.rename(columns={"session": "date"})[list(CHAIN_OI_COLUMNS)].reset_index(drop=True)
+
+
+def index_rows(
+    chain_oi: pd.DataFrame, reports: pd.DataFrame, expiring: pd.DataFrame | None = None
+) -> pd.DataFrame:
     """Series-search-shaped rows for the index products, from the chains and the report.
 
     The series-search captures leave the index products out (the collector searches only
@@ -313,6 +412,10 @@ def index_rows(chain_oi: pd.DataFrame, reports: pd.DataFrame) -> pd.DataFrame:
     whose open interest is the settlement's. A chain read after a
     settlement no longer lists the series that expired on it, so both sides keep only
     series expiring after the date.
+
+    With `expiring` (from `expiring_series`), the series expiring on the date are added
+    back on both sides, the listed ones at their last reading: the whole book, counted as
+    the equity shares are, as nearly as the chains allow.
     """
     indices = set(LISTED_INDEX_ROOTS.values())
     chain = chain_oi[chain_oi["symbol"].isin(indices)]
@@ -321,6 +424,10 @@ def index_rows(chain_oi: pd.DataFrame, reports: pd.DataFrame) -> pd.DataFrame:
         bad = sorted(set(chain.loc[owners != chain["symbol"], "root"]))
         raise ValueError(f"Listed index roots {bad} sit in another index's chain")
     chain = chain[chain["expiry"] > chain["date"]]
+    if expiring is not None:
+        observed = chain[["date", "symbol"]].drop_duplicates()
+        extra = expiring[expiring["symbol"].isin(indices)].merge(observed, on=["date", "symbol"])
+        chain = pd.concat([chain, extra[extra["expiry"] == extra["date"]]], ignore_index=True)
     listed = pd.DataFrame(
         {
             "date": chain["date"],
@@ -333,7 +440,9 @@ def index_rows(chain_oi: pd.DataFrame, reports: pd.DataFrame) -> pd.DataFrame:
         }
     )
 
-    flex = reports[(reports["kind"] == "index") & (reports["expiry"] > reports["report_date"])]
+    flex = reports[reports["kind"] == "index"]
+    if expiring is None:
+        flex = flex[flex["expiry"] > flex["report_date"]]
     owner = {root: listed_product(root, "index") for root in flex["root"].unique()}
     flex_rows = pd.DataFrame(
         {
@@ -352,6 +461,14 @@ def index_rows(chain_oi: pd.DataFrame, reports: pd.DataFrame) -> pd.DataFrame:
     return rows[list(OCC_COLUMNS)]
 
 
+def _as_roots(roots: Path | Sequence[Path]) -> list[Path]:
+    return [roots] if isinstance(roots, Path) else list(roots)
+
+
+def _names(folders: Sequence[Path]) -> str:
+    return ", ".join(str(folder) for folder in folders) or "no folder"
+
+
 def _listed_long(capture: pd.DataFrame) -> pd.DataFrame:
     """A capture's ordinary listed series, one row per right, with `oi`."""
     listed = capture[capture["product_symbol"] == capture["symbol"]]
@@ -362,8 +479,18 @@ def _listed_long(capture: pd.DataFrame) -> pd.DataFrame:
 
 
 def _content(rows: pd.DataFrame) -> pd.DataFrame:
+    """A capture's open interest in a fixed order and fixed types, for comparing readings."""
     keys = ["symbol", "product_symbol", "expiry", "strike"]
-    frame = rows.drop(columns=["capture"], errors="ignore")
+    frame = pd.DataFrame(
+        {
+            "symbol": rows["symbol"].astype(str),
+            "product_symbol": rows["product_symbol"].astype(str),
+            "expiry": pd.to_datetime(rows["expiry"]),
+            "strike": rows["strike"].astype(float),
+            "call_open_interest": rows["call_open_interest"].astype("int64"),
+            "put_open_interest": rows["put_open_interest"].astype("int64"),
+        }
+    )
     return frame.sort_values(keys).reset_index(drop=True)
 
 
@@ -381,9 +508,11 @@ __all__ = [
     "REPORT_COLUMNS",
     "CaptureDate",
     "chain_dates",
+    "ci_roots",
     "chain_open_interest",
     "date_capture",
     "date_captures",
+    "expiring_series",
     "index_rows",
     "load_captures",
     "load_census",

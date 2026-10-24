@@ -48,6 +48,8 @@ VALUE_COLUMNS = (
 )
 
 CONTRACT_MULTIPLIER = 100
+# A FLEX line counts as deep in the money when intrinsic value is above this share of its mark.
+DEEP_INTRINSIC = 0.9
 # A symbol-date's listed value is used only when nearly all of its open interest has a
 # quote from the session; otherwise a missing chain would pass for a small market.
 MIN_PRICED_SHARE = 0.99
@@ -288,6 +290,36 @@ def flex_series(panel: pd.DataFrame, dates: np.ndarray | pd.DatetimeIndex) -> pd
     return series.reset_index(drop=True)
 
 
+def value_composition(series: pd.DataFrame, spots: Mapping[str, float]) -> dict[str, float]:
+    """What FLEX mark value on one date is made of.
+
+    `series` is `flex_series` output for one date and `spots` the underlying's price per
+    symbol on it. Returns the total `value`, the `intrinsic` value at those spots, the
+    share of value in lines whose intrinsic value is above DEEP_INTRINSIC of their mark
+    (`deep_share`), and the share in lines whose root, expiry and strike also carry the
+    opposite right (`paired_share`), as conversions, boxes and collars do. A symbol with
+    no spot raises KeyError.
+    """
+    missing = sorted(set(series["symbol"]) - set(spots))
+    if missing:
+        raise KeyError(f"No spot price for {missing}")
+    spot = series["symbol"].map(dict(spots)).astype(float)
+    reach = (spot - series["strike"]).where(series["right"] == "C", series["strike"] - spot)
+    intrinsic = reach.clip(lower=0) * series["open_interest"] * CONTRACT_MULTIPLIER
+    value = series["flex_value"]
+    deep = intrinsic > DEEP_INTRINSIC * value
+    line = ["root", "expiry", "strike"]
+    rights = series[series["open_interest"] > 0].groupby(line)["right"].nunique()
+    paired = series.join(rights.rename("rights"), on=line)["rights"].eq(2)
+    total = float(value.sum())
+    return {
+        "value": total,
+        "intrinsic": float(intrinsic.sum()),
+        "deep_share": float(value[deep].sum() / total),
+        "paired_share": float(value[paired].sum() / total),
+    }
+
+
 def _flex_values(panel: pd.DataFrame, dates: np.ndarray) -> pd.DataFrame:
     series = flex_series(panel, dates).rename(columns={"open_interest": "flex_oi"})
     return series.groupby(["date", "symbol"], as_index=False)[["flex_value", "flex_oi"]].sum()
@@ -295,6 +327,7 @@ def _flex_values(panel: pd.DataFrame, dates: np.ndarray) -> pd.DataFrame:
 
 __all__ = [
     "CONTRACT_MULTIPLIER",
+    "DEEP_INTRINSIC",
     "FLEX_INDEX_ROOTS",
     "LISTED_INDEX_ROOTS",
     "MIN_PRICED_SHARE",
@@ -311,5 +344,6 @@ __all__ = [
     "reconcile_flex_sources",
     "stable_headline",
     "stable_symbols",
+    "value_composition",
     "value_share",
 ]

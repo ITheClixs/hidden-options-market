@@ -24,6 +24,7 @@ def hidden_share_macros(values: Mapping[str, Any]) -> dict[str, str]:
     return {
         **_census_macros(values),
         **_daily_macros(values),
+        **_coverage_macros(values),
         **_check_macros(values),
         **_value_macros(values),
     }
@@ -121,6 +122,40 @@ def _daily_macros(values: Mapping[str, Any]) -> dict[str, str]:
     return macros
 
 
+def _coverage_macros(values: Mapping[str, Any]) -> dict[str, str]:
+    daily = values["daily"]
+    covered, roots = daily["coverage"], daily["captures_by_root"]
+    set_aside = covered["set_aside"]
+    missing = [formats.long_date(pd.Timestamp(day)) for day in daily["missing_dates"]]
+    return {
+        "HiddenDailySpan": formats.count(daily["span"]),
+        "HiddenDailyMissing": formats.count(len(missing)),
+        "HiddenDailyMissingDates": name_list(missing),
+        "HiddenDailyLocalCaptures": formats.count(roots["local"]),
+        "HiddenDailyCICaptures": formats.count(roots["ci"]),
+        "HiddenDailyLocalSettlements": formats.count(covered["local"]),
+        "HiddenDailyFromCI": formats.count(len(covered["ci_only"])),
+        "HiddenDailyBothRoots": formats.count(covered["both"]),
+        "HiddenDailyCrossRoot": formats.count(covered["cross_root_symbols"]),
+        "HiddenDailyMixed": formats.count(sum(row["reason"] == "mixed" for row in set_aside)),
+        "HiddenDailyUndated": formats.count(
+            sum(row["reason"].startswith("undated") for row in set_aside)
+        ),
+    }
+
+
+def _index_macros(values: Mapping[str, Any]) -> dict[str, str]:
+    macros = {}
+    for symbol, whole in values["index_full_book"].items():
+        stem = f"Hidden{symbol.title()}Full"
+        day = formats.long_date(pd.Timestamp(whole["min_date"]))
+        macros[f"{stem}Low"] = _share(whole["min"])
+        macros[f"{stem}LowDate"] = (
+            f"{day}, a standard monthly expiry" if whole["min_on_monthly_expiry"] else day
+        )
+    return macros
+
+
 def _check_macros(values: Mapping[str, Any]) -> dict[str, str]:
     parts = values["reconciliation"].values()
     symbol_dates = sum(part["symbol_dates"] for part in parts)
@@ -140,14 +175,21 @@ def _check_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "HiddenExpiryMax": formats.decimal(expiry["max_abs_diff"] * 100),
         "HiddenExpiryMoved": formats.count(expiry["moved"]),
         "HiddenExpiryNameDates": formats.count(expiry["name_dates"]),
+        **_index_macros(values),
     }
 
 
 def _value_macros(values: Mapping[str, Any]) -> dict[str, str]:
     value = values["value"]
-    line = value["largest_line"]
+    line, parts = value["largest_line"], value["composition"]
     leaders = value["leaders"][:3]
     return {
+        "HiddenValueCompositionDate": formats.long_date(pd.Timestamp(parts["date"])),
+        "HiddenValueFlexTotal": formats.usd_billions(parts["value"]),
+        "HiddenValueIntrinsic": formats.usd_billions(parts["intrinsic"]),
+        "HiddenValueDeep": formats.percent(parts["deep_share"]),
+        "HiddenValueDeepThreshold": formats.percent(parts["deep_threshold"]),
+        "HiddenValuePaired": formats.percent(parts["paired_share"]),
         "HiddenValueDates": formats.count(value["dates"]),
         "HiddenValueCompleteDates": formats.count(value["complete_dates"]),
         "HiddenValueNames": formats.count(value["names"]),

@@ -10,6 +10,7 @@ htmlcov/
 
 # Data (never commit raw captures; they are large and vendor-sourced)
 data/raw/
+data/ci_captures/
 data/interim/
 data/external/
 *.parquet

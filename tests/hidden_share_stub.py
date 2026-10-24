@@ -8,8 +8,10 @@ which has no chain, and EEE, which has only an adjusted class.
 
 Listed open interest moves by one contract a day, so every settlement is told apart. A
 chain is read at 16:15 New York time each day: its quotes are that day's and its open
-interest the previous settlement's. Each settlement's series search is captured the next
-day, and the last one twice.
+interest the previous settlement's. The local root holds the series search for 1 and 3
+September (the last twice) and every chain but the one read on 3 September. Two CI roots
+fill the gap: one holds the search for 2 September and that missing chain, the other
+holds 3 September again, which must agree with the local capture.
 """
 
 from __future__ import annotations
@@ -26,7 +28,8 @@ SETTLEMENTS = DAYS[1:4]  # 1, 2 and 3 September: the ones a daily capture shows
 CENSUS_DATE = DAYS[1]
 UNIVERSE = {"AAA": "programme", "BBB": "control", "CCC": "programme", "SPX": "programme"}
 LISTED_ROOTS = {"AAA": ("AAA", "AAA1"), "BBB": ("BBB",), "CCC": ("CCC",), "SPX": ("SPX", "SPXW")}
-MID, MARK = 1.1, 2.0
+MID, MARK, SPOT = 1.1, 2.0, 105.0
+CI_ONLY_CHAIN = pd.Timestamp("2026-09-03")
 
 
 def listed_oi(root: str, day: pd.Timestamp, strike: float, right: str) -> int:
@@ -119,6 +122,7 @@ def chain(symbol: str, captured: pd.Timestamp) -> pd.DataFrame:
                     {
                         "symbol": f"_{symbol}" if symbol == "SPX" else symbol,
                         "quote_timestamp": f"{captured:%Y-%m-%d} 20:15:00",
+                        "underlying_price": SPOT,
                         "contract": f"{root}{EXPIRY:%y%m%d}{right}{int(strike * 1000):08d}",
                         "expiry": EXPIRY.date(),
                         "right": right,
@@ -132,24 +136,36 @@ def chain(symbol: str, captured: pd.Timestamp) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def write_world(raw: Path) -> None:
-    """Write the world under `raw` in the layout the collectors use."""
+def write_world(raw: Path, ci: Path | None = None) -> None:
+    """Write the world under `raw`, and its CI captures under `ci` if given."""
     for day in DAYS:
         for kind in ("equity", "index"):
             _write(raw / f"occ_flex/date={day:%Y-%m-%d}/{kind}.parquet", report(day, kind))
     for symbol, frame in census_frames().items():
         _write(raw / f"occ_census/{symbol}.parquet", frame)
-    folders = [(day + pd.offsets.BDay(1), day) for day in SETTLEMENTS]
-    folders.append((SETTLEMENTS[-1] + pd.Timedelta(days=2), SETTLEMENTS[-1]))
-    for folder, day in folders:
-        for symbol in ("AAA", "BBB", "CCC"):
-            path = raw / f"occ_open_interest/date={folder:%Y-%m-%d}/{symbol}.parquet"
-            _write(path, series_search(symbol, day))
+    local = [SETTLEMENTS[0], SETTLEMENTS[2], SETTLEMENTS[2]]
+    folders = [day + pd.offsets.BDay(1) for day in local[:2]] + [local[2] + pd.Timedelta(days=2)]
+    for folder, day in zip(folders, local, strict=True):
+        _write_search(raw, folder, day)
     for captured in CAPTURED:
-        for symbol in UNIVERSE:
-            kind = "index" if symbol == "SPX" else "equity"
-            path = raw / f"cboe_chain/date={captured:%Y-%m-%d}/{kind}_{symbol}.parquet"
-            _write(path, chain(symbol, captured))
+        root = raw if captured != CI_ONLY_CHAIN or ci is None else ci / "2026-09-03" / "raw"
+        _write_chains(root, captured)
+    if ci is not None:
+        _write_search(ci / "2026-09-03" / "raw", pd.Timestamp("2026-09-03"), SETTLEMENTS[1])
+        _write_search(ci / "2026-09-05" / "raw", pd.Timestamp("2026-09-05"), SETTLEMENTS[2])
+
+
+def _write_search(root: Path, folder: pd.Timestamp, day: pd.Timestamp) -> None:
+    for symbol in ("AAA", "BBB", "CCC"):
+        path = root / f"occ_open_interest/date={folder:%Y-%m-%d}/{symbol}.parquet"
+        _write(path, series_search(symbol, day))
+
+
+def _write_chains(root: Path, captured: pd.Timestamp) -> None:
+    for symbol in UNIVERSE:
+        kind = "index" if symbol == "SPX" else "equity"
+        path = root / f"cboe_chain/date={captured:%Y-%m-%d}/{kind}_{symbol}.parquet"
+        _write(path, chain(symbol, captured))
 
 
 def _write(path: Path, frame: pd.DataFrame) -> None:

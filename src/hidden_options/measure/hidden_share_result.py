@@ -27,20 +27,28 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from hidden_options.config import RAW_DIR, load_universe
+from hidden_options.config import CI_CAPTURES_DIR, RAW_DIR, load_universe
 from hidden_options.measure.hidden_share import (
     LISTED_INDEX_ROOTS,
-    flex_series,
     hidden_share,
     reconcile_flex_sources,
     stable_symbols,
-    value_share,
+)
+from hidden_options.measure.hidden_share_checks import (
+    adjusted_summary,
+    coverage,
+    expiry_check,
+    index_full_book,
+    reconciliation_summary,
+    records,
 )
 from hidden_options.measure.hidden_share_data import (
     CaptureDate,
     chain_open_interest,
+    ci_roots,
     date_capture,
     date_captures,
+    expiring_series,
     index_rows,
     load_captures,
     load_census,
@@ -50,6 +58,7 @@ from hidden_options.measure.hidden_share_data import (
     trading_calendar,
 )
 from hidden_options.measure.hidden_share_macros import hidden_share_macros
+from hidden_options.measure.hidden_share_value import value_summary
 from hidden_options.publish import formats
 from hidden_options.publish.registry import ANALYSES
 from hidden_options.publish.results import Result, now_iso
@@ -58,9 +67,6 @@ NAME = "hidden_share"
 THRESHOLDS = (0.10, 0.25, 0.50)
 QUANTILES = (0.10, 0.25, 0.50, 0.75, 0.90)
 LARGEST = 5
-VALUE_LEADERS = 10
-# A share moved by more than this when expiring series are left out is counted.
-EXPIRY_MOVE = 0.01
 PROGRAMME, CONTROL = "programme", "control"
 
 
@@ -70,7 +76,8 @@ class HiddenInputs:
 
     `universe` maps each followed symbol (no `_` prefix) to its group: `programme` for
     the underlyings chosen for the option-income programmes on them, `control` for the
-    liquid names chosen as controls.
+    liquid names chosen as controls. `ci_runs` names the CI captures read beside the
+    local ones, by run date.
     """
 
     census: pd.DataFrame
@@ -78,6 +85,7 @@ class HiddenInputs:
     chains: pd.DataFrame
     reports: pd.DataFrame
     universe: Mapping[str, str]
+    ci_runs: Sequence[str] = ()
 
 
 @dataclass(frozen=True)
@@ -108,32 +116,39 @@ def hidden_share_result(inputs: HiddenInputs) -> Result:
     census = census_view(inputs, chain_oi)
     daily_rows, log = date_captures(inputs.captures, chain_oi)
     dates = pd.DatetimeIndex(sorted(daily_rows["date"].unique()))
+    calendar = pd.DatetimeIndex(sorted(inputs.reports["report_date"].unique()))
+    span = calendar[(calendar >= dates[0]) & (calendar <= dates[-1])]
 
     search = hidden_share(daily_rows)
     indices = _index_share(chain_oi, inputs.reports, dates)
+    whole = _index_share(chain_oi, inputs.reports, dates, expiring_series(inputs.chains))
     daily = pd.concat([search[~search["adjusted"]], indices], ignore_index=True)
     daily = daily[daily["symbol"].isin(set(inputs.universe))]
 
     equity = inputs.reports[inputs.reports["kind"] == "equity"]
     values: dict[str, Any] = {
         "census": _census(census, inputs.census, equity),
-        "census_indices": _records(census.indices),
-        "daily": _daily(daily, dates, log, inputs.universe),
+        "census_indices": records(census.indices),
+        "daily": _daily(daily, dates, log, inputs.universe, span),
         "reconciliation": {
-            "census": _reconciliation(reconcile_flex_sources(census.share, equity)),
-            "daily": _reconciliation(reconcile_flex_sources(search, equity)),
+            "census": reconciliation_summary(reconcile_flex_sources(census.share, equity)),
+            "daily": reconciliation_summary(reconcile_flex_sources(search, equity)),
         },
-        "adjusted": _adjusted(census.share, search),
-        "expiry_check": _expiry_check(daily_rows, search),
-        "value": _value(priced_chains(inputs.chains), inputs.reports, dates, inputs.universe),
+        "adjusted": adjusted_summary(census.share, search),
+        "expiry_check": expiry_check(daily_rows, search),
+        "index_full_book": index_full_book(whole[whole["symbol"].isin(set(inputs.universe))]),
+        "value": value_summary(
+            priced_chains(inputs.chains), inputs.reports, dates, inputs.universe
+        ),
     }
     run_inputs = {
         "sources": {
             "census": "data/raw/occ_census",
-            "daily": "data/raw/occ_open_interest",
-            "chains": "data/raw/cboe_chain",
+            "daily": "data/raw/occ_open_interest, data/ci_captures/*/raw/occ_open_interest",
+            "chains": "data/raw/cboe_chain, data/ci_captures/*/raw/cboe_chain",
             "flex": "data/raw/occ_flex",
         },
+        "ci_runs": list(inputs.ci_runs),
         "census_rows": len(inputs.census),
         "capture_rows": len(inputs.captures),
         "chain_rows": len(inputs.chains),
@@ -149,12 +164,18 @@ def hidden_share_analysis() -> Result:
     return hidden_share_result(load_inputs())
 
 
-def load_inputs(raw: Path | None = None) -> HiddenInputs:
-    """Read every input from `raw` (RAW_DIR by default), the FLEX report from the first
-    chain settlement on."""
+def load_inputs(raw: Path | None = None, ci: Path | None = None) -> HiddenInputs:
+    """Read every input from `raw` (RAW_DIR by default) and the CI captures under `ci`
+    (CI_CAPTURES_DIR by default), the FLEX report from the first chain settlement on.
+
+    The census and the FLEX report are local only. Series-search captures and chains
+    are read from the local root first and then from each CI run.
+    """
     raw = RAW_DIR if raw is None else raw
+    runs = ci_roots(CI_CAPTURES_DIR if ci is None else ci)
+    roots = [raw, *runs]
     calendar = trading_calendar(raw)
-    chains = load_chains(raw, calendar)
+    chains = load_chains(roots, calendar)
     universe = load_universe()
     groups = {
         **{s: PROGRAMME for s in (*universe.treated_single_name, *universe.treated_index_and_etf)},
@@ -162,19 +183,28 @@ def load_inputs(raw: Path | None = None) -> HiddenInputs:
     }
     return HiddenInputs(
         census=load_census(raw),
-        captures=load_captures(raw),
+        captures=load_captures(roots),
         chains=chains,
         reports=load_reports(raw, pd.Timestamp(chains["oi_date"].min())),
         universe={symbol.lstrip("_"): group for symbol, group in groups.items()},
+        ci_runs=[run.parent.name for run in runs],
     )
 
 
 def _index_share(
-    chain_oi: pd.DataFrame, reports: pd.DataFrame, dates: pd.DatetimeIndex
+    chain_oi: pd.DataFrame,
+    reports: pd.DataFrame,
+    dates: pd.DatetimeIndex,
+    expiring: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """The index products' shares on `dates`, the listed side from the chain."""
+    """The index products' shares on `dates`, the listed side from the chain.
+
+    With `expiring`, the series expiring on each date count too (see `index_rows`).
+    """
     on_dates = chain_oi[chain_oi["date"].isin(dates)]
-    return hidden_share(index_rows(on_dates, _on(reports, dates)))
+    if expiring is not None:
+        expiring = expiring[expiring["date"].isin(dates)]
+    return hidden_share(index_rows(on_dates, _on(reports, dates), expiring))
 
 
 def _on(reports: pd.DataFrame, dates: pd.DatetimeIndex) -> pd.DataFrame:
@@ -201,10 +231,8 @@ def _census(view: CensusView, raw: pd.DataFrame, equity: pd.DataFrame) -> dict[s
         "mean": float(shares.mean()),
         "max": {"symbol": str(top["symbol"]), "share": float(top["flex_share"])},
         "at_least": {_key(t): int((shares >= t).sum()) for t in THRESHOLDS},
-        "half_or_more": _records(
-            ordinary[shares >= 0.5].sort_values("flex_share", ascending=False)
-        ),
-        "largest": _records(ordinary.sort_values("flex_oi", ascending=False).head(LARGEST)),
+        "half_or_more": records(ordinary[shares >= 0.5].sort_values("flex_share", ascending=False)),
+        "largest": records(ordinary.sort_values("flex_oi", ascending=False).head(LARGEST)),
         "flex_oi": flex,
         "listed_oi": listed,
         "aggregate_share": flex / (flex + listed),
@@ -216,9 +244,13 @@ def _census(view: CensusView, raw: pd.DataFrame, equity: pd.DataFrame) -> dict[s
 
 
 def _daily(
-    daily: pd.DataFrame, dates: pd.DatetimeIndex, log: pd.DataFrame, universe: Mapping[str, str]
+    daily: pd.DataFrame,
+    dates: pd.DatetimeIndex,
+    log: pd.DataFrame,
+    universe: Mapping[str, str],
+    span: pd.DatetimeIndex,
 ) -> dict[str, Any]:
-    """Shares on every settlement, and who clears each threshold on all of them."""
+    """Shares on every settlement covered, and who clears each threshold on all of them."""
     seen = daily.groupby("symbol")["date"].nunique()
     complete = sorted(seen[seen == len(dates)].index)
     full = daily[daily["symbol"].isin(complete)]
@@ -227,14 +259,20 @@ def _daily(
     totals = search.groupby("date")[["flex_oi", "listed_oi"]].sum()
     aggregate = totals["flex_oi"] / totals.sum(axis=1)
     stable = {_key(t): stable_symbols(full, t) for t in THRESHOLDS}
+    kept = log[log["dated"] & ~log["mixed"]]
+    covered = coverage(log, span)
     return {
         "dates": len(dates),
         "first_date": formats.iso_date(dates[0]),
         "last_date": formats.iso_date(dates[-1]),
+        "span": covered.pop("span"),
+        "missing_dates": covered.pop("missing_dates"),
         "captures": len(log),
-        "duplicate_captures": int(log["duplicate"].sum()),
-        "min_support": int(log["support"].min()),
-        "compared": int(log["compared"].max()),
+        "captures_by_root": covered.pop("captures_by_root"),
+        "duplicate_captures": int(kept["duplicate"].sum()),
+        "min_support": int(kept["support"].min()),
+        "compared": int(kept["compared"].max()),
+        "coverage": covered,
         "universe": len(universe),
         "universe_by_group": _by_group(sorted(universe), universe),
         "search_symbols": int(search["symbol"].nunique()),
@@ -261,163 +299,9 @@ def _daily(
     }
 
 
-def _reconciliation(reconciled: pd.DataFrame) -> dict[str, Any]:
-    """The two FLEX sources side by side, over every symbol-date where either has FLEX."""
-    either = reconciled[(reconciled["flex_oi_search"] > 0) | (reconciled["flex_oi_report"] > 0)]
-    return {
-        "symbol_dates": len(either),
-        "agreeing": int((either["rel_diff"] == 0).sum()),
-        "median_rel_diff": float(either["rel_diff"].median()),
-        "max_rel_diff": float(either["rel_diff"].max()),
-        "flex_oi_search": int(either["flex_oi_search"].sum()),
-        "flex_oi_report": int(either["flex_oi_report"].sum()),
-    }
-
-
-def _adjusted(census: pd.DataFrame, search: pd.DataFrame) -> dict[str, Any]:
-    """Adjusted-deliverable classes: counted and listed, never folded into their parents."""
-    on_census = census[census["adjusted"]]
-    with_flex = on_census[on_census["flex_oi"] > 0].sort_values("flex_oi", ascending=False)
-    daily = search[search["adjusted"] & (search["flex_oi"] > 0)]
-    by_name = daily.groupby("symbol")["flex_share"].agg(["min", "max", "size"])
-    return {
-        "census": len(on_census),
-        "census_with_flex": len(with_flex),
-        "census_flex": _records(with_flex),
-        "census_flex_oi": int(on_census["flex_oi"].sum()),
-        "census_flex_share": float(on_census["flex_oi"].sum() / census["flex_oi"].sum()),
-        "daily_with_flex": {
-            str(s): {"min": float(r["min"]), "max": float(r["max"]), "dates": int(r["size"])}
-            for s, r in by_name.iterrows()
-        },
-    }
-
-
-def _expiry_check(daily_rows: pd.DataFrame, search: pd.DataFrame) -> dict[str, Any]:
-    """How far an equity share moves when series expiring on the date are left out.
-
-    The index shares are computed that way because the chain no longer lists those
-    series; this says what the same rule does where the full book is known.
-    """
-    later = daily_rows[pd.to_datetime(daily_rows["expiry"]) > daily_rows["date"]]
-    both = search.merge(
-        hidden_share(later), on=["date", "symbol", "adjusted"], suffixes=("", "_later")
-    )
-    both = both[~both["adjusted"]]
-    gap = (both["flex_share"] - both["flex_share_later"]).abs()
-    return {
-        "name_dates": len(both),
-        "moved": int((gap > EXPIRY_MOVE).sum()),
-        "max_abs_diff": float(gap.max()),
-        "median_abs_diff": float(gap.median()),
-    }
-
-
-def _value(
-    priced: pd.DataFrame,
-    reports: pd.DataFrame,
-    dates: pd.DatetimeIndex,
-    universe: Mapping[str, str],
-) -> dict[str, Any]:
-    """FLEX mark value as a share of option value, on the daily universe's dates.
-
-    The aggregate is taken only on dates when every followed name is priced, so it does
-    not move with which names happen to have quotes.
-    """
-    chains = priced[priced["date"].isin(dates) & priced["symbol"].isin(set(universe))]
-    shares = value_share(chains, _on(reports, dates))
-    usable = shares[shares["usable"]]
-    priced_names = usable.groupby("date")["symbol"].nunique()
-    complete = priced_names[priced_names == len(universe)].index
-    totals = (
-        usable[usable["date"].isin(complete)]
-        .groupby("date")[["flex_value", "listed_value", "flex_oi", "listed_oi"]]
-        .sum()
-    )
-    value = totals["flex_value"] / (totals["flex_value"] + totals["listed_value"])
-    oi = totals["flex_oi"] / (totals["flex_oi"] + totals["listed_oi"])
-    per_name = usable.groupby("symbol")[["value_share", "oi_share"]].median()
-    last_date = pd.Timestamp(usable["date"].max())
-    last = usable[usable["date"] == last_date].sort_values("value_share", ascending=False)
-    return {
-        "symbol_dates": len(shares),
-        "usable": len(usable),
-        "dates": int(usable["date"].nunique()),
-        "complete_dates": len(complete),
-        "names": int(per_name.shape[0]),
-        "theo_share": float(
-            (usable["theo_share"] * usable["listed_oi"]).sum() / usable["listed_oi"].sum()
-        ),
-        "aggregate": _spread(value),
-        "aggregate_oi": _spread(oi),
-        "median_name": float(per_name["value_share"].median()),
-        "median_name_oi": float(per_name["oi_share"].median()),
-        "above_oi_share": int((per_name["value_share"] > per_name["oi_share"]).sum()),
-        "last_date": formats.iso_date(last_date),
-        "leaders": [
-            {
-                "symbol": str(row["symbol"]),
-                "value_share": float(row["value_share"]),
-                "oi_share": float(row["oi_share"]),
-            }
-            for row in last.head(VALUE_LEADERS).to_dict("records")
-        ],
-        "largest_line": _largest_line(reports, last, last_date, universe),
-    }
-
-
-def _largest_line(
-    reports: pd.DataFrame, last: pd.DataFrame, on: pd.Timestamp, universe: Mapping[str, str]
-) -> dict[str, Any]:
-    """The single FLEX series worth most on `on`, beside its underlying's listed value."""
-    series = flex_series(reports, pd.DatetimeIndex([on]))
-    series = series[series["symbol"].isin(set(last["symbol"]))]
-    line = series.iloc[int(np.argmax(series["flex_value"].to_numpy()))]
-    opposite = series[
-        (series["root"] == line["root"])
-        & (series["expiry"] == line["expiry"])
-        & (series["strike"] == line["strike"])
-        & (series["right"] != line["right"])
-    ]
-    listed = last.loc[last["symbol"] == line["symbol"], "listed_value"]
-    return {
-        "date": formats.iso_date(on),
-        "symbol": str(line["symbol"]),
-        "root": str(line["root"]),
-        "right": str(line["right"]),
-        "expiry": formats.iso_date(pd.Timestamp(line["expiry"])),
-        "strike": float(line["strike"]),
-        "mark": float(line["mark_price"]),
-        "open_interest": int(line["open_interest"]),
-        "value": float(line["flex_value"]),
-        "opposite_open_interest": int(opposite["open_interest"].sum()),
-        "listed_value": float(listed.iloc[0]),
-    }
-
-
 def _by_group(names: Sequence[str], universe: Mapping[str, str]) -> dict[str, int]:
     groups = [universe[name] for name in names]
     return {group: groups.count(group) for group in (PROGRAMME, CONTROL)}
-
-
-def _spread(series: pd.Series) -> dict[str, float]:
-    return {
-        "median": float(series.median()),
-        "min": float(series.min()),
-        "max": float(series.max()),
-    }
-
-
-def _records(frame: pd.DataFrame) -> list[dict[str, Any]]:
-    return [
-        {
-            "symbol": str(row["symbol"]),
-            "flex_oi": int(row["flex_oi"]),
-            "listed_oi": int(row["listed_oi"]),
-            "share": float(row["flex_share"]),
-        }
-        for row in frame.to_dict("records")
-    ]
 
 
 def _key(fraction: float) -> str:

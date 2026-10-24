@@ -11,20 +11,21 @@ from hidden_options.measure.hidden_share_macros import name_list, usd_billions
 from hidden_options.measure.hidden_share_result import census_view, hidden_share_result
 from hidden_options.publish.latex import collect_macros
 from hidden_options.publish.results import read_results, write_result
-from hidden_share_stub import CENSUS_DATE, MARK, MID, UNIVERSE, write_world
+from hidden_share_stub import CENSUS_DATE, MARK, MID, SPOT, UNIVERSE, write_world
 
 
 @pytest.fixture(scope="module")
 def raw(tmp_path_factory):
-    root = tmp_path_factory.mktemp("raw")
-    write_world(root)
-    return root
+    root = tmp_path_factory.mktemp("world")
+    write_world(root / "raw", root / "ci_captures")
+    return root / "raw"
 
 
 @pytest.fixture(scope="module")
 def inputs(raw):
     patch = pytest.MonkeyPatch()
     patch.setattr(results_module, "RAW_DIR", raw)
+    patch.setattr(results_module, "CI_CAPTURES_DIR", raw.parent / "ci_captures")
     patch.setattr(
         results_module,
         "load_universe",
@@ -92,7 +93,9 @@ class TestCensus:
 class TestDaily:
     def test_settlements_captures_and_duplicates(self, result):
         daily = result.values["daily"]
-        assert (daily["dates"], daily["captures"], daily["duplicate_captures"]) == (3, 4, 1)
+        assert (daily["dates"], daily["span"], daily["missing_dates"]) == (3, 3, [])
+        assert (daily["captures"], daily["duplicate_captures"]) == (5, 2)
+        assert daily["captures_by_root"] == {"local": 3, "ci": 2}
         assert daily["first_date"] == "2026-09-01"
         assert daily["not_in_search"] == ["SPX"]
         assert daily["complete"] == 4
@@ -121,6 +124,26 @@ class TestDaily:
         )
 
 
+class TestCoverage:
+    def test_ci_fills_the_settlement_the_local_root_lacks(self, result):
+        coverage = result.values["daily"]["coverage"]
+        assert coverage["local"] == 2
+        assert coverage["ci_only"] == ["2026-09-02"]
+        assert coverage["both"] == 1
+
+    def test_the_two_roots_agree_where_both_cover_a_settlement(self, result):
+        coverage = result.values["daily"]["coverage"]
+        # AAA, BBB and CCC on 3 September, each read locally and from CI.
+        assert coverage["cross_root_symbols"] == 3
+        assert coverage["set_aside"] == []
+        assert result.macros["HiddenDailyCrossRoot"] == "3"
+
+    def test_coverage_macros(self, result):
+        assert result.macros["HiddenDailySpan"] == "3"
+        assert result.macros["HiddenDailyMissing"] == "0"
+        assert result.macros["HiddenDailyMissingDates"] == "none"
+
+
 class TestChecks:
     def test_the_two_flex_sources_agree(self, result):
         census, daily = (result.values["reconciliation"][k] for k in ("census", "daily"))
@@ -134,6 +157,27 @@ class TestChecks:
         assert (adjusted["census"], adjusted["census_with_flex"]) == (2, 1)
         assert adjusted["census_flex"][0]["symbol"] == "AAA1"
         assert list(adjusted["daily_with_flex"]) == ["AAA1"]
+
+    def test_whole_book_index_shares_equal_the_restricted_ones_when_nothing_expires(self, result):
+        whole = result.values["index_full_book"]["SPX"]
+        assert whole["dates"] == 3
+        assert whole["min"] == pytest.approx(result.values["daily"]["names"]["SPX"]["min"])
+        assert result.macros["HiddenSpxFullLow"] == result.macros["HiddenSpxLow"]
+
+    def test_reconciliation_beyond_one_percent_stops_the_analysis(self):
+        from hidden_options.measure.hidden_share_checks import reconciliation_summary
+
+        frame = pd.DataFrame(
+            {
+                "date": pd.Timestamp("2026-09-01"),
+                "symbol": ["A", "B", "C"],
+                "flex_oi_search": [100, 100, 100],
+                "flex_oi_report": [98, 97, 100],
+                "rel_diff": [0.02, 0.03, 0.0],
+            }
+        )
+        with pytest.raises(ValueError, match="1%"):
+            reconciliation_summary(frame)
 
     def test_expiry_check_is_zero_when_nothing_expires(self, result):
         check = result.values["expiry_check"]
@@ -155,6 +199,15 @@ class TestValue:
         assert result.macros["HiddenLineRight"] == "call"
         listed = result.values["value"]["leaders"]
         assert {row["symbol"] for row in listed} == set(UNIVERSE)
+
+    def test_composition_of_flex_value(self, result):
+        composition = result.values["value"]["composition"]
+        # Every FLEX line is a call struck at 100 against a spot of 105.
+        assert composition["deep_share"] == pytest.approx(1.0)
+        assert composition["paired_share"] == 0.0
+        assert composition["intrinsic"] / composition["value"] == pytest.approx((SPOT - 100) / MARK)
+        assert result.macros["HiddenValuePaired"] == "0\\%"
+        assert result.macros["HiddenValueDeepThreshold"] == "90\\%"
 
     def test_aaa_value_share(self, result):
         aaa = next(row for row in result.values["value"]["leaders"] if row["symbol"] == "AAA")
@@ -197,6 +250,31 @@ class TestTable:
         assert "Underlyings & 4 & 4 \\\\" in text
         assert result.macros["HiddenCensusMedian"] in text
         assert result.macros["HiddenDailyAggregateLow"] in text
+
+    def test_the_daily_column_is_the_followed_list_and_says_so(self, result):
+        from hidden_options.measure.hidden_share_table import hidden_share_table
+
+        text = hidden_share_table({"hidden_share": result})
+        assert "option-income programmes" in text
+        assert "of the 3 in that span" in text
+
+    def test_a_count_resting_on_the_index_rule_is_marked(self, result):
+        from dataclasses import replace
+
+        from hidden_options.measure.hidden_share_table import hidden_share_table
+
+        values = {**result.values}
+        values["index_full_book"] = {
+            **values["index_full_book"],
+            "SPX": {**values["index_full_book"]["SPX"], "min": 0.49},
+        }
+        daily = {**values["daily"], "stable": {**values["daily"]["stable"]}}
+        daily["stable"]["50"] = {"count": 1, "symbols": ["SPX"], "by_group": {}}
+        values["daily"] = daily
+        text = hidden_share_table({"hidden_share": replace(result, values=values)})
+
+        assert "At least 50\\% & 1 & 1$^{\\dagger}$ \\\\" in text
+        assert "$^{\\dagger}$SPX" in text
 
     def test_registered_and_loaded_without_matplotlib(self):
         from hidden_options.publish import registry

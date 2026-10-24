@@ -100,6 +100,21 @@ class TestHiddenShareFigure:
             assert frame.x0 <= box.x0 and box.x1 <= frame.x1
             assert frame.y0 <= box.y0 and box.y1 <= frame.y1
 
+    def test_each_label_without_a_leader_sits_clearly_nearest_its_own_point(self, styled):
+        fig = draw()
+        ax = fig.axes[0]
+        renderer = fig.canvas.get_renderer()
+        named = [t for t in _texts(fig) if t.get_rotation() == 0]
+        points = np.array([ax.transData.transform(t.xy) for t in named])
+        margin = figures.AMBIGUITY_MARGIN_PT * fig.dpi / 72
+        for position, label in enumerate(named):
+            if label.arrow_patch is not None:
+                continue
+            box = figures.label_boxes(label, renderer)[0]
+            own = figures._distance(box, points[position : position + 1])[0]
+            others = figures._distance(box, np.delete(points, position, axis=0))
+            assert own + margin <= others.min(), label.get_text()
+
     def test_a_level_label_is_its_own_box_and_a_slanted_one_a_strip(self, styled):
         fig = draw()
         renderer = fig.canvas.get_renderer()

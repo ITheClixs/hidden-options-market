@@ -15,6 +15,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DATA_ROOT = Path(os.environ.get("HIDDEN_OPTIONS_DATA_ROOT", PROJECT_ROOT / "data"))
 RAW_DIR = DATA_ROOT / "raw"
+# Captures published by the private CI collector, one unpacked archive per run, each as
+# `<run date>/raw` in the same layout as RAW_DIR. Read beside RAW_DIR, never merged into it.
+CI_CAPTURES_DIR = DATA_ROOT / "ci_captures"
 INTERIM_DIR = DATA_ROOT / "interim"
 # Daily bars for the FLEX underlyings, rewritten whole by `hidden-options refresh-bars`.
 BARS_PATH = DATA_ROOT / "flex_underlying_bars.parquet"

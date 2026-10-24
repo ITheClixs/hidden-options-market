@@ -1,14 +1,67 @@
 {
-  "generated_at": "2026-10-24T04:51:11+00:00",
+  "generated_at": "2026-10-24T09:13:21+00:00",
   "inputs": {
-    "capture_rows": 5183638,
+    "capture_rows": 10684943,
     "census_rows": 486895,
-    "chain_rows": 12430116,
+    "chain_rows": 25625186,
+    "ci_runs": [
+      "2026-08-16",
+      "2026-08-17",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-24",
+      "2026-08-25",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-12",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-10",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-20",
+      "2026-10-21",
+      "2026-10-22",
+      "2026-10-23",
+      "2026-10-24"
+    ],
     "report_rows": 2171224,
     "sources": {
       "census": "data/raw/occ_census",
-      "chains": "data/raw/cboe_chain",
-      "daily": "data/raw/occ_open_interest",
+      "chains": "data/raw/cboe_chain, data/ci_captures/*/raw/cboe_chain",
+      "daily": "data/raw/occ_open_interest, data/ci_captures/*/raw/occ_open_interest",
       "flex": "data/raw/occ_flex"
     },
     "universe": {
@@ -114,27 +167,38 @@
     "HiddenCensusWithFlex": "480",
     "HiddenCensusWithoutFlex": "200",
     "HiddenCompleteControl": "27",
-    "HiddenCompleteProgramme": "42",
+    "HiddenCompleteProgramme": "43",
     "HiddenDailyAggregateHigh": "13.9\\%",
     "HiddenDailyAggregateLow": "11.7\\%",
-    "HiddenDailyCaptures": "48",
+    "HiddenDailyBothRoots": "35",
+    "HiddenDailyCICaptures": "51",
+    "HiddenDailyCaptures": "99",
     "HiddenDailyCompared": "68",
-    "HiddenDailyComplete": "69",
+    "HiddenDailyComplete": "70",
     "HiddenDailyControl": "27",
-    "HiddenDailyDates": "40",
-    "HiddenDailyDuplicates": "8",
+    "HiddenDailyCrossRoot": "2,788",
+    "HiddenDailyDates": "47",
+    "HiddenDailyDuplicates": "50",
     "HiddenDailyFirst": "14 August 2026",
-    "HiddenDailyIncompleteDates": "38",
-    "HiddenDailyIncompleteNames": "NDX and SPX",
+    "HiddenDailyFromCI": "7",
+    "HiddenDailyIncompleteDates": "46",
+    "HiddenDailyIncompleteNames": "NDX",
     "HiddenDailyLast": "22 October 2026",
-    "HiddenDailyMedian": "12.0\\%",
+    "HiddenDailyLocalCaptures": "48",
+    "HiddenDailyLocalSettlements": "40",
+    "HiddenDailyMedian": "12.4\\%",
+    "HiddenDailyMissing": "2",
+    "HiddenDailyMissingDates": "18 September 2026 and 22 September 2026",
+    "HiddenDailyMixed": "1",
     "HiddenDailyProgramme": "44",
     "HiddenDailySearch": "68",
-    "HiddenDailySupportLow": "64",
+    "HiddenDailySpan": "49",
+    "HiddenDailySupportLow": "65",
+    "HiddenDailyUndated": "1",
     "HiddenDailyUniverse": "71",
     "HiddenExpiryMax": "7.1",
-    "HiddenExpiryMoved": "109",
-    "HiddenExpiryNameDates": "2,720",
+    "HiddenExpiryMoved": "112",
+    "HiddenExpiryNameDates": "3,196",
     "HiddenLineExpiry": "18 December 2026",
     "HiddenLineListed": "\\$19.7bn",
     "HiddenLineOpenInterest": "16,052",
@@ -144,16 +208,22 @@
     "HiddenLineStrike": "10,010.01",
     "HiddenLineSymbol": "SPY",
     "HiddenLineValue": "\\$14.7bn",
+    "HiddenNdxFullLow": "24.1\\%",
+    "HiddenNdxFullLowDate": "2 September 2026",
     "HiddenNdxHigh": "32.7\\%",
     "HiddenNdxLow": "24.1\\%",
     "HiddenQuarterRanges": "EFA from 49.1\\% to 54.9\\%, MSFT from 25.9\\% to 34.1\\% and RUT from 51.3\\% to 55.2\\%",
-    "HiddenReconAgreeing": "3,327",
+    "HiddenReconAgreeing": "3,824",
     "HiddenReconCensus": "487",
-    "HiddenReconDaily": "2,840",
+    "HiddenReconDaily": "3,337",
     "HiddenReconMax": "0.00\\%",
-    "HiddenReconSymbolDates": "3,327",
+    "HiddenReconSymbolDates": "3,824",
+    "HiddenRutFullLow": "49.9\\%",
+    "HiddenRutFullLowDate": "16 October 2026, a standard monthly expiry",
     "HiddenRutHigh": "55.2\\%",
     "HiddenRutLow": "51.3\\%",
+    "HiddenSpxFullLow": "12.0\\%",
+    "HiddenSpxFullLowDate": "21 August 2026, a standard monthly expiry",
     "HiddenSpxHigh": "14.2\\%",
     "HiddenSpxLow": "12.3\\%",
     "HiddenStableHalf": "1",
@@ -164,25 +234,31 @@
     "HiddenStableQuarterControl": "0",
     "HiddenStableQuarterNames": "EFA, MSFT and RUT",
     "HiddenStableQuarterProgramme": "3",
-    "HiddenStableTen": "24",
+    "HiddenStableTen": "25",
     "HiddenStableTenControl": "3",
-    "HiddenStableTenNames": "AAPL, AMD, AMZN, AVGO, COIN, EFA, GDX, GOOGL, HOOD, INTC, JPM, LCID, MRK, MSFT, PANW, PLTR, QCOM, RUT, SMCI, SNOW, SOFI, SPY, UBER and XOM",
-    "HiddenStableTenProgramme": "21",
-    "HiddenValueAbove": "43",
-    "HiddenValueCompleteDates": "24",
-    "HiddenValueDates": "39",
+    "HiddenStableTenNames": "AAPL, AMD, AMZN, AVGO, COIN, EFA, GDX, GOOGL, HOOD, INTC, JPM, LCID, MRK, MSFT, PANW, PLTR, QCOM, RUT, SMCI, SNOW, SOFI, SPX, SPY, UBER and XOM",
+    "HiddenStableTenProgramme": "22",
+    "HiddenValueAbove": "42",
+    "HiddenValueCompleteDates": "41",
+    "HiddenValueCompositionDate": "22 October 2026",
+    "HiddenValueDates": "46",
+    "HiddenValueDeep": "48\\%",
+    "HiddenValueDeepThreshold": "90\\%",
+    "HiddenValueFlexTotal": "\\$502bn",
     "HiddenValueHigh": "34.3\\%",
+    "HiddenValueIntrinsic": "\\$337bn",
     "HiddenValueLastDate": "22 October 2026",
     "HiddenValueLeaders": "EFA (91\\%), SPY (84\\%) and RUT (80\\%)",
     "HiddenValueLeadersOpenInterest": "EFA (55\\%), SPY (22\\%) and RUT (53\\%)",
     "HiddenValueLow": "32.3\\%",
-    "HiddenValueMedian": "33.1\\%",
-    "HiddenValueMedianName": "14.2\\%",
+    "HiddenValueMedian": "33.2\\%",
+    "HiddenValueMedianName": "14.4\\%",
     "HiddenValueMedianNameOpenInterest": "12.8\\%",
     "HiddenValueNames": "71",
     "HiddenValueOpenInterestHigh": "14.2\\%",
     "HiddenValueOpenInterestLow": "12.4\\%",
-    "HiddenValueTheo": "7.3\\%"
+    "HiddenValuePaired": "71\\%",
+    "HiddenValueTheo": "7.5\\%"
   },
   "name": "hidden_share",
   "values": {
@@ -237,18 +313,18 @@
       "census_with_flex": 7,
       "daily_with_flex": {
         "BABA2": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.0028685266163131075,
           "min": 0.0027294688066848345
         },
         "HON2": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.36839105155615576,
           "min": 0.23661512569685494
         },
         "LCID1": {
-          "dates": 40,
-          "max": 0.26279793072909347,
+          "dates": 47,
+          "max": 0.262800002628,
           "min": 0.2103376761052193
         }
       }
@@ -382,449 +458,483 @@
         "max": 0.13858909944645537,
         "min": 0.11665989168928764
       },
-      "captures": 48,
+      "captures": 99,
+      "captures_by_root": {
+        "ci": 51,
+        "local": 48
+      },
       "compared": 68,
-      "complete": 69,
+      "complete": 70,
       "complete_by_group": {
         "control": 27,
-        "programme": 42
+        "programme": 43
       },
-      "dates": 40,
-      "duplicate_captures": 8,
+      "coverage": {
+        "both": 35,
+        "ci": 42,
+        "ci_only": [
+          "2026-09-01",
+          "2026-09-02",
+          "2026-09-03",
+          "2026-10-09",
+          "2026-10-14",
+          "2026-10-19",
+          "2026-10-21"
+        ],
+        "cross_root_symbols": 2788,
+        "local": 40,
+        "set_aside": [
+          {
+            "capture": "2026-09-16",
+            "reason": "mixed",
+            "root": "ci"
+          },
+          {
+            "capture": "2026-09-23",
+            "reason": "undated: no chain shows the capture's listed open interest on any settlement",
+            "root": "ci"
+          }
+        ]
+      },
+      "dates": 47,
+      "duplicate_captures": 50,
       "first_date": "2026-08-14",
       "incomplete": {
-        "NDX": 38,
-        "SPX": 38
+        "NDX": 46
       },
       "last_date": "2026-10-22",
-      "median_of_medians": 0.12018194922276959,
-      "min_support": 64,
+      "median_of_medians": 0.12378921685479058,
+      "min_support": 65,
       "missing": [],
+      "missing_dates": [
+        "2026-09-18",
+        "2026-09-22"
+      ],
       "names": {
         "AAPL": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.2140185514772601,
-          "median": 0.20009535512624443,
-          "min": 0.18149566730580619
+          "median": 0.200009640274258,
+          "min": 0.17866832948152114
         },
         "ABNB": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.12084608697557875,
-          "median": 0.09447836712821497,
+          "median": 0.09606577128337414,
           "min": 0.0534903652699395
         },
         "ADBE": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.136358882955312,
-          "median": 0.10211678821410249,
+          "median": 0.10155698894850473,
           "min": 0.06684869694148277
         },
         "AMD": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.16650818849037227,
-          "median": 0.1529292100727034,
+          "median": 0.152363193077459,
           "min": 0.14341789067470254
         },
         "AMZN": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.18597773962804945,
-          "median": 0.1606833184748968,
+          "median": 0.1599339079016297,
           "min": 0.1062547379583777
         },
         "AVGO": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.1597474407471155,
-          "median": 0.13022975563549177,
-          "min": 0.11421367627779264
+          "median": 0.1302721175465923,
+          "min": 0.11138471683724328
         },
         "BABA": {
-          "dates": 40,
-          "max": 0.10855028162960727,
-          "median": 0.08177995054654258,
+          "dates": 47,
+          "max": 0.10918184813021652,
+          "median": 0.0870988460468004,
           "min": 0.06310297368200163
         },
         "BAC": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.11975202824721706,
-          "median": 0.10553061751562558,
+          "median": 0.1048261331946782,
           "min": 0.0735944617167075
         },
         "CAT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.18644112192617585,
-          "median": 0.13901787527042525,
-          "min": 0.04266714104039242
+          "median": 0.13882049580619438,
+          "min": 0.040028610491258526
         },
         "COIN": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.15686114072151397,
-          "median": 0.14157791212555426,
+          "median": 0.14157045042510305,
           "min": 0.1272907076916803
         },
         "COP": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.13585239148698658,
-          "median": 0.11635924520036017,
-          "min": 0.03761692081712772
+          "median": 0.11614123848122995,
+          "min": 0.03733836224629167
         },
         "COST": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.05075132846133092,
-          "median": 0.03817228414693652,
-          "min": 0.01501422843099211
+          "median": 0.03800316957210777,
+          "min": 0.011840013243708376
         },
         "CRWD": {
-          "dates": 40,
-          "max": 0.07023953657523654,
-          "median": 0.03784741239940867,
+          "dates": 47,
+          "max": 0.07098095107070039,
+          "median": 0.03797590167631145,
           "min": 0.02375186331494913
         },
         "CSCO": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.1787386669323503,
-          "median": 0.12609915105093442,
+          "median": 0.1274210951738232,
           "min": 0.08093315480482027
         },
         "CVX": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.13264919103972106,
-          "median": 0.12018194922276959,
+          "median": 0.12015733853575797,
           "min": 0.09258858408482117
         },
         "DE": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.3553687046994099,
-          "median": 0.29522537208892663,
+          "median": 0.2862508949324755,
           "min": 0.03720756595321055
         },
         "DIA": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.024587519511964622,
-          "median": 0.010667930800953258,
+          "median": 0.010597278539267146,
           "min": 0.0005229578495973225
         },
         "DIS": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.05881689845460146,
-          "median": 0.0366764063752127,
+          "median": 0.03671616639002572,
           "min": 0.02056027130177006
         },
         "EFA": {
-          "dates": 40,
-          "max": 0.5485033552041066,
-          "median": 0.5188293670526105,
+          "dates": 47,
+          "max": 0.5493462026893187,
+          "median": 0.5172332881066779,
           "min": 0.4911446141846059
         },
         "F": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.008385985341297624,
-          "median": 0.0066479565242630306,
+          "median": 0.006616986101756485,
           "min": 0.003262053832587048
         },
         "GDX": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.17008415366414428,
-          "median": 0.13901711066268635,
+          "median": 0.13901800019083457,
           "min": 0.11532028319048934
         },
         "GLD": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.08646191140689853,
-          "median": 0.07468662346803939,
+          "median": 0.07517908745127877,
           "min": 0.06094314015301278
         },
         "GOOGL": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.16983476813851056,
-          "median": 0.1414563695491332,
+          "median": 0.1413336993766906,
           "min": 0.11903078332541435
         },
         "GS": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.058029640866351234,
-          "median": 0.0431615025139693,
+          "median": 0.04314184222105365,
           "min": 0.030426144175616482
         },
         "HON": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.36882156747059036,
-          "median": 0.22483184935732747,
+          "median": 0.22443169470161256,
           "min": 0.04769345238095238
         },
         "HOOD": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.15592763831448722,
-          "median": 0.14135598080780748,
+          "median": 0.14095923197005206,
           "min": 0.11588339523192093
         },
         "IBIT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.05856418195892719,
-          "median": 0.032510800826954275,
+          "median": 0.032577096542284835,
           "min": 0.02727103968244512
         },
         "INTC": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.21339407002081626,
-          "median": 0.19217796526443992,
-          "min": 0.15484295104707121
+          "median": 0.1917584399956777,
+          "min": 0.15182111608069523
         },
         "IWM": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.08069443902644087,
-          "median": 0.06406686807376769,
+          "median": 0.06435463411032179,
           "min": 0.049959893002405366
         },
         "JPM": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.18561404872167137,
-          "median": 0.15765335931082136,
+          "median": 0.15794730765738302,
           "min": 0.14704043379123
         },
         "KLAC": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.178516164849573,
-          "median": 0.14349760773424397,
+          "median": 0.1429347085934644,
           "min": 0.07589938231617747
         },
         "LCID": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.3218153508524637,
-          "median": 0.2814073676714436,
+          "median": 0.27944585359974844,
           "min": 0.14189143951330338
         },
         "LLY": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.06361109097874366,
-          "median": 0.04724293130237342,
-          "min": 0.034219290050039264
+          "median": 0.047070064495040295,
+          "min": 0.03318966006791827
         },
         "LRCX": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.10923036366184587,
-          "median": 0.08582646442940581,
+          "median": 0.08529136298017675,
           "min": 0.0593735364686267
         },
         "MA": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.17893212977944306,
-          "median": 0.08078479998652549,
+          "median": 0.08086648725967949,
           "min": 0.05498212237738649
         },
         "MARA": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.20314707985654265,
-          "median": 0.1479700724173544,
+          "median": 0.1482359722437759,
           "min": 0.08602929784139582
         },
         "META": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.08332337892452567,
-          "median": 0.06594438101442371,
+          "median": 0.06575159454661549,
           "min": 0.052406790331504007
         },
         "MRK": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.3327499620599828,
-          "median": 0.27221087259034693,
+          "median": 0.2708063981328926,
           "min": 0.15091310834545146
         },
         "MRNA": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.17362947167702947,
-          "median": 0.15007765767143838,
+          "median": 0.14700038760871553,
           "min": 0.0944308943089431
         },
         "MS": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.08893206571682949,
-          "median": 0.061347751574859034,
+          "median": 0.06066476086989637,
           "min": 0.03646282065158567
         },
         "MSFT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.3414961442244335,
-          "median": 0.32480204953891223,
+          "median": 0.3247537077532584,
           "min": 0.25929651235565687
         },
         "MSTR": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.13210920196109985,
-          "median": 0.09530038887627035,
+          "median": 0.09749663694488282,
           "min": 0.07044716454454004
         },
         "MU": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.0714548596939684,
-          "median": 0.05713118783635074,
+          "median": 0.05712028018228445,
           "min": 0.05277824940351755
         },
         "NDX": {
-          "dates": 38,
+          "dates": 46,
           "max": 0.3269734104405925,
-          "median": 0.27678754716623577,
+          "median": 0.26978240414491705,
           "min": 0.24070998130361168
         },
         "NFLX": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.08636629761655423,
-          "median": 0.07832921425684652,
+          "median": 0.07823545689204166,
           "min": 0.04565583072456117
         },
         "NOW": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.11720584823175452,
-          "median": 0.08974671633666023,
+          "median": 0.08900316399089298,
           "min": 0.046539248852593244
         },
         "NVDA": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.11703833759807324,
-          "median": 0.10807462063312853,
+          "median": 0.10779860542440427,
           "min": 0.07747658924217778
         },
         "PANW": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.24886070958591275,
-          "median": 0.21414565600411756,
+          "median": 0.21175528647889796,
           "min": 0.1186942428928274
         },
         "PFE": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.18251354012604656,
-          "median": 0.14614429845779192,
+          "median": 0.1433113149816998,
           "min": 0.06844046375666435
         },
         "PLTR": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.15989675030477052,
-          "median": 0.13855757410618397,
-          "min": 0.10279492085507325
+          "median": 0.13805071110641345,
+          "min": 0.10267085255749415
         },
         "PYPL": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.09669197165765218,
-          "median": 0.059513264923957546,
-          "min": 0.011451714487431494
+          "median": 0.05028360628750221,
+          "min": 0.009196795050367112
         },
         "QCOM": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.2093658591646671,
-          "median": 0.17931999400236598,
+          "median": 0.17992548671339292,
           "min": 0.16280559681955167
         },
         "QQQ": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.0737178654943591,
-          "median": 0.06469657779061373,
+          "median": 0.0643228802616986,
           "min": 0.055954327524721716
         },
         "RIVN": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.3229228505882658,
-          "median": 0.28810671347651523,
+          "median": 0.28785720105235846,
           "min": 0.016263990476361817
         },
         "RUT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.5517318529011825,
-          "median": 0.5336211871860812,
+          "median": 0.5333853139680425,
           "min": 0.5132786800497375
         },
         "SCHW": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.07809385449007421,
-          "median": 0.05384972995304797,
+          "median": 0.05355217831813577,
           "min": 0.005885890770709239
         },
         "SMCI": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.21973011284131275,
-          "median": 0.2008038736800296,
+          "median": 0.20073826327436714,
           "min": 0.16652819527991064
         },
         "SNOW": {
-          "dates": 40,
-          "max": 0.2084964777139561,
-          "median": 0.17795310443466314,
-          "min": 0.13752137003345727
+          "dates": 47,
+          "max": 0.20875548661760338,
+          "median": 0.17803476403915658,
+          "min": 0.1370822041553749
         },
         "SOFI": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.2621413628477449,
-          "median": 0.22574694228872977,
+          "median": 0.22556216726807227,
           "min": 0.2003321322687894
         },
         "SPX": {
-          "dates": 38,
+          "dates": 47,
           "max": 0.14210200262194586,
-          "median": 0.1350217280453291,
+          "median": 0.13461822249213196,
           "min": 0.12320269906963731
         },
         "SPY": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.23745169855838585,
-          "median": 0.20772352368884373,
+          "median": 0.20727346871065622,
           "min": 0.17337030595466912
         },
         "TGT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.08442078382998983,
-          "median": 0.0759971530474378,
+          "median": 0.07576278023860972,
           "min": 0.015134893387527458
         },
         "TLT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.07163998063408723,
-          "median": 0.046255775957880045,
+          "median": 0.04553932892426213,
           "min": 0.03359590503745902
         },
         "TSLA": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.12127659697343067,
-          "median": 0.10921154923782843,
+          "median": 0.10909507028582593,
           "min": 0.09103950867481919
         },
         "TXN": {
-          "dates": 40,
-          "max": 0.13854603245534058,
-          "median": 0.0996864219182555,
+          "dates": 47,
+          "max": 0.1462429234077894,
+          "median": 0.10203796961286446,
           "min": 0.06946893148592104
         },
         "UBER": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.17851231116310856,
-          "median": 0.15841273646246248,
+          "median": 0.15793386197206094,
           "min": 0.12419370826719979
         },
         "UNH": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.1046551926501725,
-          "median": 0.07559943246535175,
-          "min": 0.040107381515039196
+          "median": 0.07511745130897426,
+          "min": 0.03894633781668589
         },
         "V": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.06565440885725583,
-          "median": 0.04331818861364448,
+          "median": 0.04349440156267908,
           "min": 0.02355115102714979
         },
         "WFC": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.06680712520600293,
-          "median": 0.058549218235563485,
-          "min": 0.024854272413886703
+          "median": 0.05758558474354203,
+          "min": 0.020801093155269863
         },
         "WMT": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.18291104612470563,
-          "median": 0.15743009463842694,
+          "median": 0.15709651197703456,
           "min": 0.09991806161467258
         },
         "XOM": {
-          "dates": 40,
+          "dates": 47,
           "max": 0.19399958166948866,
-          "median": 0.17967746806828416,
+          "median": 0.17923329797126505,
           "min": 0.11020618239395918
         }
       },
@@ -834,13 +944,14 @@
         "SPX"
       ],
       "search_symbols": 68,
+      "span": 49,
       "stable": {
         "10": {
           "by_group": {
             "control": 3,
-            "programme": 21
+            "programme": 22
           },
-          "count": 24,
+          "count": 25,
           "symbols": [
             "AAPL",
             "AMD",
@@ -863,6 +974,7 @@
             "SMCI",
             "SNOW",
             "SOFI",
+            "SPX",
             "SPY",
             "UBER",
             "XOM"
@@ -900,8 +1012,28 @@
     "expiry_check": {
       "max_abs_diff": 0.07105053494856411,
       "median_abs_diff": 0.0,
-      "moved": 109,
-      "name_dates": 2720
+      "moved": 112,
+      "name_dates": 3196
+    },
+    "index_full_book": {
+      "NDX": {
+        "dates": 46,
+        "min": 0.24076195228536543,
+        "min_date": "2026-09-02",
+        "min_on_monthly_expiry": false
+      },
+      "RUT": {
+        "dates": 47,
+        "min": 0.4987258221680239,
+        "min_date": "2026-10-16",
+        "min_on_monthly_expiry": true
+      },
+      "SPX": {
+        "dates": 47,
+        "min": 0.12042926198399649,
+        "min_date": "2026-08-21",
+        "min_on_monthly_expiry": true
+      }
     },
     "reconciliation": {
       "census": {
@@ -913,28 +1045,36 @@
         "symbol_dates": 487
       },
       "daily": {
-        "agreeing": 2840,
-        "flex_oi_report": 1152844716,
-        "flex_oi_search": 1152844716,
+        "agreeing": 3337,
+        "flex_oi_report": 1344896528,
+        "flex_oi_search": 1344896528,
         "max_rel_diff": 0.0,
         "median_rel_diff": 0.0,
-        "symbol_dates": 2840
+        "symbol_dates": 3337
       }
     },
     "value": {
-      "above_oi_share": 43,
+      "above_oi_share": 42,
       "aggregate": {
-        "max": 0.3432143121907993,
-        "median": 0.3313082564162417,
-        "min": 0.32285383173799825
+        "max": 0.34321355796075115,
+        "median": 0.33165697794161675,
+        "min": 0.32297619972132635
       },
       "aggregate_oi": {
         "max": 0.14225878676597412,
-        "median": 0.13655062722984135,
+        "median": 0.13626835146400706,
         "min": 0.1238459490657329
       },
-      "complete_dates": 24,
-      "dates": 39,
+      "complete_dates": 41,
+      "composition": {
+        "date": "2026-10-22",
+        "deep_share": 0.48275736824451737,
+        "deep_threshold": 0.9,
+        "intrinsic": 336757407835.20996,
+        "paired_share": 0.7099536991658808,
+        "value": 501607184512.30005
+      },
+      "dates": 46,
       "largest_line": {
         "date": "2026-10-22",
         "expiry": "2026-12-18",
@@ -1001,12 +1141,12 @@
           "value_share": 0.31887202410123794
         }
       ],
-      "median_name": 0.14245150350710237,
-      "median_name_oi": 0.1280276648408805,
+      "median_name": 0.14397770926787984,
+      "median_name_oi": 0.12832385132403193,
       "names": 71,
-      "symbol_dates": 2830,
-      "theo_share": 0.07293394993415508,
-      "usable": 2747
+      "symbol_dates": 3334,
+      "theo_share": 0.07475263645704568,
+      "usable": 3261
     }
   }
 }

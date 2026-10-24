@@ -20,6 +20,7 @@ from hidden_options.measure.hidden_share import (
     reconcile_flex_sources,
     stable_headline,
     stable_symbols,
+    value_composition,
     value_share,
 )
 
@@ -416,3 +417,32 @@ class TestValueShare:
         row = value_share(listed, flex([])).iloc[0]
         assert row["theo_share"] == pytest.approx(0.25)
         assert row["usable"]
+
+
+class TestValueComposition:
+    SERIES = pd.DataFrame(
+        {
+            "date": pd.Timestamp("2026-10-22"),
+            "symbol": "SPY",
+            "root": "4SPY",
+            "right": ["C", "P", "C", "C"],
+            "expiry": pd.Timestamp("2026-12-18"),
+            "strike": [2.0, 200.0, 200.0, 120.0],
+            "mark_price": [100.0, 100.5, 0.01, 1.0],
+            "open_interest": [10, 10, 10, 10],
+        }
+    ).assign(flex_value=lambda f: f["mark_price"] * f["open_interest"] * 100)
+
+    def test_intrinsic_deep_and_paired_value(self):
+        parts = value_composition(self.SERIES, {"SPY": 100.0})
+
+        assert parts["value"] == pytest.approx(201_510)
+        # The call at 2 and the put at 200 are each worth their intrinsic value nearly whole.
+        assert parts["intrinsic"] == pytest.approx(98 * 1000 + 100 * 1000)
+        assert parts["deep_share"] == pytest.approx(200_500 / 201_510)
+        # Only strike 200 carries both a call and a put.
+        assert parts["paired_share"] == pytest.approx(100_510 / 201_510)
+
+    def test_a_symbol_without_a_spot_is_refused(self):
+        with pytest.raises(KeyError, match="SPY"):
+            value_composition(self.SERIES, {})

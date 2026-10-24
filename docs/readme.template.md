@@ -10,27 +10,41 @@ panel.
 
 ![FLEX against listed open interest per underlying on {{HiddenCensusDate}}, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
-**For many underlyings, a large part of the options market is not in the listed chain.**
-For {{HiddenStableTen}} of the {{HiddenDailyComplete}} underlyings followed daily, FLEX is
-at least 10% of option open interest on every one of {{HiddenDailyDates}} settlements from
-{{HiddenDailyFirst}} to {{HiddenDailyLast}}; for {{HiddenStableQuarter}} of them
-({{HiddenStableQuarterNames}}) it is at least 25%, and for {{HiddenStableHalfNames}} at
-least half. Those underlyings were chosen mostly for the option-income programmes written
-on them: {{HiddenStableTenProgramme}} of {{HiddenCompleteProgramme}} programme names clear
-10% on every date, against {{HiddenStableTenControl}} of {{HiddenCompleteControl}}
-controls. A one-date census of {{HiddenCensusUnderlyings}} underlyings with listed weekly
-options, on {{HiddenCensusDate}}, gives the wider picture: the median FLEX share is
-{{HiddenCensusMedian}}, {{HiddenCensusTen}} underlyings are at 10% or more and
-{{HiddenCensusHalf}} at half or more ({{HiddenCensusHalfNames}}).
+*FLEX against listed open interest per underlying on {{HiddenCensusDate}}, log scales.
+Coloured: FLEX is at least half of all open interest. Squares: index products, whose
+listed side comes from the Cboe chain. The {{HiddenCensusWithoutFlex}} census underlyings
+with no FLEX open interest are not drawn.*
+
+**For {{HiddenStableTen}} of the {{HiddenDailyComplete}} underlyings the collector follows,
+at least a tenth of option open interest is FLEX, outside the listed chain, on every
+date.** That holds on each of the {{HiddenDailyDates}} settlements captured from
+{{HiddenDailyFirst}} to {{HiddenDailyLast}} ({{HiddenDailyMissing}} of the
+{{HiddenDailySpan}} in that span have no usable capture). For {{HiddenStableQuarter}} of
+those underlyings ({{HiddenStableQuarterNames}}) the share is at least 25% on every date,
+and for {{HiddenStableHalfNames}} at least half, counting only series that expire after
+each date; with the series expiring on a date included, its lowest share is
+{{HiddenRutFullLow}} ({{HiddenRutFullLowDate}}). The followed underlyings were chosen
+mostly for the option-income programmes written on them: {{HiddenStableTenProgramme}} of
+{{HiddenCompleteProgramme}} programme names clear 10% on every date, against
+{{HiddenStableTenControl}} of {{HiddenCompleteControl}} controls. A one-date census of
+{{HiddenCensusUnderlyings}} underlyings with listed weekly options, on {{HiddenCensusDate}},
+gives the wider picture: the median FLEX share is {{HiddenCensusMedian}},
+{{HiddenCensusTen}} underlyings are at 10% or more and {{HiddenCensusHalf}} at half or
+more ({{HiddenCensusHalfNames}}).
 
 OCC's series search and its FLEX report count the same FLEX open interest twice, and they
 agree to the contract on {{HiddenReconAgreeing}} of {{HiddenReconSymbolDates}}
-symbol-dates. Valued at the report's marks and at listed mid quotes, FLEX holds
-{{HiddenValueLow}}–{{HiddenValueHigh}} of the followed underlyings' option value, against
-{{HiddenValueOpenInterestLow}}–{{HiddenValueOpenInterestHigh}} of their open interest.
-Value weighs deep in-the-money legs heavily: one {{HiddenLineSymbol}}
-{{HiddenLineRight}} struck at {{HiddenLineStrike}} is marked at {{HiddenLineValue}}, against
-{{HiddenLineListed}} for every listed {{HiddenLineSymbol}} option together.
+symbol-dates. Valued at the report's marks and at listed mid quotes (Cboe's theoretical
+value where a quote is one-sided or crossed, {{HiddenValueTheo}} of listed open interest),
+FLEX holds {{HiddenValueLow}}–{{HiddenValueHigh}} of the followed underlyings' option
+value, against {{HiddenValueOpenInterestLow}}–{{HiddenValueOpenInterestHigh}} of their open
+interest. The gap is mostly deep in-the-money legs and call and put lines paired at the
+same strike: on {{HiddenValueCompositionDate}}, {{HiddenValueIntrinsic}} of
+{{HiddenValueFlexTotal}} of FLEX value is intrinsic and {{HiddenValuePaired}} sits in
+paired lines. One {{HiddenLineSymbol}} {{HiddenLineRight}} series, {{HiddenLineOpenInterest}}
+contracts struck at {{HiddenLineStrike}} and paired with {{HiddenLineOppositeOpenInterest}}
+{{HiddenLineOpposite}} contracts at the same strike, is marked at {{HiddenLineValue}},
+against {{HiddenLineListed}} for every listed {{HiddenLineSymbol}} option together.
 
 ## The FLEX market over {{PanelMonths}} months
 
