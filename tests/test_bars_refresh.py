@@ -22,6 +22,7 @@ from hidden_options.collect.bars import (
     flex_underlyings,
     history_start,
     lookback_since,
+    missing_bar_reason,
     refresh_flex_underlying_bars,
     settled_daily_bars,
 )
@@ -103,6 +104,21 @@ class TestFlexUnderlyings:
     def test_a_panel_without_the_needed_columns_is_rejected(self):
         with pytest.raises(ValueError, match="report_date"):
             flex_underlyings(pd.DataFrame({"kind": ["equity"], "underlying": ["AAL"]}))
+
+
+class TestMissingBarReason:
+    @pytest.mark.parametrize("symbol", ["GME1", "HON2", "BABA2", "QQQ1"])
+    def test_a_numeric_suffix_is_an_adjusted_deliverable_root(self, symbol):
+        """OCC renames a class after a corporate action changes its deliverable; the
+        stock still trades under the plain ticker."""
+        assert missing_bar_reason(symbol) == "adjusted_deliverable"
+
+    def test_a_class_share_written_without_its_separator(self):
+        assert missing_bar_reason("BRKB") == "share_class"
+
+    @pytest.mark.parametrize("symbol", ["X", "JNPR", "BK"])
+    def test_anything_else_is_other(self, symbol):
+        assert missing_bar_reason(symbol) == "other"
 
 
 class TestHistoryLookback:
@@ -300,6 +316,20 @@ class TestRefresh:
         )
         summary = self._refresh(out)
         assert dict(summary.kept_history) == {"AAL": 1}
+
+    def test_a_restatement_just_past_the_tolerance_is_discarded(self, tmp_path, monkeypatch):
+        out = tmp_path / "bars.parquet"
+        _bars("AAL", ["2026-08-14", "2026-08-17"], close=100.0).to_parquet(out, index=False)
+        FakeYahoo(
+            monkeypatch,
+            {
+                "AAL": _bars("AAL", ["2026-08-17", "2026-10-22"], close=100.6),
+                "AAPL": _bars("AAPL", ["2026-10-22"]),
+            },
+        )
+        summary = self._refresh(out)
+        assert dict(summary.discarded_history) == {"AAL": 1}
+        assert dict(summary.kept_history) == {}
 
     def test_held_history_with_no_overlap_to_check_is_discarded_and_named(
         self, tmp_path, monkeypatch, caplog

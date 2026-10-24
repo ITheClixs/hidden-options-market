@@ -308,8 +308,8 @@ class TestRefreshBars:
         assert "2 of 3" in printed
         assert "BRKB" in printed and "404" in printed
         assert "NDX" in printed
-        assert "EA" in printed and "450" in printed
-        assert "SATS" in printed and "3" in printed
+        assert "kept     EA: 450 held rows" in printed
+        assert "discarded SATS: 3 held rows" in printed
 
     def test_defaults_to_the_data_directory(self, stub_refresh):
         calls = stub_refresh()

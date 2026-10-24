@@ -20,6 +20,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, time
@@ -68,10 +69,20 @@ MIN_ACTIVITY_DATES = 40
 HISTORY_SESSIONS = 40
 
 # Held bars before a refreshed symbol's fetched window are kept only if the two agree on
-# every session they share, to within this relative difference in the close. A split moves
-# every close by a third or more; in the October 2026 refresh every shared close agreed
-# exactly.
+# every session they share, to within this relative difference in the close. A split or a
+# stock dividend rescales earlier closes by its ratio: a fifth for a 5:4 split, and more
+# than this for any stock dividend over half a percent. In the October 2026 refresh, every
+# close shared with the file it replaced agreed exactly.
 SPLICE_TOLERANCE = 0.005
+
+# Why a qualifying symbol can have no bars. OCC renames a class whose deliverable a
+# corporate action has changed by adding a digit (GME1, HON2) while the stock trades on
+# under its plain ticker, and writes a class share without the separator the provider uses
+# (BRKB for BRK-B). Anything else the provider answered with nothing for: delisted,
+# acquired or renamed tickers among them.
+_ADJUSTED_ROOT = re.compile(r"[A-Z]+[0-9]+")
+SHARE_CLASS_SPELLINGS = frozenset({"BRKB", "BFB"})
+MISSING_BAR_REASONS = ("adjusted_deliverable", "share_class", "other")
 
 # Daily bars are stamped at the open, so the session a bar belongs to is its New York date.
 _MARKET_TZ = ZoneInfo("America/New_York")
@@ -248,6 +259,15 @@ def flex_underlyings(panel: pd.DataFrame, min_dates: int = MIN_ACTIVITY_DATES) -
     equity = panel[panel["kind"] == "equity"]
     dates = equity.groupby("underlying")["report_date"].nunique()
     return sorted(dates[dates >= min_dates].index)
+
+
+def missing_bar_reason(symbol: str) -> str:
+    """Why the provider may have no bars for ``symbol``; one of ``MISSING_BAR_REASONS``."""
+    if _ADJUSTED_ROOT.fullmatch(symbol):
+        return "adjusted_deliverable"
+    if symbol in SHARE_CLASS_SPELLINGS:
+        return "share_class"
+    return "other"
 
 
 def history_start(panel: pd.DataFrame, sessions: int = HISTORY_SESSIONS) -> pd.Timestamp:
@@ -462,6 +482,8 @@ __all__ = [
     "HISTORY_SESSIONS",
     "INTERVAL_MAX_RANGE",
     "MIN_ACTIVITY_DATES",
+    "MISSING_BAR_REASONS",
+    "SHARE_CLASS_SPELLINGS",
     "SPLICE_TOLERANCE",
     "BarParseError",
     "BarSnapshot",
@@ -470,6 +492,7 @@ __all__ = [
     "flex_underlyings",
     "history_start",
     "lookback_since",
+    "missing_bar_reason",
     "parse_chart",
     "refresh_flex_underlying_bars",
     "settled_daily_bars",
