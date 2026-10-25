@@ -15,9 +15,9 @@ Coloured: FLEX is at least half of all open interest. Squares: index products, w
 listed side comes from the Cboe chain. The 200 census underlyings
 with no FLEX open interest are not drawn.*
 
-**For 25 of the 70 underlyings the collector follows,
-at least a tenth of option open interest is FLEX, outside the listed chain, on every
-date.** That holds on each of the 47 settlements captured from
+**For 25 of the 70 underlyings the collector follows
+that are observed on every date (71 in all), at least a tenth of
+option open interest is FLEX, outside the listed chain, on every date.** That holds on each of the 47 settlements captured from
 14 August 2026 to 22 October 2026 (2 of the
 49 in that span have no usable capture). For 3 of
 those underlyings (EFA, MSFT and RUT) the share is at least 25% on every date,
@@ -39,8 +39,8 @@ value where a quote is one-sided or crossed, 7.5\% of listed open interest),
 FLEX holds 32.3\%–34.3\% of the followed underlyings' option
 value, against 12.4\%–14.2\% of their open
 interest. The gap is mostly deep in-the-money legs and call and put lines paired at the
-same strike: on 22 October 2026, \$337bn of
-\$502bn of FLEX value is intrinsic and 71\% sits in
+same strike: on 22 October 2026, \$337bn of the
+\$502bn of FLEX value on these underlyings is intrinsic and 71\% sits in
 paired lines. One SPY put series, 16,052
 contracts struck at 10,010.01 and paired with 16,052
 call contracts at the same strike, is marked at \$14.7bn,

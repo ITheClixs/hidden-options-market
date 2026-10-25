@@ -20,6 +20,7 @@ against the FLEX report on that date.
 from __future__ import annotations
 
 import glob
+import math
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -41,6 +42,14 @@ SESSION_OPEN_MINUTES = 9 * 60 + 30
 CALENDAR_TAIL_DAYS = 10
 # A capture is searched for among settlements at most this many days before its folder.
 CAPTURE_LOOKBACK_DAYS = 7
+# A capture taken while OCC was publishing a settlement holds a large part of its symbols
+# at the old settlement and the rest at the new one (32 of 68 in the one case found). A
+# stale or mislabelled chain reading moves a single symbol (12 of 2,786 equity readings,
+# never more than one in a capture). A capture is set aside as mixed only when one other
+# settlement claims at least this many symbols and this share of those compared, which
+# sits well clear of both.
+MIXED_MIN_SYMBOLS = 5
+MIXED_MIN_SHARE = 0.10
 
 CHAIN_READ_COLUMNS = (
     "symbol",
@@ -104,19 +113,31 @@ _OSI_TAIL_LENGTH = 15
 _PARTITION = re.compile(r"date=(\d{4}-\d{2}-\d{2})")
 
 
+class CICapturesError(ValueError):
+    """The CI captures the daily shares are computed with are missing or not the same."""
+
+
+FETCH_HINT = (
+    "Fetch them with `scripts/fetch_captures.sh --ci-captures`, or compute from the local "
+    "captures alone with `hidden-options results --local-only` (the result is marked)."
+)
+
+
 @dataclass(frozen=True)
 class CaptureDate:
     """The settlement a capture shows, and how many symbols vouch for it.
 
-    `others` counts the symbols that match one other settlement and not this one: a
-    capture taken while OCC was publishing a settlement holds some symbols at the old
-    one and some at the new.
+    `others` counts the symbols that match one other settlement and not this one, and
+    `largest_other` the most of them that agree on any single other settlement: a
+    capture taken while OCC was publishing holds many symbols at the old settlement and
+    the rest at the new, while a stale chain reading moves one.
     """
 
     date: pd.Timestamp
     support: int
     compared: int
     others: int = 0
+    largest_other: int = 0
 
 
 def trading_calendar(raw: Path) -> pd.DatetimeIndex:
@@ -159,10 +180,13 @@ def ci_roots(ci: Path) -> list[Path]:
     """The `raw` folder of every unpacked CI capture under `ci`, oldest first.
 
     The private CI collector publishes one archive per run; each is unpacked into
-    `<ci>/<run date>/raw` with the collectors' own layout. A missing `ci` means none.
+    `<ci>/<run date>/raw` with the collectors' own layout.
+
+    The folder must exist: without it the daily shares would quietly rest on fewer
+    captures, so its absence raises CICapturesError saying how to fetch it.
     """
     if not ci.is_dir():
-        return []
+        raise CICapturesError(f"No CI captures at {ci}. {FETCH_HINT}")
     return sorted(path for path in ci.glob("*/raw") if path.is_dir())
 
 
@@ -303,8 +327,16 @@ def date_capture(
         raise ValueError(f"only {int(votes.iloc[0])} of {compared} symbols agree on a settlement")
     winner = pd.Timestamp(votes.index[0])
     matched = agrees[agrees].reset_index().groupby("symbol")["date"].agg(["nunique", "first"])
-    others = int(((matched["nunique"] == 1) & (matched["first"] != winner)).sum())
-    return CaptureDate(winner, int(votes.iloc[0]), compared, others)
+    elsewhere = matched[(matched["nunique"] == 1) & (matched["first"] != winner)]
+    by_settlement = elsewhere.groupby("first").size()
+    largest = int(by_settlement.max()) if len(by_settlement) else 0
+    return CaptureDate(winner, int(votes.iloc[0]), compared, len(elsewhere), largest)
+
+
+def is_mixed(dated: CaptureDate) -> bool:
+    """True when one other settlement claims enough symbols to call the capture mixed."""
+    floor = max(MIXED_MIN_SYMBOLS, math.ceil(MIXED_MIN_SHARE * dated.compared))
+    return dated.largest_other >= floor
 
 
 def date_captures(
@@ -323,8 +355,10 @@ def date_captures(
     settlement, the symbols that vouched for the date out of those compared, whether the
     settlement was already captured, and how many of its symbols were checked against an
     earlier reading or added. A capture whose symbols match different settlements was
-    taken while OCC was publishing one; it is logged as `mixed` and nothing from it is
-    kept, since its majority date would be wrong for the rest. A capture that cannot be
+    taken while OCC was publishing one; when another settlement claims enough of them
+    (`is_mixed`) it is logged as `mixed` and nothing from it is kept, since its majority
+    date would be wrong for the rest. Fewer dissenting symbols are logged as `dissenters`
+    and kept under the majority date. A capture that cannot be
     dated at all (no chain reading of its settlement exists, or the symbols do not agree)
     is logged with the reason and set aside too.
     """
@@ -344,6 +378,7 @@ def date_captures(
             "support": 0,
             "compared": 0,
             "mixed": False,
+            "dissenters": 0,
             "duplicate": False,
             "symbols_compared": 0,
             "symbols_added": 0,
@@ -354,16 +389,18 @@ def date_captures(
         except ValueError as exc:
             entry["reason"] = f"undated: {exc}"
             continue
+        mixed = is_mixed(dated)
         entry.update(
             date=dated.date,
             dated=True,
             support=dated.support,
             compared=dated.compared,
-            mixed=dated.others > 0,
+            mixed=mixed,
+            dissenters=dated.others,
             duplicate=dated.date in kept,
-            reason="mixed" if dated.others > 0 else "",
+            reason="mixed" if mixed else "",
         )
-        if dated.others > 0:
+        if mixed:
             continue
         symbols = kept.setdefault(dated.date, {})
         compared = added = 0
@@ -385,6 +422,9 @@ def date_captures(
         for day, symbols in kept.items()
         for rows in symbols.values()
     ]
+    if not frames:
+        columns = [c for c in captures.columns if c not in ("capture", "source")]
+        return pd.DataFrame(columns=[*columns, "date"]), pd.DataFrame(log)
     return pd.concat(frames, ignore_index=True), pd.DataFrame(log)
 
 
@@ -503,9 +543,12 @@ def _partition_date(path: str) -> str:
 
 __all__ = [
     "CHAIN_OI_COLUMNS",
+    "MIXED_MIN_SHARE",
+    "MIXED_MIN_SYMBOLS",
     "OCC_COLUMNS",
     "PRICED_COLUMNS",
     "REPORT_COLUMNS",
+    "CICapturesError",
     "CaptureDate",
     "chain_dates",
     "ci_roots",
@@ -514,6 +557,7 @@ __all__ = [
     "date_captures",
     "expiring_series",
     "index_rows",
+    "is_mixed",
     "load_captures",
     "load_census",
     "load_chains",

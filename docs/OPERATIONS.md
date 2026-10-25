@@ -65,6 +65,15 @@ With no argument the script lists the store's releases and takes those tagged
 `data-YYYY-MM`. The `flex-archive` release is not a month and is left out; it is
 restored separately, below.
 
+The hidden-share analysis reads each CI run on its own, beside the local captures, and
+checks the two against each other, so it needs the runs kept apart rather than merged.
+`scripts/fetch_captures.sh --ci-captures` (optionally with months) unpacks every run into
+`data/ci_captures/<run date>/raw`, keeping only the series-search open interest and the
+Cboe chains, and leaves `data/raw` alone. `hidden-options results` refuses to compute the
+hidden share without that folder, or with other runs than the committed result used;
+`--local-only` computes without them and marks the result, `--accept-ci-runs` accepts the
+runs on disk.
+
 ## The FLEX archive
 
 The `flex-archive` release in the same private store holds the OCC FLEX reports as

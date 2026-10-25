@@ -7,10 +7,11 @@ import pytest
 
 from hidden_options.config import Universe
 from hidden_options.measure import hidden_share_result as results_module
+from hidden_options.measure.hidden_share_data import CICapturesError
 from hidden_options.measure.hidden_share_macros import name_list, usd_billions
 from hidden_options.measure.hidden_share_result import census_view, hidden_share_result
 from hidden_options.publish.latex import collect_macros
-from hidden_options.publish.results import read_results, write_result
+from hidden_options.publish.results import Result, read_results, write_result
 from hidden_share_stub import CENSUS_DATE, MARK, MID, SPOT, UNIVERSE, write_world
 
 
@@ -21,11 +22,11 @@ def raw(tmp_path_factory):
     return root / "raw"
 
 
-@pytest.fixture(scope="module")
-def inputs(raw):
-    patch = pytest.MonkeyPatch()
+def point_at_world(patch, raw, results):
+    """Aim the loaders at the stub world, with `results` standing in for results/."""
     patch.setattr(results_module, "RAW_DIR", raw)
     patch.setattr(results_module, "CI_CAPTURES_DIR", raw.parent / "ci_captures")
+    patch.setattr(results_module, "RESULTS_DIR", results)
     patch.setattr(
         results_module,
         "load_universe",
@@ -35,6 +36,14 @@ def inputs(raw):
             control_single_name=("BBB",),
         ),
     )
+    for name in (results_module.LOCAL_ONLY_ENV, results_module.ACCEPT_CI_RUNS_ENV):
+        patch.setenv(name, "0")
+
+
+@pytest.fixture(scope="module")
+def inputs(raw, tmp_path_factory):
+    patch = pytest.MonkeyPatch()
+    point_at_world(patch, raw, tmp_path_factory.mktemp("results"))
     try:
         yield results_module.load_inputs()
     finally:
@@ -112,6 +121,8 @@ class TestDaily:
     def test_index_range_macros(self, result):
         spx = result.values["daily"]["names"]["SPX"]
         assert result.macros["HiddenSpxLow"] == f"{spx['min'] * 100:.1f}\\%"
+        either = min(spx["min"], result.values["index_full_book"]["SPX"]["min"])
+        assert result.macros["HiddenSpxEitherLow"] == f"{either * 100:.1f}\\%"
 
     def test_ranges_and_groups(self, result):
         aaa = result.values["daily"]["names"]["AAA"]
@@ -215,6 +226,79 @@ class TestValue:
         listed = MID * (2030 + 4 * 3) * 100
         flex = MARK * 2500 * 100
         assert aaa["value_share"] == pytest.approx(flex / (flex + listed))
+
+
+class TestCIGuard:
+    """Without the CI captures the daily numbers would quietly shrink; the loader refuses."""
+
+    def committed(self, folder, runs):
+        write_result(
+            Result("hidden_share", {}, {}, {"ci_runs": runs}, "2026-10-24T00:00:00+00:00"),
+            folder,
+        )
+
+    def test_without_the_ci_directory_the_analysis_refuses(self, monkeypatch, raw, tmp_path):
+        point_at_world(monkeypatch, raw, tmp_path / "results")
+        monkeypatch.setattr(results_module, "CI_CAPTURES_DIR", tmp_path / "absent")
+        with pytest.raises(CICapturesError, match="--local-only"):
+            results_module.load_inputs()
+
+    def test_local_only_reads_no_ci_and_marks_the_result(self, monkeypatch, raw, tmp_path):
+        point_at_world(monkeypatch, raw, tmp_path / "results")
+        monkeypatch.setattr(results_module, "CI_CAPTURES_DIR", tmp_path / "absent")
+
+        local = results_module.load_inputs(local_only=True)
+        result = hidden_share_result(local)
+
+        assert (local.local_only, list(local.ci_runs)) == (True, [])
+        assert result.inputs["local_only"] is True
+        assert result.values["daily"]["missing_dates"] == ["2026-09-02"]
+
+    def test_the_local_only_switch_can_come_from_the_environment(self, monkeypatch, raw, tmp_path):
+        point_at_world(monkeypatch, raw, tmp_path / "results")
+        monkeypatch.setattr(results_module, "CI_CAPTURES_DIR", tmp_path / "absent")
+        monkeypatch.setenv(results_module.LOCAL_ONLY_ENV, "1")
+        assert results_module.load_inputs().local_only
+
+    def test_a_ci_run_set_unlike_the_committed_one_is_refused(self, monkeypatch, raw, tmp_path):
+        point_at_world(monkeypatch, raw, tmp_path / "results")
+        self.committed(tmp_path / "results", ["2026-09-03", "2026-09-05", "2026-09-09"])
+
+        with pytest.raises(CICapturesError, match="2026-09-09"):
+            results_module.load_inputs()
+        accepted = results_module.load_inputs(accept_ci_runs=True)
+        assert list(accepted.ci_runs) == ["2026-09-03", "2026-09-05"]
+
+    def test_the_committed_run_set_passes(self, monkeypatch, raw, tmp_path):
+        point_at_world(monkeypatch, raw, tmp_path / "results")
+        self.committed(tmp_path / "results", ["2026-09-03", "2026-09-05"])
+        assert results_module.load_inputs().local_only is False
+
+    def test_cli_flags_reach_the_analysis(self, monkeypatch, tmp_path):
+        import os
+
+        from hidden_options import cli
+        from hidden_options.publish import registry
+
+        for attr, kind in (("ANALYSES", "analysis"), ("FIGURES", "figure"), ("TABLES", "table")):
+            monkeypatch.setattr(registry, attr, registry.Registry(kind))
+        monkeypatch.setattr(registry, "REGISTRATION_MODULES", ())
+        for name in (results_module.LOCAL_ONLY_ENV, results_module.ACCEPT_CI_RUNS_ENV):
+            monkeypatch.setenv(name, "0")
+        seen = {}
+
+        def analysis():
+            seen.update(
+                local=os.environ[results_module.LOCAL_ONLY_ENV],
+                accept=os.environ[results_module.ACCEPT_CI_RUNS_ENV],
+            )
+            return Result("hidden_share", {}, {}, {}, "2026-10-24T00:00:00+00:00")
+
+        registry.ANALYSES.register("hidden_share")(analysis)
+        args = ["results", "--root", str(tmp_path), "--local-only", "--accept-ci-runs"]
+
+        assert cli.main(args) == 0
+        assert seen == {"local": "1", "accept": "1"}
 
 
 def test_registered_analysis_runs_the_loaders(monkeypatch, inputs):

@@ -114,11 +114,15 @@ def _daily_macros(values: Mapping[str, Any]) -> dict[str, str]:
             macros[f"HiddenStable{word}{group.title()}"] = formats.count(
                 stable[key]["by_group"][group]
             )
+    whole = values.get("index_full_book", {})
     for index in daily["not_in_search"]:
         if index in names:
             stem = f"Hidden{index.title()}"
             macros[f"{stem}Low"] = _share(names[index]["min"])
             macros[f"{stem}High"] = _share(names[index]["max"])
+            if index in whole:
+                # The lowest share under either counting rule, for a claim that holds both ways.
+                macros[f"{stem}EitherLow"] = _share(min(names[index]["min"], whole[index]["min"]))
     return macros
 
 

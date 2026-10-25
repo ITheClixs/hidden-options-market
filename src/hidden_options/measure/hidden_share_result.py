@@ -19,6 +19,7 @@ known, and the FLEX share of option value where listed quotes exist.
 
 from __future__ import annotations
 
+import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,7 +28,13 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from hidden_options.config import CI_CAPTURES_DIR, RAW_DIR, load_universe
+from hidden_options.config import (
+    ACCEPT_CI_RUNS_ENV,
+    CI_CAPTURES_DIR,
+    LOCAL_ONLY_ENV,
+    RAW_DIR,
+    load_universe,
+)
 from hidden_options.measure.hidden_share import (
     LISTED_INDEX_ROOTS,
     hidden_share,
@@ -43,7 +50,9 @@ from hidden_options.measure.hidden_share_checks import (
     records,
 )
 from hidden_options.measure.hidden_share_data import (
+    FETCH_HINT,
     CaptureDate,
+    CICapturesError,
     chain_open_interest,
     ci_roots,
     date_capture,
@@ -61,7 +70,7 @@ from hidden_options.measure.hidden_share_macros import hidden_share_macros
 from hidden_options.measure.hidden_share_value import value_summary
 from hidden_options.publish import formats
 from hidden_options.publish.registry import ANALYSES
-from hidden_options.publish.results import Result, now_iso
+from hidden_options.publish.results import RESULTS_DIR, Result, now_iso, read_results
 
 NAME = "hidden_share"
 THRESHOLDS = (0.10, 0.25, 0.50)
@@ -77,7 +86,7 @@ class HiddenInputs:
     `universe` maps each followed symbol (no `_` prefix) to its group: `programme` for
     the underlyings chosen for the option-income programmes on them, `control` for the
     liquid names chosen as controls. `ci_runs` names the CI captures read beside the
-    local ones, by run date.
+    local ones, by run date; `local_only` marks inputs read without them.
     """
 
     census: pd.DataFrame
@@ -86,6 +95,7 @@ class HiddenInputs:
     reports: pd.DataFrame
     universe: Mapping[str, str]
     ci_runs: Sequence[str] = ()
+    local_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -149,6 +159,7 @@ def hidden_share_result(inputs: HiddenInputs) -> Result:
             "flex": "data/raw/occ_flex",
         },
         "ci_runs": list(inputs.ci_runs),
+        "local_only": inputs.local_only,
         "census_rows": len(inputs.census),
         "capture_rows": len(inputs.captures),
         "chain_rows": len(inputs.chains),
@@ -164,15 +175,30 @@ def hidden_share_analysis() -> Result:
     return hidden_share_result(load_inputs())
 
 
-def load_inputs(raw: Path | None = None, ci: Path | None = None) -> HiddenInputs:
+def load_inputs(
+    raw: Path | None = None,
+    ci: Path | None = None,
+    *,
+    local_only: bool | None = None,
+    accept_ci_runs: bool | None = None,
+) -> HiddenInputs:
     """Read every input from `raw` (RAW_DIR by default) and the CI captures under `ci`
     (CI_CAPTURES_DIR by default), the FLEX report from the first chain settlement on.
 
     The census and the FLEX report are local only. Series-search captures and chains
-    are read from the local root first and then from each CI run.
+    are read from the local root first and then from each CI run. The CI runs must be
+    there and must be the runs the committed result was computed with, or the daily
+    numbers would change quietly; either raises CICapturesError. `local_only` skips the
+    CI captures and marks the inputs; `accept_ci_runs` accepts a different set of runs.
+    Left as None, each is read from its environment variable (LOCAL_ONLY_ENV,
+    ACCEPT_CI_RUNS_ENV), which `hidden-options results` sets from its flags.
     """
     raw = RAW_DIR if raw is None else raw
-    runs = ci_roots(CI_CAPTURES_DIR if ci is None else ci)
+    local_only = _switch(LOCAL_ONLY_ENV) if local_only is None else local_only
+    accept = _switch(ACCEPT_CI_RUNS_ENV) if accept_ci_runs is None else accept_ci_runs
+    runs = [] if local_only else ci_roots(CI_CAPTURES_DIR if ci is None else ci)
+    if not local_only and not accept:
+        _check_runs([run.parent.name for run in runs])
     roots = [raw, *runs]
     calendar = trading_calendar(raw)
     chains = load_chains(roots, calendar)
@@ -188,7 +214,28 @@ def load_inputs(raw: Path | None = None, ci: Path | None = None) -> HiddenInputs
         reports=load_reports(raw, pd.Timestamp(chains["oi_date"].min())),
         universe={symbol.lstrip("_"): group for symbol, group in groups.items()},
         ci_runs=[run.parent.name for run in runs],
+        local_only=local_only,
     )
+
+
+def _switch(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes"}
+
+
+def _check_runs(found: Sequence[str]) -> None:
+    """Refuse CI runs other than those the committed result in results/ was computed with."""
+    committed = read_results(RESULTS_DIR).get(NAME)
+    if committed is None or "ci_runs" not in committed.inputs:
+        return
+    expected = set(committed.inputs["ci_runs"])
+    missing, extra = sorted(expected - set(found)), sorted(set(found) - expected)
+    if missing or extra:
+        raise CICapturesError(
+            f"The CI runs on disk are not the {len(expected)} results/{NAME}.json was "
+            f"computed with (missing: {', '.join(missing) or 'none'}; new: "
+            f"{', '.join(extra) or 'none'}). {FETCH_HINT} To recompute on the runs on "
+            "disk, pass `--accept-ci-runs`."
+        )
 
 
 def _index_share(

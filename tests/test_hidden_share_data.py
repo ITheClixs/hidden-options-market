@@ -9,6 +9,7 @@ import pytest
 
 from hidden_options.measure import hidden_share_data as data
 from hidden_options.measure.hidden_share_data import (
+    CICapturesError,
     chain_dates,
     chain_open_interest,
     ci_roots,
@@ -271,39 +272,48 @@ class TestTwoRoots:
         with pytest.raises(ValueError, match="AAA"):
             date_captures(pd.concat([local, ci]), self.CHAIN)
 
-    def test_a_capture_taken_while_a_settlement_was_published_is_set_aside(self):
-        """Symbols that match different settlements mean the search changed mid-capture."""
-        chain = pd.concat(
+    @staticmethod
+    def split_world(on_first: int, on_second: int):
+        """Symbols S00, S01, ...: the chain shows 10 on 1 September and 20 on 2 September."""
+        names = [f"S{n:02d}" for n in range(on_first + on_second)]
+        chain = chain_oi(
             [
-                self.CHAIN,
-                chain_oi(
-                    [
-                        ("2026-09-01", "CCC", "2026-09-18", "C", 20),
-                        ("2026-09-02", "CCC", "2026-09-18", "C", 21),
-                    ]
-                ),
+                (day, name, "2026-09-18", "C", oi)
+                for name in names
+                for day, oi in (("2026-09-01", 10), ("2026-09-02", 20))
             ]
         )
-        mixed = self.tag(
-            pd.concat(
-                [
-                    capture([("AAA", "2026-09-18", 12, 5)]),
-                    capture([("BBB", "2026-09-18", 7, 0)], symbol="BBB"),
-                    capture([("CCC", "2026-09-18", 21, 0)], symbol="CCC"),
-                ]
-            ),
-            "2026-09-03",
-            1,
+        rows = pd.concat(
+            [
+                capture([(name, "2026-09-18", 10 if n < on_first else 20, 0)], symbol=name)
+                for n, name in enumerate(names)
+            ]
         )
-        clean = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
+        return chain, rows
 
-        dated, log = date_captures(pd.concat([clean, mixed]), chain)
+    def test_a_capture_split_across_two_settlements_is_set_aside(self):
+        """Many symbols on another settlement mean the search changed mid-capture."""
+        chain, rows = self.split_world(on_first=5, on_second=7)
+        mixed = self.tag(rows, "2026-09-03", 1)
 
-        assert log["mixed"].tolist() == [False, True]
-        assert log["reason"].tolist() == ["", "mixed"]
-        # Nothing from the mixed capture is kept: BBB's 1 September reading would be
-        # filed under 2 September otherwise.
-        assert sorted(dated["symbol"].unique()) == ["AAA"]
+        dated, log = date_captures(mixed, chain)
+
+        assert log["mixed"].tolist() == [True]
+        assert log["reason"].tolist() == ["mixed"]
+        assert log["dissenters"].tolist() == [5]
+        assert dated.empty
+
+    def test_a_single_dissenting_symbol_does_not_set_a_capture_aside(self):
+        """One stale chain reading cannot outvote the rest; the capture keeps its date."""
+        chain, rows = self.split_world(on_first=1, on_second=11)
+        clean = self.tag(rows, "2026-09-03", 0)
+
+        dated, log = date_captures(clean, chain)
+
+        assert log["mixed"].tolist() == [False]
+        assert log["dissenters"].tolist() == [1]
+        assert set(dated["date"]) == {pd.Timestamp("2026-09-02")}
+        assert dated["symbol"].nunique() == 12
 
     def test_a_capture_no_chain_can_date_is_set_aside_and_logged(self):
         dated_ok = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
@@ -325,7 +335,11 @@ class TestTwoRoots:
             tmp_path / "ci/2026-09-02/raw",
             tmp_path / "ci/2026-09-03/raw",
         ]
-        assert ci_roots(tmp_path / "absent") == []
+
+    def test_an_absent_ci_directory_is_refused_with_the_way_to_fetch_it(self, tmp_path):
+        with pytest.raises(CICapturesError, match="fetch_captures.sh --ci-captures") as error:
+            ci_roots(tmp_path / "absent")
+        assert str(tmp_path / "absent") in str(error.value)
 
 
 class TestIndexRows:

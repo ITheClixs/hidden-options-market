@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 from datetime import date
 from pathlib import Path
@@ -13,7 +14,9 @@ from hidden_options.collect.bars import refresh_flex_underlying_bars
 from hidden_options.collect.lock import AlreadyRunning, single_instance
 from hidden_options.collect.runner import run_daily_collection
 from hidden_options.config import (
+    ACCEPT_CI_RUNS_ENV,
     BARS_PATH,
+    LOCAL_ONLY_ENV,
     PROJECT_ROOT,
     RAW_DIR,
     load_programmes,
@@ -105,6 +108,17 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     results.add_argument("--only", metavar="NAME", help="Run only this analysis")
+    results.add_argument(
+        "--local-only",
+        action="store_true",
+        help="compute the hidden share without the CI captures; the result is marked",
+    )
+    results.add_argument(
+        "--accept-ci-runs",
+        action="store_true",
+        help="compute the hidden share on the CI runs on disk even if they differ from "
+        "the committed result's",
+    )
     _add_root(results)
     results.set_defaults(handler=_results)
 
@@ -269,6 +283,11 @@ def _refresh_bars(args: argparse.Namespace) -> int:
 
 def _results(args: argparse.Namespace) -> int:
     """Run registered analyses. Exit 2 for an unknown name or a mislabelled result."""
+    # The flags reach the analyses, which take no arguments, through the environment.
+    if args.local_only:
+        os.environ[LOCAL_ONLY_ENV] = "1"
+    if args.accept_ci_runs:
+        os.environ[ACCEPT_CI_RUNS_ENV] = "1"
     registry.load_registrations()
     if args.only is None and not registry.ANALYSES.select():
         print("No analyses are registered; nothing to do.")

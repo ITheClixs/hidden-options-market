@@ -15,9 +15,9 @@ Coloured: FLEX is at least half of all open interest. Squares: index products, w
 listed side comes from the Cboe chain. The {{HiddenCensusWithoutFlex}} census underlyings
 with no FLEX open interest are not drawn.*
 
-**For {{HiddenStableTen}} of the {{HiddenDailyComplete}} underlyings the collector follows,
-at least a tenth of option open interest is FLEX, outside the listed chain, on every
-date.** That holds on each of the {{HiddenDailyDates}} settlements captured from
+**For {{HiddenStableTen}} of the {{HiddenDailyComplete}} underlyings the collector follows
+that are observed on every date ({{HiddenDailyUniverse}} in all), at least a tenth of
+option open interest is FLEX, outside the listed chain, on every date.** That holds on each of the {{HiddenDailyDates}} settlements captured from
 {{HiddenDailyFirst}} to {{HiddenDailyLast}} ({{HiddenDailyMissing}} of the
 {{HiddenDailySpan}} in that span have no usable capture). For {{HiddenStableQuarter}} of
 those underlyings ({{HiddenStableQuarterNames}}) the share is at least 25% on every date,
@@ -39,8 +39,8 @@ value where a quote is one-sided or crossed, {{HiddenValueTheo}} of listed open 
 FLEX holds {{HiddenValueLow}}–{{HiddenValueHigh}} of the followed underlyings' option
 value, against {{HiddenValueOpenInterestLow}}–{{HiddenValueOpenInterestHigh}} of their open
 interest. The gap is mostly deep in-the-money legs and call and put lines paired at the
-same strike: on {{HiddenValueCompositionDate}}, {{HiddenValueIntrinsic}} of
-{{HiddenValueFlexTotal}} of FLEX value is intrinsic and {{HiddenValuePaired}} sits in
+same strike: on {{HiddenValueCompositionDate}}, {{HiddenValueIntrinsic}} of the
+{{HiddenValueFlexTotal}} of FLEX value on these underlyings is intrinsic and {{HiddenValuePaired}} sits in
 paired lines. One {{HiddenLineSymbol}} {{HiddenLineRight}} series, {{HiddenLineOpenInterest}}
 contracts struck at {{HiddenLineStrike}} and paired with {{HiddenLineOppositeOpenInterest}}
 {{HiddenLineOpposite}} contracts at the same strike, is marked at {{HiddenLineValue}},

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T09:13:21+00:00",
+  "generated_at": "2026-10-24T19:47:25+00:00",
   "inputs": {
     "capture_rows": 10684943,
     "census_rows": 486895,
@@ -57,6 +57,7 @@
       "2026-10-23",
       "2026-10-24"
     ],
+    "local_only": false,
     "report_rows": 2171224,
     "sources": {
       "census": "data/raw/occ_census",
@@ -208,6 +209,7 @@
     "HiddenLineStrike": "10,010.01",
     "HiddenLineSymbol": "SPY",
     "HiddenLineValue": "\\$14.7bn",
+    "HiddenNdxEitherLow": "24.1\\%",
     "HiddenNdxFullLow": "24.1\\%",
     "HiddenNdxFullLowDate": "2 September 2026",
     "HiddenNdxHigh": "32.7\\%",
@@ -218,10 +220,12 @@
     "HiddenReconDaily": "3,337",
     "HiddenReconMax": "0.00\\%",
     "HiddenReconSymbolDates": "3,824",
+    "HiddenRutEitherLow": "49.9\\%",
     "HiddenRutFullLow": "49.9\\%",
     "HiddenRutFullLowDate": "16 October 2026, a standard monthly expiry",
     "HiddenRutHigh": "55.2\\%",
     "HiddenRutLow": "51.3\\%",
+    "HiddenSpxEitherLow": "12.0\\%",
     "HiddenSpxFullLow": "12.0\\%",
     "HiddenSpxFullLowDate": "21 August 2026, a standard monthly expiry",
     "HiddenSpxHigh": "14.2\\%",

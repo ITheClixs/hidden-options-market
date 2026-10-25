@@ -18,6 +18,11 @@ RAW_DIR = DATA_ROOT / "raw"
 # Captures published by the private CI collector, one unpacked archive per run, each as
 # `<run date>/raw` in the same layout as RAW_DIR. Read beside RAW_DIR, never merged into it.
 CI_CAPTURES_DIR = DATA_ROOT / "ci_captures"
+# Opt-outs for the hidden-share analysis, set by `hidden-options results --local-only` and
+# `--accept-ci-runs`: compute without the CI captures (the result is marked), or accept a
+# set of CI runs other than the one the committed result was computed with.
+LOCAL_ONLY_ENV = "HIDDEN_OPTIONS_LOCAL_ONLY"
+ACCEPT_CI_RUNS_ENV = "HIDDEN_OPTIONS_ACCEPT_CI_RUNS"
 INTERIM_DIR = DATA_ROOT / "interim"
 # Daily bars for the FLEX underlyings, rewritten whole by `hidden-options refresh-bars`.
 BARS_PATH = DATA_ROOT / "flex_underlying_bars.parquet"

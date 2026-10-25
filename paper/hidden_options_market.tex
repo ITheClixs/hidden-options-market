@@ -38,8 +38,8 @@ before the turn and \OICycleLatest{} million in the latest cycle, \GrowthMultipl
 times as much, though the latest quarter added only $\OIQuarterChange$. On the last
 date its mark value was \ValueEnd{}. Set against the listed market one underlying at a
 time, it is not marginal: for \HiddenStableTen{} of the \HiddenDailyComplete{}
-underlyings we follow daily, most of them chosen for the option-income programmes
-written on them, FLEX is at least a tenth of option open interest on every one of
+underlyings we follow that are observed on every settlement, most of them chosen for the
+option-income programmes written on them, FLEX is at least a tenth of option open interest on every one of
 \HiddenDailyDates{} settlements, and in a census of \HiddenCensusUnderlyings{}
 underlyings with listed weekly options it is at least a tenth for \HiddenCensusTen{}.
 On an average date \WithinSixtyMean{} of open
@@ -108,7 +108,8 @@ listed weekly options the median FLEX share is \HiddenCensusMedian{}; \HiddenCen
 underlyings have at least a tenth of their open interest in FLEX and \HiddenCensusHalf{}
 at least half. A share on one date could flatter, so we count again over
 \HiddenDailyDates{} settlements: for \HiddenStableTen{} of the \HiddenDailyComplete{}
-underlyings we follow daily, FLEX is at least a tenth of open interest on every one of
+underlyings we follow that are observed on all of them (of \HiddenDailyUniverse{} in
+all), FLEX is at least a tenth of open interest on every one of
 those settlements, and for \HiddenStableHalfNames{} at least half, counting only series
 that expire after each date. Most of these
 underlyings were chosen for the option-income programmes written on them, and
@@ -119,8 +120,8 @@ FLEX holds \HiddenValueLow{} to \HiddenValueHigh{} of the option value of the
 underlyings we follow, against \HiddenValueOpenInterestLow{} to
 \HiddenValueOpenInterestHigh{} of their open interest. The gap comes mostly from deep
 in-the-money legs and from call and put lines paired at the same strike: on
-\HiddenValueCompositionDate{}, \HiddenValueIntrinsic{} of \HiddenValueFlexTotal{} of FLEX
-value is intrinsic, \HiddenValueDeep{} sits in series worth more than
+\HiddenValueCompositionDate{}, \HiddenValueIntrinsic{} of the \HiddenValueFlexTotal{} of
+FLEX value on these underlyings is intrinsic, \HiddenValueDeep{} sits in series worth more than
 \HiddenValueDeepThreshold{} intrinsic and \HiddenValuePaired{} in paired lines
 (Section~\ref{sec:hidden}).
 
@@ -424,7 +425,8 @@ lowest and highest share over the dates. At least half on every date:
 \HiddenStableHalfNames{}, but only under the index rule. Counted as the equity shares
 are, with the series expiring on a date included at their last reading, RUT's lowest
 share is \HiddenRutFullLow{}, on \HiddenRutFullLowDate{}; SPX, the other index product
-in the 10\% count, stays at or above \HiddenSpxFullLow{} counted either way. Across the \HiddenDailySearch{} names in the series search,
+in the 10\% count, stays at or above \HiddenSpxEitherLow{} counted either way. Across
+the \HiddenDailySearch{} names in the series search,
 FLEX is between \HiddenDailyAggregateLow{} and \HiddenDailyAggregateHigh{} of all their
 open interest on each date. The set is not a random draw:
 \HiddenStableTenProgramme{} of the \HiddenCompleteProgramme{} programme underlyings
@@ -603,8 +605,9 @@ than a year from expiry has grown from \OverOneYearStart{} to \OverOneYear{}.
 
 It is also a large part of many single options markets. On every one of
 \HiddenDailyDates{} settlements FLEX is at least a tenth of option open interest for
-\HiddenStableTen{} of the \HiddenDailyComplete{} underlyings we follow daily, most of them
-chosen for the option-income programmes written on them, and across a census of
+\HiddenStableTen{} of the \HiddenDailyComplete{} underlyings we follow that are observed on
+every settlement, most of them chosen for the option-income programmes written on them,
+and across a census of
 \HiddenCensusUnderlyings{} underlyings the median share is
 \HiddenCensusMedian{}. Research built on listed chains sees none of it.
 
