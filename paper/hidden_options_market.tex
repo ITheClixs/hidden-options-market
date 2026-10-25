@@ -53,8 +53,8 @@ regressions agrees, and a placebo using inventory dated \emph{after} the outcome
 larger $|t|$ than any genuine measure. Along the way we
 report two measurement results with wider application. First, a natural
 identification heuristic --- treating strikes off the standard listing grid as FLEX ---
-achieves precision $0.67$ and recall $0.34$ against the authoritative report, missing
-two thirds of FLEX because FLEX is frequently struck on the grid. Second, treating
+has precision \RulePrecision{} and recall \RuleRecall{} against OCC's own labels, missing
+\FlexOnGridShare{} of FLEX series because FLEX is frequently struck on the grid. Second, treating
 cleared series as economic positions mismeasures them severely and in both directions:
 a butterfly counted leg by leg is credited with 49 times its maximum attainable value,
 a four-leg collar is counted three times over, and a synthetic long call struck at
@@ -147,10 +147,11 @@ apply beyond FLEX.
 
 The first concerns identification. Before locating the authoritative report we
 identified FLEX indirectly, reasoning that listed strikes fall on a standard grid so an
-off-grid strike must be FLEX. Scored against the report, that heuristic achieves
-precision $0.67$ and recall $0.34$: it misses two thirds of FLEX, because FLEX is
-frequently struck \emph{on} the grid, and a third of what it flags is not FLEX. We
-report this because the reasoning is natural and the failure is not visible without
+off-grid strike must be FLEX. Scored against OCC's own labels on \CensusSeries{} census
+series, that heuristic has precision \RulePrecision{} and recall \RuleRecall{}: it misses
+\FlexOnGridShare{} of FLEX series, because FLEX is frequently struck \emph{on} the grid,
+and \RuleFalseShare{} of what it flags is not FLEX (Section~\ref{sec:identification}).
+We report this because the reasoning is natural and the failure is not visible without
 ground truth.
 
 The second concerns counting. Open interest is reported per series; a position is not a
@@ -455,40 +456,64 @@ at the same strike. It is marked at \HiddenLineValue{}, against \HiddenLineListe
 every listed \HiddenLineSymbol{} option together. We therefore report the value share
 beside the open-interest share and not in its place.
 
-\section{Two measurement results}
+\section{Strike-based identification fails}
+\label{sec:identification}
 
-\subsection{Identifying FLEX without the authoritative report}
+Listed strikes sit on a grid of whole dollars, halves and, on some products, quarters,
+while a FLEX strike is whatever the two counterparties agree. An off-grid strike
+therefore looks like a FLEX tell, and before we had OCC's FLEX report we identified FLEX
+that way. The series search lets us score the rule exactly, because it labels every
+series it lists: a FLEX product carries the listed root behind a leading digit.
 
-Listed strikes fall on a standard grid of whole dollars, halves and quarters, which
-suggests treating an off-grid strike as FLEX. Table~\ref{tab:confusion} scores that
-rule against the report over 486,895 cleared series.
+We score it on the census of \HiddenCensusDate{} (Section~\ref{sec:hidden}). A series
+here is one line of the search, a product, expiry and strike with its call and put open
+interest together, so a listed and a FLEX series at the same strike and expiry count as
+two. The search returns \CensusRows{} lines for the \HiddenCensusSymbols{} symbols. We
+leave out the \CensusAdjustedSeries{} in adjusted-deliverable classes, as before, and the
+\CensusEmptySeries{} with no open interest on either side, which hold no position to
+find. That leaves \CensusSeries{} series, \CensusFlexSeries{} of them FLEX.
 
-\begin{table}[t]
+\input{tables/confusion}
+
+The rule finds \RuleFlexFound{} of the \CensusFlexSeries{} FLEX series, a recall of
+\RuleRecall{}, and so misses \FlexOnGridShare{} of them (Table~\ref{tab:confusion}). Of
+the series it flags, \RuleListedFlagged{} are listed: its precision is \RulePrecision{},
+and \RuleFalseShare{} of what it calls FLEX is not. Counting the series with nothing open
+as well changes little (precision \RulePrecisionWithEmpty{}, recall
+\RuleRecallWithEmpty{}). Weighted by open interest the rule's flags are mostly right,
+with precision \RulePrecisionOpenInterest{}, because the listed series it flags are
+small. What it misses is large: \FlexOnGridOpenInterest{} of FLEX open interest sits on
+the grid, out of its reach.
+
+Figure~\ref{fig:grid} shows why: \FlexDollarShare{} of FLEX series sit on a whole dollar,
+holding \FlexDollarOpenInterest{} of FLEX open interest, against \ListedDollarShare{} of
+listed series. The largest FLEX series on a whole dollar, \RuleExampleProduct{} at
+\RuleExampleStrike{} expiring \RuleExampleExpiry{}, carries \RuleExampleOpenInterest{},
+and nothing in its strike tells it from a listed series. Off the grid the two groups
+part: only \ListedOffGridShare{} of listed series sit there. Listed strikes leave the grid
+through corporate actions, when a split or a special distribution adjusts the strikes of
+series already listed, and the listed series the rule flags come from
+\RuleListedFlaggedUnderlyings{}; \RuleListedFlaggedTopShare{} of them are on
+\RuleListedFlaggedTopNames{}.
+
+\begin{figure}[t]
 \centering
-\caption{The off-grid heuristic against the authoritative FLEX report.}
-\label{tab:confusion}
-\begin{tabular}{lrr}
-\toprule
-& True FLEX & Not FLEX \\
-\midrule
-Off-grid strike & 4,914 & 2,389 \\
-On-grid strike & 9,321 & 470,271 \\
-\midrule
-\multicolumn{3}{l}{Precision $0.673$ \quad Recall $0.345$ \quad $F_1$ $0.456$} \\
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[width=\textwidth]{figures/strike_grid.pdf}
+\caption{Where strikes sit on the listing grid, for the \CensusFlexSeries{} FLEX and
+\CensusListedSeries{} listed series of the census of \HiddenCensusDate{}: on a whole
+dollar (cents 00), a half dollar (50), a quarter (25 or 75), or off the grid. In each
+row the upper bar is FLEX and the lower listed, and each group's bars sum to 100\%
+within a panel. The shaded row is the only one the off-grid rule calls FLEX.}
+\label{fig:grid}
+\end{figure}
 
-The rule misses 9,321 FLEX series, 65.5\% of the FLEX in that universe, because FLEX is
-routinely struck on the grid --- a series such as \texttt{1AAON} at \$99.00 is FLEX at a
-round strike and no strike-based test can find it. A third of what the rule flags is
-not FLEX at all.
+The rule is therefore not noisy at random. It finds the FLEX that happens to be struck
+off the grid and misses the FLEX struck where listed strikes are, and how much of the
+second kind there is cannot be read from the strikes. A count of FLEX built on strikes
+falls short of the market by an amount that only the product symbols, or OCC's report,
+can supply.
 
-The consequence for anyone tempted by the same reasoning is that a strike-based
-identification of FLEX is not merely noisy but severely biased, and the bias is
-invisible without the authoritative source.
-
-\subsection{Cleared series are not economic positions}
+\section{Cleared series are not economic positions}
 \label{sec:positions}
 
 Open interest is reported per series. Positions span series. Three cases, each found
@@ -587,7 +612,7 @@ retention reached when collection began. That is enough to date one turn in grow
 too short to say whether the levelling of the latest cycles will last.
 \item \textbf{One outcome family.} Realised volatility in the underlying, not the option
 surface.
-\item \textbf{No structure decomposition in the panel.} The measurement section shows
+\item \textbf{No structure decomposition in the panel.} Section~\ref{sec:positions} shows
 that positions span series; the predictive tests use per-underlying aggregates and
 inherit none of that decomposition.
 \end{enumerate}
@@ -619,7 +644,8 @@ has a larger $|t|$ than any genuine predictor. An effect of \PredMDEShare{} of t
 of inventory would have been found four times in five.
 
 Two measurement findings travel further than the setting. A natural strike-based rule
-for identifying FLEX recovers a third of it. And cleared series are not economic
+for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the
+listing grid. And cleared series are not economic
 positions --- a distinction worth three orders of magnitude in one of the cases here,
 with errors that do not cancel.
 

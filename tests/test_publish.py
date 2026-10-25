@@ -508,7 +508,7 @@ class TestDrift:
         )
 
         assert run.returncode == 0, run.stderr
-        assert run.stdout.strip() == "[] ['hidden_share', 'market', 'predictive']"
+        assert run.stdout.strip() == "[] ['hidden_share', 'identification', 'market', 'predictive']"
 
 
 class TestRegistry:

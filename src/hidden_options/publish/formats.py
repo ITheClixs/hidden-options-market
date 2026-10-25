@@ -16,6 +16,16 @@ def count(value: float) -> str:
     return f"{round(value):,}"
 
 
+def counted(value: float, noun: str, plural: str | None = None) -> str:
+    """A count with its noun, which agrees in number: `1 underlying`, `15 underlyings`.
+
+    The plural is the noun with an `s` unless given (`series`, `series`). A sentence that
+    prints the macro then reads right whatever the count turns out to be.
+    """
+    many = f"{noun}s" if plural is None else plural
+    return f"{count(value)} {noun if round(value) == 1 else many}"
+
+
 def decimal(value: float, digits: int = 1) -> str:
     """A plain number at `digits` places: `2.1`, `-1.25`."""
     return f"{_unsigned_zero(value, digits):.{digits}f}"

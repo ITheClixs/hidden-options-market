@@ -1,0 +1,14 @@
+\begin{table}[t]
+\centering
+\caption{The off-grid strike rule against OCC's own labels, series by series.}
+\label{tab:confusion}
+\begin{tabular}{lrr}
+\toprule
+ & FLEX & Listed \\
+\midrule
+Strike off the grid & 4,835 & 2,004 \\
+Strike on the grid & 5,555 & 396,750 \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize A series is one line of OCC's series search on the census date: a product, expiry and strike, with its call and put open interest together. A series is FLEX when its product symbol has a leading digit; the rule flags a strike whose cents are not 00, 25, 50 or 75. Adjusted-deliverable classes and series with no open interest are left out, leaving 409,144 series, 10,390 of them FLEX. Precision $0.707$, recall $0.465$, $F_1$ $0.561$.\par}
+\end{table}

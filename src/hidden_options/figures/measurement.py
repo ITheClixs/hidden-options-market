@@ -1,4 +1,5 @@
-"""Figures for the measurement results. F3: how much of each options market is FLEX.
+"""Figures for the measurement results. F3: how much of each options market is FLEX. F4:
+why a strike rule cannot find it.
 
 F3 sets each underlying's FLEX open interest against its listed open interest on the
 census date, both on log scales. A line of constant FLEX share is a straight line of
@@ -7,9 +8,13 @@ point's distance above or below them reads as its share. The accent marks the
 underlyings where FLEX is at least half the market; the largest names, the index
 products and the accented ones carry their tickers, placed so that no two labels touch.
 
-The builder recomputes the census from the raw captures and refuses to draw against a
-`hidden_share` result from another census, since the figure and the text beside it
-would then disagree.
+F4 sets where FLEX and listed strikes sit on the listing grid side by side, as a share
+of series and of open interest: one row per grid position, FLEX in ink and listed in
+muted, each bar labelled with its share. The off-grid row, the only one the rule flags,
+sits on a faint band and is named as such.
+
+Each builder recomputes from the raw census and refuses to draw against a result from
+another census, since the figure and the text beside it would then disagree.
 """
 
 from __future__ import annotations
@@ -17,6 +22,7 @@ from __future__ import annotations
 import math
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import numpy as np
@@ -32,6 +38,9 @@ from matplotlib.transforms import Bbox
 from hidden_options.config import PROJECT_ROOT, RAW_DIR
 from hidden_options.figures.style import PALETTE, apply_style, new_figure, save
 from hidden_options.measure.hidden_share_result import census_view, load_inputs
+from hidden_options.measure.identification import GRID_POSITIONS, grid_shares, scored_series
+from hidden_options.measure.identification_result import load_dated_census
+from hidden_options.publish import formats
 from hidden_options.publish.registry import FIGURES
 from hidden_options.publish.results import RESULTS_DIR, read_results
 
@@ -176,13 +185,17 @@ def build_hidden_share(
 
 
 def _census_values(results: Path) -> Mapping[str, Any]:
-    found = read_results(results)
-    if RESULT not in found:
-        raise FileNotFoundError(
-            f"No {RESULT!r} result in {results}; run `hidden-options results --only {RESULT}`"
-        )
-    census: Mapping[str, Any] = found[RESULT].values["census"]
+    census: Mapping[str, Any] = _result_values(results, RESULT)["census"]
     return census
+
+
+def _result_values(results: Path, name: str) -> Mapping[str, Any]:
+    found = read_results(results)
+    if name not in found:
+        raise FileNotFoundError(
+            f"No {name!r} result in {results}; run `hidden-options results --only {name}`"
+        )
+    return found[name].values
 
 
 def _drawable(frame: pd.DataFrame) -> pd.DataFrame:
@@ -428,3 +441,134 @@ def _outside(box: Bbox, frame: Bbox) -> float:
     """How far `box` reaches past `frame`, weighted so that leaving the axes is never cheap."""
     reach = max(0.0, frame.x0 - box.x0, box.x1 - frame.x1, frame.y0 - box.y0, box.y1 - frame.y1)
     return float(reach) * 1e4
+
+
+# F4: where FLEX and listed strikes sit on the listing grid.
+GRID_FIGURE = "strike_grid"
+GRID_RESULT = "identification"
+GRID_LABELS: Mapping[str, str] = MappingProxyType(
+    {
+        "dollar": "Whole dollar",
+        "half": "Half dollar",
+        "quarter": "Quarter",
+        "off_grid": "Off the grid",
+    }
+)
+# Each panel: the measure it shows and its title.
+_GRID_PANELS = (("series", "Share of series"), ("open_interest", "Share of open interest"))
+# Each group: its colour and the name its top bar carries, upper bar of a row first.
+_GRID_GROUPS = (("flex", "ink", "FLEX"), ("listed", "muted", "listed"))
+_BAR_HEIGHT = 0.34
+# The value axis runs past 100% so a label still fits beside a bar that reaches it.
+_GRID_REACH = 1.24
+_GRID_TICKS = (0.0, 0.25, 0.5, 0.75, 1.0)
+_BAR_LABEL_GAP_PT = 2.5
+_GRID_TOLERANCE = 1e-9
+RULE_NOTE = "the rule flags this row"
+
+
+def share_label(share: float) -> str:
+    """A bar's share as its label reads: `49%`, `3.3%`, `0.04%`, `0%`.
+
+    Below a tenth of a percent the label keeps two places rather than writing `<0.1%`,
+    since `cmr10` has no `<` outside math.
+    """
+    if share == 0:
+        return "0%"
+    if share < 0.000995:
+        return f"{share * 100:.2f}%"
+    if share < 0.0995:
+        return f"{share * 100:.1f}%"
+    return f"{share * 100:.0f}%"
+
+
+def fig_grid(series: pd.DataFrame) -> Figure:
+    """F4 from `identification.scored_series` output.
+
+    Two panels, the share of series and the share of open interest, with a row per grid
+    position from the whole dollar down to off the grid. In each row FLEX (ink) sits
+    above listed (muted). The bars of the top row of the first panel carry the group
+    names; the off-grid row sits on a faint band, named in the second panel as the row
+    the rule flags.
+    """
+    shares = grid_shares(series)
+    fig = new_figure(1.0, aspect=0.36)
+    FigureCanvasAgg(fig)
+    axes = fig.subplots(1, 2, sharey=True)
+    rows = np.arange(len(GRID_POSITIONS), dtype=float)[::-1]
+    flagged = rows[GRID_POSITIONS.index("off_grid")]
+    top = float(np.max(rows))
+    for panel, (ax, (measure, title)) in enumerate(zip(axes, _GRID_PANELS, strict=True)):
+        ax.axhspan(flagged - 0.5, flagged + 0.5, color=PALETTE["faint"], alpha=0.5, lw=0, zorder=0)
+        for (group, colour, name), shift in zip(
+            _GRID_GROUPS, (_BAR_HEIGHT / 2, -_BAR_HEIGHT / 2), strict=True
+        ):
+            values = shares[f"{group}_{measure}"].to_numpy()
+            ax.barh(rows + shift, values, height=_BAR_HEIGHT, color=PALETTE[colour], zorder=2)
+            for row, value in zip(rows, values, strict=True):
+                named = panel == 0 and row == top
+                text = f"{share_label(value)} {name}" if named else share_label(value)
+                _bar_label(ax, value, row + shift, text)
+        _grid_axes(ax, rows, title)
+    axes[0].set_yticks(rows, [GRID_LABELS[position] for position in GRID_POSITIONS])
+    axes[1].tick_params(axis="y", labelleft=False)
+    axes[1].annotate(
+        RULE_NOTE,
+        xy=(_GRID_REACH, flagged),
+        xytext=(-2, 0),
+        textcoords="offset points",
+        ha="right",
+        va="center",
+        color=PALETTE["ink"],
+    )
+    return fig
+
+
+def _bar_label(ax: Axes, value: float, y: float, text: str) -> None:
+    label = ax.annotate(
+        text,
+        xy=(value, y),
+        xytext=(_BAR_LABEL_GAP_PT, 0),
+        textcoords="offset points",
+        ha="left",
+        va="center",
+        color=PALETTE["ink"],
+    )
+    label.set_in_layout(False)
+
+
+def _grid_axes(ax: Axes, rows: np.ndarray, title: str) -> None:
+    ax.set_title(title)
+    ax.set_xlim(0, _GRID_REACH)
+    ax.set_xticks(_GRID_TICKS, [f"{tick:.0%}" for tick in _GRID_TICKS])
+    ax.spines["bottom"].set_bounds(0, 1)
+    ax.set_ylim(rows.min() - 0.5, rows.max() + 0.5)
+    ax.spines["left"].set_visible(False)
+    ax.tick_params(axis="y", length=0)
+
+
+@FIGURES.register(GRID_FIGURE)
+def build_strike_grid(
+    raw: Path = RAW_DIR, results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT
+) -> None:
+    """F4, for the paper only: the README leads with F3 and says this in a paragraph."""
+    expected = _result_values(results, GRID_RESULT)
+    census, dated = load_dated_census(raw)
+    series = scored_series(census)
+    found = (formats.iso_date(dated.date), len(series))
+    stored = (expected["census"]["date"], expected["census"]["series"])
+    drawn = {name: column.to_dict() for name, column in grid_shares(series).items()}
+    agree = all(
+        math.isclose(drawn[f"{group}_{measure}"][position], value, abs_tol=_GRID_TOLERANCE)
+        for group, measures in expected["grid"].items()
+        for measure, by_position in measures.items()
+        for position, value in by_position.items()
+    )
+    if found != stored or not agree:
+        raise ValueError(
+            f"The census on disk ({found[0]}, {found[1]} series) does not give the shares "
+            f"results/{GRID_RESULT}.json holds ({stored[0]}, {stored[1]} series); run "
+            f"`hidden-options results --only {GRID_RESULT}`"
+        )
+    apply_style()
+    save(fig_grid(series), GRID_FIGURE, paper=True, readme=False, root=root)

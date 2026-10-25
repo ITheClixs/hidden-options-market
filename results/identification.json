@@ -1,0 +1,140 @@
+{
+  "generated_at": "2026-10-25T15:02:05+00:00",
+  "inputs": {
+    "census_rows": 486895,
+    "sources": {
+      "census": "data/raw/occ_census",
+      "chains": "data/raw/cboe_chain (to date the census)"
+    }
+  },
+  "macros": {
+    "CensusAdjustedSeries": "5,289",
+    "CensusEmptySeries": "72,462",
+    "CensusFlexSeries": "10,390",
+    "CensusListedSeries": "398,754",
+    "CensusRows": "486,895",
+    "CensusSeries": "409,144",
+    "FlexDollarOpenInterest": "59.2\\%",
+    "FlexDollarShare": "49.1\\%",
+    "FlexOnGridOpenInterest": "63.2\\%",
+    "FlexOnGridShare": "53.5\\%",
+    "ListedDollarShare": "89.0\\%",
+    "ListedOffGridShare": "0.5\\%",
+    "RuleExampleExpiry": "21 September 2026",
+    "RuleExampleOpenInterest": "250,000 contracts",
+    "RuleExampleProduct": "2PCG",
+    "RuleExampleStrike": "\\$22.00",
+    "RuleFOne": "0.561",
+    "RuleFalseShare": "29.3\\%",
+    "RuleFlexFound": "4,835",
+    "RuleFlexMissed": "5,555",
+    "RuleListedFlagged": "2,004",
+    "RuleListedFlaggedTopNames": "BKNG, FAS and NVDL",
+    "RuleListedFlaggedTopShare": "61\\%",
+    "RuleListedFlaggedUnderlyings": "15 underlyings",
+    "RuleListedPassed": "396,750",
+    "RulePrecision": "0.707",
+    "RulePrecisionOpenInterest": "0.937",
+    "RulePrecisionWithEmpty": "0.704",
+    "RuleRecall": "0.465",
+    "RuleRecallWithEmpty": "0.461"
+  },
+  "name": "identification",
+  "values": {
+    "census": {
+      "adjusted": 5289,
+      "compared": 68,
+      "date": "2026-08-14",
+      "empty": 72462,
+      "flex": 10390,
+      "flex_underlyings": 480,
+      "listed": 398754,
+      "rows": 486895,
+      "series": 409144,
+      "support": 68,
+      "symbols": 682
+    },
+    "grid": {
+      "flex": {
+        "open_interest": {
+          "dollar": 0.5918235198789853,
+          "half": 0.03213690172041139,
+          "off_grid": 0.3681845155528461,
+          "quarter": 0.00785506284775717
+        },
+        "series": {
+          "dollar": 0.4906641000962464,
+          "half": 0.03310875842155919,
+          "off_grid": 0.4653512993262753,
+          "quarter": 0.010875842155919153
+        }
+      },
+      "listed": {
+        "open_interest": {
+          "dollar": 0.9274361935623602,
+          "half": 0.06912519012347247,
+          "off_grid": 0.00308231751455317,
+          "quarter": 0.0003562987996141839
+        },
+        "series": {
+          "dollar": 0.8903559588116985,
+          "half": 0.10293062890905169,
+          "off_grid": 0.005025654915060413,
+          "quarter": 0.00168775736418945
+        }
+      }
+    },
+    "largest_whole_dollar": {
+      "expiry": "2026-09-21",
+      "open_interest": 250000,
+      "product_symbol": "2PCG",
+      "strike": 22.0,
+      "symbol": "PCG"
+    },
+    "listed_flagged": {
+      "top": [
+        {
+          "series": 683,
+          "symbol": "BKNG"
+        },
+        {
+          "series": 322,
+          "symbol": "FAS"
+        },
+        {
+          "series": 224,
+          "symbol": "NVDL"
+        }
+      ],
+      "top_share": 0.6132734530938124,
+      "underlyings": 15
+    },
+    "rule": {
+      "f1": 0.56126298682454,
+      "fn": 5555,
+      "fp": 2004,
+      "precision": 0.7069747039040796,
+      "recall": 0.4653512993262753,
+      "tn": 396750,
+      "tp": 4835
+    },
+    "rule_open_interest": {
+      "f1": 0.5286030366010162,
+      "fn": 39540796,
+      "fp": 1555983,
+      "precision": 0.9367435388774759,
+      "recall": 0.3681845155528461,
+      "tn": 503253464,
+      "tp": 23042026
+    },
+    "rule_with_empty": {
+      "f1": 0.5567313986471744,
+      "fn": 5977,
+      "fp": 2149,
+      "precision": 0.7036679536679536,
+      "recall": 0.4605595667870036,
+      "tn": 468377,
+      "tp": 5103
+    }
+  }
+}

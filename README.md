@@ -134,12 +134,16 @@ retrospectively for free. The first version of this test, on a shorter panel, is
 
 ## Two measurement results that travel
 
-**FLEX cannot be found by its strikes.** Listed strikes sit on a grid, so an off-grid
-strike looks like a FLEX tell. Scored against the OCC report over 486,895 cleared series,
-that rule has precision 0.67 and recall 0.34. FLEX is routinely struck *on* the grid —
-`1AAON` at \$99.00 is FLEX — so two thirds of it is invisible to any strike-based test,
-and a third of what the rule flags is not FLEX at all. This project used the rule first;
-the superseded census is kept as it was in
+**FLEX cannot be found by its strikes.** Listed strikes sit on a grid of whole dollars,
+halves and quarters, so an off-grid strike looks like a FLEX tell. OCC's series search
+marks every FLEX product with a leading digit, so the rule can be scored: over the
+409,144 series with open interest in the 14 August 2026 census, it has
+precision 0.707 and recall 0.465. FLEX is routinely struck *on* the
+grid: 49.1\% of FLEX series sit on a whole dollar, the largest of them
+`2PCG` at \$22.00 with 250,000 contracts. So
+53.5\% of FLEX series, and 63.2\% of FLEX open interest,
+are invisible to any strike-based test, and 29.3\% of what the rule flags is
+listed. This project used the rule first; the superseded census is kept as it was in
 [`docs/log/2026-08-18-flex-census.md`](docs/log/2026-08-18-flex-census.md).
 
 **A cleared series is not a position.** Open interest is reported per series, and
@@ -179,18 +183,19 @@ fails if any of them differs from its result file.
 ## Layout
 
 ```
-src/hidden_options/collect/occ_flex.py      OCC FLEX report: fetch, parse, validate
-src/hidden_options/collect/backfill.py      fetch the FLEX reports missing for a span of dates
-src/hidden_options/measure/flex_panel.py    panel assembly and inventory measures
-src/hidden_options/measure/hidden_share*.py how much of each options market is FLEX
-src/hidden_options/measure/structures.py    leg grouping and valuation on the underlying
-src/hidden_options/predict/                 the predictive panel, regressions and permutation test
-src/hidden_options/publish/                 results/ to the paper's numbers and tables and this README
-src/hidden_options/collect/                 chains, holdings, bars and N-PORT collectors
-scripts/                                    scheduling, one-off back-fills, reproduce.sh
-docs/                                       how the data is collected; the template for this README
-docs/log/                                   superseded work and corrections, dated, as written
-archive/                                    the scripts behind the log's results
+src/hidden_options/collect/occ_flex.py        OCC FLEX report: fetch, parse, validate
+src/hidden_options/collect/backfill.py        fetch the FLEX reports missing for a span of dates
+src/hidden_options/measure/flex_panel.py      panel assembly and inventory measures
+src/hidden_options/measure/hidden_share*.py   how much of each options market is FLEX
+src/hidden_options/measure/identification*.py why a strike rule cannot find FLEX
+src/hidden_options/measure/structures.py      leg grouping and valuation on the underlying
+src/hidden_options/predict/                   the predictive panel, regressions and permutation test
+src/hidden_options/publish/                   results/ to the paper's numbers and tables and this README
+src/hidden_options/collect/                   chains, holdings, bars and N-PORT collectors
+scripts/                                      scheduling, one-off back-fills, reproduce.sh
+docs/                                         how the data is collected; the template for this README
+docs/log/                                     superseded work and corrections, dated, as written
+archive/                                      the scripts behind the log's results
 ```
 
 The earlier strike-heuristic census is rebuilt by `scripts/reproduce.sh`; the write-ups
