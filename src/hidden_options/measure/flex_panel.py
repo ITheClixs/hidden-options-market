@@ -107,7 +107,7 @@ def exercise_style_evidence(class_name: object) -> tuple[str | None, str]:
     return style, "strict" if spelled_out else "clipped"
 
 
-def _exercise_styles(panel: pd.DataFrame) -> np.ndarray:
+def exercise_styles(panel: pd.DataFrame) -> np.ndarray:
     """Exercise style per row: the heading's own marker, else European for indices.
 
     Index options are European-style as a rule and their headings seldom use the equity
@@ -161,7 +161,7 @@ def load_panel(root: Path, kinds: tuple[str, ...] = ("equity", "index")) -> pd.D
     )
     panel["available_at"] = _available_at(panel["report_date"])
     # Object dtype keeps the unknowns as None; a bare array would be coerced to NaN.
-    panel["exercise_style"] = pd.Series(_exercise_styles(panel), index=panel.index, dtype=object)
+    panel["exercise_style"] = pd.Series(exercise_styles(panel), index=panel.index, dtype=object)
     return panel
 
 
@@ -263,6 +263,7 @@ __all__ = [
     "PanelSummary",
     "daily_inventory",
     "exercise_style_evidence",
+    "exercise_styles",
     "inventory_changes",
     "load_panel",
     "parse_exercise_style",

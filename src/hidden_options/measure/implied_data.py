@@ -21,6 +21,7 @@
 
 from __future__ import annotations
 
+import glob
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,9 +35,10 @@ from hidden_options.config import (
     BARS_PATH,
     CI_CAPTURES_DIR,
     LOCAL_ONLY_ENV,
+    PANEL_END,
     RAW_DIR,
 )
-from hidden_options.measure.flex_panel import exercise_style_evidence, load_panel
+from hidden_options.measure.flex_panel import exercise_style_evidence, exercise_styles
 from hidden_options.measure.hidden_share import LISTED_INDEX_ROOTS
 from hidden_options.measure.hidden_share_data import (
     check_ci_runs,
@@ -62,19 +64,48 @@ LISTED_COLUMNS = ("date", "symbol", "root", "expiry", "right", "strike", "iv")
 SPOT_COLUMNS = ("date", "underlying", "spot", "source")
 STYLE_GROUPS = ("strict", "clipped", "prefix", "fallback", "index")
 BAR_COLUMNS = ("symbol", "timestamp", "close")
+# What the result keeps of a chain reading, and of a panel row it only counts styles on.
+READING_COLUMNS = (
+    "date",
+    "symbol",
+    "quote_timestamp",
+    "underlying_price",
+    "contract",
+    "root",
+    "expiry",
+    "right",
+    "strike",
+    "iv",
+)
+STYLE_COLUMNS = ("report_date", "kind", "class_name", "root", "exercise_style")
+_PANEL_READ_COLUMNS = (
+    "report_date",
+    "kind",
+    "class_name",
+    "root",
+    "underlying",
+    "right",
+    "expiry",
+    "strike",
+    "mark_price",
+    "open_interest",
+)
 
 
 @dataclass(frozen=True)
 class ImpliedInputs:
     """What the result is computed from, as the loaders return it.
 
-    `panel` is the whole FLEX panel (`load_panel`), `chains` every chain row with its
-    `iv` (`load_chains`), `bars` the daily bars. `ci_runs` names the CI captures read
-    beside the local ones; `local_only` marks inputs read without them.
+    `panel` holds the FLEX rows that may be inverted, with their exercise style;
+    `styles` the equity rows of the whole panel in STYLE_COLUMNS, for the style counts;
+    `readings` each symbol's first chain reading after every session's close
+    (`close_readings`); `bars` the daily bars. `ci_runs` names the CI captures read beside
+    the local ones; `local_only` marks inputs read without them.
     """
 
     panel: pd.DataFrame
-    chains: pd.DataFrame
+    styles: pd.DataFrame
+    readings: pd.DataFrame
     bars: pd.DataFrame
     ci_runs: Sequence[str] = ()
     local_only: bool = False
@@ -88,11 +119,14 @@ def load_inputs(
     local_only: bool | None = None,
     accept_ci_runs: bool | None = None,
 ) -> ImpliedInputs:
-    """Read the panel, the chains (local, then each CI run) and the bars.
+    """Read the chain readings (local, then each CI run), the panel and the bars.
 
-    The CI captures are guarded as the hidden-share result guards them: they must be
-    present, and be the runs the committed result used, unless `local_only` or
-    `accept_ci_runs` says otherwise (each read from its environment variable when None).
+    Each chain file is cut to its first reading after the close as it is read, and the
+    panel is read in full only from the first date so read to PANEL_END; before that only
+    the style columns are kept. The CI captures are guarded as the hidden-share result
+    guards them: they must be present, and be the runs the committed result used, unless
+    `local_only` or `accept_ci_runs` says otherwise (each read from its environment
+    variable when None).
     """
     raw = RAW_DIR if raw is None else raw
     local_only = switch_on(LOCAL_ONLY_ENV) if local_only is None else local_only
@@ -101,9 +135,14 @@ def load_inputs(
     names = [run.parent.name for run in runs]
     if not local_only and not accept:
         check_ci_runs(names, RESULT_NAME, RESULTS_DIR)
-    chains = load_chains([raw, *runs], trading_calendar(raw), extra=("iv",))
+    readings = earliest_readings(
+        load_chains([raw, *runs], trading_calendar(raw), extra=("iv",), keep=_file_readings)
+    )
+    end = pd.Timestamp(PANEL_END)
+    panel = _read_panel(raw, ("equity", "index"), _PANEL_READ_COLUMNS, readings["date"].min(), end)
+    styles = _read_panel(raw, ("equity",), STYLE_COLUMNS[:-1], None, end)
     bars = pd.read_parquet(BARS_PATH if bars_path is None else bars_path, columns=list(BAR_COLUMNS))
-    return ImpliedInputs(load_panel(raw), chains, bars, names, local_only)
+    return ImpliedInputs(panel, styles[list(STYLE_COLUMNS)], readings, bars, names, local_only)
 
 
 def close_readings(chains: pd.DataFrame) -> pd.DataFrame:
@@ -112,12 +151,53 @@ def close_readings(chains: pd.DataFrame) -> pd.DataFrame:
     day = local.dt.tz_localize(None).dt.normalize()
     minutes = local.dt.hour * 60 + local.dt.minute
     trading = (day == chains["session"]) & (minutes < CLOSE_MINUTES + QUOTE_DELAY_MINUTES)
-    after = chains[~trading]
-    first = after.groupby(["symbol", "session"])["quote_timestamp"].transform("min")
-    frame = after[after["quote_timestamp"] == first]
-    frame = frame.drop_duplicates(["symbol", "session", "contract"])
-    readings: pd.DataFrame = frame.rename(columns={"session": "date"}).reset_index(drop=True)
-    return readings
+    return earliest_readings(chains[~trading].rename(columns={"session": "date"}))
+
+
+def earliest_readings(readings: pd.DataFrame) -> pd.DataFrame:
+    """Each symbol's earliest reading of each date, every series once."""
+    first = readings.groupby(["symbol", "date"])["quote_timestamp"].transform("min")
+    frame = readings[readings["quote_timestamp"] == first]
+    kept: pd.DataFrame = frame.drop_duplicates(["symbol", "date", "contract"]).reset_index(
+        drop=True
+    )
+    return kept
+
+
+def _file_readings(chain: pd.DataFrame) -> pd.DataFrame:
+    """One chain file cut to its first reading after each close, in READING_COLUMNS."""
+    kept: pd.DataFrame = close_readings(chain)[list(READING_COLUMNS)]
+    return kept
+
+
+def _read_panel(
+    raw: Path,
+    kinds: Sequence[str],
+    columns: Sequence[str],
+    since: pd.Timestamp | None,
+    until: pd.Timestamp,
+) -> pd.DataFrame:
+    """FLEX report rows of `kinds` dated `since` to `until`, in `columns`, with their
+    exercise style as `load_panel` reads it."""
+    paths = [
+        path
+        for kind in kinds
+        for path in sorted(glob.glob(str(raw / f"occ_flex/date=*/{kind}.parquet")))
+        if (since is None or _folder_date(path) >= since) and _folder_date(path) <= until
+    ]
+    if not paths:
+        raise FileNotFoundError(f"No FLEX reports under {raw}/occ_flex up to {until:%Y-%m-%d}")
+    panel = pd.concat([pd.read_parquet(path, columns=list(columns)) for path in paths])
+    panel = panel.reset_index(drop=True)
+    panel["report_date"] = pd.to_datetime(panel["report_date"])
+    if "expiry" in panel.columns:
+        panel["expiry"] = pd.to_datetime(panel["expiry"])
+    panel["exercise_style"] = pd.Series(exercise_styles(panel), index=panel.index, dtype=object)
+    return panel
+
+
+def _folder_date(path: str) -> pd.Timestamp:
+    return pd.Timestamp(path.split("date=")[1][:10])
 
 
 def listed_quotes(readings: pd.DataFrame) -> pd.DataFrame:
@@ -231,11 +311,14 @@ def _day(values: pd.Series) -> pd.Series:
 
 __all__ = [
     "INDEX_FRACTIONS",
+    "READING_COLUMNS",
     "RESULT_NAME",
     "SPOT_AGREEMENT",
+    "STYLE_COLUMNS",
     "STYLE_GROUPS",
     "ImpliedInputs",
     "close_readings",
+    "earliest_readings",
     "equity_closes",
     "listed_quotes",
     "load_inputs",

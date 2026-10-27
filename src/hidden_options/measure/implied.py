@@ -10,7 +10,7 @@ The model, one choice per input:
 * European rows: Black-Scholes. American rows: a 200-step Cox-Ross-Rubinstein tree,
   except where early exercise never pays (see `pricing.early_exercise_matters`), where
   the closed form is exact.
-* Rate RATE = 0.04, the constant `gamma_gap` already uses, and carry yield CARRY = 0: no
+* Rate RATE, the 0.04 `gamma_gap` already uses (imported from it), and carry yield CARRY = 0: no
   dividends. Both are recorded with every result that uses them.
 * Time: calendar days from the report date to expiry, over 365.
 * Exercise style: the panel's, read from OCC's class heading; index rows are European
@@ -43,6 +43,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import brentq
 
+from hidden_options.measure.gamma_gap import RISK_FREE
 from hidden_options.measure.hidden_share import CONTRACT_MULTIPLIER, listed_product
 from hidden_options.measure.pricing import (
     BoolArray,
@@ -56,7 +57,7 @@ from hidden_options.measure.pricing import (
     lowest_tree_sigma,
 )
 
-RATE = 0.04
+RATE = RISK_FREE
 CARRY = 0.0
 DAYS_PER_YEAR = 365
 SIGMA_BOUNDS = (1e-4, 5.0)
@@ -134,8 +135,9 @@ class InversionStatus(StrEnum):
     ZERO_PRICE: the mark is zero, negative or missing.
     NO_SPOT: there is no price for the underlying on the date.
     BELOW_INTRINSIC: the mark is below the model's price at the bottom of the bracket,
-        which is its intrinsic value: spot against strike now for an American row,
-        against the discounted strike for a European one.
+        which is its intrinsic value: spot against strike now on the tree (an American put
+        here), spot against the discounted strike in closed form (European rows, and
+        American calls, which with no carry yield are priced as European).
     NO_CONVERGENCE: no volatility in the bracket gives the mark (it is above the price at
         500%), or the search did not settle.
     OK: the row has a volatility.
@@ -215,7 +217,7 @@ def implied_vols_frame(frame: pd.DataFrame, *, rate: float, carry: float = CARRY
     """`implied_vols` for a frame that carries its own `spot`, over any number of dates."""
     years = _years(frame)
     style = inversion_style(frame)
-    iv, status = _invert(
+    iv, status, at_floor = _invert(
         price=frame["mark_price"].to_numpy(dtype=float),
         spot=frame["spot"].to_numpy(dtype=float),
         strike=frame["strike"].to_numpy(dtype=float),
@@ -225,7 +227,9 @@ def implied_vols_frame(frame: pd.DataFrame, *, rate: float, carry: float = CARRY
         rate=rate,
         carry=carry,
     )
-    return frame.assign(years=years, inverted_as=style, iv=iv, iv_status=status)
+    return frame.assign(
+        years=years, inverted_as=style, iv=iv, iv_status=status, iv_at_floor=at_floor
+    )
 
 
 def inversion_style(frame: pd.DataFrame) -> pd.Series:
@@ -429,9 +433,11 @@ def _invert(
     american: BoolArray,
     rate: float,
     carry: float,
-) -> tuple[FloatArray, np.ndarray]:
-    """Volatility and status for every row; the tree only where early exercise matters."""
+) -> tuple[FloatArray, np.ndarray, BoolArray]:
+    """Volatility, status and the at-floor flag for every row; the tree only where early
+    exercise matters."""
     iv = np.full(price.size, np.nan)
+    at_floor = np.zeros(price.size, dtype=bool)
     early = _precheck(price, spot, years)
     open_rows = early == ""
     status = np.where(open_rows, InversionStatus.OK.value, early).astype(object)
@@ -439,7 +445,7 @@ def _invert(
     for on_tree in (False, True):
         rows = np.flatnonzero(open_rows & (tree == on_tree))
         if rows.size:
-            iv[rows], status[rows] = _invert_rows(
+            iv[rows], status[rows], at_floor[rows] = _invert_rows(
                 price[rows],
                 spot[rows],
                 strike[rows],
@@ -449,7 +455,7 @@ def _invert(
                 rate,
                 carry,
             )
-    return iv, status
+    return iv, status, at_floor
 
 
 def _invert_rows(
@@ -461,8 +467,13 @@ def _invert_rows(
     on_tree: bool,
     rate: float,
     carry: float,
-) -> tuple[FloatArray, np.ndarray]:
-    """Rows priced by one model: the bracket ends first, then the search inside it."""
+) -> tuple[FloatArray, np.ndarray, BoolArray]:
+    """Rows priced by one model: the bracket ends first, then the search inside it.
+
+    The third array flags marks within FLOOR_TOL of the price at the bottom of the
+    bracket: at their intrinsic value, their volatility is the bracket's floor and says
+    nothing about the market's.
+    """
     pricer = binomial if on_tree else black_scholes
 
     def model(rows: np.ndarray, sigma: FloatArray) -> FloatArray:
@@ -508,7 +519,7 @@ def _invert_rows(
         )
         iv[inside[converged]] = sigma[converged]
         status[inside[~converged]] = InversionStatus.NO_CONVERGENCE.value
-    return iv, status
+    return iv, status, on_low
 
 
 def _start(
@@ -533,7 +544,7 @@ def _start(
     if not on_tree:
         forward = s * np.exp((rate - carry) * t)
         return np.asarray(np.sqrt(2.0 * np.abs(np.log(forward / k)) / t), dtype=np.float64)
-    european, _ = _invert_rows(price[rows], s, k, t, is_call[rows], False, rate, carry)
+    european = _invert_rows(price[rows], s, k, t, is_call[rows], False, rate, carry)[0]
     return np.where(np.isfinite(european), european, 0.5)
 
 

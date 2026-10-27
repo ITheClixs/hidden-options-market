@@ -522,6 +522,35 @@ class TestLoaders:
         ]
         assert sorted(chains["oi_date"]) == [pd.Timestamp("2026-09-01"), pd.Timestamp("2026-09-02")]
 
+    def test_a_keep_hook_reduces_each_file_before_they_are_joined(self, tmp_path):
+        for day, oi in (("2026-09-02", 7.0), ("2026-09-03", 9.0)):
+            chain = pd.DataFrame(
+                {
+                    "symbol": ["AAA", "AAA"],
+                    "quote_timestamp": [f"{day} 20:15:00"] * 2,
+                    "underlying_price": [100.0, 100.0],
+                    "contract": ["AAA260918C00100000", "AAA260918P00100000"],
+                    "expiry": [pd.Timestamp("2026-09-18").date()] * 2,
+                    "right": ["C", "P"],
+                    "strike": [100.0, 100.0],
+                    "bid": [1.0, 1.0],
+                    "ask": [1.2, 1.2],
+                    "theo": [1.1, 1.1],
+                    "open_interest": [oi, oi],
+                }
+            )
+            self.write(tmp_path / f"cboe_chain/date={day}/equity_AAA.parquet", chain)
+        seen = []
+
+        def calls_only(frame):
+            seen.append(len(frame))
+            return frame[frame["right"] == "C"][["symbol", "session", "open_interest"]]
+
+        chains = load_chains(tmp_path, CALENDAR, keep=calls_only)
+        assert seen == [2, 2]  # each file whole, already dated
+        assert chains["open_interest"].tolist() == [7.0, 9.0]
+        assert list(chains.columns) == ["symbol", "session", "open_interest"]
+
     def test_missing_inputs_are_named(self, tmp_path):
         with pytest.raises(FileNotFoundError, match="occ_flex"):
             trading_calendar(tmp_path)

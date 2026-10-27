@@ -6,15 +6,18 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from hidden_options.measure.implied_data import STYLE_COLUMNS
 from hidden_options.publish.latex import collect_macros
 from hidden_options.publish.results import Result, read_results, write_result
 from implied_stub import bars, chains, panel
 
 
 def inputs():
-    from hidden_options.measure.implied_data import ImpliedInputs
+    from hidden_options.measure.implied_data import ImpliedInputs, close_readings
 
-    return ImpliedInputs(panel(), chains(), bars(), ["2026-09-03"], False)
+    rows = panel()
+    styles = rows.loc[rows["kind"] == "equity", list(STYLE_COLUMNS)]
+    return ImpliedInputs(rows, styles, close_readings(chains()), bars(), ["2026-09-03"], False)
 
 
 @pytest.fixture(scope="module")
@@ -66,6 +69,7 @@ class TestResult:
             "top_share": 1.0,
         }
         assert coverage["no_spot_underlyings"] == ["BBB", "DJX"]
+        assert coverage["at_floor"] == 0
 
     def test_spots(self, result):
         spots = result.values["spots"]
@@ -131,18 +135,19 @@ class TestResult:
 
     def test_styles(self, result):
         styles = result.values["styles"]
-        assert styles["panel"]["equity_rows"] == 16
+        assert styles["panel"]["equity_rows"] == 17
         assert styles["panel"]["by_group"] == {
-            "strict": 11,
+            "strict": 12,
             "clipped": 1,
             "prefix": 3,
             "fallback": 1,
         }
-        assert styles["panel"]["unread_share"] == pytest.approx(0.25)
+        assert styles["panel"]["unread_share"] == pytest.approx(4 / 17)
         assert styles["window"]["equity_rows"] == 12
         agreement = styles["prefix_agreement"]
-        assert (agreement["checked"], agreement["agree"]) == (12, 12)
-        assert (agreement["contradict"], agreement["other"]) == (0, 0)
+        # 2AAA under an AMER/FLEX heading on 3 August contradicts the pairing.
+        assert (agreement["checked"], agreement["agree"]) == (13, 12)
+        assert (agreement["contradict"], agreement["other"]) == (1, 0)
 
     def test_macros(self, result):
         macros = result.macros
@@ -160,14 +165,17 @@ class TestResult:
         assert macros["IvMatchedSeries"] == "5"
         assert macros["IvIndexMatched"] == "1"
         assert macros["IvDomainCells"] == "0"
-        assert macros["IvUnreadShare"] == "25.0\\%"
+        assert macros["IvUnreadShare"] == "23.5\\%"
+        assert macros["IvMedianBiasCalls"] == "1.00"
+        assert macros["IvMedianBiasPuts"] == "0.00"
+        assert macros["IvAtFloor"] == "0"
         assert macros["IvFallbackRows"] == "1 series-day"
         assert macros["IvPrefixGap"] == "0.00"
         assert macros["IvBelowTopNames"] == "AAA"
         assert macros["IvBelowTopShare"] == "100.0\\%"
         assert macros["IvSpotSetAside"] == "1"
         assert macros["IvSpotAgreement"] == "0.5\\%"
-        assert macros["IvPrefixContradict"] == "0"
+        assert macros["IvPrefixContradict"] == "1"
         assert macros["IvSigmaLow"] == "0.01\\%"
         assert macros["IvSigmaHigh"] == "500\\%"
         assert macros["IvDeepMoneyness"] == "90\\%"
@@ -176,7 +184,9 @@ class TestResult:
     def test_records_its_inputs(self, result):
         assert result.inputs["ci_runs"] == ["2026-09-03"]
         assert result.inputs["local_only"] is False
-        assert result.inputs["panel_rows"] == 19
+        assert result.inputs["panel_rows"] == 20
+        assert result.inputs["style_rows"] == 17
+        assert result.inputs["bar_rows"] == 6
         assert result.inputs["panel_end"] == "2026-10-22"
 
 
@@ -188,8 +198,11 @@ class TestPanelEnd:
         values = implied_result.implied_validation_result(inputs()).values
         assert (values["window"]["last_date"], values["window"]["dates"]) == ("2026-09-01", 1)
         assert values["window"]["panel_end"] == "2026-09-01"
-        # The full-panel style counts stop at the panel end too.
-        assert values["styles"]["panel"]["equity_rows"] == 15
+        # The full-panel style counts, the readings and the bars stop at the panel end too.
+        assert values["styles"]["panel"]["equity_rows"] == 16
+        result = implied_result.implied_validation_result(inputs())
+        assert result.inputs["bar_rows"] == 4
+        assert result.inputs["reading_rows"] == 9
 
     def test_the_panel_end_is_one_constant(self):
         from hidden_options import config
@@ -205,7 +218,11 @@ class TestDomain:
         values = implied_result.implied_validation_result(inputs()).values
         assert values["domain"]["cells"] > 0
         assert ["1.00-1.05", "91-365"] in values["domain"]["buckets"]
-        assert 0 < values["domain"]["usable_open_interest"] <= values["domain"]["ok_open_interest"]
+        domain = values["domain"]
+        assert 0 < domain["usable_open_interest"] <= domain["ok_open_interest"]
+        by_kind = domain["usable_open_interest_by_kind"]
+        assert set(by_kind) == {"equity", "index"}
+        assert 0 < by_kind["equity"] <= domain["ok_open_interest_by_kind"]["equity"]
 
 
 class TestAnalysis:

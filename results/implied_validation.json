@@ -1,8 +1,7 @@
 {
-  "generated_at": "2026-10-27T20:48:30+00:00",
+  "generated_at": "2026-10-27T21:01:45+00:00",
   "inputs": {
-    "bar_rows": 1055665,
-    "chain_rows": 26128108,
+    "bar_rows": 1054212,
     "ci_runs": [
       "2026-08-16",
       "2026-08-17",
@@ -58,14 +57,17 @@
     ],
     "local_only": false,
     "panel_end": "2026-10-22",
-    "panel_rows": 15179194,
+    "panel_rows": 2171224,
+    "reading_rows": 12325226,
     "sources": {
       "bars": "data/flex_underlying_bars.parquet",
       "chains": "data/raw/cboe_chain, data/ci_captures/*/raw/cboe_chain",
       "flex": "data/raw/occ_flex"
-    }
+    },
+    "style_rows": 5156199
   },
   "macros": {
+    "IvAtFloor": "22",
     "IvBelowDeepCalls": "89.1\\%",
     "IvBelowIntrinsic": "87,430",
     "IvBelowTopNames": "SPX, SPY, RUT, XSP and IWM",
@@ -82,6 +84,8 @@
     "IvDomainFailShort": "6",
     "IvDomainOfCells": "50",
     "IvDomainOpenInterest": "89.1\\%",
+    "IvDomainOpenInterestEquity": "89.3\\%",
+    "IvDomainOpenInterestIndex": "85.7\\%",
     "IvExpired": "18,142",
     "IvFallbackRows": "0 series-days",
     "IvFirstDate": "14 August 2026",
@@ -90,6 +94,8 @@
     "IvMatched": "119,813",
     "IvMatchedSeries": "6,445",
     "IvMedianBias": "-0.01",
+    "IvMedianBiasCalls": "0.13",
+    "IvMedianBiasPuts": "-0.14",
     "IvMedianGap": "0.43",
     "IvMedianGapHigh": "0.46",
     "IvMedianGapLow": "0.71",
@@ -125,6 +131,7 @@
   "name": "implied_validation",
   "values": {
     "coverage": {
+      "at_floor": 22,
       "below_intrinsic": {
         "deep_calls": 77882,
         "rows": 87430,
@@ -502,7 +509,15 @@
       "failing_short": 6,
       "of_cells": 50,
       "ok_open_interest": 0.9272082156290948,
-      "usable_open_interest": 0.8905716807034723
+      "ok_open_interest_by_kind": {
+        "equity": 0.9322780399420296,
+        "index": 0.8636444441118266
+      },
+      "usable_open_interest": 0.8905716807034723,
+      "usable_open_interest_by_kind": {
+        "equity": 0.8932379280122839,
+        "index": 0.8571431584737293
+      }
     },
     "rates": {
       "0.03": {

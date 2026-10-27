@@ -108,7 +108,7 @@ class TestStyles:
         groups = style_groups(panel())
         assert groups.iloc[:5].tolist() == ["strict", "strict", "clipped", "prefix", "index"]
         # 3AAA on 3 August: no heading marker and no prefix answer.
-        assert groups.iloc[-1] == "fallback"
+        assert groups.iloc[-2] == "fallback"
 
     def test_product_prefix(self):
         assert product_prefix(pd.Series(["1AAA", "2SPX", "4MRUT", "13ABC"])).tolist() == [
@@ -147,11 +147,32 @@ class TestLoadInputs:
         monkeypatch.setattr(implied_data, "RESULTS_DIR", results)
         return implied_data.load_inputs(raw, ci, bars_path, **kwargs)
 
-    def test_reads_the_panel_chains_and_bars(self, monkeypatch, world):
+    def test_reads_the_panel_readings_and_bars(self, monkeypatch, world):
         inputs = self.load(monkeypatch, world)
-        assert set(inputs.panel["report_date"]) == {D0, D1, D2}
-        assert "iv" in inputs.chains.columns
+        # The rows to invert start at the first date read after the close; the style
+        # counts see every date, with only the columns they need.
+        assert set(inputs.panel["report_date"]) == {D1, D2}
+        assert inputs.panel["exercise_style"].iloc[0] == "european"
+        assert set(inputs.styles["report_date"]) == {D0, D1, D2}
+        assert list(inputs.styles.columns) == [
+            "report_date",
+            "kind",
+            "class_name",
+            "root",
+            "exercise_style",
+        ]
+        assert set(inputs.styles["kind"]) == {"equity"}
         assert len(inputs.bars) == 6
+
+    def test_readings_are_reduced_file_by_file_to_the_first_after_the_close(
+        self, monkeypatch, world
+    ):
+        inputs = self.load(monkeypatch, world)
+        expected = close_readings(chains())
+        key = ["date", "symbol", "contract"]
+        got = inputs.readings.sort_values(key).reset_index(drop=True)
+        want = expected.sort_values(key).reset_index(drop=True)
+        assert got[[*key, "iv", "underlying_price"]].equals(want[[*key, "iv", "underlying_price"]])
         assert (list(inputs.ci_runs), inputs.local_only) == (["2026-09-03"], False)
 
     def test_without_the_ci_captures_the_inputs_are_refused(self, monkeypatch, world):

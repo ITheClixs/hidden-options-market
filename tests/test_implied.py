@@ -286,6 +286,18 @@ class TestImpliedVols:
         with pytest.raises(ValueError, match="exercise style"):
             inversion_style(frame(row(kind="index", exercise_style=None)))
 
+    def test_a_mark_at_the_bottom_of_the_bracket_is_flagged(self):
+        floor = model_price(50.0, 1.0, SIGMA_BOUNDS[0], "C", "european")
+        panel = frame(row(strike=50.0, mark_price=floor), row(), row(mark_price=0.0))
+        inverted = implied_vols(panel, self.SPOTS, rate=RATE)
+        assert inverted["iv_status"].tolist() == ["ok", "ok", "zero_price"]
+        assert inverted["iv_at_floor"].tolist() == [True, False, False]
+
+    def test_the_rate_is_the_one_gamma_gap_uses(self):
+        from hidden_options.measure import gamma_gap, implied
+
+        assert implied.RATE is gamma_gap.RISK_FREE
+
     def test_one_date_at_a_time(self):
         panel = frame(row(), row(report_date=DAY + pd.Timedelta(days=1)))
         with pytest.raises(ValueError, match="one report date"):

@@ -573,7 +573,9 @@ the floor are mostly deep in-the-money calls on dividend payers: \IvBelowDeepCal
 calls struck below \IvDeepMoneyness{} of spot, and \IvBelowTopShare{} are on
 \IvBelowTopNames{}. For such a call the floor is the spot less the discounted strike,
 which without dividends is too high for a stock or index that pays them; the shortfall
-is consistent with OCC marking these calls with dividends allowed for.
+is consistent with OCC marking these calls with dividends allowed for. Of the marks that
+do invert, \IvAtFloor{} sit at the floor itself and take the bottom of the bracket; such
+a volatility says nothing about the market, and these rows are flagged.
 
 Where a FLEX series has a listed twin, the same underlying, expiry, right and strike in
 the listed product of the same settlement, we compare its volatility with the one Cboe
@@ -589,8 +591,8 @@ equity options.
 
 The median absolute gap between the two volatilities is \IvMedianGap{} vol points, and
 \IvWithinTwo{} of gaps are within \IvWithinPoints{} points (Table~\ref{tab:implied}).
-The median signed gap is $\IvMedianBias$, so neither side sits systematically above the
-other. Agreement is worst in the final week before expiry, where the median gap is
+Overall the median signed gap is $\IvMedianBias$, but by right it is
+$\IvMedianBiasCalls$ points for calls and $\IvMedianBiasPuts$ for puts. Agreement is worst in the final week before expiry, where the median gap is
 \IvShortMedianGap{} points and \IvShortWithinTwo{} are within \IvWithinPoints{}.
 
 We call a cell of strike over spot and days to expiry validated when its median gap is
@@ -599,8 +601,10 @@ at most \IvWithinPoints{} vol points over at least \IvMinMatched{} matched serie
 holding \IvDomainCompared{} of the matched series-days that invert, and
 \IvDomainFailShort{} of the \IvDomainFail{} that do not are in the final week. Of all FLEX
 open interest on these dates, \IvOkOpenInterest{} is in series that invert and
-\IvDomainOpenInterest{} in series that invert inside a validated cell: the part of the
-book for which the inversion has been checked.
+\IvDomainOpenInterest{} in series that invert inside a validated cell:
+\IvDomainOpenInterestEquity{} of equity open interest and \IvDomainOpenInterestIndex{}
+of index open interest. The cells were validated on equity series. For index series
+the domain is applied bucket by bucket; it has not been checked on them.
 
 \input{tables/implied_domain}
 

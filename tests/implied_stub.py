@@ -197,6 +197,8 @@ def panel() -> pd.DataFrame:
         _flex(D0, "equity", PLAIN, "4AAA", "AAA", "C", y1, 100.0, 5.0, 1, None),
         _flex(D0, "equity", PLAIN, "1AAA", "AAA", "P", y1, 100.0, 5.0, 1, None),
         _flex(D0, "equity", PLAIN, "3AAA", "AAA", "P", y1, 100.0, 5.0, 1, None),
+        # A heading that contradicts its prefix: American under a European digit.
+        _flex(D0, "equity", AMER, "2AAA", "AAA", "C", y1, 100.0, 5.0, 1, "american"),
     ]
     frame = pd.DataFrame(rows)
     frame["exercise_style"] = frame["exercise_style"].astype(object)

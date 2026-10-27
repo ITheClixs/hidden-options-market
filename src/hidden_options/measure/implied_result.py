@@ -40,7 +40,6 @@ from hidden_options.measure.implied_data import (
     SPOT_AGREEMENT,
     STYLE_GROUPS,
     ImpliedInputs,
-    close_readings,
     equity_closes,
     load_inputs,
     overlap_dates,
@@ -84,10 +83,12 @@ FLEX_COLUMNS = (
 
 def implied_validation_result(inputs: ImpliedInputs) -> Result:
     """The `implied_validation` result from loaded inputs, up to the frozen PANEL_END."""
-    report_dates = pd.to_datetime(inputs.panel["report_date"])
-    panel = inputs.panel[report_dates <= pd.Timestamp(PANEL_END)]
-    readings = close_readings(inputs.chains)
-    closes = equity_closes(inputs.bars)
+    end = pd.Timestamp(PANEL_END)
+    panel = inputs.panel[pd.to_datetime(inputs.panel["report_date"]) <= end]
+    styles = inputs.styles[pd.to_datetime(inputs.styles["report_date"]) <= end]
+    readings = inputs.readings[pd.to_datetime(inputs.readings["date"]) <= end]
+    all_closes = equity_closes(inputs.bars)
+    closes = all_closes[all_closes["date"] <= end]
     agreement = reading_agreement(readings, closes)
     listed = usable_listed(readings, agreement)
     dates = overlap_dates(panel, readings)
@@ -108,7 +109,7 @@ def implied_validation_result(inputs: ImpliedInputs) -> Result:
         },
         "spots": _spots(rows, spots, agreement),
         "coverage": _coverage(rows),
-        "styles": _styles(panel, rows),
+        "styles": _styles(styles, rows),
         "validation": _validation(validation),
         "domain": _domain(domain, validation, rows),
         "rates": {f"{rate:.2f}": _at_rate(validation, listed, rate) for rate in SENSITIVITY_RATES},
@@ -123,8 +124,9 @@ def implied_validation_result(inputs: ImpliedInputs) -> Result:
         "local_only": inputs.local_only,
         "panel_end": formats.iso_date(pd.Timestamp(PANEL_END)),
         "panel_rows": len(panel),
-        "chain_rows": len(inputs.chains),
-        "bar_rows": len(inputs.bars),
+        "style_rows": len(styles),
+        "reading_rows": len(readings),
+        "bar_rows": len(closes),
     }
     return Result(NAME, values, implied_macros(values), run_inputs, now_iso())
 
@@ -204,6 +206,7 @@ def _coverage(rows: pd.DataFrame) -> dict[str, Any]:
             for kind, group in rows.groupby("kind", sort=True)
         },
         "below_intrinsic": _below(below, deep),
+        "at_floor": int((rows["iv_at_floor"] & (status == InversionStatus.OK.value)).sum()),
         "no_spot_underlyings": sorted(set(no_spot.astype(str))),
     }
 
@@ -302,7 +305,19 @@ def _domain(
         "compared_share": _share(_in(compared, domain).sum(), len(compared)),
         "ok_open_interest": _share(oi[ok].sum(), oi.sum()),
         "usable_open_interest": _share(oi[ok & _in(rows, domain)].sum(), oi.sum()),
+        "ok_open_interest_by_kind": {
+            kind: _share(oi[ok & of_kind].sum(), oi[of_kind].sum())
+            for kind, of_kind in _kinds(rows).items()
+        },
+        "usable_open_interest_by_kind": {
+            kind: _share(oi[ok & of_kind & _in(rows, domain)].sum(), oi[of_kind].sum())
+            for kind, of_kind in _kinds(rows).items()
+        },
     }
+
+
+def _kinds(rows: pd.DataFrame) -> dict[str, pd.Series]:
+    return {kind: rows["kind"] == kind for kind in ("equity", "index")}
 
 
 def _at_rate(validation: pd.DataFrame, listed: pd.DataFrame, rate: float) -> dict[str, Any]:

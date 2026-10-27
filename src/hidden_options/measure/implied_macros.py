@@ -74,6 +74,7 @@ def _coverage_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "IvBelowTopNames": name_list([row["symbol"] for row in below["top"]]),
         "IvBelowTopShare": _share(below["top_share"]),
         "IvNoConvergence": formats.count(status["no_convergence"]),
+        "IvAtFloor": formats.count(coverage["at_floor"]),
         "IvSpotReadings": formats.count(spots["agreement"]["readings"]),
         "IvSpotSetAside": formats.count(spots["agreement"]["set_aside"]),
     }
@@ -90,6 +91,8 @@ def _validation_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "IvMedianGap": _points(overall["median_abs"]),
         "IvWithinTwo": _share(overall["within"]),
         "IvMedianBias": _points(overall["median_diff"]),
+        "IvMedianBiasCalls": _points(validation["by_right"]["C"]["median_diff"]),
+        "IvMedianBiasPuts": _points(validation["by_right"]["P"]["median_diff"]),
         "IvShortMedianGap": _points(short["median_abs"]),
         "IvShortWithinTwo": _share(short["within"]),
         "IvDomainCells": formats.count(domain["cells"]),
@@ -99,6 +102,8 @@ def _validation_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "IvDomainCompared": _share(domain["compared_share"]),
         "IvOkOpenInterest": _share(domain["ok_open_interest"]),
         "IvDomainOpenInterest": _share(domain["usable_open_interest"]),
+        "IvDomainOpenInterestEquity": _share(domain["usable_open_interest_by_kind"]["equity"]),
+        "IvDomainOpenInterestIndex": _share(domain["usable_open_interest_by_kind"]["index"]),
     }
 
 

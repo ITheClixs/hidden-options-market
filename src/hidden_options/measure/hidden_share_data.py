@@ -23,7 +23,7 @@ import glob
 import math
 import os
 import re
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -218,13 +218,18 @@ def check_ci_runs(found: Sequence[str], name: str, results: Path) -> None:
 
 
 def load_chains(
-    roots: Path | Sequence[Path], calendar: pd.DatetimeIndex, extra: Sequence[str] = ()
+    roots: Path | Sequence[Path],
+    calendar: pd.DatetimeIndex,
+    extra: Sequence[str] = (),
+    keep: Callable[[pd.DataFrame], pd.DataFrame] | None = None,
 ) -> pd.DataFrame:
     """Every stored Cboe chain row under `roots`, with its root, dates and symbol without `_`.
 
     A settlement read in more than one place keeps its latest reading (see
     `chain_open_interest`), wherever it was stored. `extra` names chain columns to read
-    beside CHAIN_READ_COLUMNS (the listed implied volatility, say).
+    beside CHAIN_READ_COLUMNS (the listed implied volatility, say). `keep`, if given, is
+    applied to each file once it is dated, before the files are joined, so a caller that
+    needs a small part of every file never holds them all at once.
     """
     folders = _as_roots(roots)
     paths = [
@@ -234,10 +239,15 @@ def load_chains(
     ]
     if not paths:
         raise FileNotFoundError(f"No Cboe chains under {_names(folders)}/cboe_chain")
-    chains = pd.concat(
-        [pd.read_parquet(path, columns=[*CHAIN_READ_COLUMNS, *extra]) for path in paths],
-        ignore_index=True,
-    )
+    frames = []
+    for path in paths:
+        frame = _dated_chain(pd.read_parquet(path, columns=[*CHAIN_READ_COLUMNS, *extra]), calendar)
+        frames.append(frame if keep is None else keep(frame))
+    return pd.concat(frames, ignore_index=True)
+
+
+def _dated_chain(chains: pd.DataFrame, calendar: pd.DatetimeIndex) -> pd.DataFrame:
+    """One chain file with its symbol, root, expiry and the two dates of each reading."""
     contracts = chains["contract"].astype(str)
     bad = ~contracts.str.contains(_OSI_TAIL) | (contracts.str.len() <= _OSI_TAIL_LENGTH)
     if bad.any():
