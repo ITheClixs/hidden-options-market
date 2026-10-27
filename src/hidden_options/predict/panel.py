@@ -57,6 +57,22 @@ _REQUIRED = ("abs_ret_next", *CONTROLS, "oi_innov", "d_log_oi")
 _MARKET_TZ = ZoneInfo("America/New_York")
 
 
+def _sessions(timestamps: pd.Series) -> pd.Series:
+    """The New York date of each bar timestamp."""
+    stamps = pd.to_datetime(timestamps, utc=True)
+    sessions: pd.Series = stamps.dt.tz_convert(_MARKET_TZ).dt.tz_localize(None).dt.normalize()
+    return sessions
+
+
+def bars_through(bars: pd.DataFrame, end: pd.Timestamp) -> pd.DataFrame:
+    """The bars of sessions on or before `end`, in a fresh index.
+
+    An outcome is realised on ``available_at`` or later, so a panel whose last report is
+    read on `end` meets no bar after it.
+    """
+    return bars[_sessions(bars["timestamp"]) <= end].reset_index(drop=True)
+
+
 def session_frame(bars: pd.DataFrame) -> pd.DataFrame:
     """Per symbol and session: returns, the trailing controls and the forward outcomes.
 
@@ -66,8 +82,7 @@ def session_frame(bars: pd.DataFrame) -> pd.DataFrame:
     sessions starting with it (missing unless all ``h`` exist).
     """
     frame = bars[["symbol", "timestamp", "open", "close", "volume"]].copy()
-    stamps = pd.to_datetime(frame["timestamp"], utc=True)
-    frame["session"] = stamps.dt.tz_convert(_MARKET_TZ).dt.tz_localize(None).dt.normalize()
+    frame["session"] = _sessions(frame["timestamp"])
     if frame.duplicated(["symbol", "session"]).any():
         raise ValueError("bars hold more than one bar for a symbol and session")
     frame = frame.sort_values(["symbol", "session"]).reset_index(drop=True)
@@ -190,6 +205,7 @@ __all__ = [
     "OUTCOMES",
     "PLACEBO_LEAD",
     "PREDICTORS",
+    "bars_through",
     "build_predictive_panel",
     "inventory_predictors",
     "join_outcomes",

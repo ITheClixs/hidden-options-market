@@ -142,14 +142,16 @@ class CaptureDate:
     largest_other: int = 0
 
 
-def trading_calendar(raw: Path) -> pd.DatetimeIndex:
-    """The FLEX report dates, then CALENDAR_TAIL_DAYS weekdays after the last of them.
+def trading_calendar(raw: Path, until: pd.Timestamp | None = None) -> pd.DatetimeIndex:
+    """The FLEX report dates up to `until`, then CALENDAR_TAIL_DAYS weekdays after the last.
 
     The report dates are OCC's activity dates, so holidays inside the panel are absent.
     The tail lets a capture from after the last report find its own day, which keeps it
     from being taken for the last report's.
     """
     days = sorted({_partition_date(path) for path in glob.glob(str(raw / "occ_flex/date=*"))})
+    if until is not None:
+        days = [day for day in days if pd.Timestamp(day) <= until]
     if not days:
         raise FileNotFoundError(f"No FLEX reports under {raw}/occ_flex")
     reports = pd.DatetimeIndex(days)
@@ -316,12 +318,13 @@ def load_captures(roots: Path | Sequence[Path]) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
-def load_reports(raw: Path, since: pd.Timestamp) -> pd.DataFrame:
-    """The FLEX report rows, equity and index, for every activity date from `since`."""
+def load_reports(raw: Path, since: pd.Timestamp, until: pd.Timestamp | None = None) -> pd.DataFrame:
+    """The FLEX report rows, equity and index, for every activity date from `since` to `until`."""
     paths = [
         path
         for path in sorted(glob.glob(str(raw / "occ_flex/date=*/*.parquet")))
         if pd.Timestamp(_partition_date(path)) >= since
+        and (until is None or pd.Timestamp(_partition_date(path)) <= until)
     ]
     if not paths:
         raise FileNotFoundError(f"No FLEX reports under {raw}/occ_flex from {since:%Y-%m-%d}")
@@ -380,7 +383,7 @@ def is_mixed(dated: CaptureDate) -> bool:
 
 
 def date_captures(
-    captures: pd.DataFrame, chain_oi: pd.DataFrame
+    captures: pd.DataFrame, chain_oi: pd.DataFrame, until: pd.Timestamp | None = None
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Date every capture and keep one reading of each symbol on each settlement.
 
@@ -390,6 +393,11 @@ def date_captures(
     same settlement must show identical open interest for it, since the search shows a
     settlement as OCC processed it, and a difference raises. A later capture can still
     add symbols the earlier ones lack.
+
+    With `until`, nothing of a settlement after it is kept or logged, nor of an undated
+    capture whose folder is after it. A capture is dated by the whole of `chain_oi`, later
+    readings included: they say which settlement it shows, and cannot make it show an
+    earlier one.
 
     Returns the kept rows with their `date`, and a log of every capture: its source and
     settlement, the symbols that vouched for the date out of those compared, whether the
@@ -412,6 +420,7 @@ def date_captures(
         entry: dict[str, object] = {
             "capture": folder,
             "source": int(str(source)),
+            "rows": len(rows),
             "date": pd.NaT,
             "dated": False,
             "reason": "",
@@ -423,12 +432,16 @@ def date_captures(
             "symbols_compared": 0,
             "symbols_added": 0,
         }
-        log.append(entry)
         try:
             dated = date_capture(rows, chain_oi, window)
         except ValueError as exc:
             entry["reason"] = f"undated: {exc}"
+            if until is None or folder <= until:
+                log.append(entry)
             continue
+        if until is not None and dated.date > until:
+            continue
+        log.append(entry)
         mixed = is_mixed(dated)
         entry.update(
             date=dated.date,

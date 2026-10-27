@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T22:35:18+00:00",
+  "generated_at": "2026-10-27T22:15:06+00:00",
   "inputs": {
     "dates": 475,
     "first_date": "2024-12-02",
@@ -8,6 +8,7 @@
       "index"
     ],
     "last_date": "2026-10-22",
+    "panel_end": "2026-10-22",
     "rows": 15179194,
     "source": "data/raw/occ_flex"
   },

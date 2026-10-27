@@ -21,6 +21,7 @@ from __future__ import annotations
 import glob
 import re
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -163,6 +164,18 @@ def load_panel(root: Path, kinds: tuple[str, ...] = ("equity", "index")) -> pd.D
     # Object dtype keeps the unknowns as None; a bare array would be coerced to NaN.
     panel["exercise_style"] = pd.Series(exercise_styles(panel), index=panel.index, dtype=object)
     return panel
+
+
+def panel_through(panel: pd.DataFrame, end: date) -> pd.DataFrame:
+    """The rows of a panel dated on or before `end`: the frozen panel a result is computed on.
+
+    A FLEX report collected after `end` is on disk but not in the result. Raises if no
+    report is left, since every result needs at least one.
+    """
+    kept = panel[pd.to_datetime(panel["report_date"]) <= pd.Timestamp(end)]
+    if kept.empty:
+        raise ValueError(f"No FLEX report on or before {end:%Y-%m-%d}")
+    return kept.reset_index(drop=True)
 
 
 def summarise_panel(panel: pd.DataFrame) -> PanelSummary:

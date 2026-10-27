@@ -1,7 +1,8 @@
 """Result `market`: the panel, its size and growth, and its expiry cycle (M1, M6).
 
 Everything the paper's Data section and market section print about the FLEX market as a
-whole is computed here from every report on disk. Three kinds of number come out.
+whole is computed here from every report on disk up to the frozen panel end. Three kinds
+of number come out.
 
 * The panel and its two end dates: coverage, size, value and make-up.
 * Growth, without leaning on two chosen days: a one-break fit to log open interest dates
@@ -26,8 +27,8 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from hidden_options.config import RAW_DIR
-from hidden_options.measure.flex_panel import load_panel
+from hidden_options.config import PANEL_END, RAW_DIR
+from hidden_options.measure.flex_panel import load_panel, panel_through
 from hidden_options.measure.market import (
     MATURITY_HORIZON_MONTHS,
     TOP_DROPS,
@@ -62,7 +63,8 @@ _TICKER = re.compile(r"[A-Z0-9./]+")
 
 
 def market_result(panel: pd.DataFrame) -> Result:
-    """The `market` result for an assembled FLEX panel."""
+    """The `market` result for an assembled FLEX panel, up to the frozen PANEL_END."""
+    panel = panel_through(panel, PANEL_END)
     daily = market_daily(panel)
     calendar = pd.DatetimeIndex(daily["report_date"])
     expiries = monthly_expiries(calendar)
@@ -91,13 +93,14 @@ def market_result(panel: pd.DataFrame) -> Result:
         "last_date": formats.iso_date(last),
         "dates": len(calendar),
         "rows": len(panel),
+        "panel_end": formats.iso_date(pd.Timestamp(PANEL_END)),
     }
     return Result(NAME, values, market_macros(values), inputs, now_iso())
 
 
 @ANALYSES.register(NAME)
 def market() -> Result:
-    """M1 and M6 on every FLEX report on disk."""
+    """M1 and M6 on every FLEX report on disk up to PANEL_END."""
     return market_result(load_panel(RAW_DIR))
 
 

@@ -12,6 +12,7 @@ import pytest
 
 from hidden_options.predict import result as result_module
 from hidden_options.predict.macros import bp, p_value, predictive_macros
+from hidden_options.predict.panel import bars_through
 from hidden_options.predict.regressions import TABLE_SPECS
 from hidden_options.predict.tables import predictive_table, windows_table
 from hidden_options.publish import registry
@@ -93,6 +94,65 @@ class TestResult:
     def test_inputs_record_the_data(self, result):
         assert result.inputs["first_date"] == "2025-01-02"
         assert result.inputs["bar_symbols"] == 30
+
+
+class TestPanelEnd:
+    """Dates past the frozen panel end change nothing, in the reports or in the bars."""
+
+    DAYS = pd.bdate_range("2025-01-02", periods=130)
+    LONG_FLEX = synthetic_flex_panel(names=30, dates=130)
+    LONG_BARS = synthetic_bars(synthetic_daily(names=30, dates=130))
+    END = DAYS[109]
+
+    def run(self, flex, bars):
+        return result_module.predictive_result(flex, bars, n_perm=10, later_starts=STARTS)
+
+    def test_reports_and_bars_after_the_frozen_panel_end_are_ignored(self, monkeypatch):
+        monkeypatch.setattr(result_module, "PANEL_END", self.END.date())
+
+        frozen = self.run(self.LONG_FLEX, self.LONG_BARS)
+        # Written without them: the reports to the end, the bars to the session its last
+        # report is first read on.
+        flex = self.LONG_FLEX[self.LONG_FLEX["report_date"] <= self.END]
+        stamps = self.LONG_BARS["timestamp"].dt.tz_convert("America/New_York")
+        bars = self.LONG_BARS[stamps.dt.tz_localize(None).dt.normalize() <= self.DAYS[110]]
+        plain = self.run(flex, bars)
+
+        assert frozen.values == plain.values
+        assert frozen.macros == plain.macros
+        assert frozen.values["sample"]["report_dates"] == 110
+        assert frozen.inputs["panel_end"] == self.END.strftime("%Y-%m-%d")
+        assert frozen.inputs["last_date"] == self.END.strftime("%Y-%m-%d")
+        assert frozen.inputs["bars_end"] == self.DAYS[110].strftime("%Y-%m-%d")
+        assert frozen.inputs["dates"] == 110
+        assert frozen.inputs["bar_rows"] == len(bars) < len(self.LONG_BARS)
+
+    def test_later_reports_would_otherwise_be_used(self, monkeypatch):
+        monkeypatch.setattr(result_module, "PANEL_END", self.END.date())
+        frozen = self.run(self.LONG_FLEX, self.LONG_BARS)
+        monkeypatch.setattr(result_module, "PANEL_END", self.DAYS[-1].date())
+        everything = self.run(self.LONG_FLEX, self.LONG_BARS)
+        assert everything.values["sample"]["report_dates"] == 130
+        assert everything.values["rows"] != frozen.values["rows"]
+
+    def test_bars_are_cut_at_the_new_york_session(self):
+        bars = pd.DataFrame(
+            {
+                "symbol": "AAA",
+                "timestamp": pd.to_datetime(
+                    [
+                        "2025-05-01 13:30",
+                        "2025-05-02 13:30",
+                        "2025-05-02 20:00",
+                        "2025-05-05 13:30",
+                    ],
+                    utc=True,
+                ),
+            }
+        )
+        kept = bars_through(bars, pd.Timestamp("2025-05-02"))
+        assert kept["timestamp"].dt.day.tolist() == [1, 2, 2]
+        assert list(kept.index) == [0, 1, 2]
 
 
 class TestMacros:

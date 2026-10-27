@@ -326,6 +326,38 @@ class TestTwoRoots:
         assert "no chain" in log["reason"].iloc[1]
         assert pd.isna(log["date"].iloc[1])
 
+    def test_captures_of_settlements_after_the_cut_are_left_out_and_not_logged(self):
+        kept = self.tag(capture([("AAA", "2026-09-18", 10, 5)]), "2026-09-02", 0)
+        later = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-03", 0)
+        after = self.tag(capture([("AAA", "2026-09-18", 12, 5)]), "2026-09-04", 1)
+
+        dated, log = date_captures(
+            pd.concat([kept, later, after]), self.CHAIN, until=pd.Timestamp("2026-09-01")
+        )
+
+        assert set(dated["date"]) == {pd.Timestamp("2026-09-01")}
+        assert log["capture"].tolist() == [pd.Timestamp("2026-09-02")]
+
+    def test_an_undated_capture_taken_after_the_cut_is_not_logged(self):
+        before = self.tag(capture([("AAA", "2026-09-18", 99, 99)]), "2026-09-02", 0)
+        after = self.tag(capture([("AAA", "2026-09-18", 99, 99)]), "2026-09-04", 1)
+
+        _, log = date_captures(
+            pd.concat([before, after]), self.CHAIN, until=pd.Timestamp("2026-09-03")
+        )
+
+        assert log["capture"].tolist() == [pd.Timestamp("2026-09-02")]
+        assert log["dated"].tolist() == [False]
+
+    def test_the_log_counts_each_captures_rows(self):
+        both = self.tag(
+            capture([("AAA", "2026-09-18", 12, 5), ("2AAA", "2026-09-18", 99, 0)]), "2026-09-03", 0
+        )
+
+        _, log = date_captures(both, self.CHAIN)
+
+        assert log["rows"].tolist() == [2]
+
     def test_ci_roots_are_the_raw_folders_under_the_ci_directory(self, tmp_path):
         for name in ("2026-09-03", "2026-09-02"):
             (tmp_path / "ci" / name / "raw").mkdir(parents=True)
@@ -550,6 +582,37 @@ class TestLoaders:
         assert seen == [2, 2]  # each file whole, already dated
         assert chains["open_interest"].tolist() == [7.0, 9.0]
         assert list(chains.columns) == ["symbol", "session", "open_interest"]
+
+    def test_reports_and_the_calendar_stop_at_the_cut(self, tmp_path):
+        for day in ("2026-09-01", "2026-09-02", "2026-09-08"):
+            report = pd.DataFrame(
+                {
+                    "report_date": [day],
+                    "kind": ["equity"],
+                    "class_name": ["X"],
+                    "root": ["1AAA"],
+                    "underlying": ["AAA"],
+                    "right": ["C"],
+                    "expiry": [pd.Timestamp("2026-09-18").date()],
+                    "strike": [100.0],
+                    "mark_price": [1.0],
+                    "open_interest": [5],
+                }
+            )
+            self.write(tmp_path / f"occ_flex/date={day}/equity.parquet", report)
+        until = pd.Timestamp("2026-09-02")
+
+        calendar = trading_calendar(tmp_path, until)
+        reports = load_reports(tmp_path, pd.Timestamp("2026-09-01"), until)
+
+        # The tail of weekdays begins after the cut, not after the last report on disk.
+        assert list(calendar[:3]) == [
+            pd.Timestamp(d) for d in ("2026-09-01", "2026-09-02", "2026-09-03")
+        ]
+        assert sorted(reports["report_date"].unique()) == [
+            pd.Timestamp("2026-09-01"),
+            pd.Timestamp("2026-09-02"),
+        ]
 
     def test_missing_inputs_are_named(self, tmp_path):
         with pytest.raises(FileNotFoundError, match="occ_flex"):

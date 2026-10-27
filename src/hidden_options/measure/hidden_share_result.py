@@ -20,7 +20,7 @@ known, and the FLEX share of option value where listed quotes exist.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -31,9 +31,11 @@ from hidden_options.config import (
     ACCEPT_CI_RUNS_ENV,
     CI_CAPTURES_DIR,
     LOCAL_ONLY_ENV,
+    PANEL_END,
     RAW_DIR,
     load_universe,
 )
+from hidden_options.measure.flex_panel import panel_through
 from hidden_options.measure.hidden_share import (
     LISTED_INDEX_ROOTS,
     hidden_share,
@@ -119,11 +121,27 @@ def census_view(inputs: HiddenInputs, chain_oi: pd.DataFrame | None = None) -> C
     return CensusView(dated, share, indices)
 
 
+def freeze(inputs: HiddenInputs, end: pd.Timestamp) -> HiddenInputs:
+    """`inputs` with the reports and the chain readings of settlements after `end` left out.
+
+    The series-search captures are cut where they are dated (`date_captures`).
+    """
+    chains = inputs.chains[inputs.chains["oi_date"] <= end]
+    return replace(inputs, chains=chains, reports=panel_through(inputs.reports, end))
+
+
 def hidden_share_result(inputs: HiddenInputs) -> Result:
-    """The `hidden_share` result from loaded inputs."""
+    """The `hidden_share` result from loaded inputs, up to the frozen PANEL_END.
+
+    The listed side of every settlement up to the panel end comes from the chains read
+    after it, which may be a later day's; a chain's own settlement is its `oi_date`.
+    """
+    end = pd.Timestamp(PANEL_END)
+    # A capture is dated against every chain reading, so a later settlement is known as such.
+    daily_rows, log = date_captures(inputs.captures, chain_open_interest(inputs.chains), end)
+    inputs = freeze(inputs, end)
     chain_oi = chain_open_interest(inputs.chains)
     census = census_view(inputs, chain_oi)
-    daily_rows, log = date_captures(inputs.captures, chain_oi)
     dates = pd.DatetimeIndex(sorted(daily_rows["date"].unique()))
     calendar = pd.DatetimeIndex(sorted(inputs.reports["report_date"].unique()))
     span = calendar[(calendar >= dates[0]) & (calendar <= dates[-1])]
@@ -159,8 +177,9 @@ def hidden_share_result(inputs: HiddenInputs) -> Result:
         },
         "ci_runs": list(inputs.ci_runs),
         "local_only": inputs.local_only,
+        "panel_end": formats.iso_date(end),
         "census_rows": len(inputs.census),
-        "capture_rows": len(inputs.captures),
+        "capture_rows": int(log["rows"].sum()),
         "chain_rows": len(inputs.chains),
         "report_rows": len(inputs.reports),
         "universe": dict(sorted(inputs.universe.items())),
@@ -170,7 +189,7 @@ def hidden_share_result(inputs: HiddenInputs) -> Result:
 
 @ANALYSES.register(NAME)
 def hidden_share_analysis() -> Result:
-    """M2 on the census, the daily captures and the chains on disk."""
+    """M2 on the census, the daily captures and the chains on disk, up to PANEL_END."""
     return hidden_share_result(load_inputs())
 
 
@@ -182,7 +201,8 @@ def load_inputs(
     accept_ci_runs: bool | None = None,
 ) -> HiddenInputs:
     """Read every input from `raw` (RAW_DIR by default) and the CI captures under `ci`
-    (CI_CAPTURES_DIR by default), the FLEX report from the first chain settlement on.
+    (CI_CAPTURES_DIR by default), the FLEX report from the first chain settlement to
+    PANEL_END.
 
     The census and the FLEX report are local only. Series-search captures and chains
     are read from the local root first and then from each CI run. The CI runs must be
@@ -199,7 +219,8 @@ def load_inputs(
     if not local_only and not accept:
         check_ci_runs([run.parent.name for run in runs], NAME, RESULTS_DIR)
     roots = [raw, *runs]
-    calendar = trading_calendar(raw)
+    end = pd.Timestamp(PANEL_END)
+    calendar = trading_calendar(raw, end)
     chains = load_chains(roots, calendar)
     universe = load_universe()
     groups = {
@@ -210,7 +231,7 @@ def load_inputs(
         census=load_census(raw),
         captures=load_captures(roots),
         chains=chains,
-        reports=load_reports(raw, pd.Timestamp(chains["oi_date"].min())),
+        reports=load_reports(raw, pd.Timestamp(chains["oi_date"].min()), end),
         universe={symbol.lstrip("_"): group for symbol, group in groups.items()},
         ci_runs=[run.parent.name for run in runs],
         local_only=local_only,

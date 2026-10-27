@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import date
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -339,6 +341,35 @@ class TestMarketResult:
 
         write_result(result, tmp_path)
         assert read_results(tmp_path)["market"].macros == result.macros
+
+
+class TestPanelEnd:
+    END = date(2025, 10, 31)
+
+    def test_reports_after_the_frozen_panel_end_are_ignored(self, monkeypatch):
+        panel = synthetic_market()
+        monkeypatch.setattr(market_result, "PANEL_END", self.END)
+
+        frozen = market_result.market_result(panel)
+        trimmed = market_result.market_result(panel[panel["report_date"] <= "2025-10-31"])
+
+        assert frozen.values == trimmed.values
+        assert frozen.macros == trimmed.macros
+        assert frozen.values["panel"]["last_date"] == "2025-10-31"
+        assert frozen.inputs["panel_end"] == "2025-10-31"
+        assert frozen.inputs["last_date"] == "2025-10-31"
+        assert frozen.inputs["rows"] == (panel["report_date"] <= "2025-10-31").sum()
+
+    def test_a_later_panel_end_lets_them_in(self, monkeypatch):
+        monkeypatch.setattr(market_result, "PANEL_END", date(2025, 12, 31))
+        assert market_result.market_result(synthetic_market()).values["panel"]["last_date"] == (
+            "2025-12-31"
+        )
+
+    def test_a_panel_that_ends_before_the_panel_end_is_refused(self, monkeypatch):
+        monkeypatch.setattr(market_result, "PANEL_END", date(2024, 1, 1))
+        with pytest.raises(ValueError, match="on or before 2024-01-01"):
+            market_result.market_result(synthetic_market())
 
 
 def test_registered_analysis_reads_the_raw_panel(monkeypatch, tmp_path):

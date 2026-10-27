@@ -228,6 +228,50 @@ class TestValue:
         assert aaa["value_share"] == pytest.approx(flex / (flex + listed))
 
 
+class TestPanelEnd:
+    """Settlements, reports and chain readings after the frozen panel end change nothing."""
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def frozen(inputs):
+        patch = pytest.MonkeyPatch()
+        patch.setattr(results_module, "PANEL_END", pd.Timestamp("2026-09-02").date())
+        try:
+            yield hidden_share_result(inputs)
+        finally:
+            patch.undo()
+
+    def test_the_daily_shares_stop_at_the_panel_end(self, frozen):
+        daily = frozen.values["daily"]
+        assert (daily["first_date"], daily["last_date"], daily["dates"]) == (
+            "2026-09-01",
+            "2026-09-02",
+            2,
+        )
+        # The captures of the 3 September settlement, and their duplicates, are not counted.
+        assert (daily["captures"], daily["duplicate_captures"]) == (2, 0)
+        assert daily["captures_by_root"] == {"local": 1, "ci": 1}
+        assert daily["coverage"]["both"] == 0
+
+    def test_the_census_does_not_move(self, frozen, result):
+        assert frozen.values["census"] == result.values["census"]
+
+    def test_the_inputs_are_cut_and_say_where(self, frozen, result):
+        assert frozen.inputs["panel_end"] == "2026-09-02"
+        assert frozen.inputs["report_rows"] < result.inputs["report_rows"]
+        assert frozen.inputs["chain_rows"] < result.inputs["chain_rows"]
+        assert frozen.inputs["capture_rows"] < result.inputs["capture_rows"]
+
+    def test_the_value_share_uses_no_later_report(self, frozen):
+        assert frozen.values["value"]["dates"] == 2
+
+    def test_a_panel_end_after_the_data_changes_nothing(self, monkeypatch, inputs, result):
+        monkeypatch.setattr(results_module, "PANEL_END", pd.Timestamp("2026-12-31").date())
+        again = hidden_share_result(inputs)
+        assert again.values == result.values
+        assert again.macros == result.macros
+
+
 class TestCIGuard:
     """Without the CI captures the daily numbers would quietly shrink; the loader refuses."""
 

@@ -33,11 +33,11 @@ from hidden_options.collect.bars import (
     flex_underlyings,
     missing_bar_reason,
 )
-from hidden_options.config import BARS_PATH, RAW_DIR
-from hidden_options.measure.flex_panel import daily_inventory, load_panel
+from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR
+from hidden_options.measure.flex_panel import daily_inventory, load_panel, panel_through
 from hidden_options.predict.inference import N_PERM, SEED, permutation_test
 from hidden_options.predict.macros import predictive_macros
-from hidden_options.predict.panel import CONTROLS, build_predictive_panel
+from hidden_options.predict.panel import CONTROLS, bars_through, build_predictive_panel
 from hidden_options.predict.regressions import (
     MAIN_OUTCOME,
     MAIN_PREDICTOR,
@@ -76,12 +76,19 @@ def predictive_result(
     seed: int = SEED,
     later_starts: Sequence[str] = LATER_STARTS,
 ) -> Result:
-    """The `predictive` result for an assembled FLEX panel and the underlyings' bars."""
+    """The `predictive` result for an assembled FLEX panel and the underlyings' bars.
+
+    Both are cut to the frozen PANEL_END: the reports to it, the bars to the session its
+    last report is first read on, where that report's outcome is realised.
+    """
     started = time.perf_counter()
+    flex_panel = panel_through(flex_panel, PANEL_END)
     kinds = flex_panel.groupby("kind")["underlying"].unique()
     equity = set(kinds.get("equity", []))
     daily = daily_inventory(flex_panel)
     daily = daily[daily["underlying"].isin(equity)]
+    bars_end = pd.Timestamp(daily["available_at"].max())
+    bars = bars_through(bars, bars_end)
     panel = build_predictive_panel(daily, bars)
 
     rows = run_predictive(panel)
@@ -131,6 +138,8 @@ def predictive_result(
     inputs = {
         "source": "data/raw/occ_flex",
         "bars": "data/flex_underlying_bars.parquet",
+        "panel_end": f"{PANEL_END:%Y-%m-%d}",
+        "bars_end": f"{bars_end:%Y-%m-%d}",
         "first_date": first,
         "last_date": f"{daily['report_date'].max():%Y-%m-%d}",
         "dates": int(daily["report_date"].nunique()),
@@ -148,7 +157,7 @@ def predictive_result(
 
 @ANALYSES.register(NAME)
 def predictive() -> Result:
-    """P1 on every FLEX report on disk and the refreshed bars."""
+    """P1 on every FLEX report on disk up to PANEL_END and the refreshed bars."""
     return predictive_result(load_panel(RAW_DIR), pd.read_parquet(BARS_PATH))
 
 
