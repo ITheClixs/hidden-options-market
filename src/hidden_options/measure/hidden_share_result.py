@@ -19,7 +19,6 @@ known, and the FLEX share of option value where listed quotes exist.
 
 from __future__ import annotations
 
-import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -50,10 +49,9 @@ from hidden_options.measure.hidden_share_checks import (
     records,
 )
 from hidden_options.measure.hidden_share_data import (
-    FETCH_HINT,
     CaptureDate,
-    CICapturesError,
     chain_open_interest,
+    check_ci_runs,
     ci_roots,
     date_capture,
     date_captures,
@@ -64,13 +62,14 @@ from hidden_options.measure.hidden_share_data import (
     load_chains,
     load_reports,
     priced_chains,
+    switch_on,
     trading_calendar,
 )
 from hidden_options.measure.hidden_share_macros import hidden_share_macros
 from hidden_options.measure.hidden_share_value import value_summary
 from hidden_options.publish import formats
 from hidden_options.publish.registry import ANALYSES
-from hidden_options.publish.results import RESULTS_DIR, Result, now_iso, read_results
+from hidden_options.publish.results import RESULTS_DIR, Result, now_iso
 
 NAME = "hidden_share"
 THRESHOLDS = (0.10, 0.25, 0.50)
@@ -194,11 +193,11 @@ def load_inputs(
     ACCEPT_CI_RUNS_ENV), which `hidden-options results` sets from its flags.
     """
     raw = RAW_DIR if raw is None else raw
-    local_only = _switch(LOCAL_ONLY_ENV) if local_only is None else local_only
-    accept = _switch(ACCEPT_CI_RUNS_ENV) if accept_ci_runs is None else accept_ci_runs
+    local_only = switch_on(LOCAL_ONLY_ENV) if local_only is None else local_only
+    accept = switch_on(ACCEPT_CI_RUNS_ENV) if accept_ci_runs is None else accept_ci_runs
     runs = [] if local_only else ci_roots(CI_CAPTURES_DIR if ci is None else ci)
     if not local_only and not accept:
-        _check_runs([run.parent.name for run in runs])
+        check_ci_runs([run.parent.name for run in runs], NAME, RESULTS_DIR)
     roots = [raw, *runs]
     calendar = trading_calendar(raw)
     chains = load_chains(roots, calendar)
@@ -216,26 +215,6 @@ def load_inputs(
         ci_runs=[run.parent.name for run in runs],
         local_only=local_only,
     )
-
-
-def _switch(name: str) -> bool:
-    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes"}
-
-
-def _check_runs(found: Sequence[str]) -> None:
-    """Refuse CI runs other than those the committed result in results/ was computed with."""
-    committed = read_results(RESULTS_DIR).get(NAME)
-    if committed is None or "ci_runs" not in committed.inputs:
-        return
-    expected = set(committed.inputs["ci_runs"])
-    missing, extra = sorted(expected - set(found)), sorted(set(found) - expected)
-    if missing or extra:
-        raise CICapturesError(
-            f"The CI runs on disk are not the {len(expected)} results/{NAME}.json was "
-            f"computed with (missing: {', '.join(missing) or 'none'}; new: "
-            f"{', '.join(extra) or 'none'}). {FETCH_HINT} To recompute on the runs on "
-            "disk, pass `--accept-ci-runs`."
-        )
 
 
 def _index_share(

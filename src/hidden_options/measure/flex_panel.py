@@ -80,17 +80,31 @@ def parse_exercise_style(class_name: object) -> str | None:
     Anything shorter is left unknown rather than guessed, and so is a heading that
     carries both markers.
     """
+    return exercise_style_evidence(class_name)[0]
+
+
+def exercise_style_evidence(class_name: object) -> tuple[str | None, str]:
+    """The style a heading marks, as `parse_exercise_style` reads it, and how it says so.
+
+    ``"strict"`` when the marker is spelled out in full (``(AMER/FLEX)``, or
+    ``(AMER/FLEX`` where the cut-off took the bracket), ``"clipped"`` when only a stub of
+    three letters or more survives the cut (``(AME``, ``(EURO/F``), ``"none"`` when the
+    heading does not say, or says both.
+    """
     if not isinstance(class_name, str):
-        return None
+        return None, "none"
     heading = _CONTINUATION.sub("", class_name)
-    found = set()
+    found: dict[str, bool] = {}
     for text, closer in _PARENTHETICAL.findall(heading):
         token = re.sub(r"[\s/]+", "/", text.strip().upper())
         for marker, style in _STYLE_MARKERS:
             clipped = not closer and len(token) >= _MIN_CLIPPED_MARKER
             if token == marker or (clipped and marker.startswith(token)):
-                found.add(style)
-    return found.pop() if len(found) == 1 else None
+                found[style] = found.get(style, False) or token == marker
+    if len(found) != 1:
+        return None, "none"
+    ((style, spelled_out),) = found.items()
+    return style, "strict" if spelled_out else "clipped"
 
 
 def _exercise_styles(panel: pd.DataFrame) -> np.ndarray:
@@ -248,6 +262,7 @@ __all__ = [
     "NEAR_DATED_DAYS",
     "PanelSummary",
     "daily_inventory",
+    "exercise_style_evidence",
     "inventory_changes",
     "load_panel",
     "parse_exercise_style",

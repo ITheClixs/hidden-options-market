@@ -8,6 +8,7 @@ import pytest
 
 from hidden_options.measure.flex_panel import (
     daily_inventory,
+    exercise_style_evidence,
     inventory_changes,
     load_panel,
     parse_exercise_style,
@@ -276,6 +277,28 @@ class TestExerciseStyle:
     )
     def test_parse_exercise_style(self, class_name, expected):
         assert parse_exercise_style(class_name) == expected
+
+    @pytest.mark.parametrize(
+        ("class_name", "expected"),
+        [
+            ("AAON INC (AMER/FLEX)", ("american", "strict")),
+            ("Apple Inc (Euro Flex)          (CONT)", ("european", "strict")),
+            # Spelled out in full, though the cut-off took the closing bracket.
+            ("UNITED STATES STEEL (AMER/FLEX (CONT)", ("american", "strict")),
+            ("ADVANCED MICRO-DEVICES (EURO/F (CONT)", ("european", "clipped")),
+            ("ISHARES BITCOIN TRUST ETF (AME", ("american", "clipped")),
+            ("Accenture PLC (EUR", ("european", "clipped")),
+            # A full marker beside a stub of the same style is still read as spelled out.
+            ("3M (EURO/FLEX) (EUR", ("european", "strict")),
+            ("Ionis Pharmaceuticals, Inc. (A", (None, "none")),
+            ("PLAIN HOLDINGS CORP", (None, "none")),
+            ("Apple Inc (AMER/FLEX) (EURO/FLEX)", (None, "none")),
+            (None, (None, "none")),
+        ],
+    )
+    def test_exercise_style_evidence(self, class_name, expected):
+        assert exercise_style_evidence(class_name) == expected
+        assert parse_exercise_style(class_name) == expected[0]
 
 
 class TestGapSafeChanges:

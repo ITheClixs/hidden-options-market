@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import glob
 import math
+import os
 import re
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -34,6 +35,7 @@ from hidden_options.measure.hidden_share import (
     listed_index,
     listed_product,
 )
+from hidden_options.publish.results import read_results
 
 NEW_YORK = "America/New_York"
 # Minutes after midnight at which the regular session opens, 09:30 in New York.
@@ -190,11 +192,39 @@ def ci_roots(ci: Path) -> list[Path]:
     return sorted(path for path in ci.glob("*/raw") if path.is_dir())
 
 
-def load_chains(roots: Path | Sequence[Path], calendar: pd.DatetimeIndex) -> pd.DataFrame:
+def switch_on(name: str) -> bool:
+    """True when the environment variable `name` is set to 1, true or yes."""
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes"}
+
+
+def check_ci_runs(found: Sequence[str], name: str, results: Path) -> None:
+    """Refuse CI runs other than those `results/<name>.json` was computed with.
+
+    A result computed from the CI captures records their run dates; a re-run on another
+    set would change its numbers quietly. Nothing is checked before the first commit.
+    """
+    committed = read_results(results).get(name)
+    if committed is None or "ci_runs" not in committed.inputs:
+        return
+    expected = set(committed.inputs["ci_runs"])
+    missing, extra = sorted(expected - set(found)), sorted(set(found) - expected)
+    if missing or extra:
+        raise CICapturesError(
+            f"The CI runs on disk are not the {len(expected)} results/{name}.json was "
+            f"computed with (missing: {', '.join(missing) or 'none'}; new: "
+            f"{', '.join(extra) or 'none'}). {FETCH_HINT} To recompute on the runs on "
+            "disk, pass `--accept-ci-runs`."
+        )
+
+
+def load_chains(
+    roots: Path | Sequence[Path], calendar: pd.DatetimeIndex, extra: Sequence[str] = ()
+) -> pd.DataFrame:
     """Every stored Cboe chain row under `roots`, with its root, dates and symbol without `_`.
 
     A settlement read in more than one place keeps its latest reading (see
-    `chain_open_interest`), wherever it was stored.
+    `chain_open_interest`), wherever it was stored. `extra` names chain columns to read
+    beside CHAIN_READ_COLUMNS (the listed implied volatility, say).
     """
     folders = _as_roots(roots)
     paths = [
@@ -205,7 +235,7 @@ def load_chains(roots: Path | Sequence[Path], calendar: pd.DatetimeIndex) -> pd.
     if not paths:
         raise FileNotFoundError(f"No Cboe chains under {_names(folders)}/cboe_chain")
     chains = pd.concat(
-        [pd.read_parquet(path, columns=list(CHAIN_READ_COLUMNS)) for path in paths],
+        [pd.read_parquet(path, columns=[*CHAIN_READ_COLUMNS, *extra]) for path in paths],
         ignore_index=True,
     )
     contracts = chains["contract"].astype(str)
@@ -553,6 +583,7 @@ __all__ = [
     "chain_dates",
     "ci_roots",
     "chain_open_interest",
+    "check_ci_runs",
     "date_capture",
     "date_captures",
     "expiring_series",
@@ -563,5 +594,6 @@ __all__ = [
     "load_chains",
     "load_reports",
     "priced_chains",
+    "switch_on",
     "trading_calendar",
 ]
