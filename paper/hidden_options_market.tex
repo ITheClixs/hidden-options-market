@@ -538,6 +538,88 @@ are inflated by it.
 The errors have opposite signs and do not cancel. The report's mark prices avoid the
 valuation half of the problem directly, since they price each series as cleared.
 
+\subsection{Pricing the hidden book}
+\label{sec:pricing}
+
+A mark says what a series is worth, not how it moves with the underlying. Read against
+the underlying's price, though, it gives back the volatility that prices it, and that
+volatility gives the series' delta, gamma and vega. We invert every mark on the
+\IvDates{} report dates from \IvFirstDate{} to \IvLastDate{}, the dates for which we
+also hold the listed chains, so that the volatilities can be checked against the listed
+market.
+
+The model makes one choice per input. European series are priced by Black and Scholes,
+American ones on a \IvTreeSteps{}-step Cox--Ross--Rubinstein tree. The rate is a constant
+\IvRate{} and the dividend yield is zero, so an American call is never exercised early
+and is priced as its European twin. Time runs in calendar days over 365, and the search
+runs over volatilities from \IvSigmaLow{} to \IvSigmaHigh{}. The exercise style is
+OCC's. Index series are European; an equity class names its style in its heading,
+except that \IvUnmarkedShare{} of equity series-days in the panel sit under a heading
+that does not, and we price those as American. An equity's spot is its close. An
+index's is its level in the Cboe chain read after the close, and the mini products on
+SPX, NDX and RUT take their fixed fraction of it. The Dow, MSCI and bitcoin indices, and
+equity classes our daily bars do not cover, have no spot.
+
+Of the \IvRows{} series-days, \IvOkShare{} give a volatility. Every other one keeps its
+reason: a mark below the model's floor (\IvBelowIntrinsic{}), no spot (\IvNoSpot{}),
+expiry on the report date (\IvExpired{}), a mark above the price at \IvSigmaHigh{}
+(\IvNoConvergence{}), a zero mark (\IvZeroPrice{}). Of the marks below the floor,
+\IvBelowDeepCalls{} are on calls struck below \IvDeepMoneyness{} of spot. For such a
+call the floor is the spot less the discounted strike, which without dividends is too
+high for a stock or index that pays them; the shortfall is consistent with OCC marking
+these calls with dividends allowed for.
+
+Where a FLEX series has a listed twin, the same underlying, expiry, right and strike in
+the listed product of the same settlement, we compare its volatility with the one Cboe
+quotes for the twin in each symbol's first chain reading after the close. Cboe computes
+its volatilities against the stock price at the time of reading, which moves after
+hours, so we set aside the \IvSpotSetAside{} of \IvSpotReadings{} equity readings whose
+stock price is more than \IvSpotAgreement{} from the close. That leaves \IvMatched{}
+series-days on \IvMatchedSeries{} series with a twin, of which \IvCompared{} invert.
+Only \IvIndexMatched{} of them are index series-days, so the comparison speaks for
+equity options.
+
+\input{tables/implied}
+
+The median absolute gap between the two volatilities is \IvMedianGap{} vol points, and
+\IvWithinTwo{} of gaps are within \IvWithinPoints{} points (Table~\ref{tab:implied}).
+The median signed gap is $\IvMedianBias$, so neither side sits systematically above the
+other. Agreement is worst in the final week before expiry, where the median gap is
+\IvShortMedianGap{} points and \IvShortWithinTwo{} are within \IvWithinPoints{}.
+
+We call a cell of strike over spot and days to expiry validated when its median gap is
+at most \IvWithinPoints{} vol points over at least \IvMinMatched{} matched series-days.
+\IvDomainCells{} of the \IvDomainOfCells{} cells qualify (Table~\ref{tab:implied-domain}),
+holding \IvDomainCompared{} of the matched series-days that invert, and
+\IvDomainFailShort{} of the \IvDomainFail{} that do not are in the final week. Of all FLEX
+open interest on these dates, \IvOkOpenInterest{} is in series that invert and
+\IvDomainOpenInterest{} in series that invert inside a validated cell: the part of the
+book for which the inversion has been checked.
+
+\input{tables/implied_domain}
+
+How the exercise style was read changes the gap little: the median is \IvStrictGap{}
+points where the heading spells the style out, \IvClippedGap{} where the heading is cut
+off partway through it, and \IvUnmarkedGap{} where it says nothing and we assume
+American. There is reason to think the assumption is wrong for most of those series.
+Wherever the heading names a style, the product symbol's leading digit agrees with it,
+1 with American and 2 and 4 with European: \IvPrefixContradict{} of the
+\IvPrefixMarked{} marked equity series-days contradict that pairing, and
+\IvPrefixOther{} carry another digit. Read by the digit, \IvUnmarkedEuropeanPrefix{} of
+unmarked series-days would be European. For the comparison the difference is small. An
+American and a European call are worth the same with no dividend yield, and priced as
+European the unmarked puts' median signed gap moves from $\IvUnmarkedPutBias$ to
+$\IvUnmarkedPutBiasEuropean$ points.
+
+The rate is a choice too. Repeated at \IvRateLow{}, the comparison gives a median gap of
+\IvMedianGapLow{} points with \IvWithinTwoLow{} of gaps within \IvWithinPoints{} and
+\IvDomainCellsLow{} cells validated; at \IvRateHigh{} it gives \IvMedianGapHigh{} points,
+\IvWithinTwoHigh{} and \IvDomainCellsHigh{} cells.
+
+Every greek computed from these volatilities is gross. Open interest counts the
+contracts outstanding, not who holds them, so a dollar delta is that of the long side;
+the writers hold its negative, and the report does not say who is long.
+
 \section{Does hidden inventory predict the visible market?}
 \label{sec:predict}
 

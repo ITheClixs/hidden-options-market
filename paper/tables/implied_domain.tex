@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\caption{Where the inversion agrees with the listed market.}
+\label{tab:implied-domain}
+\begin{tabular}{lrrrrr}
+\toprule
+Strike over spot & $\leq 7$ & 8--30 & 31--90 & 91--365 & $>365$ \\
+\midrule
+$<0.70$ & 37.13 & 6.25 & \textbf{0.91} & \textbf{0.81} & \textbf{0.93} \\
+0.70--0.80 & 21.50 & \textbf{1.42} & \textbf{0.28} & \textbf{0.31} & \textbf{1.12} \\
+0.80--0.90 & 5.11 & \textbf{0.56} & \textbf{0.44} & \textbf{0.47} & \textbf{1.20} \\
+0.90--0.95 & \textbf{1.06} & \textbf{0.36} & \textbf{0.37} & \textbf{0.59} & \textbf{1.22} \\
+0.95--1.00 & \textbf{0.46} & \textbf{0.34} & \textbf{0.32} & \textbf{0.45} & \textbf{1.12} \\
+1.00--1.05 & \textbf{0.58} & \textbf{0.36} & \textbf{0.35} & \textbf{0.46} & \textbf{1.13} \\
+1.05--1.10 & \textbf{0.80} & \textbf{0.35} & \textbf{0.31} & \textbf{0.39} & \textbf{0.79} \\
+1.10--1.20 & 4.16 & \textbf{0.27} & \textbf{0.23} & \textbf{0.35} & \textbf{0.88} \\
+1.20--1.30 & 16.40 & \textbf{0.35} & \textbf{0.19} & \textbf{0.31} & \textbf{0.77} \\
+$\geq 1.30$ & 32.70 & \textbf{1.17} & \textbf{0.28} & \textbf{0.26} & \textbf{0.67} \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Median absolute gap between FLEX mark and listed implied volatility, in vol points, by strike over spot (rows) and days to expiry (columns). Bold cells are validated: a median gap of at most 2 vol points over at least 50 matched series-days. A dash marks a cell with no match.\par}
+\end{table}
