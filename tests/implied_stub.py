@@ -92,7 +92,7 @@ def panel() -> pd.DataFrame:
             300,
             "american",
         ),  # listed 0.40
-        # Unmarked, priced as a European put: read as American its volatility comes out low.
+        # Unmarked, priced as a European put; its prefix 2 says European.
         _flex(
             D1,
             "equity",
@@ -196,6 +196,7 @@ def panel() -> pd.DataFrame:
         _flex(D0, "equity", AMER, "1AAA", "AAA", "C", y1, 100.0, 5.0, 1, "american"),
         _flex(D0, "equity", PLAIN, "4AAA", "AAA", "C", y1, 100.0, 5.0, 1, None),
         _flex(D0, "equity", PLAIN, "1AAA", "AAA", "P", y1, 100.0, 5.0, 1, None),
+        _flex(D0, "equity", PLAIN, "3AAA", "AAA", "P", y1, 100.0, 5.0, 1, None),
     ]
     frame = pd.DataFrame(rows)
     frame["exercise_style"] = frame["exercise_style"].astype(object)

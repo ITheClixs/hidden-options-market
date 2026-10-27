@@ -17,6 +17,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from hidden_options.config import PANEL_END
 from hidden_options.measure.implied import (
     CARRY,
     DAYS_PER_YEAR,
@@ -24,12 +25,14 @@ from hidden_options.measure.implied import (
     MAX_MEDIAN_DIFF,
     MIN_MATCHED,
     MONEYNESS_LABELS,
+    PREFIX_STYLES,
     RATE,
     SIGMA_BOUNDS,
     InversionStatus,
     bucketed,
     compare_with_listed,
     implied_vols_frame,
+    product_prefix,
     validated_domain,
 )
 from hidden_options.measure.implied_data import (
@@ -41,7 +44,6 @@ from hidden_options.measure.implied_data import (
     equity_closes,
     load_inputs,
     overlap_dates,
-    product_prefix,
     reading_agreement,
     spot_table,
     style_groups,
@@ -60,8 +62,8 @@ WITHIN = 0.02
 SENSITIVITY_RATES = (0.03, 0.05)
 # A call struck below this share of spot is deep in the money.
 DEEP_MONEYNESS = 0.9
-# The style the marked headings show for each product-symbol prefix.
-PREFIX_STYLE = {"1": "american", "2": "european", "4": "european"}
+# The underlyings with the most marks below the model's floor are named.
+BELOW_NAMED = 5
 STATUSES = tuple(status.value for status in InversionStatus)
 # The FLEX columns a row is inverted from, kept through the comparison.
 FLEX_COLUMNS = (
@@ -81,14 +83,16 @@ FLEX_COLUMNS = (
 
 
 def implied_validation_result(inputs: ImpliedInputs) -> Result:
-    """The `implied_validation` result from loaded inputs."""
+    """The `implied_validation` result from loaded inputs, up to the frozen PANEL_END."""
+    report_dates = pd.to_datetime(inputs.panel["report_date"])
+    panel = inputs.panel[report_dates <= pd.Timestamp(PANEL_END)]
     readings = close_readings(inputs.chains)
     closes = equity_closes(inputs.bars)
     agreement = reading_agreement(readings, closes)
     listed = usable_listed(readings, agreement)
-    dates = overlap_dates(inputs.panel, readings)
-    in_window = pd.to_datetime(inputs.panel["report_date"]).isin(dates)
-    window = inputs.panel[in_window].reset_index(drop=True)
+    dates = overlap_dates(panel, readings)
+    in_window = pd.to_datetime(panel["report_date"]).isin(dates)
+    window = panel[in_window].reset_index(drop=True)
     spots = spot_table(readings, closes)
     rows = invert(with_spots(window, spots), RATE)
     validation = compare_with_listed(rows, listed)
@@ -100,14 +104,14 @@ def implied_validation_result(inputs: ImpliedInputs) -> Result:
             "last_date": formats.iso_date(dates[-1]),
             "dates": len(dates),
             "rows": len(rows),
+            "panel_end": formats.iso_date(pd.Timestamp(PANEL_END)),
         },
         "spots": _spots(rows, spots, agreement),
         "coverage": _coverage(rows),
-        "styles": _styles(inputs.panel, rows),
+        "styles": _styles(panel, rows),
         "validation": _validation(validation),
         "domain": _domain(domain, validation, rows),
         "rates": {f"{rate:.2f}": _at_rate(validation, listed, rate) for rate in SENSITIVITY_RATES},
-        "unmarked_as_european": _unmarked_as_european(validation, listed),
     }
     run_inputs = {
         "sources": {
@@ -117,7 +121,8 @@ def implied_validation_result(inputs: ImpliedInputs) -> Result:
         },
         "ci_runs": list(inputs.ci_runs),
         "local_only": inputs.local_only,
-        "panel_rows": len(inputs.panel),
+        "panel_end": formats.iso_date(pd.Timestamp(PANEL_END)),
+        "panel_rows": len(panel),
         "chain_rows": len(inputs.chains),
         "bar_rows": len(inputs.bars),
     }
@@ -155,6 +160,7 @@ def _settings() -> dict[str, Any]:
         "rate": RATE,
         "carry": CARRY,
         "sensitivity_rates": list(SENSITIVITY_RATES),
+        "prefix_styles": dict(PREFIX_STYLES),
         "sigma_bounds": list(SIGMA_BOUNDS),
         "tree_steps": TREE_STEPS,
         "days_per_year": DAYS_PER_YEAR,
@@ -197,46 +203,52 @@ def _coverage(rows: pd.DataFrame) -> dict[str, Any]:
             str(kind): _counts(group["iv_status"], STATUSES)
             for kind, group in rows.groupby("kind", sort=True)
         },
-        "below_intrinsic": {"rows": len(below), "deep_calls": int(deep.sum())},
+        "below_intrinsic": _below(below, deep),
         "no_spot_underlyings": sorted(set(no_spot.astype(str))),
     }
 
 
+def _below(below: pd.DataFrame, deep: pd.Series) -> dict[str, Any]:
+    """Marks below the floor: how many, how many on deep in-the-money calls, and on whom."""
+    per = below.groupby(below["underlying"].astype(str)).size().sort_index()
+    top = per.sort_values(ascending=False, kind="stable").head(BELOW_NAMED)
+    return {
+        "rows": len(below),
+        "deep_calls": int(deep.sum()),
+        "top": [{"symbol": str(name), "rows": int(n)} for name, n in top.items()],
+        "top_share": _share(top.sum(), len(below)),
+    }
+
+
 def _styles(panel: pd.DataFrame, rows: pd.DataFrame) -> dict[str, Any]:
-    """How OCC's headings give the equity exercise style, over the panel and the window,
-    and how the product symbol's prefix lines up with the marked ones."""
+    """Where the equity exercise style comes from, over the panel and the window, and how
+    well the product symbol's prefix agrees with the headings that name a style."""
     equity = panel[panel["kind"] == "equity"]
     groups = style_groups(equity)
-    marked = groups != "unmarked"
-    prefix = product_prefix(equity["root"])
+    named = groups.isin(["strict", "clipped"])
+    expected = product_prefix(equity["root"]).map(dict(PREFIX_STYLES))
     style = equity["exercise_style"].astype(object)
-    expected = prefix.map(PREFIX_STYLE)
     known = expected.notna()
-    by_prefix = pd.crosstab(prefix, style.where(marked, "unmarked"))
     return {
         "panel": _group_shares(groups),
         "window": _group_shares(rows.loc[rows["kind"] == "equity", "group"]),
-        "prefix": {
-            "marked": int(marked.sum()),
-            "fit": int((marked & known & (style == expected)).sum()),
-            "contradict": int((marked & known & (style != expected)).sum()),
-            "other": int((marked & ~known).sum()),
-            "unmarked": int((~marked).sum()),
-            "unmarked_european_prefix": int((~marked & (expected == "european")).sum()),
-            "by_prefix": {
-                str(p): {str(s): int(n) for s, n in row.items()} for p, row in by_prefix.iterrows()
-            },
+        "prefix_agreement": {
+            "checked": int(named.sum()),
+            "agree": int((named & known & (style == expected)).sum()),
+            "contradict": int((named & known & (style != expected)).sum()),
+            "other": int((named & ~known).sum()),
         },
     }
 
 
 def _group_shares(groups: pd.Series) -> dict[str, Any]:
-    counts = _counts(groups, STYLE_GROUPS[:3])
+    counts = _counts(groups, STYLE_GROUPS[:4])
     total = sum(counts.values())
+    unread = counts["prefix"] + counts["fallback"]
     return {
         "equity_rows": total,
         "by_group": counts,
-        "unmarked_share": counts["unmarked"] / total if total else None,
+        "unread_share": unread / total if total else None,
     }
 
 
@@ -303,13 +315,6 @@ def _at_rate(validation: pd.DataFrame, listed: pd.DataFrame, rate: float) -> dic
         "by_right": _split(again, ["right"], [["C", "P"]]),
         "domain_cells": len(domain),
     }
-
-
-def _unmarked_as_european(validation: pd.DataFrame, listed: pd.DataFrame) -> dict[str, Any]:
-    """The matched unmarked rows inverted as European instead of American."""
-    unmarked = validation.loc[validation["group"] == "unmarked", list(FLEX_COLUMNS)]
-    again = compare_with_listed(invert(unmarked.assign(exercise_style="european"), RATE), listed)
-    return {"overall": gap_stats(again["diff"]), "by_right": _split(again, ["right"], [["C", "P"]])}
 
 
 def _in(frame: pd.DataFrame, domain: frozenset[tuple[str, str]]) -> pd.Series:

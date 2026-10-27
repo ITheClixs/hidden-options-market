@@ -6,13 +6,13 @@ import pandas as pd
 import pytest
 
 from hidden_options.measure.hidden_share_data import CICapturesError
+from hidden_options.measure.implied import product_prefix
 from hidden_options.measure.implied_data import (
     SPOT_AGREEMENT,
     close_readings,
     equity_closes,
     listed_quotes,
     overlap_dates,
-    product_prefix,
     reading_agreement,
     spot_table,
     style_groups,
@@ -106,7 +106,9 @@ class TestSpots:
 class TestStyles:
     def test_style_groups(self):
         groups = style_groups(panel())
-        assert groups.iloc[:5].tolist() == ["strict", "strict", "clipped", "unmarked", "index"]
+        assert groups.iloc[:5].tolist() == ["strict", "strict", "clipped", "prefix", "index"]
+        # 3AAA on 3 August: no heading marker and no prefix answer.
+        assert groups.iloc[-1] == "fallback"
 
     def test_product_prefix(self):
         assert product_prefix(pd.Series(["1AAA", "2SPX", "4MRUT", "13ABC"])).tolist() == [

@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import pytest
 
-from hidden_options.measure.implied import implied_vol
 from hidden_options.publish.latex import collect_macros
 from hidden_options.publish.results import Result, read_results, write_result
-from implied_stub import RATE, bars, chains, panel
+from implied_stub import bars, chains, panel
 
 
 def inputs():
@@ -22,17 +22,6 @@ def result() -> Result:
     from hidden_options.measure.implied_result import implied_validation_result
 
     return implied_validation_result(inputs())
-
-
-def unmarked_put_gap() -> float:
-    """The unmarked row: a European put at 0.35 read as American, against listed 0.35."""
-    from implied_stub import mark
-
-    price = mark(100, 110, 30, 0.35, "P")
-    iv, _ = implied_vol(
-        price, 100, 110, 30 / 365, rate=RATE, carry=0.0, right="P", style="american"
-    )
-    return iv - 0.35
 
 
 class TestResult:
@@ -70,7 +59,12 @@ class TestResult:
         }
         assert coverage["by_kind"]["index"]["ok"] == 2
         assert coverage["by_kind"]["index"]["no_spot"] == 1
-        assert coverage["below_intrinsic"] == {"rows": 1, "deep_calls": 1}
+        assert coverage["below_intrinsic"] == {
+            "rows": 1,
+            "deep_calls": 1,
+            "top": [{"symbol": "AAA", "rows": 1}],
+            "top_share": 1.0,
+        }
         assert coverage["no_spot_underlyings"] == ["BBB", "DJX"]
 
     def test_spots(self, result):
@@ -89,7 +83,7 @@ class TestResult:
 
     def test_gaps(self, result):
         overall = result.values["validation"]["overall"]
-        gaps = np.array([0.01, -0.03, 0.0, unmarked_put_gap(), 0.01, 0.0])
+        gaps = np.array([0.01, -0.03, 0.0, 0.0, 0.01, 0.0])
         assert overall["n"] == 6
         assert overall["median_abs"] == pytest.approx(np.median(np.abs(gaps)), abs=1e-6)
         assert overall["within"] == pytest.approx(np.mean(np.abs(gaps) <= 0.02 + 1e-9))
@@ -100,16 +94,13 @@ class TestResult:
         assert {name: stats["n"] for name, stats in groups.items()} == {
             "strict": 3,
             "clipped": 1,
-            "unmarked": 1,
+            "prefix": 1,
+            "fallback": 0,
             "index": 1,
         }
-        assert groups["unmarked"]["median_diff"] == pytest.approx(unmarked_put_gap(), abs=1e-6)
-        assert result.values["validation"]["by_group_right"]["unmarked|P"]["n"] == 1
-
-    def test_unmarked_rows_read_as_european(self, result):
-        sensitivity = result.values["unmarked_as_european"]
-        assert sensitivity["overall"]["n"] == 1
-        assert sensitivity["overall"]["median_diff"] == pytest.approx(0.0, abs=1e-6)
+        # The unmarked put is European by its prefix, as it was priced.
+        assert groups["prefix"]["median_diff"] == pytest.approx(0.0, abs=1e-6)
+        assert result.values["validation"]["by_group_right"]["prefix|P"]["n"] == 1
 
     def test_buckets(self, result):
         validation = result.values["validation"]
@@ -140,18 +131,18 @@ class TestResult:
 
     def test_styles(self, result):
         styles = result.values["styles"]
-        assert styles["panel"]["equity_rows"] == 15
-        assert styles["panel"]["by_group"] == {"strict": 11, "clipped": 1, "unmarked": 3}
-        assert styles["panel"]["unmarked_share"] == pytest.approx(0.2)
+        assert styles["panel"]["equity_rows"] == 16
+        assert styles["panel"]["by_group"] == {
+            "strict": 11,
+            "clipped": 1,
+            "prefix": 3,
+            "fallback": 1,
+        }
+        assert styles["panel"]["unread_share"] == pytest.approx(0.25)
         assert styles["window"]["equity_rows"] == 12
-        prefix = styles["prefix"]
-        assert (prefix["marked"], prefix["fit"], prefix["contradict"], prefix["other"]) == (
-            12,
-            12,
-            0,
-            0,
-        )
-        assert (prefix["unmarked"], prefix["unmarked_european_prefix"]) == (3, 2)
+        agreement = styles["prefix_agreement"]
+        assert (agreement["checked"], agreement["agree"]) == (12, 12)
+        assert (agreement["contradict"], agreement["other"]) == (0, 0)
 
     def test_macros(self, result):
         macros = result.macros
@@ -169,7 +160,11 @@ class TestResult:
         assert macros["IvMatchedSeries"] == "5"
         assert macros["IvIndexMatched"] == "1"
         assert macros["IvDomainCells"] == "0"
-        assert macros["IvUnmarkedShare"] == "20.0\\%"
+        assert macros["IvUnreadShare"] == "25.0\\%"
+        assert macros["IvFallbackRows"] == "1 series-day"
+        assert macros["IvPrefixGap"] == "0.00"
+        assert macros["IvBelowTopNames"] == "AAA"
+        assert macros["IvBelowTopShare"] == "100.0\\%"
         assert macros["IvSpotSetAside"] == "1"
         assert macros["IvSpotAgreement"] == "0.5\\%"
         assert macros["IvPrefixContradict"] == "0"
@@ -181,7 +176,25 @@ class TestResult:
     def test_records_its_inputs(self, result):
         assert result.inputs["ci_runs"] == ["2026-09-03"]
         assert result.inputs["local_only"] is False
-        assert result.inputs["panel_rows"] == 18
+        assert result.inputs["panel_rows"] == 19
+        assert result.inputs["panel_end"] == "2026-10-22"
+
+
+class TestPanelEnd:
+    def test_dates_after_the_frozen_panel_end_are_left_out(self, monkeypatch):
+        from hidden_options.measure import implied_result
+
+        monkeypatch.setattr(implied_result, "PANEL_END", pd.Timestamp("2026-09-01").date())
+        values = implied_result.implied_validation_result(inputs()).values
+        assert (values["window"]["last_date"], values["window"]["dates"]) == ("2026-09-01", 1)
+        assert values["window"]["panel_end"] == "2026-09-01"
+        # The full-panel style counts stop at the panel end too.
+        assert values["styles"]["panel"]["equity_rows"] == 15
+
+    def test_the_panel_end_is_one_constant(self):
+        from hidden_options import config
+
+        assert pd.Timestamp("2026-10-22").date() == config.PANEL_END
 
 
 class TestDomain:
@@ -211,7 +224,7 @@ class TestTables:
         assert "\\label{tab:implied}" in text
         assert "0.95--1.00" in text
         assert "$\\leq 7$" in text
-        assert "No marker" in text
+        assert "Product prefix" in text
 
     def test_domain_table(self, result):
         from hidden_options.measure.implied_table import domain_table

@@ -13,6 +13,7 @@ from typing import Any
 
 import pandas as pd
 
+from hidden_options.measure.hidden_share_macros import name_list
 from hidden_options.publish import formats
 
 MISSING = "--"
@@ -70,6 +71,8 @@ def _coverage_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "IvNoSpot": formats.count(status["no_spot"]),
         "IvBelowIntrinsic": formats.count(status["below_intrinsic"]),
         "IvBelowDeepCalls": _share(below["deep_calls"] / below["rows"] if below["rows"] else None),
+        "IvBelowTopNames": name_list([row["symbol"] for row in below["top"]]),
+        "IvBelowTopShare": _share(below["top_share"]),
         "IvNoConvergence": formats.count(status["no_convergence"]),
         "IvSpotReadings": formats.count(spots["agreement"]["readings"]),
         "IvSpotSetAside": formats.count(spots["agreement"]["set_aside"]),
@@ -100,23 +103,20 @@ def _validation_macros(values: Mapping[str, Any]) -> dict[str, str]:
 
 
 def _style_macros(values: Mapping[str, Any]) -> dict[str, str]:
-    styles, validation = values["styles"], values["validation"]
-    groups, by_right = validation["by_group"], validation["by_group_right"]
-    prefix, european = styles["prefix"], values["unmarked_as_european"]
-    macros = {
-        "IvUnmarkedShare": _share(styles["panel"]["unmarked_share"]),
-        "IvPrefixMarked": formats.count(prefix["marked"]),
-        "IvPrefixContradict": formats.count(prefix["contradict"]),
-        "IvPrefixOther": formats.counted(prefix["other"], "series-day"),
-        "IvUnmarkedEuropeanPrefix": _share(
-            prefix["unmarked_european_prefix"] / prefix["unmarked"] if prefix["unmarked"] else None
+    styles, groups = values["styles"], values["validation"]["by_group"]
+    agreement = styles["prefix_agreement"]
+    return {
+        "IvUnreadShare": _share(styles["panel"]["unread_share"]),
+        "IvFallbackRows": formats.counted(
+            styles["panel"]["by_group"]["fallback"], "series-day", "series-days"
         ),
-        "IvUnmarkedPutBias": _points(by_right["unmarked|P"]["median_diff"]),
-        "IvUnmarkedPutBiasEuropean": _points(european["by_right"]["P"]["median_diff"]),
+        "IvPrefixMarked": formats.count(agreement["checked"]),
+        "IvPrefixContradict": formats.count(agreement["contradict"]),
+        "IvPrefixOther": formats.counted(agreement["other"], "series-day"),
+        "IvStrictGap": _points(groups["strict"]["median_abs"]),
+        "IvClippedGap": _points(groups["clipped"]["median_abs"]),
+        "IvPrefixGap": _points(groups["prefix"]["median_abs"]),
     }
-    for group, name in (("strict", "Strict"), ("clipped", "Clipped"), ("unmarked", "Unmarked")):
-        macros[f"Iv{name}Gap"] = _points(groups[group]["median_abs"])
-    return macros
 
 
 def _rate_macros(values: Mapping[str, Any]) -> dict[str, str]:

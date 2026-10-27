@@ -11,6 +11,7 @@ import pytest
 from hidden_options.measure.implied import (
     GREEK_COLUMNS,
     MONEYNESS_BINS,
+    PREFIX_STYLES,
     RATE,
     SIGMA_BOUNDS,
     InversionStatus,
@@ -23,6 +24,7 @@ from hidden_options.measure.implied import (
     implied_vols,
     inversion_style,
     listed_twin,
+    style_source,
     validated_domain,
 )
 from hidden_options.measure.pricing import binomial, black_scholes
@@ -172,9 +174,10 @@ class TestImpliedVols:
                 expiry=DAY + HALF_YEAR,
                 mark_price=put_mark,
             ),
-            # Unmarked: inverted as American under the default.
+            # Unmarked heading, American by its product prefix.
             row(
                 class_name="AAA INC",
+                root="1AAA",
                 exercise_style=None,
                 right="P",
                 strike=110.0,
@@ -239,7 +242,7 @@ class TestImpliedVols:
         assert inverted["spot"].iloc[4] == 5100.0
         assert inverted["years"].iloc[0] == 1.0
 
-    def test_unmarked_equity_rows_are_inverted_as_american(self):
+    def test_an_unmarked_row_takes_the_style_its_prefix_gives(self):
         inverted = implied_vols(self.rows(), self.SPOTS, rate=RATE)
         assert inverted["inverted_as"].tolist()[:5] == [
             "european",
@@ -248,16 +251,35 @@ class TestImpliedVols:
             "american",
             "european",
         ]
-        # Same mark, same contract: the unmarked row inverts exactly as the marked American.
+        # Same mark, same contract: the row read by prefix inverts exactly as the marked one.
         assert inverted["iv"].iloc[3] == inverted["iv"].iloc[2]
 
     def test_inversion_style(self):
         panel = frame(
-            row(exercise_style=None),
-            row(exercise_style="american"),
+            row(exercise_style=None, root="1AAA"),  # prefix 1: American
+            row(exercise_style=None, root="2AAA"),  # prefix 2: European
+            row(exercise_style=None, root="4AAA"),  # prefix 4: European
+            row(exercise_style=None, root="3AAA"),  # no answer: the American fallback
+            row(exercise_style="american", root="2AAA"),  # the heading wins over the prefix
             row(kind="index", exercise_style="european"),
         )
-        assert inversion_style(panel).tolist() == ["american", "american", "european"]
+        assert inversion_style(panel).tolist() == [
+            "american",
+            "european",
+            "european",
+            "american",
+            "american",
+            "european",
+        ]
+
+    def test_style_source(self):
+        panel = frame(
+            row(exercise_style=None, root="1AAA"),
+            row(exercise_style=None, root="3AAA"),
+            row(exercise_style="european"),
+        )
+        assert style_source(panel).tolist() == ["prefix", "fallback", "heading"]
+        assert PREFIX_STYLES == {"1": "american", "2": "european", "4": "european"}
 
     def test_an_unmarked_index_row_is_refused(self):
         # The panel reads unmarked index headings as European; a None here means it did not.
@@ -308,7 +330,12 @@ class TestGreeks:
     def test_an_american_put_takes_the_trees_greeks(self):
         deep = frame(
             row(
-                class_name="AAA INC", exercise_style=None, right="P", strike=200.0, mark_price=100.0
+                class_name="AAA INC",
+                root="1AAA",
+                exercise_style=None,
+                right="P",
+                strike=200.0,
+                mark_price=100.0,
             )
         )
         inverted = implied_vols(deep, {"AAA": SPOT}, rate=RATE)

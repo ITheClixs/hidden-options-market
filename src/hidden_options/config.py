@@ -9,12 +9,16 @@ from __future__ import annotations
 import json
 import os
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DATA_ROOT = Path(os.environ.get("HIDDEN_OPTIONS_DATA_ROOT", PROJECT_ROOT / "data"))
 RAW_DIR = DATA_ROOT / "raw"
+# The last FLEX report date the paper's results use. The collector keeps adding dates
+# nightly; the published window does not move with them.
+PANEL_END = date(2026, 10, 22)
 # Captures published by the private CI collector, one unpacked archive per run, each as
 # `<run date>/raw` in the same layout as RAW_DIR. Read beside RAW_DIR, never merged into it.
 CI_CAPTURES_DIR = DATA_ROOT / "ci_captures"

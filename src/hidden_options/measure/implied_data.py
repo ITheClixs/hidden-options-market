@@ -13,9 +13,10 @@
   bitcoin indices, and FLEX classes the bars lack (adjusted deliverables among them).
 * An equity's reading is used only where its stock price agrees with the close to within
   SPOT_AGREEMENT. Elsewhere Cboe's volatilities were computed against another price.
-* Style groups split the validation by how OCC's class heading gave the exercise style:
-  spelled out in full, clipped by the heading's thirty-character limit, or not at all;
-  index rows are a group of their own.
+* Style groups split the validation by where the exercise style came from: OCC's class
+  heading, spelled out in full or clipped by its thirty-character limit; the product
+  symbol's prefix, where the heading says nothing; or the American fallback, where the
+  prefix gives no answer either. Index rows are a group of their own.
 """
 
 from __future__ import annotations
@@ -44,6 +45,7 @@ from hidden_options.measure.hidden_share_data import (
     switch_on,
     trading_calendar,
 )
+from hidden_options.measure.implied import style_source
 from hidden_options.publish.results import RESULTS_DIR
 
 RESULT_NAME = "implied_validation"
@@ -58,7 +60,7 @@ INDEX_FRACTIONS: Mapping[str, tuple[str, float]] = MappingProxyType(
 )
 LISTED_COLUMNS = ("date", "symbol", "root", "expiry", "right", "strike", "iv")
 SPOT_COLUMNS = ("date", "underlying", "spot", "source")
-STYLE_GROUPS = ("strict", "clipped", "unmarked", "index")
+STYLE_GROUPS = ("strict", "clipped", "prefix", "fallback", "index")
 BAR_COLUMNS = ("symbol", "timestamp", "close")
 
 
@@ -211,18 +213,16 @@ def overlap_dates(panel: pd.DataFrame, readings: pd.DataFrame) -> list[pd.Timest
 
 
 def style_groups(panel: pd.DataFrame) -> pd.Series:
-    """`strict`, `clipped` or `unmarked` by the heading's marker; `index` for index rows."""
+    """Where an equity row's exercise style comes from: `strict` or `clipped` for a heading
+    that spells the style out or is cut off partway through it, `prefix` for one read
+    from the product symbol, `fallback` for one assumed; `index` for index rows."""
     codes, headings = pd.factorize(panel["class_name"])
-    names = {"strict": "strict", "clipped": "clipped", "none": "unmarked"}
-    read = [names[exercise_style_evidence(heading)[1]] for heading in headings]
-    groups = np.array([*read, "unmarked"], dtype=object)[codes]
+    read = [exercise_style_evidence(heading)[1] for heading in headings]
+    evidence = np.array([*read, "none"], dtype=object)[codes]
+    source = style_source(panel).to_numpy()
+    groups = np.where(evidence == "none", source, evidence).astype(object)
     groups[(panel["kind"] == "index").to_numpy()] = "index"
     return pd.Series(groups, index=panel.index, dtype=object)
-
-
-def product_prefix(roots: pd.Series) -> pd.Series:
-    """The leading digits of a FLEX product symbol (`1AAPL` to `1`)."""
-    return roots.astype(str).str.extract(r"^(\d+)", expand=False)
 
 
 def _day(values: pd.Series) -> pd.Series:
@@ -240,7 +240,6 @@ __all__ = [
     "listed_quotes",
     "load_inputs",
     "overlap_dates",
-    "product_prefix",
     "reading_agreement",
     "spot_table",
     "style_groups",

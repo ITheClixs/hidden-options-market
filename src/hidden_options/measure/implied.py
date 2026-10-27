@@ -13,9 +13,11 @@ The model, one choice per input:
 * Rate RATE = 0.04, the constant `gamma_gap` already uses, and carry yield CARRY = 0: no
   dividends. Both are recorded with every result that uses them.
 * Time: calendar days from the report date to expiry, over 365.
-* Exercise style: the panel's, read from OCC's class heading. An equity row whose heading
-  does not say is inverted as American, the conservative reading for a put (and for a
-  call on a dividend payer); index rows are European (`flex_panel.load_panel`).
+* Exercise style: the panel's, read from OCC's class heading; index rows are European
+  (`flex_panel.load_panel`). Where an equity heading does not say, the FLEX product
+  symbol's leading digit does (PREFIX_STYLES): wherever a heading names the style, 1
+  goes with American and 2 and 4 with European. A row whose digit gives no answer is
+  inverted as American. `style_source` says which of the three applied.
 * Search: volatility between SIGMA_BOUNDS, 0.01% and 500%. One contract is solved with
   Brent's method; a frame is solved all at once by Newton steps kept inside a shrinking
   bracket, falling back to bisection when a step would leave it. The two agree to
@@ -66,6 +68,12 @@ PRICE_TOL = 1e-9
 FLOOR_TOL = 1e-6
 MAX_ITERATIONS = 100
 STYLES = ("american", "european")
+# The style each FLEX product-symbol prefix carries, as the marked class headings show it.
+PREFIX_STYLES: Mapping[str, str] = MappingProxyType(
+    {"1": "american", "2": "european", "4": "european"}
+)
+# The style of an equity row that neither its heading nor its prefix gives.
+FALLBACK_STYLE = "american"
 RIGHTS = ("C", "P")
 # A one percent move in the underlying, for dollar gamma.
 ONE_PERCENT = 0.01
@@ -221,7 +229,8 @@ def implied_vols_frame(frame: pd.DataFrame, *, rate: float, carry: float = CARRY
 
 
 def inversion_style(frame: pd.DataFrame) -> pd.Series:
-    """The exercise style each row is inverted under: its own, or American if unread.
+    """The exercise style each row is inverted under: its heading's, else its prefix's,
+    else American (see `style_source`).
 
     Only equity rows may lack a style: the panel reads an unmarked index heading as
     European, so an index row without one did not come through `load_panel`.
@@ -230,11 +239,25 @@ def inversion_style(frame: pd.DataFrame) -> pd.Series:
     unread = style.isna()
     if (unread & (frame["kind"] != "equity")).any():
         raise ValueError("An index row has no exercise style; load the panel with load_panel")
-    style = style.where(~unread, "american")
+    by_prefix = product_prefix(frame["root"]).map(dict(PREFIX_STYLES))
+    style = style.where(~unread, by_prefix.where(by_prefix.notna(), FALLBACK_STYLE))
     unknown = ~style.isin(STYLES)
     if unknown.any():
         raise ValueError(f"Unknown exercise style {style[unknown].iloc[0]!r}")
-    return style
+    return style.astype(object)
+
+
+def style_source(frame: pd.DataFrame) -> pd.Series:
+    """Where each row's inversion style comes from: `heading`, `prefix` or `fallback`."""
+    unread = frame["exercise_style"].isna().to_numpy()
+    known = product_prefix(frame["root"]).isin(set(PREFIX_STYLES)).to_numpy()
+    source = np.where(~unread, "heading", np.where(known, "prefix", "fallback"))
+    return pd.Series(source, index=frame.index, dtype=object)
+
+
+def product_prefix(roots: pd.Series) -> pd.Series:
+    """The leading digits of a FLEX product symbol (`1AAPL` to `1`)."""
+    return roots.astype(str).str.extract(r"^(\d+)", expand=False)
 
 
 def greeks(
@@ -612,11 +635,13 @@ __all__ = [
     "DTE_EDGES",
     "DTE_LABELS",
     "GREEK_COLUMNS",
+    "FALLBACK_STYLE",
     "INDEX_TWINS",
     "MAX_MEDIAN_DIFF",
     "MIN_MATCHED",
     "MONEYNESS_BINS",
     "MONEYNESS_LABELS",
+    "PREFIX_STYLES",
     "RATE",
     "SIGMA_BOUNDS",
     "InversionStatus",
@@ -631,5 +656,7 @@ __all__ = [
     "implied_vols_frame",
     "inversion_style",
     "listed_twin",
+    "product_prefix",
+    "style_source",
     "validated_domain",
 ]

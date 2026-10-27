@@ -553,9 +553,14 @@ American ones on a \IvTreeSteps{}-step Cox--Ross--Rubinstein tree. The rate is a
 \IvRate{} and the dividend yield is zero, so an American call is never exercised early
 and is priced as its European twin. Time runs in calendar days over 365, and the search
 runs over volatilities from \IvSigmaLow{} to \IvSigmaHigh{}. The exercise style is
-OCC's. Index series are European; an equity class names its style in its heading,
-except that \IvUnmarkedShare{} of equity series-days in the panel sit under a heading
-that does not, and we price those as American. An equity's spot is its close. An
+OCC's. Index series are European, and an equity class names its style in its heading,
+except that \IvUnreadShare{} of equity series-days in the panel sit under a heading that
+does not. For those the product symbol says it. Wherever the heading names a style, the
+symbol's leading digit agrees with it, 1 with American and 2 and 4 with European:
+\IvPrefixContradict{} of the \IvPrefixMarked{} equity series-days with a named style
+contradict that pairing, and \IvPrefixOther{} carry another digit. We therefore take an
+unnamed style from the digit. Where the digit gives no answer too we price the series as
+American, a fallback that covers \IvFallbackRows{}. An equity's spot is its close. An
 index's is its level in the Cboe chain read after the close, and the mini products on
 SPX, NDX and RUT take their fixed fraction of it. The Dow, MSCI and bitcoin indices, and
 equity classes our daily bars do not cover, have no spot.
@@ -563,11 +568,12 @@ equity classes our daily bars do not cover, have no spot.
 Of the \IvRows{} series-days, \IvOkShare{} give a volatility. Every other one keeps its
 reason: a mark below the model's floor (\IvBelowIntrinsic{}), no spot (\IvNoSpot{}),
 expiry on the report date (\IvExpired{}), a mark above the price at \IvSigmaHigh{}
-(\IvNoConvergence{}), a zero mark (\IvZeroPrice{}). Of the marks below the floor,
-\IvBelowDeepCalls{} are on calls struck below \IvDeepMoneyness{} of spot. For such a
-call the floor is the spot less the discounted strike, which without dividends is too
-high for a stock or index that pays them; the shortfall is consistent with OCC marking
-these calls with dividends allowed for.
+(\IvNoConvergence{}), a zero mark (\IvZeroPrice{}). The \IvBelowIntrinsic{} marks below
+the floor are mostly deep in-the-money calls on dividend payers: \IvBelowDeepCalls{} are on
+calls struck below \IvDeepMoneyness{} of spot, and \IvBelowTopShare{} are on
+\IvBelowTopNames{}. For such a call the floor is the spot less the discounted strike,
+which without dividends is too high for a stock or index that pays them; the shortfall
+is consistent with OCC marking these calls with dividends allowed for.
 
 Where a FLEX series has a listed twin, the same underlying, expiry, right and strike in
 the listed product of the same settlement, we compare its volatility with the one Cboe
@@ -598,18 +604,10 @@ book for which the inversion has been checked.
 
 \input{tables/implied_domain}
 
-How the exercise style was read changes the gap little: the median is \IvStrictGap{}
-points where the heading spells the style out, \IvClippedGap{} where the heading is cut
-off partway through it, and \IvUnmarkedGap{} where it says nothing and we assume
-American. There is reason to think the assumption is wrong for most of those series.
-Wherever the heading names a style, the product symbol's leading digit agrees with it,
-1 with American and 2 and 4 with European: \IvPrefixContradict{} of the
-\IvPrefixMarked{} marked equity series-days contradict that pairing, and
-\IvPrefixOther{} carry another digit. Read by the digit, \IvUnmarkedEuropeanPrefix{} of
-unmarked series-days would be European. For the comparison the difference is small. An
-American and a European call are worth the same with no dividend yield, and priced as
-European the unmarked puts' median signed gap moves from $\IvUnmarkedPutBias$ to
-$\IvUnmarkedPutBiasEuropean$ points.
+Where the style comes from changes the gap little: the median is \IvStrictGap{} points
+where the heading spells the style out, \IvClippedGap{} where the heading is cut off
+partway through it, and \IvPrefixGap{} where the product symbol gives it
+(Table~\ref{tab:implied}).
 
 The rate is a choice too. Repeated at \IvRateLow{}, the comparison gives a median gap of
 \IvMedianGapLow{} points with \IvWithinTwoLow{} of gaps within \IvWithinPoints{} and

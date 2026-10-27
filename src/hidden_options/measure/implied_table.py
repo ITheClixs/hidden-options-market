@@ -17,9 +17,10 @@ from hidden_options.publish.results import Result
 
 RESULT = "implied_validation"
 GROUP_LABELS = {
-    "strict": "Style spelled out",
-    "clipped": "Style clipped",
-    "unmarked": "No marker (as American)",
+    "strict": "Heading, spelled out",
+    "clipped": "Heading, clipped",
+    "prefix": "Product prefix",
+    "fallback": "Neither (as American)",
     "index": "Index (European)",
 }
 
