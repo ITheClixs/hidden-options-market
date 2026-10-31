@@ -147,6 +147,19 @@ class TestLoadInputs:
         monkeypatch.setattr(implied_data, "RESULTS_DIR", results)
         return implied_data.load_inputs(raw, ci, bars_path, **kwargs)
 
+    def test_the_calendar_is_cut_at_the_panel_end(self, monkeypatch, world):
+        from hidden_options.measure import implied_data
+
+        seen = []
+        real = implied_data.trading_calendar
+        monkeypatch.setattr(
+            implied_data,
+            "trading_calendar",
+            lambda raw, until=None: seen.append(until) or real(raw, until),
+        )
+        self.load(monkeypatch, world)
+        assert seen == [pd.Timestamp(implied_data.PANEL_END)]
+
     def test_reads_the_panel_readings_and_bars(self, monkeypatch, world):
         inputs = self.load(monkeypatch, world)
         # The rows to invert start at the first date read after the close; the style

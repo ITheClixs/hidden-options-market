@@ -153,6 +153,7 @@ def test_builder_refuses_a_result_from_another_census(monkeypatch, tmp_path):
         indices=INDICES,
     )
     monkeypatch.setattr(figures, "load_inputs", lambda raw: None)
+    monkeypatch.setattr(figures, "freeze", lambda inputs, end: inputs)
     monkeypatch.setattr(figures, "census_view", lambda inputs: view)
     monkeypatch.setattr(
         figures,
@@ -172,6 +173,7 @@ def test_builder_writes_paper_and_readme_figures(monkeypatch, tmp_path):
         indices=INDICES,
     )
     monkeypatch.setattr(figures, "load_inputs", lambda raw: None)
+    monkeypatch.setattr(figures, "freeze", lambda inputs, end: inputs)
     monkeypatch.setattr(figures, "census_view", lambda inputs: view)
     monkeypatch.setattr(
         figures,

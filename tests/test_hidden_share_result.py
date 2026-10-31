@@ -272,6 +272,32 @@ class TestPanelEnd:
         assert again.macros == result.macros
 
 
+class TestLoadInputsPanelEnd:
+    """`load_inputs` reads no FLEX report, and builds no calendar, past the panel end."""
+
+    def test_reports_and_the_calendar_stop_at_the_panel_end(self, monkeypatch, raw, tmp_path):
+        point_at_world(monkeypatch, raw, tmp_path)
+        end = pd.Timestamp("2026-09-02")
+        monkeypatch.setattr(results_module, "PANEL_END", end.date())
+        seen = []
+        real = results_module.trading_calendar
+        monkeypatch.setattr(
+            results_module,
+            "trading_calendar",
+            lambda root, until=None: seen.append(until) or real(root, until),
+        )
+
+        loaded = results_module.load_inputs()
+
+        assert seen == [end]
+        assert loaded.reports["report_date"].max() == end
+        # The stub world has reports to 4 September; the uncut loader would return them.
+        monkeypatch.setattr(results_module, "PANEL_END", pd.Timestamp("2026-09-04").date())
+        assert results_module.load_inputs().reports["report_date"].max() == pd.Timestamp(
+            "2026-09-04"
+        )
+
+
 class TestCIGuard:
     """Without the CI captures the daily numbers would quietly shrink; the loader refuses."""
 

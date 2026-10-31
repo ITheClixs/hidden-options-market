@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import pytest
 
 from hidden_options.measure.identification import Confusion
@@ -135,17 +136,31 @@ class TestAnalysis:
         seen = {}
 
         def date_capture(frame, chain_oi):
-            seen["rows"], seen["chain"] = len(frame), chain_oi
+            seen["rows"], seen["chain"] = len(frame), list(chain_oi["date"])
             return DATED
 
+        def trading_calendar(raw, until):
+            seen["until"] = until
+            return "calendar"
+
+        def chain_open_interest(chains):
+            assert chains == "chains on calendar"
+            return pd.DataFrame({"date": pd.to_datetime(["2026-10-22", "2026-10-23"])})
+
+        monkeypatch.setattr(module, "PANEL_END", pd.Timestamp("2026-10-22").date())
         monkeypatch.setattr(module, "load_census", lambda raw: census())
-        monkeypatch.setattr(module, "trading_calendar", lambda raw: "calendar")
+        monkeypatch.setattr(module, "trading_calendar", trading_calendar)
         monkeypatch.setattr(module, "load_chains", lambda raw, calendar: f"chains on {calendar}")
-        monkeypatch.setattr(module, "chain_open_interest", lambda chains: f"oi of {chains}")
+        monkeypatch.setattr(module, "chain_open_interest", chain_open_interest)
         monkeypatch.setattr(module, "date_capture", date_capture)
         frame, dated = module.load_dated_census(tmp_path)
         assert (len(frame), dated) == (len(ROWS), DATED)
-        assert seen == {"rows": len(ROWS), "chain": "oi of chains on calendar"}
+        # The calendar and the settlements the census is dated against stop at the panel end.
+        assert seen == {
+            "rows": len(ROWS),
+            "chain": [pd.Timestamp("2026-10-22")],
+            "until": pd.Timestamp("2026-10-22"),
+        }
 
 
 class TestTable:

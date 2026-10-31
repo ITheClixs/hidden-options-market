@@ -136,7 +136,12 @@ def load_inputs(
     if not local_only and not accept:
         check_ci_runs(names, RESULT_NAME, RESULTS_DIR)
     readings = earliest_readings(
-        load_chains([raw, *runs], trading_calendar(raw), extra=("iv",), keep=_file_readings)
+        load_chains(
+            [raw, *runs],
+            trading_calendar(raw, pd.Timestamp(PANEL_END)),
+            extra=("iv",),
+            keep=_file_readings,
+        )
     )
     end = pd.Timestamp(PANEL_END)
     panel = _read_panel(raw, ("equity", "index"), _PANEL_READ_COLUMNS, readings["date"].min(), end)

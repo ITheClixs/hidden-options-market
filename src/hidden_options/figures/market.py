@@ -20,9 +20,9 @@ from matplotlib.colors import Normalize
 from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter, MaxNLocator, NullFormatter
 
-from hidden_options.config import PROJECT_ROOT, RAW_DIR
+from hidden_options.config import PANEL_END, PROJECT_ROOT, RAW_DIR
 from hidden_options.figures.style import PALETTE, apply_style, new_figure, save, seq_cmap
-from hidden_options.measure.flex_panel import load_panel
+from hidden_options.measure.flex_panel import load_panel, panel_through
 from hidden_options.measure.market import (
     cumulative_share,
     expiry_cohorts,
@@ -141,8 +141,9 @@ def fig_concentration(cumulative: pd.Series, marks: Mapping[int, float]) -> Figu
 
 @lru_cache(maxsize=1)
 def cached_panel(raw: Path) -> pd.DataFrame:
-    """The panel, loaded once per process for however many figures are built."""
-    return load_panel(raw)
+    """The panel up to the frozen PANEL_END, loaded once per process for however many
+    figures are built."""
+    return panel_through(load_panel(raw), PANEL_END)
 
 
 @FIGURES.register("growth")

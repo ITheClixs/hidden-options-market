@@ -17,7 +17,7 @@ from typing import Any
 
 import pandas as pd
 
-from hidden_options.config import RAW_DIR
+from hidden_options.config import PANEL_END, RAW_DIR
 from hidden_options.measure.hidden_share import is_adjusted_product
 from hidden_options.measure.hidden_share_data import (
     CaptureDate,
@@ -87,11 +87,14 @@ def load_dated_census(raw: Path | None = None) -> tuple[pd.DataFrame, CaptureDat
     """The census rows and the settlement their listed side shows.
 
     Dated as `hidden_share_result.census_view` dates it, from the local Cboe chains: the
-    census needs no CI capture, and the local chains date it on their own.
+    census needs no CI capture, and the local chains date it on their own. Only settlements
+    up to PANEL_END count.
     """
     raw = RAW_DIR if raw is None else raw
+    end = pd.Timestamp(PANEL_END)
     census = load_census(raw)
-    chain_oi = chain_open_interest(load_chains(raw, trading_calendar(raw)))
+    chain_oi = chain_open_interest(load_chains(raw, trading_calendar(raw, end)))
+    chain_oi = chain_oi[chain_oi["date"] <= end]
     return census, date_capture(census, chain_oi)
 
 

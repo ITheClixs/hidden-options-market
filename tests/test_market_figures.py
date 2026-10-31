@@ -160,6 +160,19 @@ def test_figures_register_under_their_stems():
     assert results_module.market.__name__ == "market"
 
 
+def test_the_cached_panel_stops_at_the_frozen_panel_end(monkeypatch):
+    end = pd.Timestamp("2025-10-31")
+    monkeypatch.setattr(figures, "PANEL_END", end.date())
+    monkeypatch.setattr(figures, "load_panel", lambda root: PANEL)
+    figures.cached_panel.cache_clear()
+    try:
+        panel = figures.cached_panel("raw")
+    finally:
+        figures.cached_panel.cache_clear()
+    assert panel["report_date"].max() == end
+    assert len(panel) < len(PANEL)
+
+
 def test_builder_refuses_a_result_from_another_panel(tmp_path, monkeypatch, result):
     write_result(result, tmp_path / "results")
     shorter = PANEL[PANEL["report_date"] < "2025-12-01"]

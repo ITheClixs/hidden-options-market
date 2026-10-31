@@ -35,9 +35,9 @@ from matplotlib.text import Annotation, Text
 from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter
 from matplotlib.transforms import Bbox
 
-from hidden_options.config import PROJECT_ROOT, RAW_DIR
+from hidden_options.config import PANEL_END, PROJECT_ROOT, RAW_DIR
 from hidden_options.figures.style import PALETTE, apply_style, new_figure, save
-from hidden_options.measure.hidden_share_result import census_view, load_inputs
+from hidden_options.measure.hidden_share_result import census_view, freeze, load_inputs
 from hidden_options.measure.identification import GRID_POSITIONS, grid_shares, scored_series
 from hidden_options.measure.identification_result import load_dated_census
 from hidden_options.publish import formats
@@ -172,7 +172,7 @@ def build_hidden_share(
 ) -> None:
     """F3, for the paper and as the README's lead figure."""
     expected = _census_values(results)
-    view = census_view(load_inputs(raw))
+    view = census_view(freeze(load_inputs(raw), pd.Timestamp(PANEL_END)))
     found = (f"{view.dated.date:%Y-%m-%d}", len(view.ordinary))
     if found != (expected["date"], expected["underlyings"]):
         raise ValueError(
