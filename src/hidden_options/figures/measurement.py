@@ -1,5 +1,5 @@
 """Figures for the measurement results. F3: how much of each options market is FLEX. F4:
-why a strike rule cannot find it.
+why a strike rule cannot find it. F5 and F6: why a cleared series is not a position.
 
 F3 sets each underlying's FLEX open interest against its listed open interest on the
 census date, both on log scales. A line of constant FLEX share is a straight line of
@@ -13,8 +13,12 @@ of series and of open interest: one row per grid position, FLEX in ink and liste
 muted, each bar labelled with its share. The off-grid row, the only one the rule flags,
 sits on a faint band and is named as such.
 
-Each builder recomputes from the raw census and refuses to draw against a result from
-another census, since the figure and the text beside it would then disagree.
+F5 sets what a butterfly and a collar can be worth against the strike notional of their
+legs. F6 is the distribution across underlyings of strike notional over delta exposure.
+
+The census figures recompute from the raw census and refuse to draw against a result from
+another census, since the figure and the text beside it would then disagree. F5 and F6
+draw from the `positions` result alone.
 """
 
 from __future__ import annotations
@@ -40,6 +44,8 @@ from hidden_options.figures.style import PALETTE, apply_style, new_figure, save
 from hidden_options.measure.hidden_share_result import census_view, freeze, load_inputs
 from hidden_options.measure.identification import GRID_POSITIONS, grid_shares, scored_series
 from hidden_options.measure.identification_result import load_dated_census
+from hidden_options.measure.positions import payoff
+from hidden_options.measure.structures import CONTRACT_MULTIPLIER
 from hidden_options.publish import formats
 from hidden_options.publish.registry import FIGURES
 from hidden_options.publish.results import RESULTS_DIR, read_results
@@ -572,3 +578,167 @@ def build_strike_grid(
         )
     apply_style()
     save(fig_grid(series), GRID_FIGURE, paper=True, readme=False, root=root)
+
+
+ANATOMY_FIGURE = "anatomy"
+RATIO_FIGURE = "notional_ratio"
+POSITIONS_RESULT = "positions"
+_BILLION = 1e9
+# The payoff is drawn this far either side of a structure's strikes, as a share of their span.
+_PAYOFF_MARGIN = 0.35
+_PAYOFF_POINTS = 801
+_RATIO_BINS_PER_DECADE = 5
+
+
+def _usd_bn(value: float) -> str:
+    """Dollars in billions, as an annotation sets them: `\\$63.8bn`, `\\$0.43bn`."""
+    billions = value / _BILLION
+    digits = 2 if billions < 1 else 1
+    return f"\\${billions:.{digits}f}bn"
+
+
+def _anatomy_payoff(ax: Axes, legs: pd.DataFrame, title: str, low: float, high: float) -> None:
+    prices = np.linspace(low, high, _PAYOFF_POINTS)
+    values = payoff(legs, prices) / _BILLION
+    for strike in sorted(set(legs["strike"])):
+        ax.axvline(strike, color=PALETTE["faint"], linewidth=0.6, zorder=0)
+    ax.plot(prices, values, color=PALETTE["ink"])
+    top = float(values.max())
+    ax.axhline(top, color=PALETTE["muted"], linewidth=0.6, linestyle=(0, (3, 2)), zorder=1)
+    ax.set_xlim(low, high)
+    ax.set_ylim(bottom=min(0.0, float(values.min())), top=top * 1.25)
+    ax.set_title(title, loc="left")
+    ax.set_xlabel("Underlying at expiry (\\$)")
+    ax.set_ylabel("Value at expiry (\\$bn)")
+
+
+def _anatomy_bars(
+    ax: Axes, leg_notionals: Sequence[float], top: float, max_label: str, unit: str
+) -> None:
+    """Strike notional leg by leg, stacked, over the most the position can be worth."""
+    left = 0.0
+    for value in leg_notionals:
+        ax.barh(
+            1,
+            value / _BILLION,
+            left=left,
+            color=PALETTE["muted"],
+            edgecolor=PALETTE["surface"],
+            linewidth=0.8,
+            height=0.6,
+        )
+        left += value / _BILLION
+    ax.barh(0, top / _BILLION, color=PALETTE["ink"], height=0.6)
+    ax.set_yticks([1, 0], ["Strike notional,\nleg by leg", max_label])
+    ax.set_ylim(-0.6, 1.6)
+    ax.set_xlim(0, left * 1.28)
+    ax.tick_params(axis="y", length=0)
+    ax.spines["left"].set_visible(False)
+    ax.set_xlabel(unit)
+    for value, y in ((left * _BILLION, 1), (top, 0)):
+        ax.annotate(
+            _usd_bn(value),
+            xy=(value / _BILLION, y),
+            xytext=(3, 0),
+            textcoords="offset points",
+            va="center",
+            color=PALETTE["ink"],
+        )
+
+
+def fig_anatomy(cases: Mapping[str, Any]) -> Figure:
+    """F5: what a butterfly and a collar can be worth, against their legs' strike notional.
+
+    Top row: the payoff at expiry, one expiry of the butterfly and the whole collar, with
+    faint rules at the strikes. Bottom row: the strike notional leg by leg beside the
+    maximum value. The signs of the legs are assumed, since the report gives none.
+    """
+    butterfly, collar = cases["butterfly"], cases["collar"]
+    fig = new_figure(1.0, aspect=0.62)
+    axes = fig.subplots(2, 2, gridspec_kw={"height_ratios": [2.4, 1.0]})
+    legs = pd.DataFrame(butterfly["legs"])
+    first = legs[legs["expiry"] == legs["expiry"].min()]
+    span = float(first["strike"].max() - first["strike"].min())
+    _anatomy_payoff(
+        axes[0, 0],
+        first,
+        f"{butterfly['underlying']} butterfly, one of {len(butterfly['expiries'])} expiries",
+        float(first["strike"].min()) - _PAYOFF_MARGIN * span,
+        float(first["strike"].max()) + _PAYOFF_MARGIN * span,
+    )
+    notionals = (legs["strike"] * legs["contracts"].abs() * CONTRACT_MULTIPLIER).tolist()
+    _anatomy_bars(
+        axes[1, 0], notionals, butterfly["max_value"], "Maximum value", "All expiries (\\$bn)"
+    )
+    signed = pd.DataFrame(collar["legs"])
+    _anatomy_payoff(
+        axes[0, 1],
+        signed,
+        f"{collar['underlying']} collar with a deep call",
+        0.0,
+        float(signed["strike"].max()) * (1 + _PAYOFF_MARGIN / 2),
+    )
+    notionals = (signed["strike"] * signed["contracts"].abs() * CONTRACT_MULTIPLIER).tolist()
+    _anatomy_bars(axes[1, 1], notionals, collar["max_value"], "Maximum value", "\\$bn")
+    return fig
+
+
+def fig_ratio_distribution(measures: pd.DataFrame) -> Figure:
+    """F6: strike notional over delta exposure across underlyings, on a log scale.
+
+    Each underlying is one count, its median across dates. Filled bars net within detected
+    structures; the outlined histogram nets nothing. The rule at 1 is where the naive
+    measure and the exposure agree, with underlyings either side of it named by share.
+    """
+    fig = new_figure(1.0, aspect=0.5)
+    ax = fig.subplots()
+    net = np.log10(measures["ratio"].to_numpy(dtype=float))
+    gross = np.log10(measures["gross_ratio"].to_numpy(dtype=float))
+    low = math.floor(min(net.min(), gross.min()))
+    high = math.ceil(max(net.max(), gross.max()))
+    edges = np.linspace(low, high, (high - low) * _RATIO_BINS_PER_DECADE + 1)
+    ax.hist(net, bins=edges, color=PALETTE["ink"], label="net")
+    ax.hist(gross, bins=edges, histtype="step", color=PALETTE["muted"], linewidth=0.8)
+    ax.axvline(0.0, color=PALETTE["accent"], linewidth=0.8)
+    ax.set_xticks(range(low, high + 1), [_power(tick) for tick in range(low, high + 1)])
+    ax.set_xlabel("Strike notional over delta exposure (log scale)")
+    ax.set_ylabel("Underlyings")
+    below = float((net < 0).mean())
+    top = ax.get_ylim()[1]
+    for text, offset, side in (
+        (f"{below * 100:.0f}% of underlyings\nbelow 1", -4, "right"),
+        (f"{(1 - below) * 100:.0f}% above", 4, "left"),
+    ):
+        ax.annotate(
+            text,
+            xy=(0, top),
+            xytext=(offset, -2),
+            textcoords="offset points",
+            ha=side,
+            va="top",
+            color=PALETTE["ink"],
+        )
+    return fig
+
+
+def _power(exponent: int) -> str:
+    return f"{10.0**exponent:g}"
+
+
+@FIGURES.register(ANATOMY_FIGURE)
+def build_anatomy(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) -> None:
+    """F5, for the paper; every number comes from the `positions` result."""
+    cases = _result_values(results, POSITIONS_RESULT)["cases"]
+    if cases["butterfly"] is None or cases["collar"] is None:
+        raise ValueError("The positions result lacks a worked case to draw")
+    apply_style()
+    save(fig_anatomy(cases), ANATOMY_FIGURE, paper=True, readme=False, root=root)
+
+
+@FIGURES.register(RATIO_FIGURE)
+def build_notional_ratio(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) -> None:
+    """F6, for the paper; the result already stops at the panel end."""
+    ratios = _result_values(results, POSITIONS_RESULT)["ratios"]
+    apply_style()
+    frame = pd.DataFrame(ratios["by_underlying"])
+    save(fig_ratio_distribution(frame), RATIO_FIGURE, paper=True, readme=False, root=root)
