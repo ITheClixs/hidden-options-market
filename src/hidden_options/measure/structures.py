@@ -27,12 +27,15 @@ exposure --- contracts times spot --- is the scale that survives both.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
 
+CONTRACT_MULTIPLIER = 100
+LEG_COLUMNS = ("underlying", "expiry", "right", "strike", "contracts")
 STRUCTURE_COLUMNS = (
     "symbol",
     "expiry",
@@ -53,6 +56,9 @@ class GroupingConfig:
 
     `count_tolerance` is relative: legs of one trade rarely match to the contract
     because of partial exercise and assignment, but they stay within a few percent.
+
+    These values were frozen before the detector was first scored against fund holdings
+    (`holdings_truth`). A change after that needs both scores reported.
     """
 
     count_tolerance: float = 0.05
@@ -95,71 +101,118 @@ def _label(call_legs: int, put_legs: int, strikes: np.ndarray, counts: np.ndarra
     return f"{n}_leg"
 
 
+def structure_type(
+    rights: Sequence[str],
+    strikes: Sequence[float] | np.ndarray,
+    sizes: Sequence[float] | np.ndarray,
+) -> str:
+    """The label of a set of legs: `synthetic`, `collar_buffer`, `3_leg` and so on."""
+    calls = sum(1 for right in rights if right == "C")
+    return _label(calls, len(rights) - calls, np.asarray(strikes, dtype=float), np.asarray(sizes))
+
+
+def group_legs(
+    legs: pd.DataFrame, spots: Mapping[str, float], config: GroupingConfig | None = None
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Group one date's legs into structures.
+
+    Returns the legs with a `structure_id` (-1 for a leg in no structure) and a
+    `structure` label, and a table of the structures in STRUCTURE_COLUMNS plus
+    `structure_id`. Legs group within an underlying and expiry, on contract count alone,
+    so an underlying without a spot is still grouped: only its `exposure` is missing.
+    ``contracts`` in the table is the median leg, and ``exposure`` that size times spot.
+    """
+    cfg = config or GroupingConfig()
+    ids = np.full(len(legs), -1, dtype=np.int64)
+    labels = np.full(len(legs), None, dtype=object)
+    records: list[dict[str, Any]] = []
+    sizes = legs["contracts"].to_numpy(dtype=float)
+    rights = legs["right"].to_numpy(dtype=object)
+    strikes = legs["strike"].to_numpy(dtype=float)
+    eligible = np.flatnonzero(sizes >= cfg.min_contracts)
+    keys = legs.iloc[eligible]
+    for found in keys.groupby(["underlying", "expiry"], sort=True).indices.values():
+        rows = eligible[found]
+        if len(rows) < cfg.min_legs:
+            continue
+        first = legs.iloc[rows[0]]
+        clusters = _cluster_by_count(sizes[rows], cfg.count_tolerance)
+        for cluster in np.unique(clusters):
+            members = rows[clusters == cluster]
+            if len(members) < cfg.min_legs:
+                continue
+            record = _structure(
+                first["underlying"],
+                first["expiry"],
+                rights[members],
+                strikes[members],
+                sizes[members],
+                spots,
+            )
+            record["structure_id"] = len(records)
+            ids[members] = len(records)
+            labels[members] = record["structure"]
+            records.append(record)
+    grouped = legs.assign(structure_id=ids, structure=labels)
+    table = pd.DataFrame(records, columns=[*STRUCTURE_COLUMNS, "structure_id"])
+    return grouped, table
+
+
+def _structure(
+    underlying: Any,
+    expiry: Any,
+    rights: np.ndarray,
+    strikes: np.ndarray,
+    sizes: np.ndarray,
+    spots: Mapping[str, float],
+) -> dict[str, Any]:
+    call_legs = int((rights == "C").sum())
+    representative = float(np.median(sizes))
+    spot = spots.get(cast(str, underlying), float("nan"))
+    return {
+        "symbol": underlying,
+        "expiry": expiry,
+        "structure": structure_type(list(rights), strikes, sizes),
+        "n_legs": len(rights),
+        "contracts": representative,
+        "exposure": representative * CONTRACT_MULTIPLIER * spot,
+        "call_legs": call_legs,
+        "put_legs": len(rights) - call_legs,
+        "min_strike": float(strikes.min()),
+        "max_strike": float(strikes.max()),
+    }
+
+
 def group_structures(
     census: pd.DataFrame, spot_by_symbol: dict[str, float], config: GroupingConfig | None = None
 ) -> pd.DataFrame:
-    """Group legs into structures and value each once, on the underlying.
+    """Group a census's legs into structures and value each once, on the underlying.
 
-    ``contracts`` is the representative size of the structure, taken as the median leg
-    rather than the sum, because the legs are the same position seen from different
-    strikes. ``exposure`` is that size times spot.
+    A symbol without a usable spot is left out. The rest is `group_legs`, largest first.
     """
-    cfg = config or GroupingConfig()
-    if census.empty:
+    priced = census[census["symbol"].map(lambda name: _usable(spot_by_symbol.get(name)))]
+    if priced.empty:
         return pd.DataFrame(columns=list(STRUCTURE_COLUMNS))
-
-    records = []
-    for (symbol, expiry), group in census.groupby(["symbol", "expiry"], sort=False):
-        spot = spot_by_symbol.get(cast(str, symbol))
-        if not spot or not np.isfinite(spot):
-            continue
-
-        legs = []
-        for row in group.itertuples():
-            # itertuples types every attribute as the union of all column types.
-            call_oi = cast(float, row.call_open_interest)
-            put_oi = cast(float, row.put_open_interest)
-            strike = cast(float, row.strike)
-            if call_oi > 0:
-                legs.append((float(call_oi), float(strike), "C"))
-            if put_oi > 0:
-                legs.append((float(put_oi), float(strike), "P"))
-        legs = [leg for leg in legs if leg[0] >= cfg.min_contracts]
-        if len(legs) < cfg.min_legs:
-            continue
-
-        counts = np.array([leg[0] for leg in legs])
-        labels = _cluster_by_count(counts, cfg.count_tolerance)
-
-        for label in np.unique(labels):
-            members = [leg for leg, lab in zip(legs, labels, strict=True) if lab == label]
-            if len(members) < cfg.min_legs:
-                continue
-            sizes = np.array([m[0] for m in members])
-            strikes = np.array([m[1] for m in members])
-            call_legs = sum(1 for m in members if m[2] == "C")
-            put_legs = len(members) - call_legs
-            representative = float(np.median(sizes))
-
-            records.append(
-                {
-                    "symbol": symbol,
-                    "expiry": expiry,
-                    "structure": _label(call_legs, put_legs, strikes, sizes),
-                    "n_legs": len(members),
-                    "contracts": representative,
-                    "exposure": representative * 100 * spot,
-                    "call_legs": call_legs,
-                    "put_legs": put_legs,
-                    "min_strike": float(strikes.min()),
-                    "max_strike": float(strikes.max()),
-                }
-            )
-
-    if not records:
+    calls = priced.assign(right="C", contracts=priced["call_open_interest"])
+    puts = priced.assign(right="P", contracts=priced["put_open_interest"])
+    both = pd.concat([calls, puts], ignore_index=True).rename(columns={"symbol": "underlying"})
+    held = both.loc[both["contracts"] > 0, list(LEG_COLUMNS)].reset_index(drop=True)
+    _, table = group_legs(held, spot_by_symbol, config)
+    if table.empty:
         return pd.DataFrame(columns=list(STRUCTURE_COLUMNS))
-    frame = pd.DataFrame(records)[list(STRUCTURE_COLUMNS)]
+    frame = table[list(STRUCTURE_COLUMNS)]
     return frame.sort_values("exposure", ascending=False).reset_index(drop=True)
 
 
-__all__ = ["STRUCTURE_COLUMNS", "GroupingConfig", "group_structures"]
+def _usable(spot: float | None) -> bool:
+    return bool(spot) and bool(np.isfinite(cast(float, spot)))
+
+
+__all__ = [
+    "LEG_COLUMNS",
+    "STRUCTURE_COLUMNS",
+    "GroupingConfig",
+    "group_legs",
+    "group_structures",
+    "structure_type",
+]

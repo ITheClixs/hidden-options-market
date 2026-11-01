@@ -9,10 +9,17 @@ from __future__ import annotations
 
 from datetime import date
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from hidden_options.measure.structures import GroupingConfig, group_structures
+from hidden_options.measure.structures import (
+    LEG_COLUMNS,
+    GroupingConfig,
+    group_legs,
+    group_structures,
+    structure_type,
+)
 
 EXPIRY = date(2026, 9, 30)
 SPOT = {"SPY": 765.0, "MSFT": 495.25, "MSTR": 93.10}
@@ -148,3 +155,108 @@ class TestGrouping:
         before = BUFFER.copy()
         group_structures(BUFFER, SPOT)
         pd.testing.assert_frame_equal(BUFFER, before)
+
+
+def _legs(rows):
+    """rows: (underlying, expiry, right, strike, contracts)"""
+    return pd.DataFrame(rows, columns=list(LEG_COLUMNS))
+
+
+COLLAR_LEGS = _legs(
+    [
+        ("SPY", EXPIRY, "C", 1.87, 37507),
+        ("SPY", EXPIRY, "C", 765.66, 37507),
+        ("SPY", EXPIRY, "P", 746.77, 38317),
+        ("SPY", EXPIRY, "P", 597.42, 37540),
+    ]
+)
+
+
+class TestGroupLegs:
+    def test_group_legs_recovers_collar(self):
+        legs, structures = group_legs(COLLAR_LEGS, SPOT)
+        assert legs["structure_id"].nunique() == 1
+        assert (legs["structure_id"] >= 0).all()
+        assert len(structures) == 1
+        row = structures.iloc[0]
+        assert row["structure_id"] == legs["structure_id"].iloc[0]
+        assert row["structure"] == "collar_buffer"
+        assert row["n_legs"] == 4
+
+    def test_group_legs_leaves_singletons_ungrouped(self):
+        legs, structures = group_legs(
+            _legs([("SPY", EXPIRY, "C", 700.0, 50000), ("SPY", EXPIRY, "P", 650.0, 9000)]), SPOT
+        )
+        assert (legs["structure_id"] == -1).all()
+        assert structures.empty
+        assert "structure_id" in structures.columns
+
+    def test_legs_below_the_minimum_stay_ungrouped_beside_a_structure(self):
+        legs, _ = group_legs(
+            _legs(
+                [
+                    ("SPY", EXPIRY, "C", 700.0, 50000),
+                    ("SPY", EXPIRY, "P", 700.0, 50000),
+                    ("SPY", EXPIRY, "C", 800.0, 100),
+                    ("SPY", EXPIRY, "P", 800.0, 100),
+                ]
+            ),
+            SPOT,
+        )
+        assert list(legs["structure_id"] >= 0) == [True, True, False, False]
+
+    def test_each_expiry_and_underlying_has_its_own_structures(self):
+        other = date(2026, 10, 30)
+        legs, structures = group_legs(
+            _legs(
+                [
+                    ("SPY", EXPIRY, "C", 700.0, 50000),
+                    ("SPY", EXPIRY, "P", 700.0, 50000),
+                    ("SPY", other, "C", 700.0, 50000),
+                    ("MSFT", other, "P", 700.0, 50000),
+                ]
+            ),
+            SPOT,
+        )
+        assert list(legs["structure_id"] >= 0) == [True, True, False, False]
+        assert len(structures) == 1
+
+    def test_an_underlying_without_a_spot_is_grouped_but_has_no_exposure(self):
+        legs, structures = group_legs(
+            _legs([("ZZZZ", EXPIRY, "C", 10.0, 900), ("ZZZZ", EXPIRY, "P", 10.0, 900)]), SPOT
+        )
+        assert (legs["structure_id"] >= 0).all()
+        assert np.isnan(structures.iloc[0]["exposure"])
+
+    def test_extra_columns_are_kept_and_the_input_is_untouched(self):
+        rows = COLLAR_LEGS.assign(root="4SPY")
+        before = rows.copy()
+        legs, _ = group_legs(rows, SPOT)
+        assert (legs["root"] == "4SPY").all()
+        pd.testing.assert_frame_equal(rows, before)
+
+    def test_no_legs_gives_typed_frames(self):
+        legs, structures = group_legs(_legs([]), SPOT)
+        assert legs.empty and "structure_id" in legs.columns
+        assert structures.empty and "structure_id" in structures.columns
+
+    def test_config_sets_the_tolerance(self):
+        rows = _legs([("SPY", EXPIRY, "C", 700.0, 50000), ("SPY", EXPIRY, "P", 700.0, 40000)])
+        assert (group_legs(rows, SPOT)[0]["structure_id"] == -1).all()
+        wide = group_legs(rows, SPOT, GroupingConfig(count_tolerance=0.3))[0]
+        assert (wide["structure_id"] >= 0).all()
+
+
+class TestStructureType:
+    def test_labels_are_those_of_the_grouped_structures(self):
+        assert structure_type(["C", "P"], [95.0, 95.01], [10, 10]) == "synthetic"
+        assert structure_type(["C", "P"], [110.0, 80.0], [10, 10]) == "risk_reversal"
+        assert structure_type(["C", "C"], [100.0, 120.0], [10, 10]) == "vertical_spread"
+        assert structure_type(["C", "C", "C"], [1.0, 2.0, 3.0], [1, 1, 1]) == "butterfly"
+        assert structure_type(["C", "C", "P"], [1.0, 2.0, 4.0], [1, 1, 1]) == "three_leg"
+        assert structure_type(["C", "C", "P", "P"], [1.0, 2, 3, 4], [1, 1, 1, 1]) == "collar_buffer"
+        assert structure_type(["C"] * 5, [1.0, 2, 3, 4, 5], [1] * 5) == "5_leg"
+
+
+def test_grouping_values_are_the_ones_frozen_before_scoring():
+    assert GroupingConfig() == GroupingConfig(count_tolerance=0.05, min_contracts=500, min_legs=2)
