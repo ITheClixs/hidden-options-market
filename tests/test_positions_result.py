@@ -208,3 +208,42 @@ class TestFloorDelta:
         assert 0 <= ratios["legs"]["understated_share"] <= 1
         assert ratios["legs"]["below_floor_share"] == 0
         assert ratios["floor_delta"]["n"] >= ratios["rule"]["n"]
+
+
+class TestMacros:
+    def test_scores_and_denominators_print(self, result):
+        macros = result.macros
+        assert macros["PosRecall"] == "50.0\\%"
+        assert macros["PosPrecision"] == "100.0\\%"
+        assert macros["PosTruth"] == "2"
+        assert macros["PosFunds"] == "2 funds"
+        assert macros["PosUnderlyings"] == "2 underlyings"
+        assert macros["PosStaleFiles"] == "1 file"
+
+    def test_cases_print_from_their_values(self, result):
+        macros = result.macros
+        assert macros["PosButterflyName"] == "MSFT"
+        assert macros["PosButterflyLines"] == "9"
+        assert macros["PosCollarName"] == "SPY"
+        assert macros["PosDeepStrike"] == "\\$1.87"
+
+    def test_dollars_read_at_their_scale(self):
+        from hidden_options.measure.positions_macros import usd
+
+        assert usd(7_013_435) == "\\$7.0m"
+        assert usd(1.3e9) == "\\$1.30bn"
+        assert usd(63.8e9) == "\\$63.8bn"
+        assert usd(4.256e12) == "\\$4.26tn"
+        assert usd(None) == "--"
+
+    def test_a_missing_case_prints_a_dash_and_no_macro_is_lost(self, result):
+        from hidden_options.measure.positions_macros import positions_macros
+
+        values = {**result.values, "cases": {"butterfly": None, "collar": None}}
+        macros = positions_macros(values)
+        assert set(macros) == set(result.macros)
+        assert macros["PosButterflyTimes"] == "--"
+        assert macros["PosDeepTimes"] == "--"
+
+    def test_names_are_letters_only(self, result):
+        assert all(name.isalpha() for name in result.macros)
