@@ -224,6 +224,7 @@ def load_chains(
     calendar: pd.DatetimeIndex,
     extra: Sequence[str] = (),
     keep: Callable[[pd.DataFrame], pd.DataFrame] | None = None,
+    pattern: str = "*.parquet",
 ) -> pd.DataFrame:
     """Every stored Cboe chain row under `roots`, with its root, dates and symbol without `_`.
 
@@ -231,13 +232,14 @@ def load_chains(
     `chain_open_interest`), wherever it was stored. `extra` names chain columns to read
     beside CHAIN_READ_COLUMNS (the listed implied volatility, say). `keep`, if given, is
     applied to each file once it is dated, before the files are joined, so a caller that
-    needs a small part of every file never holds them all at once.
+    needs a small part of every file never holds them all at once. `pattern` names the
+    files to read, `index_*.parquet` for the index chains alone.
     """
     folders = _as_roots(roots)
     paths = [
         path
         for folder in folders
-        for path in sorted(glob.glob(str(folder / "cboe_chain/date=*/*.parquet")))
+        for path in sorted(glob.glob(str(folder / f"cboe_chain/date=*/{pattern}")))
     ]
     if not paths:
         raise FileNotFoundError(f"No Cboe chains under {_names(folders)}/cboe_chain")

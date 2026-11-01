@@ -78,7 +78,7 @@ READING_COLUMNS = (
     "iv",
 )
 STYLE_COLUMNS = ("report_date", "kind", "class_name", "root", "exercise_style")
-_PANEL_READ_COLUMNS = (
+PANEL_READ_COLUMNS = (
     "report_date",
     "kind",
     "class_name",
@@ -144,8 +144,8 @@ def load_inputs(
         )
     )
     end = pd.Timestamp(PANEL_END)
-    panel = _read_panel(raw, ("equity", "index"), _PANEL_READ_COLUMNS, readings["date"].min(), end)
-    styles = _read_panel(raw, ("equity",), STYLE_COLUMNS[:-1], None, end)
+    panel = read_panel(raw, ("equity", "index"), PANEL_READ_COLUMNS, readings["date"].min(), end)
+    styles = read_panel(raw, ("equity",), STYLE_COLUMNS[:-1], None, end)
     bars = pd.read_parquet(BARS_PATH if bars_path is None else bars_path, columns=list(BAR_COLUMNS))
     return ImpliedInputs(panel, styles[list(STYLE_COLUMNS)], readings, bars, names, local_only)
 
@@ -175,7 +175,7 @@ def _file_readings(chain: pd.DataFrame) -> pd.DataFrame:
     return kept
 
 
-def _read_panel(
+def read_panel(
     raw: Path,
     kinds: Sequence[str],
     columns: Sequence[str],
@@ -315,7 +315,9 @@ def _day(values: pd.Series) -> pd.Series:
 
 
 __all__ = [
+    "BAR_COLUMNS",
     "INDEX_FRACTIONS",
+    "PANEL_READ_COLUMNS",
     "READING_COLUMNS",
     "RESULT_NAME",
     "SPOT_AGREEMENT",
@@ -328,6 +330,7 @@ __all__ = [
     "listed_quotes",
     "load_inputs",
     "overlap_dates",
+    "read_panel",
     "reading_agreement",
     "spot_table",
     "style_groups",

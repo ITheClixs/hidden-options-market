@@ -268,7 +268,7 @@ def _butterfly_case(day: pd.Timestamp, underlying: str, triples: pd.DataFrame) -
             {
                 "right": ["C", "C", "C"],
                 "strike": [row.low, row.middle, row.high],
-                "contracts": [row.wing, -float(row.body), row.wing],
+                "contracts": [row.wing, -cast(float, row.body), row.wing],
             }
         )
         strike_notional += float(
