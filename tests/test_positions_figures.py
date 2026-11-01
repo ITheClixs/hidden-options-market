@@ -11,6 +11,7 @@ from matplotlib.patches import Rectangle
 
 from hidden_options.figures import measurement as figures
 from hidden_options.figures.style import PALETTE, apply_style
+from hidden_options.measure.positions_macros import usd
 from hidden_options.publish import registry
 from hidden_options.publish.results import write_result
 from positions_stub import inputs
@@ -35,7 +36,7 @@ def ratios(n=200, seed=3):
     return pd.DataFrame(
         {
             "symbol": [f"N{i}" for i in range(n)],
-            "ratio": 10 ** rng.normal(0.5, 0.8, n),
+            "ratio": np.minimum(10 ** rng.normal(0.5, 0.8, n), 900.0),
             "gross_ratio": 10 ** rng.normal(0.1, 0.5, n),
         }
     )
@@ -59,8 +60,8 @@ class TestAnatomy:
         cases = result.values["cases"]
         fig = figures.fig_anatomy(cases)
         text = [t.get_text() for t in fig.axes[2].texts]
-        assert figures._usd_bn(cases["butterfly"]["strike_notional"]) in text
-        assert figures._usd_bn(cases["butterfly"]["max_value"]) in text
+        assert usd(cases["butterfly"]["strike_notional"]) in text
+        assert usd(cases["butterfly"]["max_value"]) in text
 
 
 class TestRatioDistribution:
@@ -83,6 +84,21 @@ class TestRatioDistribution:
         text = " ".join(t.get_text() for t in fig.axes[0].texts)
         below = (frame["ratio"] < 1).mean() * 100
         assert f"{below:.0f}%" in text
+
+    def test_underlyings_past_the_axis_are_counted_in_a_note(self, styled):
+        frame = ratios()
+        wild = pd.DataFrame({"symbol": ["FAR"], "ratio": [39_148.0], "gross_ratio": [39_148.0]})
+        fig = figures.fig_ratio_distribution(pd.concat([frame, wild], ignore_index=True))
+        text = " ".join(t.get_text() for t in fig.axes[0].texts)
+        assert "1 underlying beyond the axis" in text
+        assert "39,148" in text
+        assert fig.axes[0].get_xticks()[-1] == 3
+
+    def test_both_histograms_are_named(self, styled):
+        fig = figures.fig_ratio_distribution(ratios())
+        text = " ".join(t.get_text() for t in fig.axes[0].texts)
+        assert "no netting" in text
+        assert "netted within structures" in text
 
 
 class TestBuilders:

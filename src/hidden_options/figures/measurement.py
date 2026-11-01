@@ -45,6 +45,7 @@ from hidden_options.measure.hidden_share_result import census_view, freeze, load
 from hidden_options.measure.identification import GRID_POSITIONS, grid_shares, scored_series
 from hidden_options.measure.identification_result import load_dated_census
 from hidden_options.measure.positions import payoff
+from hidden_options.measure.positions_macros import usd
 from hidden_options.measure.structures import CONTRACT_MULTIPLIER
 from hidden_options.publish import formats
 from hidden_options.publish.registry import FIGURES
@@ -588,13 +589,8 @@ _BILLION = 1e9
 _PAYOFF_MARGIN = 0.35
 _PAYOFF_POINTS = 801
 _RATIO_BINS_PER_DECADE = 5
-
-
-def _usd_bn(value: float) -> str:
-    """Dollars in billions, as an annotation sets them: `\\$63.8bn`, `\\$0.43bn`."""
-    billions = value / _BILLION
-    digits = 2 if billions < 1 else 1
-    return f"\\${billions:.{digits}f}bn"
+# The axis stops at this power of ten; the few underlyings beyond it are counted in a note.
+_RATIO_TOP_DECADE = 3
 
 
 def _anatomy_payoff(ax: Axes, legs: pd.DataFrame, title: str, low: float, high: float) -> None:
@@ -605,6 +601,13 @@ def _anatomy_payoff(ax: Axes, legs: pd.DataFrame, title: str, low: float, high: 
     ax.plot(prices, values, color=PALETTE["ink"])
     top = float(np.max(values))
     ax.axhline(top, color=PALETTE["muted"], linewidth=0.6, linestyle=(0, (3, 2)), zorder=1)
+    ax.annotate(
+        f"Maximum {usd(top * _BILLION)}",
+        xy=(low, top),
+        xytext=(3, 3),
+        textcoords="offset points",
+        color=PALETTE["ink"],
+    )
     ax.set_xlim(low, high)
     ax.set_ylim(bottom=min(0.0, float(np.min(values))), top=top * 1.25)
     ax.set_title(title, loc="left")
@@ -637,7 +640,7 @@ def _anatomy_bars(
     ax.set_xlabel(unit)
     for value, y in ((left * _BILLION, 1), (top, 0)):
         ax.annotate(
-            _usd_bn(value),
+            usd(value),
             xy=(value / _BILLION, y),
             xytext=(3, 0),
             textcoords="offset points",
@@ -695,30 +698,47 @@ def fig_ratio_distribution(measures: pd.DataFrame) -> Figure:
     net = np.log10(measures["ratio"].to_numpy(dtype=float))
     gross = np.log10(measures["gross_ratio"].to_numpy(dtype=float))
     low = math.floor(min(net.min(), gross.min()))
-    high = math.ceil(max(net.max(), gross.max()))
+    high = min(math.ceil(max(net.max(), gross.max())), _RATIO_TOP_DECADE)
     edges = np.linspace(low, high, (high - low) * _RATIO_BINS_PER_DECADE + 1).tolist()
-    ax.hist(net, bins=edges, color=PALETTE["ink"], label="net")
-    ax.hist(gross, bins=edges, histtype="step", color=PALETTE["muted"], linewidth=0.8)
+    filled = ax.hist(net, bins=edges, color=PALETTE["ink"])[0]
+    outline = ax.hist(gross, bins=edges, histtype="step", color=PALETTE["muted"], linewidth=0.8)[0]
     ax.axvline(0.0, color=PALETTE["accent"], linewidth=0.8)
     ax.set_xticks(range(low, high + 1), [_power(tick) for tick in range(low, high + 1)])
     ax.set_xlabel("Strike notional over delta exposure (log scale)")
     ax.set_ylabel("Underlyings")
+    top = float(max(np.max(filled), np.max(outline))) * 1.12
+    ax.set_ylim(0, top)
     below = float((net < 0).mean())
-    top = ax.get_ylim()[1]
-    for text, offset, side in (
-        (f"{below * 100:.0f}% of underlyings\nbelow 1", -4, "right"),
-        (f"{(1 - below) * 100:.0f}% above", 4, "left"),
-    ):
+    notes = [
+        (f"{below * 100:.0f}% of underlyings\nbelow 1", (0.0, top), (-4, -2), "right"),
+        (f"{(1 - below) * 100:.0f}% above", (0.0, top), (4, -2), "left"),
+        ("no netting", _peak(outline, edges), (5, -4), "left"),
+        ("netted within structures", _peak(filled, edges), (14, -4), "left"),
+    ]
+    beyond = int((net > high).sum())
+    if beyond:
+        worst = f"{10 ** float(net.max()):,.0f}"
+        noun = "underlying" if beyond == 1 else "underlyings"
+        notes.append(
+            (f"{beyond} {noun} beyond the axis,\nup to {worst}", (high, top), (0, -2), "right")
+        )
+    for text, xy, offset, side in notes:
         ax.annotate(
             text,
-            xy=(0, top),
-            xytext=(offset, -2),
+            xy=xy,
+            xytext=offset,
             textcoords="offset points",
             ha=side,
             va="top",
             color=PALETTE["ink"],
         )
     return fig
+
+
+def _peak(counts: Any, edges: Sequence[float]) -> tuple[float, float]:
+    """The top right corner of a histogram's tallest bin, where its label goes."""
+    tallest = int(np.argmax(counts))
+    return edges[tallest + 1], float(counts[tallest])
 
 
 def _power(exponent: int) -> str:
