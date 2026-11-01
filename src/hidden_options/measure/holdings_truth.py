@@ -357,7 +357,7 @@ def floor_check(truth: pd.DataFrame, report: pd.DataFrame) -> dict[str, int]:
     for key, held in zip(_leg_keys(truth), truth["contracts"].abs().to_numpy(), strict=True):
         if key in table:
             found += 1
-            covered += table[key] >= held
+            covered += int(table[key] >= held)
     return {"legs": len(truth), "found": found, "covered": covered}
 
 

@@ -100,7 +100,10 @@ class _Walk:
     chance: list[float] = field(default_factory=list)
     priced_oi: float = 0.0
     no_spot_oi: float = 0.0
+    below_floor_oi: float = 0.0
+    understated_oi: float = 0.0
     total_oi: float = 0.0
+    floor_delta: list[pd.DataFrame] = field(default_factory=list)
     rows: int = 0
     tolerance: dict[str, float] = field(default_factory=dict)
 
@@ -190,6 +193,11 @@ def _walk(
                 notional_measures(rows, frame, legs, spot).assign(report_date=day)
             )
         _tally_coverage(walk, priced[RATE])
+        walk.floor_delta.append(
+            notional_measures(rows, with_floor_delta(priced[RATE]), legs, spot).assign(
+                report_date=day
+            )
+        )
         if day in scored_days:
             walk.detected.append(legs[legs["root"].astype(str).isin(roots)])
             walk.held.append(priced[RATE][priced[RATE]["root"].astype(str).isin(roots)])
@@ -229,6 +237,18 @@ def priced_rows(
     return valued.assign(in_domain=usable, delta_dollars=valued["delta_dollars"].where(usable))
 
 
+def with_floor_delta(priced: pd.DataFrame) -> pd.DataFrame:
+    """`priced_rows` with a delta of one, in size, on every mark below the model's floor.
+
+    Such a call has no time value left to back a volatility out of, and moves one for one
+    with the underlying. Outside the validated domain, so a sensitivity and not a claim.
+    """
+    below = priced["iv_status"] == InversionStatus.BELOW_INTRINSIC.value
+    side = priced["right"].map({"C": 1.0, "P": -1.0})
+    full = side * priced["open_interest"].astype(float) * CONTRACT_MULTIPLIER * priced["spot"]
+    return priced.assign(delta_dollars=priced["delta_dollars"].where(~below, full))
+
+
 def in_domain(frame: pd.DataFrame, domain: frozenset[tuple[str, str]]) -> pd.Series:
     cells = pd.Series(
         list(zip(frame["moneyness_bucket"], frame["dte_bucket"], strict=True)),
@@ -263,6 +283,10 @@ def _tally_coverage(walk: _Walk, priced: pd.DataFrame) -> None:
     walk.total_oi += float(oi.sum())
     walk.priced_oi += float(oi[priced["delta_dollars"].notna()].sum())
     walk.no_spot_oi += float(oi[priced["spot"].isna()].sum())
+    below = priced["iv_status"] == InversionStatus.BELOW_INTRINSIC.value
+    walk.below_floor_oi += float(oi[below].sum())
+    strike_value = priced["strike"].astype(float) * oi * CONTRACT_MULTIPLIER
+    walk.understated_oi += float(oi[strike_value < priced["delta_dollars"].abs()].sum())
 
 
 def _settings() -> dict[str, Any]:
@@ -454,6 +478,13 @@ def _ratios(
             "no_spot_share": walk.no_spot_oi / walk.total_oi if walk.total_oi else None,
             "outside_share": 1 - covered / total if total else None,
         },
+        "legs": {
+            "understated_share": walk.understated_oi / walk.priced_oi if walk.priced_oi else None,
+            "below_floor_share": walk.below_floor_oi / walk.total_oi if walk.total_oi else None,
+        },
+        "floor_delta": _distribution(
+            per_underlying_ratios(pd.concat(walk.floor_delta, ignore_index=True))["ratio"]
+        ),
         "rates": {
             f"{rate:.2f}": _distribution(per_underlying_ratios(measures[rate])["ratio"])
             for rate in SENSITIVITY_RATES

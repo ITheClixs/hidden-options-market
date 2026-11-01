@@ -51,6 +51,8 @@ REGISTRATION_MODULES: tuple[str, ...] = (
     "hidden_options.measure.identification_table",
     "hidden_options.measure.implied_result",
     "hidden_options.measure.implied_table",
+    "hidden_options.measure.positions_result",
+    "hidden_options.measure.positions_table",
     "hidden_options.predict.result",
     "hidden_options.predict.tables",
 )

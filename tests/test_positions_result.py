@@ -154,3 +154,57 @@ class TestCases:
         rows = rows_of(pd.Timestamp("2026-09-14"))
         rows = rows[~rows["underlying"].isin(["MSFT", "SPY"])]
         assert _cases(rows, inputs()) == {"butterfly": None, "collar": None}
+
+
+class TestTable:
+    def test_the_table_states_its_denominators(self, result):
+        from hidden_options.measure.positions_table import validation_table
+
+        table = validation_table({"positions": result})
+        assert "\\label{tab:positions}" in table
+        assert "Synthetic" in table
+        assert "50.0\\%" in table
+        assert "consistent with a disclosed holder" in table
+
+    def test_the_table_asks_for_its_result(self):
+        from hidden_options.measure.positions_table import validation_table
+
+        with pytest.raises(KeyError, match="positions"):
+            validation_table({})
+
+    def test_an_unnamed_type_is_labelled_by_its_legs(self):
+        from hidden_options.measure.positions_table import _by_type
+
+        row = _by_type(
+            "5_leg",
+            {"truth": 0, "recall": None, "recall_grouped": None, "touching": 2, "precision": 0.5},
+        )
+        assert row["label"] == "5 legs"
+        assert row["recall"] is None
+        assert row["precision"] == "50.0\\%"
+
+
+class TestFloorDelta:
+    def test_a_mark_below_the_floor_takes_a_delta_of_one(self):
+        from hidden_options.measure.positions_result import with_floor_delta
+
+        priced = pd.DataFrame(
+            {
+                "right": ["C", "P", "C"],
+                "iv_status": ["below_intrinsic", "below_intrinsic", "no_spot"],
+                "open_interest": [10, 10, 10],
+                "spot": [100.0, 100.0, float("nan")],
+                "delta_dollars": [float("nan")] * 3,
+            }
+        )
+        filled = with_floor_delta(priced)
+        assert filled["delta_dollars"].iloc[0] == pytest.approx(100_000.0)
+        assert filled["delta_dollars"].iloc[1] == pytest.approx(-100_000.0)
+        assert pd.isna(filled["delta_dollars"].iloc[2])
+        assert pd.isna(priced["delta_dollars"].iloc[0])
+
+    def test_the_result_reports_the_leg_level_and_floor_readings(self, result):
+        ratios = result.values["ratios"]
+        assert 0 <= ratios["legs"]["understated_share"] <= 1
+        assert ratios["legs"]["below_floor_share"] == 0
+        assert ratios["floor_delta"]["n"] >= ratios["rule"]["n"]
