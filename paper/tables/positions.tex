@@ -1,0 +1,23 @@
+\begin{table}[t]
+\centering
+\caption{Detected structures against disclosed fund holdings.}
+\label{tab:positions}
+\begin{tabular}{lrrrrr}
+\toprule
+ & Held & Grouped & Recall & Touching & Precision \\
+\midrule
+Report before the file's date & 36 & 91.2\% & 77.9\% & 57 & 86.0\% \\
+Report of the file's date & 36 & 90.9\% & 77.8\% & 61 & 83.6\% \\
+\textit{By structure type} &  &  &  &  &  \\
+Synthetic (call and put, one strike) & 35 & 91.8\% & 78.6\% & 33 & 100.0\% \\
+Risk reversal & 0 & -- & -- & 1 & 0.0\% \\
+Three legs & 0 & -- & -- & 8 & 25.0\% \\
+Two calls and two puts & 1 & 69.2\% & 53.8\% & 7 & 100.0\% \\
+5 legs & 0 & -- & -- & 2 & 50.0\% \\
+6 legs & 0 & -- & -- & 4 & 100.0\% \\
+7 legs & 0 & -- & -- & 1 & 100.0\% \\
+9 legs & 0 & -- & -- & 1 & 100.0\% \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Held counts distinct structures, a fund's FLEX legs of one underlying and expiry with the same set of legs, each averaged over its dates. Grouped is the share whose legs all lie in one detected structure; recall requires that structure's type to be the type of the fund's legs. Touching counts distinct detected structures with a leg some fund holds, and precision is the share with two or more legs held by one fund. Types are those of the fund's legs for the first three columns and of the detected structure for the last two. A dash marks a type with nothing to score. A match says a structure is consistent with a disclosed holder, not that it is the holder's position.\par}
+\end{table}

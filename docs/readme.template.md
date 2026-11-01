@@ -146,14 +146,20 @@ are invisible to any strike-based test, and {{RuleFalseShare}} of what the rule 
 listed. This project used the rule first; the superseded census is kept as it was in
 [`docs/log/2026-08-18-flex-census.md`](docs/log/2026-08-18-flex-census.md).
 
-**A cleared series is not a position.** Open interest is reported per series, and
-positions span series. Conflating them produced errors in both directions that do not
-cancel:
+**A cleared series is not a position.** Open interest is reported per series, and positions
+span series. On an average date {{PosStructuredMean}} of FLEX open interest sits in groups of
+series with near-equal counts at one expiry. Scored against disclosed fund holdings, with the
+settings frozen first, that grouping recalls {{PosRecall}} of {{PosTruth}} held structures with
+precision {{PosPrecision}}. The test rests on {{PosFunds}} and almost entirely on same-strike
+pairs, and a match means consistent with a disclosed holder, no more. Across
+{{PosRatioUnderlyings}} underlyings, strike notional is a median {{PosRatioMedian}} times delta
+exposure, and at least {{PosGrossMedian}} times whatever the signs of the legs. On single
+positions, recomputed from the report:
 
-- a butterfly counted leg by leg is credited with **49×** its maximum attainable value;
-- a four-leg SPY collar is counted about **3×** over;
-- a synthetic long call struck at \$1.87 against a \$765 spot is recorded as **\$7m** of
-  strike notional when its exposure is **\$2.9bn**.
+- a butterfly's strike notional is **{{PosButterflyTimes}}×** its maximum value;
+- a four-leg SPY collar is counted about **{{PosCollarTimes}}×** over;
+- a call struck at {{PosDeepStrike}} is recorded as **{{PosDeepNotional}}** of strike notional
+  when its exposure is **{{PosDeepExposure}}**.
 
 ## Run it
 
@@ -189,6 +195,8 @@ src/hidden_options/measure/flex_panel.py      panel assembly and inventory measu
 src/hidden_options/measure/hidden_share*.py   how much of each options market is FLEX
 src/hidden_options/measure/identification*.py why a strike rule cannot find FLEX
 src/hidden_options/measure/structures.py      leg grouping and valuation on the underlying
+src/hidden_options/measure/holdings_truth.py  fund holdings as truth for the grouping, and its score
+src/hidden_options/measure/positions*.py      series against positions across the market
 src/hidden_options/predict/                   the predictive panel, regressions and permutation test
 src/hidden_options/publish/                   results/ to the paper's numbers and tables and this README
 src/hidden_options/collect/                   chains, holdings, bars and N-PORT collectors

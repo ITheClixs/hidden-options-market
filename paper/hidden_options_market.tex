@@ -55,10 +55,15 @@ report two measurement results with wider application. First, a natural
 identification heuristic --- treating strikes off the standard listing grid as FLEX ---
 has precision \RulePrecision{} and recall \RuleRecall{} against OCC's own labels, missing
 \FlexOnGridShare{} of FLEX series because FLEX is frequently struck on the grid. Second, treating
-cleared series as economic positions mismeasures them severely and in both directions:
-a butterfly counted leg by leg is credited with 49 times its maximum attainable value,
-a four-leg collar is counted three times over, and a synthetic long call struck at
-\$1.87 against a \$765 spot is recorded at \$7m when its exposure is \$2.9bn.
+cleared series as economic positions mismeasures them. On an average date \PosStructuredMean{}
+of open interest sits in groups of series with near-equal counts at one expiry, a grouping that
+recalls \PosRecall{} of the \PosTruth{} multi-leg structures funds disclose, with precision
+\PosPrecision{}, on a test confined mostly to same-strike pairs. Strike notional is a median
+\PosRatioMedian{} times delta exposure across \PosRatioUnderlyings{} underlyings, and at least
+\PosGrossMedian{} times whatever the signs of the legs. Single positions go further and in both
+directions: a butterfly's strike notional is \PosButterflyTimes{} times its maximum value, and a
+call struck at \PosDeepStrike{} is recorded at \PosDeepNotional{} against \PosDeepExposure{} of
+exposure.
 
 \vspace{0.8em}
 \noindent\textbf{Keywords:} FLEX options; clearing data; open interest; hidden
@@ -155,9 +160,12 @@ We report this because the reasoning is natural and the failure is not visible w
 ground truth.
 
 The second concerns counting. Open interest is reported per series; a position is not a
-series. Conflating them produced errors of 49-fold, threefold, and three orders of
-magnitude, with opposite signs that do not cancel. Any study using open interest is
-exposed to the same conflation.
+series. On an average date \PosStructuredMean{} of FLEX open interest sits in groups of series
+with near-equal counts at one expiry, and strike notional is a median \PosRatioMedian{} times
+delta exposure across underlyings. On single positions the error is \PosButterflyTimes{}-fold on
+a butterfly and \PosCollarTimes{}-fold on a collar, and on a deep in-the-money call it is
+\PosDeepTimes{}-fold the other way. Any study using open interest is exposed to the same
+conflation.
 
 \paragraph{Relation to the literature.} Work inferring option-market positioning from
 listed data must assume who holds each side: \citet{bollen2004} read net buying pressure
@@ -516,27 +524,123 @@ can supply.
 \section{Cleared series are not economic positions}
 \label{sec:positions}
 
-Open interest is reported per series. Positions span series. Three cases, each found
-while building an earlier census, show what conflating them costs.
+Open interest is reported per series, and positions span series. That open interest mixes
+the legs of combinations is not a new observation. What FLEX adds is a way to measure it
+across a whole market: its contracts are custom, so the legs of one trade tend to share
+a count no other series has, and some of the funds that hold them publish their holdings.
+We show what the conflation costs on three positions, measure how much of the book is
+built this way, check that measurement against disclosed holdings, and then value the
+book three ways.
 
-\paragraph{A butterfly.} One underlying carries call lines of 100k, 200k and 100k
-contracts at equally spaced strikes across three consecutive expiries. Read as nine
-independent positions this is \$63.8bn of notional. A butterfly cannot be worth more
-than its strike spacing times its wing size: \$1.30bn in total, an overstatement of 49
-times.
+\subsection{Three positions}
+\label{sec:cases}
 
-\paragraph{A collar.} SPY at one expiry carries four legs near 37,500 contracts each ---
-a synthetic long, a cap, a floor and a buffer floor. The position is roughly \$2.87bn.
-Counted leg by leg at strike-based notional it is \$8.02bn.
+These three were found while building an earlier census. Each is located here by its
+signature and recomputed from the report. The report gives no signs, so the side of each
+leg below is our reading of the construction.
 
-\paragraph{A strike-based notional.} The same collar's synthetic long call, struck at
-\$1.87 against a spot near \$765, carries \$2.9bn of exposure and is recorded by strike
-times contracts as \$7m. Deep in-the-money calls used to replicate an underlying are
-three orders of magnitude invisible to that measure, while far out-of-the-money legs
-are inflated by it.
+\paragraph{A butterfly.} On \PosButterflyDate{}, \PosButterflyName{} carries
+\PosButterflyLines{} call lines across \PosButterflyExpiries{} expiries, in proportions of
+one, two and one at evenly spaced strikes, with wings of \PosButterflyWing{} contracts. Read
+as separate positions they are \PosButterflyNotional{} of strike notional. Long the wings
+and short the body, each butterfly can pay at most its strike spacing times its wing size,
+\PosButterflyMax{} in all, so strike notional is \PosButterflyTimes{} times the most the
+position can be worth.
 
-The errors have opposite signs and do not cancel. The report's mark prices avoid the
-valuation half of the problem directly, since they price each series as cleared.
+\paragraph{A collar.} On \PosCollarDate{}, \PosCollarName{} at its \PosCollarExpiry{} expiry
+carries four legs of about \PosCollarSize{} contracts: a call struck at \PosDeepStrike{},
+a call and a put near the \PosCollarSpot{} spot, and a put further down. Read as a buffer
+(long the deep call and the higher put, short the other two), the most it can be worth at
+expiry is \PosCollarMax{}, close to contracts times spot at \PosCollarExposure{}. Its legs
+add up to \PosCollarNotional{} of strike notional, \PosCollarTimes{} times as much.
+
+\paragraph{A deep call.} The collar's first leg runs the other way. Strike times contracts
+records it at \PosDeepNotional{}. OCC marks it at \PosDeepMark{}, below the floor of our
+model (spot less the discounted strike, with no dividends), so it has no volatility and no
+delta from us. A call struck at \PosDeepMoneyness{} of spot moves one for one with the
+underlying all the same, and on that footing its exposure is \PosDeepExposure{},
+\PosDeepTimes{} times its strike notional.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/anatomy.pdf}
+\caption{Two structures from the report: one expiry of the \PosButterflyName{} butterfly on
+\PosButterflyDate{}, and the \PosCollarName{} collar on \PosCollarDate{}. Top: value at expiry
+against the underlying, with the legs' sides as read in the text and faint lines at their
+strikes; the dashed line is the most the position can be worth. Bottom: strike notional, one
+block per leg (all \PosButterflyExpiries{} expiries for the butterfly), over that maximum. The
+collar's deep call is the fourth block, too thin to see.}
+\label{fig:anatomy}
+\end{figure}
+
+The first two errors overstate and the third understates, and all three are mechanical
+(Figure~\ref{fig:anatomy}). They say nothing yet about how common such positions are.
+
+\subsection{Structures across the market}
+\label{sec:structures}
+
+Legs transacted together carry near-equal counts at a shared expiry. Within each underlying
+and expiry we therefore sort the series by open interest, leave out those under
+\PosMinContracts{} contracts, and start a new group wherever the count falls more than
+\PosTolerance{} below the one before. A group of two or more series is a structure. The rule
+sees equal counts and nothing else, so it cannot see a ratio: in the butterfly above it pairs
+the wings at \PosButterflyGrouped{} of the \PosButterflyExpiries{} expiries and leaves the
+body alone.
+
+Run on each of the \PosDates{} report dates, it places \PosStructuredMean{} of open interest
+in a structure on an average date (from \PosStructuredMin{} to \PosStructuredMax{}, and
+\PosStructuredLast{} on the last). Few series carry that: on the last date \PosGroupedLast{} of
+the \PosSeriesLast{} series with open interest are grouped, into \PosStructuresLast{}
+structures. Nor is it spread evenly. The median underlying has \PosMedianStructured{} of its
+open interest in a structure, and \PosHalfStructured{} of underlyings have at least half.
+Of the open interest in structures, a call and a put at one strike hold \PosShareSynthetic{}
+on an average date, two calls with two puts \PosShareFour{}, and two legs of one right
+\PosShareVertical{}.
+
+The share barely depends on the tolerance: on the last date it is \PosToleranceExact{} when
+counts must match exactly and \PosToleranceWide{} at a tolerance of 10\%. Some of it would
+arise by chance. Dealing each underlying's counts at random among its series, on every fifth
+report date (\PosChanceDates{} dates), still gives \PosChance{}. That deal leaves the equal
+counts in the pack, so it is generous to chance, but it shows the share is not all signal.
+
+\paragraph{Against disclosed holdings.} Fund holdings can test the rule, in a narrow way.
+Clearing is aggregate, so a match cannot show that a structure is a particular holder's
+position. It can only ask whether series a fund holds together are grouped together, and a
+match means no more than \emph{consistent with a disclosed holder}. We fixed the grouping
+settings and the score before the first scored run.
+
+The test uses the issuers' daily files for option-income funds, \PosFirstAsOf{} to
+\PosLastAsOf{}: \PosFiles{} files from \PosHoldingFunds{} holding FLEX, each keyed on its own
+as-of date. We drop \PosStaleFiles{} more than \PosStaleBdays{} business days behind their
+capture. A file dated $D$ shows the settlement before $D$: open interest covers the fund's
+contracts on \PosFloorPrevious{} of \PosFloorLegs{} held legs on the report before that date,
+and on \PosFloorSame{} on the report of the date itself, so we score against the report
+before. Global X's covered-call funds cannot help. Their \PosGlobalxLegs{} option lines, from
+\PosGlobalxFunds{}, include \PosGlobalxOnReport{} on the FLEX report and \PosGlobalxMulti{}
+holdings of two legs at one expiry.
+
+A position that lasts is not fresh evidence each day, so each distinct structure counts once,
+averaged over its dates. That leaves \PosTruth{} structures, held by \PosFunds{} on
+\PosUnderlyings{} over \PosStructureDates{} structure-dates, and \PosSyntheticTruth{} of them
+are a call and a put at one strike. The detector puts all of a structure's legs together
+\PosGrouped{} of the time, and into a structure of the same type \PosRecall{} of the time, our
+recall (Table~\ref{tab:positions}). Of the \PosTouching{} distinct detected structures with a
+leg some fund holds, \PosPrecision{} have two or more legs held by one fund, our precision;
+\PosPrecisionExact{} have every leg held by one fund. Scored one date at a time, the medians
+over \PosScoreDates{} dates are \PosMedianRecall{} and \PosMedianPrecision{}, with recall
+between \PosLowRecall{} and \PosHighRecall{}. Against the report of the file's own date the
+two scores are \PosSameDayRecall{} and \PosSameDayPrecision{}. All \PosSyntheticTouching{}
+detected same-strike pairs that touch a holding are confirmed, and the misses on precision are
+mostly groups of three legs. Both scores clear the bar of one half we set in advance for making a market-wide statement at all.
+
+\input{tables/positions}
+
+The score should not be read for more than it tests. It rests on one family of funds and
+almost entirely on one kind of structure, and it is the easy case: in the median held leg the
+fund has \PosHolderShare{} of the open interest, so few other holders blur the counts. What
+it supports is that the rule finds same-strike pairs where one holder is nearly the whole of
+the series. For collars, for spreads and for series many holders share, there is no disclosed
+test, and the shares above are measurements of equal counts, not validated positions.
 
 \subsection{Pricing the hidden book}
 \label{sec:pricing}
@@ -621,6 +725,59 @@ The rate is a choice too. Repeated at \IvRateLow{}, the comparison gives a media
 Every greek computed from these volatilities is gross. Open interest counts the
 contracts outstanding, not who holds them, so a dollar delta is that of the long side;
 the writers hold its negative, and the report does not say who is long.
+
+\subsection{Notional across the market}
+\label{sec:notional}
+
+We value each underlying's book on each date three ways: strike times contracts, OCC's mark
+times contracts, and delta exposure. Delta exposure takes the absolute sum of the dollar deltas
+within each detected structure and adds up those sums and the absolute dollar delta of each
+ungrouped leg. Open interest has no sign, so the rule counts every leg of a structure as long.
+We use a delta only where the volatility inverts inside a validated cell, at a rate of
+\PosRate{}, and leave out whole any structure with a leg that lacks one, so that the ratio sets
+strike notional against exposure on the same series. That keeps \PosCovered{} of open interest
+over the panel and leaves \PosOutside{} out. Of all open interest, \PosPriced{} has a usable
+delta before structures are completed, and \PosNoSpot{} has no spot, chiefly index series before
+the chains begin.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/notional_ratio.pdf}
+\caption{Strike notional over delta exposure across the \PosRatioUnderlyings{} underlyings with
+a validated delta, each counted once at its median across dates. Filled bars net deltas within
+detected structures, counting every leg as long. The outline nets nothing, which no assignment
+of signs can exceed in exposure. The line marks where the two measures agree, and the axis
+stops at 1,000.}
+\label{fig:notional-ratio}
+\end{figure}
+
+Across \PosRatioUnderlyings{} underlyings, each at its median across dates, strike notional is a
+median of \PosRatioMedian{} times delta exposure, with quartiles of \PosRatioQuarter{} and
+\PosRatioThreeQuarters{} and tenth and ninetieth percentiles of \PosRatioTen{} and
+\PosRatioNinety{} (Figure~\ref{fig:notional-ratio}). It is above one for \PosAboveOne{} of
+underlyings and above ten for \PosAboveTen{}. The delta depends on the rate, a little: at
+\PosRateLow{} and \PosRateHigh{} the median is \PosRatioRateLow{} and \PosRatioRateHigh{}. For
+the market as a whole on the median date, strike notional is \PosMarketRatio{} times delta
+exposure and \PosMarketMark{} times mark value; on the last date it is \PosStrikeLast{} against
+\ValueEnd{} of value.
+
+By underlying, then, the error runs mostly one way: only \PosBelowOne{} of underlyings are below
+one. The other direction shows at the level of the leg. Strike notional is below the leg's own
+dollar delta on \PosUnderstated{} of the open interest with a delta, and the legs it understates
+most tend to drop out of this comparison, as the deep call above did: \PosBelowFloor{} of open
+interest is marked below the model's floor. Giving those marks a delta of one, outside the
+validated cells, moves the median to \PosFloorMedian{} and the share below one to
+\PosFloorBelowOne{}.
+
+The netting rule needs care. On the median date it accounts for \PosNettingShare{} of the
+logarithmic gap between strike notional and delta exposure, but where signs can be seen it
+misreads them. On the \PosSignStructures{} structures funds hold, the rule gives a median of
+\PosRuleOverSigned{} of the delta the funds' own signed contracts imply, because a long call and
+a short put add where the rule nets them. We therefore also report the ratio with no netting at
+all. No assignment of signs can give more exposure than the sum of the legs' absolute deltas, so
+that ratio is a floor whatever the signs are: a median of \PosGrossMedian{}, or
+\PosMarketGross{} for the market on the median date. Strike notional overstates the exposure of
+the typical underlying by at least that much, in the cells where we can compute a delta.
 
 \section{Does hidden inventory predict the visible market?}
 \label{sec:predict}
@@ -729,9 +886,10 @@ of inventory would have been found four times in five.
 
 Two measurement findings travel further than the setting. A natural strike-based rule
 for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the
-listing grid. And cleared series are not economic
-positions --- a distinction worth three orders of magnitude in one of the cases here,
-with errors that do not cancel.
+listing grid. And cleared series are not economic positions: \PosStructuredMean{} of open
+interest sits in groups of series with near-equal counts, and across underlyings strike notional
+is a median \PosRatioMedian{} times delta exposure, at least \PosGrossMedian{} times whatever the
+signs. On single legs the error reaches \PosDeepTimes{}-fold in the other direction.
 
 \section*{Data and code availability}
 
