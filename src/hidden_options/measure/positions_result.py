@@ -176,6 +176,7 @@ def _walk(
     both = pd.concat([truth, same_day], ignore_index=True)
     scored_days = set(pd.to_datetime(both["report_date"]))
     roots = set(both["root"].astype(str))
+    underlyings = set(both["underlying"].astype(str))
     option_keys = globalx[["underlying", "expiry", "right", "strike"]].drop_duplicates()
     for position, day in enumerate(dates):
         rows = inputs.read_day(day).reset_index(drop=True)
@@ -199,7 +200,7 @@ def _walk(
             )
         )
         if day in scored_days:
-            walk.detected.append(legs[legs["root"].astype(str).isin(roots)])
+            walk.detected.append(scored_legs(legs, underlyings))
             walk.held.append(priced[RATE][priced[RATE]["root"].astype(str).isin(roots)])
         walk.case_rows.append(rows[rows["underlying"].isin(CASE_UNDERLYINGS)])
         walk.globalx_rows.append(rows.merge(option_keys)[_REPORT_KEY])
@@ -208,6 +209,15 @@ def _walk(
         if position == len(dates) - 1:
             walk.tolerance = _tolerance_shares(legs)
     return walk
+
+
+def scored_legs(legs: pd.DataFrame, underlyings: set[str]) -> pd.DataFrame:
+    """One date's grouped legs the score needs: every leg of the underlyings funds hold.
+
+    By underlying, not by root, since a structure may hold legs of more than one root.
+    """
+    kept: pd.DataFrame = legs[legs["underlying"].astype(str).isin(underlyings)]
+    return kept
 
 
 def _tolerance_shares(legs: pd.DataFrame) -> dict[str, float]:

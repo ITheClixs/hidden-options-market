@@ -247,3 +247,18 @@ class TestMacros:
 
     def test_names_are_letters_only(self, result):
         assert all(name.isalpha() for name in result.macros)
+
+
+class TestScoredLegs:
+    def test_a_structure_keeps_its_legs_of_another_root(self):
+        """Grouping does not look at the root, so the score must see every leg of a structure."""
+        from hidden_options.measure.positions_result import scored_legs
+
+        legs = pd.DataFrame(
+            {
+                "underlying": ["AAA", "AAA", "ZZZ"],
+                "root": ["2AAA", "1AAA", "2ZZZ"],
+                "structure_id": [0, 0, 1],
+            }
+        )
+        assert list(scored_legs(legs, {"AAA"})["root"]) == ["2AAA", "1AAA"]

@@ -735,7 +735,8 @@ within each detected structure and adds up those sums and the absolute dollar de
 ungrouped leg. Open interest has no sign, so the rule counts every leg of a structure as long.
 We use a delta only where the volatility inverts inside a validated cell, at a rate of
 \PosRate{}, and leave out whole any structure with a leg that lacks one, so that the ratio sets
-strike notional against exposure on the same series. That keeps \PosCovered{} of open interest
+strike notional against exposure on the same series. The cells were validated on the
+\IvDates{} dates with listed chains; here they are carried back over the whole panel. That keeps \PosCovered{} of open interest
 over the panel and leaves \PosOutside{} out. Of all open interest, \PosPriced{} has a usable
 delta before structures are completed, and \PosNoSpot{} has no spot, chiefly index series before
 the chains begin.
@@ -756,7 +757,8 @@ median of \PosRatioMedian{} times delta exposure, with quartiles of \PosRatioQua
 \PosRatioThreeQuarters{} and tenth and ninetieth percentiles of \PosRatioTen{} and
 \PosRatioNinety{} (Figure~\ref{fig:notional-ratio}). It is above one for \PosAboveOne{} of
 underlyings and above ten for \PosAboveTen{}. The delta depends on the rate, a little: at
-\PosRateLow{} and \PosRateHigh{} the median is \PosRatioRateLow{} and \PosRatioRateHigh{}. For
+\PosRateLow{} and \PosRateHigh{}, with the same cells, the median is \PosRatioRateLow{} and
+\PosRatioRateHigh{}. For
 the market as a whole on the median date, strike notional is \PosMarketRatio{} times delta
 exposure and \PosMarketMark{} times mark value; on the last date it is \PosStrikeLast{} against
 \ValueEnd{} of value.
