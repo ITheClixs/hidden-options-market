@@ -195,7 +195,8 @@ def _butterfly_macros(case: Mapping[str, Any] | None) -> dict[str, str]:
         "PosButterflyNotional": usd(found.get("strike_notional")),
         "PosButterflyMax": usd(found.get("max_value")),
         "PosButterflyTimes": _whole(found.get("overstatement")),
-        "PosButterflyWings": _whole(found.get("wings_grouped")),
+        "PosButterflyGrouped": _whole(found.get("wings_grouped")),
+        "PosButterflyWing": _whole(_wing(found.get("legs"))),
     }
 
 
@@ -217,7 +218,16 @@ def _collar_macros(case: Mapping[str, Any] | None) -> dict[str, str]:
         "PosDeepNotional": usd(deep.get("strike_notional")),
         "PosDeepExposure": usd(deep.get("exposure")),
         "PosDeepTimes": _whole(deep.get("ratio")),
+        "PosDeepMoneyness": _moneyness(deep.get("strike"), found.get("spot")),
     }
+
+
+def _wing(legs: list[Mapping[str, Any]] | None) -> float | None:
+    return None if not legs else max(leg["contracts"] for leg in legs)
+
+
+def _moneyness(strike: float | None, spot: float | None) -> str:
+    return MISSING if strike is None or not spot else formats.percent(strike / spot, 1)
 
 
 def _whole(value: float | None) -> str:
