@@ -58,11 +58,12 @@ has precision \RulePrecision{} and recall \RuleRecall{} against OCC's own labels
 cleared series as economic positions mismeasures them. On an average date \PosStructuredMean{}
 of open interest sits in groups of series with near-equal counts at one expiry, against
 \PosChance{} when the counts are dealt at random. Scored against the holdings of one fund
-family, whose funds hold nearly all the open interest of the series they hold, that grouping
-recalls \PosRecall{} of the \PosTruth{} multi-leg structures they disclose, with precision
+family, where in the median held leg the fund holds \PosHolderShare{} of the open interest,
+that grouping recalls \PosRecall{} of the \PosTruth{} multi-leg structures they disclose, with precision
 \PosPrecision{}, on a test confined mostly to same-strike pairs. On the \PosCovered{} of open
-interest with a validated delta, the median strike notional across \PosRatioUnderlyings{}
-underlyings is at least \PosGrossMedian{} times delta exposure, whatever the signs of the legs.
+interest with a validated delta, the median underlying's strike notional, across
+\PosRatioUnderlyings{} underlyings, is at least \PosGrossMedian{} times its delta exposure,
+whatever the signs of the legs.
 Single positions go further and in both
 directions: a butterfly's strike notional is \PosButterflyTimes{} times its maximum value, and a
 call struck at \PosDeepStrike{} is recorded at \PosDeepNotional{} against \PosDeepExposure{} of

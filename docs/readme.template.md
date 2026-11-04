@@ -151,11 +151,11 @@ span series. On an average date {{PosStructuredMean}} of FLEX open interest sits
 series with near-equal counts at one expiry, against {{PosChance}} when the counts are dealt at
 random. Scored against disclosed fund holdings, with the settings frozen first, that grouping
 recalls {{PosRecall}} of {{PosTruth}} held structures with precision {{PosPrecision}}. The test
-rests on {{PosFunds}} of one family, whose funds hold nearly all the open interest of their
-series, and almost entirely on same-strike pairs; a match means consistent with a disclosed
+rests on {{PosFunds}} of one family, where in the median held leg the fund holds
+{{PosHolderShare}} of the open interest, and almost entirely on same-strike pairs; a match means consistent with a disclosed
 holder, no more. On the {{PosCovered}} of open interest with a validated delta, the median
-strike notional across {{PosRatioUnderlyings}} underlyings is at least {{PosGrossMedian}} times
-delta exposure, whatever the signs of the legs. Counting every leg as long gives
+underlying's strike notional, across {{PosRatioUnderlyings}} underlyings, is at least
+{{PosGrossMedian}} times its delta exposure, whatever the signs of the legs. Counting every leg as long gives
 {{PosRatioMedian}}, a reading that is neither a floor nor a ceiling and that overstates the
 ratio on the same-strike pairs funds disclose. On single
 positions, recomputed from the report:

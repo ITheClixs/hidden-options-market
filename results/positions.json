@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T14:05:46+00:00",
+  "generated_at": "2026-11-04T14:55:45+00:00",
   "inputs": {
     "ci_runs": [
       "2026-08-16",
@@ -54,7 +54,7 @@
       "2026-10-23",
       "2026-10-24"
     ],
-    "holding_rows": 9379,
+    "holding_rows": 9283,
     "local_only": false,
     "panel_end": "2026-10-22",
     "panel_rows": 15179194,
