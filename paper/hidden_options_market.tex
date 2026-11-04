@@ -56,11 +56,14 @@ identification heuristic --- treating strikes off the standard listing grid as F
 has precision \RulePrecision{} and recall \RuleRecall{} against OCC's own labels, missing
 \FlexOnGridShare{} of FLEX series because FLEX is frequently struck on the grid. Second, treating
 cleared series as economic positions mismeasures them. On an average date \PosStructuredMean{}
-of open interest sits in groups of series with near-equal counts at one expiry, a grouping that
-recalls \PosRecall{} of the \PosTruth{} multi-leg structures funds disclose, with precision
-\PosPrecision{}, on a test confined mostly to same-strike pairs. Strike notional is a median
-\PosRatioMedian{} times delta exposure across \PosRatioUnderlyings{} underlyings, and at least
-\PosGrossMedian{} times whatever the signs of the legs. Single positions go further and in both
+of open interest sits in groups of series with near-equal counts at one expiry, against
+\PosChance{} when the counts are dealt at random. Scored against the holdings of one fund
+family, whose funds hold nearly all the open interest of the series they hold, that grouping
+recalls \PosRecall{} of the \PosTruth{} multi-leg structures they disclose, with precision
+\PosPrecision{}, on a test confined mostly to same-strike pairs. On the \PosCovered{} of open
+interest with a validated delta, the median strike notional across \PosRatioUnderlyings{}
+underlyings is at least \PosGrossMedian{} times delta exposure, whatever the signs of the legs.
+Single positions go further and in both
 directions: a butterfly's strike notional is \PosButterflyTimes{} times its maximum value, and a
 call struck at \PosDeepStrike{} is recorded at \PosDeepNotional{} against \PosDeepExposure{} of
 exposure.
@@ -161,8 +164,9 @@ ground truth.
 
 The second concerns counting. Open interest is reported per series; a position is not a
 series. On an average date \PosStructuredMean{} of FLEX open interest sits in groups of series
-with near-equal counts at one expiry, and strike notional is a median \PosRatioMedian{} times
-delta exposure across underlyings. On single positions the error is \PosButterflyTimes{}-fold on
+with near-equal counts at one expiry, against \PosChance{} if the counts are dealt at random.
+Where a validated delta exists, the median underlying's strike notional is at least
+\PosGrossMedian{} times its delta exposure, whatever the signs of the legs. On single positions the error is \PosButterflyTimes{}-fold on
 a butterfly and \PosCollarTimes{}-fold on a collar, and on a deep in-the-money call it is
 \PosDeepTimes{}-fold the other way. Any study using open interest is exposed to the same
 conflation.
@@ -568,8 +572,10 @@ underlying all the same, and on that footing its exposure is \PosDeepExposure{},
 \PosButterflyDate{}, and the \PosCollarName{} collar on \PosCollarDate{}. Top: value at expiry
 against the underlying, with the legs' sides as read in the text and faint lines at their
 strikes; the dashed line is the most the position can be worth. Bottom: strike notional, one
-block per leg (all \PosButterflyExpiries{} expiries for the butterfly), over that maximum. The
-collar's deep call is the fourth block, too thin to see.}
+block per leg (all \PosButterflyExpiries{} expiries for the butterfly), over that maximum, which
+for the butterfly is for all \PosButterflyExpiries{} expiries. The collar's deep call is the first
+block, too thin to see at \PosDeepNotional{}; the third case is read from the text, not the
+bar.}
 \label{fig:anatomy}
 \end{figure}
 
@@ -625,12 +631,14 @@ averaged over its dates. That leaves \PosTruth{} structures, held by \PosFunds{}
 are a call and a put at one strike. The detector puts all of a structure's legs together
 \PosGrouped{} of the time, and into a structure of the same type \PosRecall{} of the time, our
 recall (Table~\ref{tab:positions}). Of the \PosTouching{} distinct detected structures with a
-leg some fund holds, \PosPrecision{} have two or more legs held by one fund, our precision;
-\PosPrecisionExact{} have every leg held by one fund. Scored one date at a time, the medians
+leg some fund holds, \PosPrecision{} have two or more legs held by one fund. That is our
+precision, and a lenient one: the mean over structures of the share of each one's dates on
+which any two of its legs share a holder. Under the strict reading, every leg held by one fund,
+it is \PosPrecisionExact{}. Scored one date at a time, the medians
 over \PosScoreDates{} dates are \PosMedianRecall{} and \PosMedianPrecision{}, with recall
 between \PosLowRecall{} and \PosHighRecall{}. Against the report of the file's own date the
 two scores are \PosSameDayRecall{} and \PosSameDayPrecision{}. All \PosSyntheticTouching{}
-detected same-strike pairs that touch a holding are confirmed, and the misses on precision are
+detected same-strike pairs that touch a holding are consistent with a disclosed holder, and the misses on precision are
 mostly groups of three legs. Both scores clear the bar of one half we set in advance for making a market-wide statement at all.
 
 \input{tables/positions}
@@ -730,56 +738,60 @@ the writers hold its negative, and the report does not say who is long.
 \label{sec:notional}
 
 We value each underlying's book on each date three ways: strike times contracts, OCC's mark
-times contracts, and delta exposure. Delta exposure takes the absolute sum of the dollar deltas
-within each detected structure and adds up those sums and the absolute dollar delta of each
-ungrouped leg. Open interest has no sign, so the rule counts every leg of a structure as long.
-We use a delta only where the volatility inverts inside a validated cell, at a rate of
-\PosRate{}, and leave out whole any structure with a leg that lacks one, so that the ratio sets
-strike notional against exposure on the same series. The cells were validated on the
-\IvDates{} dates with listed chains; here they are carried back over the whole panel. That keeps \PosCovered{} of open interest
-over the panel and leaves \PosOutside{} out. Of all open interest, \PosPriced{} has a usable
-delta before structures are completed, and \PosNoSpot{} has no spot, chiefly index series before
-the chains begin.
+times contracts, and delta exposure. Open interest has no sign, so delta exposure cannot be
+netted with any confidence. We lead with the sum of the legs' absolute dollar deltas, which
+nets nothing. No assignment of signs can give more exposure than that, so strike notional over
+it is a floor on the true ratio. Beside it we give the reading if every leg were long: the
+absolute sum of the dollar deltas within each detected structure, plus the absolute dollar
+delta of each ungrouped leg. That rule is neither a floor nor a ceiling in general. We use a
+delta only where the volatility inverts inside a validated cell, at a rate of \PosRate{}, and
+leave out whole any structure with a leg that lacks one, so that each ratio sets strike
+notional against exposure on the same series. The cells were validated on the \IvDates{}
+dates with listed chains; here they are carried back over the whole panel. That keeps
+\PosCovered{} of open interest over the panel and leaves \PosOutside{} out. Of all open
+interest, \PosPriced{} has a usable delta before structures are completed, and \PosNoSpot{}
+has no spot, chiefly index series before the chains begin.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/notional_ratio.pdf}
 \caption{Strike notional over delta exposure across the \PosRatioUnderlyings{} underlyings with
-a validated delta, each counted once at its median across dates. Filled bars net deltas within
-detected structures, counting every leg as long. The outline nets nothing, which no assignment
-of signs can exceed in exposure. The line marks where the two measures agree, and the axis
-stops at 1,000.}
+a validated delta, each counted once at its median across dates. Filled bars net nothing, which
+no assignment of signs can exceed in exposure, so each is a floor on its underlying's ratio;
+the shares either side of one, and the note on underlyings past the axis, are of these. The
+outline is the reading if every leg of a detected structure were long. The line marks where the
+two measures agree, and the axis stops at 1,000.}
 \label{fig:notional-ratio}
 \end{figure}
 
-Across \PosRatioUnderlyings{} underlyings, each at its median across dates, strike notional is a
-median of \PosRatioMedian{} times delta exposure, with quartiles of \PosRatioQuarter{} and
-\PosRatioThreeQuarters{} and tenth and ninetieth percentiles of \PosRatioTen{} and
-\PosRatioNinety{} (Figure~\ref{fig:notional-ratio}). It is above one for \PosAboveOne{} of
-underlyings and above ten for \PosAboveTen{}. The delta depends on the rate, a little: at
-\PosRateLow{} and \PosRateHigh{}, with the same cells, the median is \PosRatioRateLow{} and
-\PosRatioRateHigh{}. For
-the market as a whole on the median date, strike notional is \PosMarketRatio{} times delta
-exposure and \PosMarketMark{} times mark value; on the last date it is \PosStrikeLast{} against
-\ValueEnd{} of value.
+Across \PosRatioUnderlyings{} underlyings, each at its median across dates, strike notional is
+at least \PosGrossMedian{} times delta exposure for the median underlying, with quartiles of
+\PosGrossQuarter{} and \PosGrossThreeQuarters{} and tenth and ninetieth percentiles of
+\PosGrossTen{} and \PosGrossNinety{} (Figure~\ref{fig:notional-ratio}). The floor is above one
+for \PosGrossAboveOne{} of underlyings and above ten for \PosGrossAboveTen{}. The delta depends
+on the rate, a little: at \PosRateLow{} and \PosRateHigh{}, with the same cells, the median floor
+is \PosGrossRateLow{} and \PosGrossRateHigh{}. For the market as a whole on the median date,
+strike notional is at least \PosMarketGross{} times delta exposure and \PosMarketMark{} times
+mark value; on the last date it is \PosStrikeLast{} against \ValueEnd{} of value.
 
-By underlying, then, the error runs mostly one way: only \PosBelowOne{} of underlyings are below
-one. The other direction shows at the level of the leg. Strike notional is below the leg's own
-dollar delta on \PosUnderstated{} of the open interest with a delta, and the legs it understates
-most tend to drop out of this comparison, as the deep call above did: \PosBelowFloor{} of open
-interest is marked below the model's floor. Giving those marks a delta of one, outside the
-validated cells, moves the median to \PosFloorMedian{} and the share below one to
-\PosFloorBelowOne{}.
+If every leg were long, the median would be \PosRatioMedian{}, with quartiles of
+\PosRatioQuarter{} and \PosRatioThreeQuarters{} (\PosRatioRateLow{} and \PosRatioRateHigh{}
+at the other two rates), and \PosMarketRatio{} for the market on the median date. Where signs
+can be seen, that reading errs in one direction. On the \PosSignStructures{} structures funds
+hold, the rule gives a median of \PosRuleOverSigned{} of the delta the funds' own signed
+contracts imply, because a long call and a short put add where the rule nets them, so it
+overstates the ratio there; same-strike pairs are \PosShareSynthetic{} of the open interest in
+structures. Under that rule, netting within structures accounts for \PosNettingShare{} of the
+logarithmic gap between strike notional and delta exposure on the median date.
 
-The netting rule needs care. On the median date it accounts for \PosNettingShare{} of the
-logarithmic gap between strike notional and delta exposure, but where signs can be seen it
-misreads them. On the \PosSignStructures{} structures funds hold, the rule gives a median of
-\PosRuleOverSigned{} of the delta the funds' own signed contracts imply, because a long call and
-a short put add where the rule nets them. We therefore also report the ratio with no netting at
-all. No assignment of signs can give more exposure than the sum of the legs' absolute deltas, so
-that ratio is a floor whatever the signs are: a median of \PosGrossMedian{}, or
-\PosMarketGross{} for the market on the median date. Strike notional overstates the exposure of
-the typical underlying by at least that much, in the cells where we can compute a delta.
+By underlying, then, the error runs mostly one way: only \PosGrossBelowOne{} of underlyings
+have a floor below one. The other direction shows at the level of the leg. Strike notional is
+below the leg's own dollar delta on \PosUnderstated{} of the open interest with a delta, and
+the legs it understates most tend to drop out of this comparison, as the deep call above did:
+\PosBelowFloor{} of open interest is marked below the model's floor. Giving those marks a delta
+of one, outside the validated cells, moves the median floor to \PosFloorGrossMedian{}, with
+\PosFloorGrossBelowOne{} of underlyings below one, and the all-long median to
+\PosFloorMedian{}.
 
 \section{Does hidden inventory predict the visible market?}
 \label{sec:predict}
@@ -889,9 +901,9 @@ of inventory would have been found four times in five.
 Two measurement findings travel further than the setting. A natural strike-based rule
 for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the
 listing grid. And cleared series are not economic positions: \PosStructuredMean{} of open
-interest sits in groups of series with near-equal counts, and across underlyings strike notional
-is a median \PosRatioMedian{} times delta exposure, at least \PosGrossMedian{} times whatever the
-signs. On single legs the error reaches \PosDeepTimes{}-fold in the other direction.
+interest sits in groups of series with near-equal counts, against \PosChance{} by chance, and
+on the \PosCovered{} of open interest with a validated delta the median underlying's strike
+notional is at least \PosGrossMedian{} times its delta exposure, whatever the signs. On single legs the error reaches \PosDeepTimes{}-fold in the other direction.
 
 \section*{Data and code availability}
 

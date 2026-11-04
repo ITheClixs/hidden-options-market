@@ -148,12 +148,16 @@ listed. This project used the rule first; the superseded census is kept as it wa
 
 **A cleared series is not a position.** Open interest is reported per series, and positions
 span series. On an average date 78.7\% of FLEX open interest sits in groups of
-series with near-equal counts at one expiry. Scored against disclosed fund holdings, with the
-settings frozen first, that grouping recalls 77.9\% of 36 held structures with
-precision 86.0\%. The test rests on 18 funds and almost entirely on same-strike
-pairs, and a match means consistent with a disclosed holder, no more. Across
-1,458 underlyings, strike notional is a median 3.65 times delta
-exposure, and at least 2.35 times whatever the signs of the legs. On single
+series with near-equal counts at one expiry, against 26.5\% when the counts are dealt at
+random. Scored against disclosed fund holdings, with the settings frozen first, that grouping
+recalls 77.9\% of 36 held structures with precision 86.0\%. The test
+rests on 18 funds of one family, whose funds hold nearly all the open interest of their
+series, and almost entirely on same-strike pairs; a match means consistent with a disclosed
+holder, no more. On the 69.4\% of open interest with a validated delta, the median
+strike notional across 1,458 underlyings is at least 2.35 times
+delta exposure, whatever the signs of the legs. Counting every leg as long gives
+3.65, a reading that is neither a floor nor a ceiling and that overstates the
+ratio on the same-strike pairs funds disclose. On single
 positions, recomputed from the report:
 
 - a butterfly's strike notional is **49×** its maximum value;
