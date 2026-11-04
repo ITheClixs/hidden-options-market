@@ -271,10 +271,9 @@ class TestCaptureCut:
         from hidden_options.measure.positions_result import positions_result
         from positions_stub import AFTER_END, D2, globalx, holdings
 
-        late = (
-            holdings()
-            .query("fund == 'AAAY' and as_of == @D2")
-            .assign(capture_date=AFTER_END, contracts=lambda rows: rows["contracts"] * 5)
+        rows = holdings()
+        late = rows[(rows["fund"] == "AAAY") & (rows["as_of"] == D2)].assign(
+            capture_date=AFTER_END, contracts=lambda frame: frame["contracts"] * 5
         )
         late_globalx = globalx().iloc[[0]].assign(capture_date=AFTER_END, strike=4000.0)
         again = positions_result(
