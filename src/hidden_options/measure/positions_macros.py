@@ -150,6 +150,7 @@ def _ratio_macros(ratios: Mapping[str, Any]) -> dict[str, str]:
     rule, gross, market = ratios["rule"], ratios["gross"], ratios["market"]
     quantiles, coverage = rule["quantiles"], ratios["coverage"]
     rates = [ratios["rates"][key] for key in sorted(ratios["rates"])]
+    gross_rates = [ratios["rates_gross"][key] for key in sorted(ratios["rates_gross"])]
     across, legs, floor = ratios["structured_by_underlying"], ratios["legs"], ratios["floor_delta"]
     return {
         "PosRatioUnderlyings": formats.count(ratios["underlyings"]),
@@ -163,6 +164,8 @@ def _ratio_macros(ratios: Mapping[str, Any]) -> dict[str, str]:
         "PosAboveTen": _share(rule["above_ten"]),
         "PosRatioRateLow": _times(rates[0]["quantiles"]["0.50"], 2),
         "PosRatioRateHigh": _times(rates[-1]["quantiles"]["0.50"], 2),
+        "PosGrossRateLow": _times(gross_rates[0]["quantiles"]["0.50"], 2),
+        "PosGrossRateHigh": _times(gross_rates[-1]["quantiles"]["0.50"], 2),
         "PosGrossMedian": _times(gross["quantiles"]["0.50"], 2),
         "PosGrossQuarter": _times(gross["quantiles"]["0.25"]),
         "PosGrossThreeQuarters": _times(gross["quantiles"]["0.75"]),

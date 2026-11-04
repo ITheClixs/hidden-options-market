@@ -116,6 +116,7 @@ class TestMarket:
         assert ratios["underlyings"] == len(ratios["by_underlying"])
         assert ratios["rule"]["n"] == ratios["underlyings"]
         assert set(ratios["rates"]) == {"0.03", "0.05"}
+        assert set(ratios["rates_gross"]) == {"0.03", "0.05"}
 
     def test_coverage_shares_are_shares(self, result):
         coverage = result.values["ratios"]["coverage"]

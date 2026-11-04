@@ -499,6 +499,10 @@ def _ratios(
             f"{rate:.2f}": _distribution(per_underlying_ratios(measures[rate])["ratio"])
             for rate in SENSITIVITY_RATES
         },
+        "rates_gross": {
+            f"{rate:.2f}": _distribution(per_underlying_ratios(measures[rate])["gross_ratio"])
+            for rate in SENSITIVITY_RATES
+        },
         "by_underlying": [
             {
                 "symbol": str(row.underlying),
