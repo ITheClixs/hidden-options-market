@@ -83,9 +83,10 @@ class TestRatioDistribution:
     def test_the_unnetted_series_is_filled(self, styled):
         frame = ratios()
         fig = figures.fig_ratio_distribution(frame)
-        filled = sum(bar.get_height() for bar in fig.axes[0].patches if isinstance(bar, Rectangle))
-        edges = np.linspace(-1, 3, 21)
-        assert filled == np.histogram(np.log10(frame["gross_ratio"]), bins=edges)[0].sum()
+        bars = [bar for bar in fig.axes[0].patches if isinstance(bar, Rectangle)]
+        edges = [bar.get_x() for bar in bars] + [bars[-1].get_x() + bars[-1].get_width()]
+        expected = np.histogram(np.log10(frame["gross_ratio"]), bins=edges)[0]
+        assert [bar.get_height() for bar in bars] == list(expected)
 
     def test_each_underlying_is_counted_once(self, styled):
         frame = ratios()
