@@ -263,19 +263,20 @@ def locate_butterfly(
 def _butterfly_case(day: pd.Timestamp, underlying: str, triples: pd.DataFrame) -> dict[str, Any]:
     legs = []
     strike_notional = worth = 0.0
-    for row in triples.itertuples():
+    for row in triples.to_dict("records"):
         signed = pd.DataFrame(
             {
                 "right": ["C", "C", "C"],
-                "strike": [row.low, row.middle, row.high],
-                "contracts": [row.wing, -cast(float, row.body), row.wing],
+                "strike": [row["low"], row["middle"], row["high"]],
+                "contracts": [row["wing"], -float(row["body"]), row["wing"]],
+                "expiry": [row["expiry"]] * 3,
             }
         )
         strike_notional += float(
             (signed["strike"] * signed["contracts"].abs() * CONTRACT_MULTIPLIER).sum()
         )
         worth += max_value(signed)
-        legs.append(signed.assign(expiry=row.expiry))
+        legs.append(signed)
     return {
         "report_date": day,
         "underlying": underlying,

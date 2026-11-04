@@ -90,7 +90,8 @@ _GLOBALX_AS_OF = re.compile(r"as of (\d{2}/\d{2}/\d{4})")
 _STRIKE_SCALE = 1000
 _PARTITION = re.compile(r"date=(\d{4}-\d{2}-\d{2})")
 
-LegKey = tuple[pd.Timestamp, str, pd.Timestamp, str, int]
+# Report date and expiry as nanoseconds since the epoch, strike in tenths of a cent.
+LegKey = tuple[int, str, int, str, int]
 
 
 @dataclass(frozen=True)
@@ -444,8 +445,8 @@ def _holders(truth: pd.DataFrame) -> dict[LegKey, set[str]]:
 
 
 def _leg_keys(frame: pd.DataFrame) -> list[LegKey]:
-    days = pd.to_datetime(frame["report_date"]).to_numpy(dtype="datetime64[ns]")
-    expiries = pd.to_datetime(frame["expiry"]).to_numpy(dtype="datetime64[ns]")
+    days = pd.to_datetime(frame["report_date"]).to_numpy(dtype="datetime64[ns]").astype(np.int64)
+    expiries = pd.to_datetime(frame["expiry"]).to_numpy(dtype="datetime64[ns]").astype(np.int64)
     strikes = np.rint(frame["strike"].to_numpy(dtype=float) * _STRIKE_SCALE).astype(np.int64)
     return list(
         zip(
