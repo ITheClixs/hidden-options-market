@@ -362,11 +362,25 @@ def floor_check(truth: pd.DataFrame, report: pd.DataFrame) -> dict[str, int]:
 
 
 def load_globalx_options(raw: Path) -> pd.DataFrame:
-    """The option lines of the Global X files: all of them are `SPX US 03/21/25 C6085`."""
-    records = []
+    """The option lines of the Global X files (all of them `SPX US 03/21/25 C6085`), with the
+    `capture_date` of their folder."""
+    records: list[dict[str, Any]] = []
     for path in sorted(glob.glob(str(raw / "globalx_holdings/date=*/*.csv"))):
-        records.extend(_globalx_file(Path(path)))
-    columns = ["fund", "as_of", "underlying", "expiry", "right", "strike", "contracts"]
+        found = _PARTITION.search(path)
+        if found is None:
+            raise ValueError(f"{path} is not in a date=YYYY-MM-DD folder")
+        capture = pd.Timestamp(found.group(1))
+        records.extend({**row, "capture_date": capture} for row in _globalx_file(Path(path)))
+    columns = [
+        "fund",
+        "as_of",
+        "capture_date",
+        "underlying",
+        "expiry",
+        "right",
+        "strike",
+        "contracts",
+    ]
     return pd.DataFrame(records, columns=columns)
 
 

@@ -130,6 +130,7 @@ def globalx():
         {
             "fund": ["XYLD", "XYLD"],
             "as_of": [D1, AFTER_END],
+            "capture_date": [D1, AFTER_END],
             "underlying": ["SPX", "SPX"],
             "expiry": [EXPIRY, EXPIRY],
             "right": ["C", "C"],

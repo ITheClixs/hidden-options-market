@@ -112,8 +112,8 @@ def positions_result(inputs: PositionsInputs) -> Result:
     """The `positions` result from loaded inputs, up to the frozen PANEL_END."""
     end = pd.Timestamp(PANEL_END)
     dates = [pd.Timestamp(day) for day in inputs.dates if pd.Timestamp(day) <= end]
-    holdings = inputs.holdings[pd.to_datetime(inputs.holdings["as_of"]) <= end]
-    globalx = inputs.globalx[pd.to_datetime(inputs.globalx["as_of"]) <= end]
+    holdings = through(inputs.holdings, end)
+    globalx = through(inputs.globalx, end)
     truth = holdings_structures(holdings, dates)
     same_day = holdings_structures(holdings, dates, same_day=True)
     walk = _walk(dates, inputs, truth, same_day, globalx)
@@ -155,6 +155,15 @@ def positions_result(inputs: PositionsInputs) -> Result:
         "spot_rows": len(inputs.spots),
     }
     return Result(NAME, values, positions_macros(values), run_inputs, now_iso())
+
+
+def through(holdings: pd.DataFrame, end: pd.Timestamp) -> pd.DataFrame:
+    """Holdings captured by `end` and dated by it: a later capture, even of an earlier file,
+    is not in the frozen result."""
+    captured = pd.to_datetime(holdings["capture_date"]) <= end
+    dated = pd.to_datetime(holdings["as_of"]) <= end
+    kept: pd.DataFrame = holdings[captured & dated]
+    return kept
 
 
 @ANALYSES.register(NAME)

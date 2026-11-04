@@ -264,3 +264,59 @@ class TestScoredLegs:
             }
         )
         assert list(scored_legs(legs, {"AAA"})["root"]) == ["2AAA", "1AAA"]
+
+
+class TestCaptureCut:
+    def test_a_capture_after_the_panel_end_is_ignored(self, result):
+        from hidden_options.measure.positions_result import positions_result
+        from positions_stub import AFTER_END, D2, globalx, holdings
+
+        late = (
+            holdings()
+            .query("fund == 'AAAY' and as_of == @D2")
+            .assign(capture_date=AFTER_END, contracts=lambda rows: rows["contracts"] * 5)
+        )
+        late_globalx = globalx().iloc[[0]].assign(capture_date=AFTER_END, strike=4000.0)
+        again = positions_result(
+            inputs(
+                holdings=pd.concat([holdings(), late], ignore_index=True),
+                globalx=pd.concat([globalx(), late_globalx], ignore_index=True),
+            )
+        )
+        assert again.values == result.values
+        assert again.inputs["holding_rows"] == result.inputs["holding_rows"]
+
+    def test_holding_rows_count_only_captures_up_to_the_end(self, result):
+        from positions_stub import holdings
+
+        rows = holdings()
+        kept = rows[(rows["capture_date"] <= "2026-10-22") & (rows["as_of"] <= "2026-10-22")]
+        assert result.inputs["holding_rows"] == len(kept)
+
+
+class TestGrossMacros:
+    NAMES = (
+        "PosGrossQuarter",
+        "PosGrossThreeQuarters",
+        "PosGrossTen",
+        "PosGrossNinety",
+        "PosGrossAboveOne",
+        "PosGrossAboveTen",
+        "PosGrossBelowOne",
+        "PosGrossRateLow",
+        "PosGrossRateHigh",
+        "PosFloorGrossMedian",
+        "PosFloorGrossBelowOne",
+    )
+
+    def test_the_unnetted_macros_render(self, result):
+        ratios = result.values["ratios"]
+        gross, floor = ratios["gross"], ratios["floor_delta_gross"]
+        macros = result.macros
+        for name in self.NAMES:
+            assert macros[name] and macros[name] != "--", name
+        assert macros["PosGrossQuarter"] == f"{gross['quantiles']['0.25']:.1f}"
+        assert macros["PosGrossBelowOne"] == f"{gross['below_one'] * 100:.1f}\\%"
+        assert macros["PosFloorGrossMedian"] == f"{floor['quantiles']['0.50']:.2f}"
+        low = ratios["rates_gross"]["0.03"]["quantiles"]["0.50"]
+        assert macros["PosGrossRateLow"] == f"{low:.2f}"

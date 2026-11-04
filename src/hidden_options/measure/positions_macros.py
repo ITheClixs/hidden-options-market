@@ -174,7 +174,7 @@ def _ratio_macros(ratios: Mapping[str, Any]) -> dict[str, str]:
         "PosGrossAboveOne": _share(gross["above_one"]),
         "PosGrossAboveTen": _share(gross["above_ten"]),
         "PosGrossBelowOne": _share(gross["below_one"]),
-        "PosFloorGrossMedian": _times(ratios["floor_delta_gross"]["quantiles"].get("0.50"), 2),
+        "PosFloorGrossMedian": _times(ratios["floor_delta_gross"]["quantiles"]["0.50"], 2),
         "PosFloorGrossBelowOne": _share(ratios["floor_delta_gross"]["below_one"]),
         "PosMarketRatio": _times(market["strike_over_delta"]),
         "PosMarketGross": _times(market["strike_over_gross"]),

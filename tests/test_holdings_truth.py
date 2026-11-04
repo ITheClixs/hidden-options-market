@@ -314,6 +314,7 @@ class TestLoaders:
         assert row["contracts"] == -5428.0
         assert row["as_of"] == pd.Timestamp("2025-03-14")
         assert row["expiry"] == pd.Timestamp("2025-03-21")
+        assert row["capture_date"] == pd.Timestamp("2025-03-14")
 
     def test_globalx_overlap_counts_legs_on_the_flex_report_and_multi_leg_holdings(self):
         options = pd.DataFrame(
