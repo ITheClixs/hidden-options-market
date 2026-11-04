@@ -589,11 +589,22 @@ _BILLION = 1e9
 _PAYOFF_MARGIN = 0.35
 _PAYOFF_POINTS = 801
 _RATIO_BINS_PER_DECADE = 5
+# The collar's axis starts this share of its span left of zero, so the deep call shows.
+_DEEP_MARGIN = 0.06
 # The axis stops at this power of ten; the few underlyings beyond it are counted in a note.
 _RATIO_TOP_DECADE = 3
 
 
-def _anatomy_payoff(ax: Axes, legs: pd.DataFrame, title: str, low: float, high: float) -> None:
+def _anatomy_payoff(
+    ax: Axes,
+    legs: pd.DataFrame,
+    title: str,
+    span: tuple[float, float],
+    scope: str,
+    left: float | None = None,
+) -> None:
+    """The payoff over `span`; `left` starts the axis further left, to show a strike at zero."""
+    low, high = span
     prices = np.linspace(low, high, _PAYOFF_POINTS)
     values = payoff(legs, prices) / _BILLION
     for strike in sorted(set(legs["strike"])):
@@ -601,14 +612,15 @@ def _anatomy_payoff(ax: Axes, legs: pd.DataFrame, title: str, low: float, high: 
     ax.plot(prices, values, color=PALETTE["ink"])
     top = float(np.max(values))
     ax.axhline(top, color=PALETTE["muted"], linewidth=0.6, linestyle=(0, (3, 2)), zorder=1)
+    start = low if left is None else left
     ax.annotate(
-        f"Maximum {usd(top * _BILLION)}",
-        xy=(low, top),
+        f"Maximum, {scope}: {usd(top * _BILLION)}",
+        xy=(start, top),
         xytext=(3, 3),
         textcoords="offset points",
         color=PALETTE["ink"],
     )
-    ax.set_xlim(low, high)
+    ax.set_xlim(start, high)
     ax.set_ylim(bottom=min(0.0, float(np.min(values))), top=top * 1.25)
     ax.set_title(title, loc="left")
     ax.set_xlabel("Underlying at expiry (\\$)")
@@ -662,62 +674,89 @@ def fig_anatomy(cases: Mapping[str, Any]) -> Figure:
     legs = pd.DataFrame(butterfly["legs"])
     first = legs[legs["expiry"] == legs["expiry"].min()]
     span = float(first["strike"].max() - first["strike"].min())
+    expiries = len(butterfly["expiries"])
     _anatomy_payoff(
         axes[0, 0],
         first,
-        f"{butterfly['underlying']} butterfly, one of {len(butterfly['expiries'])} expiries",
-        float(first["strike"].min()) - _PAYOFF_MARGIN * span,
-        float(first["strike"].max()) + _PAYOFF_MARGIN * span,
+        f"{butterfly['underlying']} butterfly, one of {expiries} expiries",
+        (
+            float(first["strike"].min()) - _PAYOFF_MARGIN * span,
+            float(first["strike"].max()) + _PAYOFF_MARGIN * span,
+        ),
+        "one expiry",
     )
     notionals = (legs["strike"] * legs["contracts"].abs() * CONTRACT_MULTIPLIER).tolist()
     _anatomy_bars(
-        axes[1, 0], notionals, butterfly["max_value"], "Maximum value", "All expiries (\\$bn)"
+        axes[1, 0],
+        notionals,
+        butterfly["max_value"],
+        f"Maximum value,\n{expiries} expiries",
+        f"All {expiries} expiries (\\$bn)",
     )
     signed = pd.DataFrame(collar["legs"])
+    high = float(signed["strike"].max()) * (1 + _PAYOFF_MARGIN / 2)
     _anatomy_payoff(
         axes[0, 1],
         signed,
         f"{collar['underlying']} collar with a deep call",
-        0.0,
-        float(signed["strike"].max()) * (1 + _PAYOFF_MARGIN / 2),
+        (0.0, high),
+        "one expiry",
+        left=-_DEEP_MARGIN * high,
     )
+    _deep_call_label(axes[0, 1], float(signed["strike"].min()))
     notionals = (signed["strike"] * signed["contracts"].abs() * CONTRACT_MULTIPLIER).tolist()
     _anatomy_bars(axes[1, 1], notionals, collar["max_value"], "Maximum value", "\\$bn")
     return fig
 
 
+def _deep_call_label(ax: Axes, strike: float) -> None:
+    """Name the deep call's strike, whose rule sits against the axis."""
+    ax.axvline(strike, color=PALETTE["muted"], linewidth=0.6, zorder=0)
+    ax.annotate(
+        f"call struck at \\${strike:.2f}",
+        xy=(strike, 0.0),
+        xytext=(4, 6),
+        textcoords="offset points",
+        ha="left",
+        va="bottom",
+        color=PALETTE["ink"],
+    )
+
+
 def fig_ratio_distribution(measures: pd.DataFrame) -> Figure:
     """F6: strike notional over delta exposure across underlyings, on a log scale.
 
-    Each underlying is one count, its median across dates. Filled bars net within detected
-    structures; the outlined histogram nets nothing. The rule at 1 is where the naive
-    measure and the exposure agree, with underlyings either side of it named by share.
+    Each underlying is one count, its median across dates. Filled bars net nothing, the
+    reading no assignment of signs can exceed in exposure, so it leads; the outline nets
+    within detected structures as if every leg were long. The rule at 1 is where the naive
+    measure and the exposure agree; the shares either side, and the note on underlyings past
+    the axis, are of the filled series.
     """
     fig = new_figure(1.0, aspect=0.5)
     ax = fig.subplots()
-    net = np.log10(measures["ratio"].to_numpy(dtype=float))
     gross = np.log10(measures["gross_ratio"].to_numpy(dtype=float))
+    net = np.log10(measures["ratio"].to_numpy(dtype=float))
     low = math.floor(min(net.min(), gross.min()))
     high = min(math.ceil(max(net.max(), gross.max())), _RATIO_TOP_DECADE)
     edges = np.linspace(low, high, (high - low) * _RATIO_BINS_PER_DECADE + 1).tolist()
-    filled = ax.hist(net, bins=edges, color=PALETTE["ink"])[0]
-    outline = ax.hist(gross, bins=edges, histtype="step", color=PALETTE["muted"], linewidth=0.8)[0]
+    filled = ax.hist(gross, bins=edges, color=PALETTE["ink"])[0]
+    outline = ax.hist(net, bins=edges, histtype="step", color=PALETTE["muted"], linewidth=0.8)[0]
     ax.axvline(0.0, color=PALETTE["accent"], linewidth=0.8)
     ax.set_xticks(range(low, high + 1), [_power(tick) for tick in range(low, high + 1)])
     ax.set_xlabel("Strike notional over delta exposure (log scale)")
     ax.set_ylabel("Underlyings")
     top = float(max(np.max(filled), np.max(outline))) * 1.12
     ax.set_ylim(0, top)
-    below = float((net < 0).mean())
+    below = float((gross < 0).mean())
     notes = [
         (f"{below * 100:.0f}% of underlyings\nbelow 1", (0.0, top), (-4, -2), "right"),
         (f"{(1 - below) * 100:.0f}% above", (0.0, top), (4, -2), "left"),
-        ("no netting", _peak(outline, edges), (5, -4), "left"),
-        ("netted within structures", _peak(filled, edges), (14, -4), "left"),
+        ("no netting", _peak(filled, edges), (5, -4), "left"),
+        ("netted, every leg long", _peak(outline, edges), (5, -4), "left"),
     ]
-    beyond = int((net > high).sum())
+    beyond = int((gross > high).sum())
     if beyond:
-        worst = f"{10 ** float(net.max()):,.0f}"
+        worst = f"{10 ** float(gross.max()):,.0f}"
         noun = "underlying" if beyond == 1 else "underlyings"
         notes.append(
             (f"{beyond} {noun} beyond the axis,\nup to {worst}", (high, top), (0, -2), "right")

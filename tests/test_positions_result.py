@@ -208,6 +208,7 @@ class TestFloorDelta:
         assert 0 <= ratios["legs"]["understated_share"] <= 1
         assert ratios["legs"]["below_floor_share"] == 0
         assert ratios["floor_delta"]["n"] >= ratios["rule"]["n"]
+        assert ratios["floor_delta_gross"]["n"] == ratios["floor_delta"]["n"]
 
 
 class TestMacros:

@@ -474,6 +474,7 @@ def _ratios(
     ratios: pd.DataFrame, measures: Mapping[float, pd.DataFrame], walk: _Walk
 ) -> dict[str, Any]:
     base = measures[RATE]
+    floor = per_underlying_ratios(pd.concat(walk.floor_delta, ignore_index=True))
     covered = float((base["covered_oi_share"] * base["open_interest"]).sum())
     total = float(base["open_interest"].sum())
     return {
@@ -492,9 +493,8 @@ def _ratios(
             "understated_share": walk.understated_oi / walk.priced_oi if walk.priced_oi else None,
             "below_floor_share": walk.below_floor_oi / walk.total_oi if walk.total_oi else None,
         },
-        "floor_delta": _distribution(
-            per_underlying_ratios(pd.concat(walk.floor_delta, ignore_index=True))["ratio"]
-        ),
+        "floor_delta": _distribution(floor["ratio"]),
+        "floor_delta_gross": _distribution(floor["gross_ratio"]),
         "rates": {
             f"{rate:.2f}": _distribution(per_underlying_ratios(measures[rate])["ratio"])
             for rate in SENSITIVITY_RATES

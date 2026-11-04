@@ -63,6 +63,14 @@ class TestAnatomy:
         assert usd(cases["butterfly"]["strike_notional"]) in text
         assert usd(cases["butterfly"]["max_value"]) in text
 
+    def test_maxima_say_their_scope_and_the_deep_call_is_named(self, styled, result):
+        fig = figures.fig_anatomy(result.values["cases"])
+        assert any("Maximum, one expiry" in t.get_text() for t in fig.axes[0].texts)
+        labels = [t.get_text() for t in fig.axes[2].get_yticklabels()]
+        assert any("3 expiries" in label for label in labels)
+        assert any("call struck at" in t.get_text() for t in fig.axes[1].texts)
+        assert fig.axes[1].get_xlim()[0] < 0
+
 
 class TestRatioDistribution:
     def test_reference_at_one_is_the_only_accent(self, styled):
@@ -71,6 +79,13 @@ class TestRatioDistribution:
         accents = [line for line in ax.get_lines() if to_hex(line.get_color()) == PALETTE["accent"]]
         assert len(accents) == 1
         assert list(accents[0].get_xdata()) == [0.0, 0.0]
+
+    def test_the_unnetted_series_is_filled(self, styled):
+        frame = ratios()
+        fig = figures.fig_ratio_distribution(frame)
+        filled = sum(bar.get_height() for bar in fig.axes[0].patches if isinstance(bar, Rectangle))
+        edges = np.linspace(-1, 3, 21)
+        assert filled == np.histogram(np.log10(frame["gross_ratio"]), bins=edges)[0].sum()
 
     def test_each_underlying_is_counted_once(self, styled):
         frame = ratios()
@@ -82,7 +97,7 @@ class TestRatioDistribution:
         frame = ratios()
         fig = figures.fig_ratio_distribution(frame)
         text = " ".join(t.get_text() for t in fig.axes[0].texts)
-        below = (frame["ratio"] < 1).mean() * 100
+        below = (frame["gross_ratio"] < 1).mean() * 100
         assert f"{below:.0f}%" in text
 
     def test_underlyings_past_the_axis_are_counted_in_a_note(self, styled):
@@ -98,7 +113,7 @@ class TestRatioDistribution:
         fig = figures.fig_ratio_distribution(ratios())
         text = " ".join(t.get_text() for t in fig.axes[0].texts)
         assert "no netting" in text
-        assert "netted within structures" in text
+        assert "netted, every leg long" in text
 
 
 class TestBuilders:
