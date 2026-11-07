@@ -155,3 +155,16 @@ def test_table_reads_the_result_macros(result):
     assert result.macros["GammaMedianGross"] in text
     with pytest.raises(KeyError):
         hidden_gamma_table({})
+
+
+def test_names_above_a_tenth_netted():
+    from hidden_options.measure.hidden_gamma_macros import _names
+
+    found = _names(
+        {
+            "AAA": {"share_netted": 0.12, "share_netted_both": 0.30},
+            "BBB": {"share_netted": 0.40, "share_netted_both": 0.05},
+            "CCC": {"share_netted": 0.01, "share_netted_both": 0.01},
+        }
+    )
+    assert found == {"GammaTenNettedNames": "BBB and AAA", "GammaTenBothNames": "AAA"}

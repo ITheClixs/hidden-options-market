@@ -794,6 +794,69 @@ of one, outside the validated cells, moves the median floor to \PosFloorGrossMed
 \PosFloorGrossBelowOne{} of underlyings below one, and the all-long median to
 \PosFloorMedian{}.
 
+\section{How much gamma do listed chains leave out?}
+\label{sec:gamma}
+
+Contracts are not risk, and neither is notional. What a dealer who has taken the other
+side of an option hedges is its gamma near spot, and the gamma figures in use are built
+from listed chains: practitioner gamma exposure, and in research the listed gamma
+proxy of \citet{prakash2026}, the one study we know of on the same FLEX data. FLEX
+series are in none of them. We ask how much option gamma such a figure leaves out, on
+the \GammaSettlements{} settlements from \GammaStart{} to \GammaEnd{} for which we hold
+listed chains, across their \GammaUnderlyings{} underlyings. The definitions were fixed
+in a dated specification before any figure was computed; one addition made after a trial
+run, the netting of listed pairs, is recorded there and reported beside the original
+rules.
+
+Both sides are priced on one footing. A listed series takes Black--Scholes gamma at its
+own quoted volatility; a FLEX series reads the listed surface of the same underlying and
+session at its strike and expiry, linear in log-moneyness within an expiry and in total
+variance across expiries. \GammaInteriorShare{} of FLEX open interest is read inside the
+surface, and \GammaPricedShare{} of live FLEX open interest is priced at all. Dollar
+gamma is the change in dollar delta for a 1\% move. Open interest has no sign, so we
+report gamma notional under two attribution rules rather than a position: \emph{gross}
+counts every contract, and \emph{pair-netted} matches call against put open interest at
+each strike and counts only the excess, because a long call and a short put at one strike
+is a forward with no gamma. Section~\ref{sec:structures} showed that such pairs are most
+of the FLEX book; where funds disclose their sides they are synthetic forwards. A
+straddle would be understated by the rule, so it is a floor for books of that kind, not a
+bound in general.
+
+\input{tables/hidden_gamma}
+
+Counted gross, FLEX is a large part of each market's gamma: \GammaMedianGross{} of the
+total for the median underlying, with an interquartile range of \GammaLowGross{} to
+\GammaHighGross{}, and at least a tenth for \GammaAtLeastTenGross{} of the
+\GammaUnderlyings{} underlyings (Table~\ref{tab:gamma}). It is not deep-in-the-money
+inventory: \GammaNearMoneyGross{} of FLEX dollar gamma sits within 5\% of spot, and
+\GammaDaysWeekGross{} expires within a week. Most of it, however, is in same-strike pairs.
+Netting them leaves \GammaMedianNetted{} for the median underlying, or \GammaMedianBoth{}
+when listed pairs are netted by the same rule, and at least a tenth only for
+\GammaTenBothNames{}. Pooled across underlyings and settlements, so that large books
+weigh, the shares are \GammaPooledGross{}, \GammaPooledNetted{} and \GammaPooledBoth{}.
+The index products split: in SPY and NDX the share barely moves with the rule
+(\GammaSPYGross{} and \GammaNDXGross{} gross, \GammaSPYBoth{} and \GammaNDXBoth{} netted
+on both sides), so their FLEX gamma is outright options, while in SPX it falls from
+\GammaSPXGross{} to \GammaSPXBoth{}.
+
+Under the sign convention vendors apply to listed chains, calls positive and puts
+negative, adding FLEX would reverse the sign of the listed figure on \GammaFlipShare{} of
+\GammaSignedDays{} underlying-days, and the FLEX term is a median \GammaSignedRelative{}
+of the listed one in size. That convention is an assumption about who is long, not a
+finding, and we report it only because it is what such figures use.
+
+The figures do not rest on the surface. On the \GammaMarkShare{} of FLEX open interest
+whose own mark inverts to a validated volatility (Section~\ref{sec:pricing}), gamma at
+that volatility is \GammaMarkRatio{} times gamma from the listed surface, and the two
+volatilities differ by a median of \GammaMarkVolGap{} points.
+
+A listed-only gamma figure therefore misses nearly a fifth of gross gamma notional in the median
+market we follow, but most of what it misses is the convexity of forwards, which is none.
+Where FLEX holds outright options, as in SPY, NDX and the single names written by
+option-income funds, the omission survives netting. Whether FLEX positions move the
+underlying is a question about those books, signed; the next section tests the cruder
+quantity, gross inventory.
+
 \section{Does hidden inventory predict the visible market?}
 \label{sec:predict}
 
@@ -938,6 +1001,11 @@ Stock price clustering on option expiration dates.
 Park, T. and U.~Kurucak (2025).
 Growth of income funds and death of volatility.
 Working paper, University of Texas at Dallas.
+
+\bibitem[Prakash et al.(2026)]{prakash2026}
+Prakash, S., F.~Ferstler, and N.~Pezolano (2026).
+FOMO: FLEX options and market outcomes.
+Working paper, arXiv:2610.13044.
 
 \end{thebibliography}
 

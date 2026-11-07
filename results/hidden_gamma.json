@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-07T22:32:49+00:00",
+  "generated_at": "2026-11-07T22:35:16+00:00",
   "inputs": {
     "ci_runs": [
       "2026-08-16",
@@ -130,6 +130,8 @@
     "GammaSignedDays": "3,333",
     "GammaSignedRelative": "4.0\\%",
     "GammaStart": "13 August 2026",
+    "GammaTenBothNames": "EFA, MSFT, LCID, NDX, SPY, HON, QCOM, PFE and COIN",
+    "GammaTenNettedNames": "EFA, MSFT, LCID, NDX, HON and SPY",
     "GammaUnderlyings": "71"
   },
   "name": "hidden_gamma",

@@ -13,9 +13,9 @@ from hidden_options.publish.results import Result
 
 RESULT = "hidden_gamma"
 RULES = (
-    ("Gross", "Gross: every contract"),
+    ("Gross", "Gross"),
     ("Netted", "FLEX pairs netted"),
-    ("Both", "Pairs netted on both sides"),
+    ("Both", "Both sides netted"),
 )
 
 
@@ -65,8 +65,8 @@ def _notes(m: Mapping[str, str]) -> str:
         "Both sides are priced on the listed implied-volatility surface of the same "
         "session. The share is FLEX over FLEX plus listed. Gross counts every contract. "
         "FLEX pairs netted counts at each strike only the excess of call over put open "
-        "interest or the reverse on the FLEX side, against gross listed gamma; pairs "
-        "netted on both sides applies the same rule to the listed side too. Median and "
+        "interest or the reverse on the FLEX side, against gross listed gamma; both sides "
+        "netted applies the same rule to the listed side too. Median and "
         "interquartile range are across underlyings of each one's median over "
         "settlements; $\\geq$10\\% counts underlyings whose median share is at least 10\\%; "
         "pooled sums gamma over all underlyings and settlements before dividing; the last "

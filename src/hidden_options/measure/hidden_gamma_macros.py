@@ -11,6 +11,7 @@ from typing import Any
 
 import pandas as pd
 
+from hidden_options.measure.hidden_share_macros import name_list
 from hidden_options.publish import formats
 
 RULE_WORDS = {"share_gross": "Gross", "share_netted": "Netted", "share_netted_both": "Both"}
@@ -30,6 +31,7 @@ def hidden_gamma_macros(values: Mapping[str, Any], inputs: Mapping[str, Any]) ->
         **_where(values["where"]),
         **_signed(values["signed"]),
         **_marks(values["marks"]),
+        **_names(values["underlyings"]),
         "GammaPricedShare": formats.percent(values["coverage"]["priced_oi_share"], 1),
         "GammaInteriorShare": formats.percent(values["coverage"]["interior_oi_share"], 1),
     }
@@ -93,6 +95,16 @@ def _signed(signed: Mapping[str, Any]) -> dict[str, str]:
         "GammaSignedRelative": formats.percent(signed["median_relative"], 1),
         "GammaSignedDays": formats.count(signed["underlying_days"]),
     }
+
+
+def _names(underlyings: Mapping[str, Mapping[str, Any]]) -> dict[str, str]:
+    """Underlyings whose median share is at least a tenth, largest first, per netted rule."""
+    out = {}
+    for rule, word in (("share_netted", "Netted"), ("share_netted_both", "Both")):
+        above = [(s, f[rule]) for s, f in underlyings.items() if f[rule] >= 0.10]
+        names = [s for s, _ in sorted(above, key=lambda pair: (-pair[1], pair[0]))]
+        out[f"GammaTen{word}Names"] = name_list(names)
+    return out
 
 
 def _marks(marks: Mapping[str, Any]) -> dict[str, str]:
