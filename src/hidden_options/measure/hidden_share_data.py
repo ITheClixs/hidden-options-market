@@ -276,21 +276,22 @@ def chain_open_interest(chains: pd.DataFrame) -> pd.DataFrame:
     return frame.rename(columns={"oi_date": "date"})[list(CHAIN_OI_COLUMNS)].reset_index(drop=True)
 
 
-def priced_chains(chains: pd.DataFrame) -> pd.DataFrame:
+def priced_chains(chains: pd.DataFrame, extra: Sequence[str] = ()) -> pd.DataFrame:
     """Each settlement's listed open interest with the quotes of that same session.
 
     The open interest of settlement D is read from a chain taken after D, and its quotes
     from the latest chain whose session is D. A series with no quote from that session
-    keeps missing prices.
+    keeps missing prices. `extra` names further quote columns (the implied volatility,
+    say) taken from that same reading.
     """
     oi = chain_open_interest(chains)
     latest = chains.groupby(["symbol", "session"])["quote_timestamp"].transform("max")
     quotes = chains[chains["quote_timestamp"] == latest]
     quotes = quotes.drop_duplicates(["symbol", "session", "contract"]).rename(
         columns={"session": "date"}
-    )[["date", "symbol", "contract", "bid", "ask", "theo", "underlying_price"]]
+    )[["date", "symbol", "contract", "bid", "ask", "theo", "underlying_price", *extra]]
     priced = oi.merge(quotes, on=["date", "symbol", "contract"], how="left")
-    return priced[list(PRICED_COLUMNS)]
+    return priced[[*PRICED_COLUMNS, *extra]]
 
 
 def load_census(raw: Path) -> pd.DataFrame:

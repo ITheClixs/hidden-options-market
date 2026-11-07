@@ -114,6 +114,20 @@ class TestChainOpenInterest:
         # 1 September's settlement has no quotes from its own session in the data.
         assert pd.isna(priced.loc[pd.Timestamp("2026-09-01"), "bid"])
 
+    def test_priced_chains_carry_extra_quote_columns_from_the_same_session(self):
+        chains = chain_frame(
+            [
+                ("SPY", "2026-09-02 20:15:00", "SPY", "2026-09-18", "C", 10, 2.0, 2.2, 101.0),
+                ("SPY", "2026-09-03 20:15:00", "SPY", "2026-09-18", "C", 12, 3.0, 3.2, 102.0),
+            ]
+        )
+        chains["iv"] = [0.21, 0.34]
+        priced = priced_chains(chains, extra=("iv",)).set_index("date")
+
+        assert priced.loc[pd.Timestamp("2026-09-02"), "iv"] == 0.21
+        assert pd.isna(priced.loc[pd.Timestamp("2026-09-01"), "iv"])
+        assert "iv" not in priced_chains(chains).columns
+
 
 def capture(rows, symbol="AAA"):
     """rows: (product, expiry, call_oi, put_oi)"""

@@ -77,3 +77,16 @@ to expiry over 365. Rate 0.04 and zero carry, the values the rest of the paper u
 
 Only a defect found in the code (a test failing, a unit wrong). Any change after a figure
 has been seen is recorded here as a dated amendment, with the figure it changed.
+
+## Amendment, 2026-11-07 (same day)
+
+**What was seen first.** A trial run on the local captures, before any result file existed,
+gave per-underlying median shares of 0.179 (gross) and 0.014 (pair-netted, FLEX side only),
+over 71 underlyings and 46 settlements.
+
+**What changed.** A methodology review pointed out that netting only the FLEX side compares a
+netted numerator with a gross denominator: listed books hold conversions too. The listed
+side is now also pair-netted by the same rule, and a third share is added:
+`share_netted_both` = FLEX netted / (FLEX netted + listed netted). The two shares defined
+above are unchanged and still reported; the new one is added beside them, not in place of
+either. No threshold, filter or sample was changed.
