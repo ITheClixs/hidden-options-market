@@ -28,6 +28,8 @@ scripts that produced the numbers below are in [`archive/`](../../archive/README
 | 2026-08-18 | [reframing](2026-08-18-reframing.md) | The project's thesis after four tests found no volume footprint: a bound on absorption capacity and a free measurement method, not an absorption curve. | The next day's question, whether hidden inventory predicts the visible market, asked of the OCC FLEX panel: [predictive-result](2026-08-19-predictive-result.md). Its tight bound was weakened shortly after by the implied-hedging calculation (see `archive/README.md`). |
 | 2026-08-19 | [predictive-result](2026-08-19-predictive-result.md) | The first test of whether per-underlying FLEX inventory predicts the underlying's next-day volatility, on the shorter panel then on disk: a null, with a placebo dated after the outcome that matched the genuine estimate. | The same test rebuilt in code on the full panel, with gap-safe changes, outcomes joined on the date each report became usable, and permutation inference; its numbers are in the paper's predictive section and the README. |
 
+| 2026-11-07 | [hidden-gamma-spec](2026-11-07-hidden-gamma-spec.md) | Specification, written before any figure, of how much option gamma a listed-only calculation leaves out: gamma from one listed surface for both sides, two attribution rules for FLEX (gross, pair-netted). | Open. |
+
 ## Former names
 
 The ten entries were moved with `git mv`, so `git log --follow` reaches their history.
