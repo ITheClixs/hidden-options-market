@@ -7,7 +7,8 @@ toward a positive floor.
 
 ## Verdict
 
-**No kill found. Novelty verdict unchanged: HIGH (Level C).**
+**No competing paper found.** The dynamic claim still looks unstudied, subject to the
+limits of this sweep stated below.
 
 ## What was searched
 
@@ -48,11 +49,8 @@ Before posting, the sweep must be re-run manually against Google Scholar, SSRN a
 NBER, plus the AFA/WFA programmes. That is a prerequisite for any novelty claim in the
 paper, not an optional extra.
 
-## Standing race-risk estimate
-
-Unchanged at roughly 32%, dominated by the ~18% that someone extends Huang (2025)-style
-launch-event designs from leveraged single-stock ETFs to option-income ones. Nothing in
-this sweep raises or lowers it.
+The nearest likely competitor is an extension of Huang (2025)-style launch-event designs
+from leveraged single-stock ETFs to option-income ones.
 
 ## Addendum, same day: OpenAlex
 

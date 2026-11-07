@@ -5,7 +5,9 @@ a test of how fast markets absorb a disclosed option flow, found no footprint in
 and became a measurement of FLEX inventory in OCC clearing data. Along the way it made
 errors, retracted claims and replaced a census with an authoritative source. None of
 that is deleted. Entries are not edited after the fact; the only changes since they were
-written are the file names, which moved from `docs/`, and the links between entries.
+written are the file names, which moved from `docs/`, the links between entries, and one
+cleanup on 2026-11-07: `prior-art-sweep` dropped a numeric "race-risk" estimate that had
+no stated basis and restated its verdict line in plain words. Its findings are unchanged.
 
 The current results are in the paper and the [README](../../README.md), generated from
 `results/`; [`OPERATIONS.md`](../OPERATIONS.md) says how the data is collected. The
