@@ -1,0 +1,793 @@
+{
+  "generated_at": "2026-11-07T22:32:49+00:00",
+  "inputs": {
+    "ci_runs": [
+      "2026-08-16",
+      "2026-08-17",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-24",
+      "2026-08-25",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-12",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-10",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-20",
+      "2026-10-21",
+      "2026-10-22",
+      "2026-10-23",
+      "2026-10-24"
+    ],
+    "first_date": "2026-08-13",
+    "flex_series_days": 1615684,
+    "last_date": "2026-10-22",
+    "local_only": false,
+    "settlements": 48,
+    "underlyings": 71
+  },
+  "macros": {
+    "GammaAtLeastFiveBoth": "21",
+    "GammaAtLeastFiveGross": "68",
+    "GammaAtLeastFiveNetted": "12",
+    "GammaAtLeastQuarterBoth": "3",
+    "GammaAtLeastQuarterGross": "12",
+    "GammaAtLeastQuarterNetted": "2",
+    "GammaAtLeastTenBoth": "9",
+    "GammaAtLeastTenGross": "54",
+    "GammaAtLeastTenNetted": "6",
+    "GammaControlBoth": "1.9\\%",
+    "GammaControlCount": "27",
+    "GammaControlGross": "15.7\\%",
+    "GammaControlNetted": "1.0\\%",
+    "GammaDaysLongGross": "38\\%",
+    "GammaDaysLongNetted": "45\\%",
+    "GammaDaysMonthGross": "26\\%",
+    "GammaDaysMonthNetted": "24\\%",
+    "GammaDaysQuarterGross": "20\\%",
+    "GammaDaysQuarterNetted": "18\\%",
+    "GammaDaysWeekGross": "15\\%",
+    "GammaDaysWeekNetted": "13\\%",
+    "GammaEnd": "22 October 2026",
+    "GammaFlipShare": "2.0\\%",
+    "GammaHighBoth": "5.7\\%",
+    "GammaHighGross": "22.5\\%",
+    "GammaHighNetted": "3.7\\%",
+    "GammaIWMBoth": "3.9\\%",
+    "GammaIWMGross": "6.2\\%",
+    "GammaIWMNetted": "2.7\\%",
+    "GammaInteriorShare": "87.2\\%",
+    "GammaLowBoth": "0.7\\%",
+    "GammaLowGross": "10.1\\%",
+    "GammaLowNetted": "0.4\\%",
+    "GammaMarkRatio": "1.02",
+    "GammaMarkShare": "88.9\\%",
+    "GammaMarkVolGap": "0.48",
+    "GammaMedianBoth": "2.6\\%",
+    "GammaMedianGross": "18.0\\%",
+    "GammaMedianNetted": "1.5\\%",
+    "GammaNDXBoth": "20.5\\%",
+    "GammaNDXGross": "20.3\\%",
+    "GammaNDXNetted": "15.0\\%",
+    "GammaNearMoneyGross": "68\\%",
+    "GammaNearMoneyNetted": "64\\%",
+    "GammaPooledBoth": "7.0\\%",
+    "GammaPooledGross": "10.6\\%",
+    "GammaPooledNetted": "3.3\\%",
+    "GammaPricedShare": "97.6\\%",
+    "GammaProgrammeBoth": "3.5\\%",
+    "GammaProgrammeCount": "44",
+    "GammaProgrammeGross": "18.7\\%",
+    "GammaProgrammeNetted": "2.0\\%",
+    "GammaQQQBoth": "4.0\\%",
+    "GammaQQQGross": "7.0\\%",
+    "GammaQQQNetted": "2.6\\%",
+    "GammaRUTBoth": "8.8\\%",
+    "GammaRUTGross": "33.4\\%",
+    "GammaRUTNetted": "6.6\\%",
+    "GammaSPXBoth": "4.7\\%",
+    "GammaSPXGross": "8.2\\%",
+    "GammaSPXNetted": "2.1\\%",
+    "GammaSPYBoth": "18.3\\%",
+    "GammaSPYGross": "18.0\\%",
+    "GammaSPYNetted": "12.0\\%",
+    "GammaSettlements": "48",
+    "GammaSignedDays": "3,333",
+    "GammaSignedRelative": "4.0\\%",
+    "GammaStart": "13 August 2026",
+    "GammaUnderlyings": "71"
+  },
+  "name": "hidden_gamma",
+  "values": {
+    "coverage": {
+      "interior_oi_share": 0.8720286852937952,
+      "priced_oi_share": 0.9764947977355923
+    },
+    "distribution": {
+      "share_gross": {
+        "at_least": {
+          "0.05": 68,
+          "0.10": 54,
+          "0.25": 12
+        },
+        "by_group": {
+          "control": 0.1567102868764491,
+          "other": null,
+          "programme": 0.18659690143387728
+        },
+        "group_counts": {
+          "control": 27,
+          "other": 0,
+          "programme": 44
+        },
+        "median": 0.17988606649302671,
+        "q25": 0.10133649719688242,
+        "q75": 0.22495672978914938
+      },
+      "share_netted": {
+        "at_least": {
+          "0.05": 12,
+          "0.10": 6,
+          "0.25": 2
+        },
+        "by_group": {
+          "control": 0.010407452896460126,
+          "other": null,
+          "programme": 0.019774147490915626
+        },
+        "group_counts": {
+          "control": 27,
+          "other": 0,
+          "programme": 44
+        },
+        "median": 0.014551869495651319,
+        "q25": 0.0043782887301733135,
+        "q75": 0.036677122809659485
+      },
+      "share_netted_both": {
+        "at_least": {
+          "0.05": 21,
+          "0.10": 9,
+          "0.25": 3
+        },
+        "by_group": {
+          "control": 0.018654501773444767,
+          "other": null,
+          "programme": 0.03473921686020433
+        },
+        "group_counts": {
+          "control": 27,
+          "other": 0,
+          "programme": 44
+        },
+        "median": 0.0257103846124447,
+        "q25": 0.007474963928809268,
+        "q75": 0.05730889068931326
+      }
+    },
+    "index": {
+      "IWM": {
+        "share_gross": 0.06226505485761295,
+        "share_netted": 0.027260761055248533,
+        "share_netted_both": 0.039134387740457306
+      },
+      "NDX": {
+        "share_gross": 0.20327017242238576,
+        "share_netted": 0.1499404194449966,
+        "share_netted_both": 0.20536212532380202
+      },
+      "QQQ": {
+        "share_gross": 0.06990823341989622,
+        "share_netted": 0.025596080620058418,
+        "share_netted_both": 0.04044142962023928
+      },
+      "RUT": {
+        "share_gross": 0.3342686449244956,
+        "share_netted": 0.06575434752718998,
+        "share_netted_both": 0.08837900853371822
+      },
+      "SPX": {
+        "share_gross": 0.08191665916064822,
+        "share_netted": 0.020722217588895534,
+        "share_netted_both": 0.04748406416805717
+      },
+      "SPY": {
+        "share_gross": 0.17988606649302671,
+        "share_netted": 0.12037296871417308,
+        "share_netted_both": 0.1829803103618613
+      }
+    },
+    "marks": {
+      "gamma_ratio": 1.0156387222547252,
+      "median_vol_gap": 0.004816414990526485,
+      "oi_share": 0.8889003590210816,
+      "series": 1520751
+    },
+    "pooled": {
+      "share_gross": 0.105787586148302,
+      "share_netted": 0.033182137205625774,
+      "share_netted_both": 0.06962182352884866
+    },
+    "signed": {
+      "flip_share": 0.0204020402040204,
+      "median_relative": 0.039933494585246525,
+      "underlying_days": 3333
+    },
+    "underlyings": {
+      "AAPL": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.2852345001272791,
+        "share_netted": 0.008279692048079403,
+        "share_netted_both": 0.014256273023823408
+      },
+      "ABNB": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.09320574588163749,
+        "share_netted": 0.02387897086658279,
+        "share_netted_both": 0.04158061626178888
+      },
+      "ADBE": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.18764804662906168,
+        "share_netted": 0.00969778235258389,
+        "share_netted_both": 0.017935826528098917
+      },
+      "AMD": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.231695542832673,
+        "share_netted": 0.014551869495651319,
+        "share_netted_both": 0.0257103846124447
+      },
+      "AMZN": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.2677873881389466,
+        "share_netted": 0.011128776612746742,
+        "share_netted_both": 0.018099386165909268
+      },
+      "AVGO": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.2605718444450135,
+        "share_netted": 0.01068734386681225,
+        "share_netted_both": 0.01890455888600454
+      },
+      "BABA": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.10580530766343049,
+        "share_netted": 0.003176346001606757,
+        "share_netted_both": 0.006031839578731931
+      },
+      "BAC": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.1567102868764491,
+        "share_netted": 0.010203238075556637,
+        "share_netted_both": 0.018654501773444767
+      },
+      "CAT": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.2180948166499084,
+        "share_netted": 0.03198678246821261,
+        "share_netted_both": 0.05738181973518315
+      },
+      "COIN": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.1414809921739607,
+        "share_netted": 0.06635251285651085,
+        "share_netted_both": 0.10679957967758985
+      },
+      "COP": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.19563595311593082,
+        "share_netted": 0.010636127538174415,
+        "share_netted_both": 0.01586472302877719
+      },
+      "COST": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.08483771010556972,
+        "share_netted": 0.00019304001380821543,
+        "share_netted_both": 0.00032662290086166634
+      },
+      "CRWD": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.08229894588180815,
+        "share_netted": 0.0019739345766074208,
+        "share_netted_both": 0.0036345459345149436
+      },
+      "CSCO": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.24361963833073752,
+        "share_netted": 0.010407452896460126,
+        "share_netted_both": 0.01891037299668243
+      },
+      "CVX": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.1421051192118482,
+        "share_netted": 0.02595774415830817,
+        "share_netted_both": 0.037629113868367974
+      },
+      "DE": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.4252521857052286,
+        "share_netted": 0.0009886342836373985,
+        "share_netted_both": 0.0016544218688933714
+      },
+      "DIA": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.0079469220331531,
+        "share_netted": 0.0006516649208862902,
+        "share_netted_both": 0.0010037146324959906
+      },
+      "DIS": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.07652197951259918,
+        "share_netted": 6.781102825238266e-05,
+        "share_netted_both": 0.00011318604436310494
+      },
+      "EFA": {
+        "group": "programme",
+        "settlements": 45,
+        "share_gross": 0.39578343052542886,
+        "share_netted": 0.3218651789288671,
+        "share_netted_both": 0.3629310604670135
+      },
+      "F": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.009564125501264417,
+        "share_netted": 0.0013503913979391676,
+        "share_netted_both": 0.00231651527816149
+      },
+      "GDX": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.20924713860808714,
+        "share_netted": 0.03703933604176213,
+        "share_netted_both": 0.05540114015432679
+      },
+      "GLD": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.11653484382331133,
+        "share_netted": 0.017382950802532143,
+        "share_netted_both": 0.027504989334287647
+      },
+      "GOOGL": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.24480360769842677,
+        "share_netted": 0.018035985012060007,
+        "share_netted_both": 0.030344045979951356
+      },
+      "GS": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.1005544341795044,
+        "share_netted": 0.0023102065925185667,
+        "share_netted_both": 0.003849284254091055
+      },
+      "HON": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.22437331158932164,
+        "share_netted": 0.12293587003295875,
+        "share_netted_both": 0.16251654683125058
+      },
+      "HOOD": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.10905504240750519,
+        "share_netted": 0.043211059770827245,
+        "share_netted_both": 0.07726087340107592
+      },
+      "IBIT": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.06950178880822237,
+        "share_netted": 0.024514155513323622,
+        "share_netted_both": 0.039985072301776135
+      },
+      "INTC": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.2255401479889771,
+        "share_netted": 0.04308302001883509,
+        "share_netted_both": 0.07621292056275958
+      },
+      "IWM": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.06226505485761295,
+        "share_netted": 0.027260761055248533,
+        "share_netted_both": 0.039134387740457306
+      },
+      "JPM": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.27148510945345183,
+        "share_netted": 0.026569636013526934,
+        "share_netted_both": 0.045047947344773104
+      },
+      "KLAC": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.2040882623382211,
+        "share_netted": 0.04188219280083355,
+        "share_netted_both": 0.06669258073172067
+      },
+      "LCID": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.1984647374442149,
+        "share_netted": 0.19472236162925646,
+        "share_netted_both": 0.29326967748553623
+      },
+      "LLY": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.12481613700804679,
+        "share_netted": 0.0032968274791157224,
+        "share_netted_both": 0.005701926741265636
+      },
+      "LRCX": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.1525722524212733,
+        "share_netted": 0.024322322312548734,
+        "share_netted_both": 0.04431931954105549
+      },
+      "MA": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.12517254579767823,
+        "share_netted": 0.001909382933392632,
+        "share_netted_both": 0.0032914671504890966
+      },
+      "MARA": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.23279760991963028,
+        "share_netted": 0.0,
+        "share_netted_both": 0.0
+      },
+      "META": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.11096059935733604,
+        "share_netted": 0.0054597499812309045,
+        "share_netted_both": 0.008918088278886604
+      },
+      "MRK": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.402071488659222,
+        "share_netted": 0.05061850213923491,
+        "share_netted_both": 0.07214983722605034
+      },
+      "MRNA": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.07841381745736417,
+        "share_netted": 0.01882607739293572,
+        "share_netted_both": 0.028604035386313096
+      },
+      "MS": {
+        "group": "control",
+        "settlements": 46,
+        "share_gross": 0.10211856021426047,
+        "share_netted": 0.016514980515165284,
+        "share_netted_both": 0.029435141961425694
+      },
+      "MSFT": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.3836442226180619,
+        "share_netted": 0.2632175148714065,
+        "share_netted_both": 0.36024646102286806
+      },
+      "MSTR": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.11690353168117099,
+        "share_netted": 0.025310854240540154,
+        "share_netted_both": 0.04348577234809835
+      },
+      "MU": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.1051088846176477,
+        "share_netted": 0.0007743306100535133,
+        "share_netted_both": 0.001552649493319358
+      },
+      "NDX": {
+        "group": "programme",
+        "settlements": 46,
+        "share_gross": 0.20327017242238576,
+        "share_netted": 0.1499404194449966,
+        "share_netted_both": 0.20536212532380202
+      },
+      "NFLX": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.1974661802373788,
+        "share_netted": 0.0009701007991782896,
+        "share_netted_both": 0.001822827523756217
+      },
+      "NOW": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.0889186589626843,
+        "share_netted": 0.0070474242268661275,
+        "share_netted_both": 0.012884580920803107
+      },
+      "NVDA": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.1822370845993779,
+        "share_netted": 0.013422504439501897,
+        "share_netted_both": 0.022632604619111936
+      },
+      "PANW": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.3643068013245167,
+        "share_netted": 0.01301904192025374,
+        "share_netted_both": 0.02248354620561993
+      },
+      "PFE": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.20512506536788708,
+        "share_netted": 0.0709696293395125,
+        "share_netted_both": 0.1275127506000415
+      },
+      "PLTR": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.19946436979519955,
+        "share_netted": 0.013051933959911303,
+        "share_netted_both": 0.02490438921103923
+      },
+      "PYPL": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.1089074746867367,
+        "share_netted": 0.007108837471954896,
+        "share_netted_both": 0.01125611811857218
+      },
+      "QCOM": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.198580131426229,
+        "share_netted": 0.08888062774853848,
+        "share_netted_both": 0.1549694023876935
+      },
+      "QQQ": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.06990823341989622,
+        "share_netted": 0.025596080620058418,
+        "share_netted_both": 0.04044142962023928
+      },
+      "RIVN": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.46248476579575226,
+        "share_netted": 0.001355040071049357,
+        "share_netted_both": 0.0021918263041902776
+      },
+      "RUT": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.3342686449244956,
+        "share_netted": 0.06575434752718998,
+        "share_netted_both": 0.08837900853371822
+      },
+      "SCHW": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.0780758446555092,
+        "share_netted": 0.007497998686380371,
+        "share_netted_both": 0.012532657256572903
+      },
+      "SMCI": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.19095671826837665,
+        "share_netted": 0.03631490957755684,
+        "share_netted_both": 0.05453153298829107
+      },
+      "SNOW": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.13753384980000588,
+        "share_netted": 0.06020108093949712,
+        "share_netted_both": 0.09415962092629676
+      },
+      "SOFI": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.23949593679221448,
+        "share_netted": 0.039854097169531186,
+        "share_netted_both": 0.07410420454379718
+      },
+      "SPX": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.08191665916064822,
+        "share_netted": 0.020722217588895534,
+        "share_netted_both": 0.04748406416805717
+      },
+      "SPY": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.17988606649302671,
+        "share_netted": 0.12037296871417308,
+        "share_netted_both": 0.1829803103618613
+      },
+      "TGT": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.039653371199648534,
+        "share_netted": 0.0006399348668878321,
+        "share_netted_both": 0.0014307083856951164
+      },
+      "TLT": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.0788975970387361,
+        "share_netted": 0.029115805992021796,
+        "share_netted_both": 0.049592692979194795
+      },
+      "TSLA": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.19195911851372605,
+        "share_netted": 0.0015165480106923927,
+        "share_netted_both": 0.003103952699272851
+      },
+      "TXN": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.13436668703422203,
+        "share_netted": 0.037267001535703934,
+        "share_netted_both": 0.060177684713497666
+      },
+      "UBER": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.19815658011990833,
+        "share_netted": 0.03281867500413003,
+        "share_netted_both": 0.05723596164344337
+      },
+      "UNH": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.16570888185056348,
+        "share_netted": 0.0016962067234669186,
+        "share_netted_both": 0.002839855492207047
+      },
+      "V": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.0854598419316808,
+        "share_netted": 0.005702064428518453,
+        "share_netted_both": 0.010075433254324837
+      },
+      "WFC": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.08491666114096783,
+        "share_netted": 0.002111328509631013,
+        "share_netted_both": 0.0033040167022298484
+      },
+      "WMT": {
+        "group": "control",
+        "settlements": 47,
+        "share_gross": 0.20907262490719297,
+        "share_netted": 0.01326870431703193,
+        "share_netted_both": 0.02440963878506465
+      },
+      "XOM": {
+        "group": "programme",
+        "settlements": 47,
+        "share_gross": 0.30652045581100174,
+        "share_netted": 0.011130075446373582,
+        "share_netted_both": 0.016588629204021363
+      }
+    },
+    "where": {
+      "days": {
+        "31-90": {
+          "gross": 0.20411753813834274,
+          "netted": 0.1803132430147603
+        },
+        "8-30": {
+          "gross": 0.2621215575679035,
+          "netted": 0.2440493144565649
+        },
+        "<=7": {
+          "gross": 0.1494201616991411,
+          "netted": 0.1274415385738167
+        },
+        ">90": {
+          "gross": 0.38434074259461265,
+          "netted": 0.448195903954858
+        }
+      },
+      "moneyness": {
+        "0.80-0.95": {
+          "gross": 0.20081271402490442,
+          "netted": 0.17973578556789002
+        },
+        "0.95-1.05": {
+          "gross": 0.6766735433532207,
+          "netted": 0.6397240204216212
+        },
+        "1.05-1.20": {
+          "gross": 0.07315484516862783,
+          "netted": 0.10997630687905077
+        },
+        "<0.80": {
+          "gross": 0.037055782494023685,
+          "netted": 0.0385388126420125
+        },
+        ">=1.20": {
+          "gross": 0.012303114959223324,
+          "netted": 0.03202507448942557
+        }
+      }
+    }
+  }
+}
