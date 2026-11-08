@@ -30,17 +30,19 @@
 FLEX options are exchange options with negotiated terms, cleared by the Options Clearing
 Corporation and absent from the listed chains most option research uses. From OCC's daily
 FLEX open-interest report, \PanelStart{} to \PanelEnd{}, we measure how much option risk
-those chains omit. Counted in contracts the omission is large: \ValueEnd{} of mark value
-on the last date and, in a census of \HiddenCensusUnderlyings{} underlyings, at least a
-tenth of open interest for \HiddenCensusTen{}. Counted in gamma it is
-\GammaMedianGross{} of the median underlying's gross and \GammaMedianNetted{} once
+those chains omit. Counted in contracts the omission is large: in a census of
+\HiddenCensusUnderlyings{} underlyings FLEX is at least a tenth of open interest for
+\HiddenCensusTen{}, and on the last date it holds \ValueEnd{} at OCC's marks. Counted in
+gamma, across the \GammaUnderlyings{} underlyings whose listed chains we store, it is
+\GammaMedianGross{} of the median one's gross and \GammaMedianNetted{} once
 same-strike call and put pairs, which are forwards, are netted; it stays large only in a
 few products such as SPY and NDX. In tests specified in advance, netted FLEX dollar gamma
 does not predict next-day volatility (minimum detectable effect \GPredMDEShare{} of mean
 absolute return per standard deviation, an unsigned average across equity names), and no
-pinning to large FLEX strikes is detected on dates when only FLEX expires, by a design
-whose size and power hold on real returns but that detects none at listed strikes either.
-Two measurement results travel further: off-grid strikes miss \FlexOnGridShare{} of FLEX
+tendency of closes to settle at large FLEX strikes (pinning) is detected on dates when
+only FLEX expires, by a design whose size and power, checked on real returns, match the
+simulated ones but that detects none at listed strikes either. Two measurement results
+travel further: classifying off-grid strikes as FLEX misses \FlexOnGridShare{} of FLEX
 series, and strike notional overstates delta exposure at least \PosGrossMedian{}-fold for
 the median underlying.
 \vspace{0.8em}
@@ -79,19 +81,20 @@ modest for most names and large in a few products. Two tests specified in advanc
 effect of that hidden convexity on the visible market, and for each we report what it
 could have seen: the gamma test's minimum detectable effect, and the pinning test's size
 and power checked on real returns as well as simulated ones. And building the census
-exposed two measurement errors to which any study of open interest is exposed. The
+exposed two measurement errors that any study of open interest can make. The
 market's size and growth are the setting rather than the finding, and we describe them
 last.
 
-\paragraph{How much convexity it holds.} Counted in contracts the book is large: it
-holds \ValueEnd{} of mark value on the last date, and in a census of
-\HiddenCensusUnderlyings{} underlyings at least a tenth of option open interest for
-\HiddenCensusTen{}. But contracts are not risk. What a dealer on the
+\paragraph{How much convexity it holds.} Counted in contracts the book is large: in a
+census of \HiddenCensusUnderlyings{} underlyings FLEX is at least a tenth of option open
+interest for \HiddenCensusTen{}. But contracts are not risk. What a dealer on the
 other side of a FLEX trade hedges is its gamma near spot, and gamma figures in use are
 built from listed chains (Section~\ref{sec:gamma}). Pricing listed and FLEX series on one
-listed volatility surface, FLEX is \GammaMedianGross{} of the median underlying's option
+listed volatility surface, in the \GammaUnderlyings{} underlyings whose listed chains we
+store, FLEX is \GammaMedianGross{} of the median underlying's option
 gamma counted gross, and \GammaMedianNetted{} once its same-strike call and put pairs,
-forwards with no gamma, are netted (\GammaMedianBoth{} if listed pairs are netted too). The omission survives netting in a few products
+forwards with no gamma, are netted (\GammaMedianBoth{} if listed pairs are netted too, a comparison added after the
+specification). The omission survives netting in a few products
 where FLEX holds outright options: \GammaSPYNetted{} of SPY's gamma and \GammaNDXNetted{} of
 NDX's (\GammaSPYBoth{} and \GammaNDXBoth{} with listed pairs netted too).
 
@@ -99,36 +102,38 @@ NDX's (\GammaSPYBoth{} and \GammaNDXBoth{} with listed pairs netted too).
 moved underlying prices, gamma observed at date $T$, published overnight and so available
 at $T+1$, should carry information about what follows. In a test fixed in advance, on
 \GPredDays{} underlying-days, netted FLEX dollar gamma scaled by dollar volume does not
-predict next-day absolute returns ($t=\GPredT$, permutation $p=\GPredPermP$), and the
+predict next-day absolute returns ($t=\GPredT$, clustered $p=\GPredP$), and the
 minimum detectable effect is \GPredMDE{} basis points per standard deviation,
-\GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). The result does not depend on
-when the book is priced. Priced at $T-1$, or with FLEX implied volatility as a control, the
-coefficient stays indistinguishable from zero, and the one large coefficient in the table,
+\GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). Priced at $T-1$ instead, or
+with FLEX implied volatility as a control, the coefficient stays indistinguishable from
+zero, though the control turns its sign positive. The one large coefficient in the table,
 on gamma two dates later, comes from re-pricing: with prices held fixed so that only open
 interest moves, its $t$ goes from \GPredLeadT{} to \GPredLeadFixedT{}. The hedge a 1\% move
 would call for is small, \GPredMedianX{} basis points of a day's dollar volume in the
 median underlying-day. Gross open interest does not predict either, but that test counts
-contracts, most of them forwards, and is the weaker of the two.
+contracts, many of them forwards, and is the weaker of the two.
 
 The measure is unsigned, so books on opposite sides within an underlying could offset. We
 tried to sign it where the holders seem known, in names chosen for the option-income funds
 written on them, by assuming that what netting leaves there is the funds' written calls.
-The funds' daily holdings refute the assumption: they write their calls in listed series
-and use FLEX for the short puts of synthetic stock, and they account for
-\PBookFundShare{} of the netted FLEX book in those names. Even there, the hidden book is
-mostly someone else's, and which side dealers take of it remains unobserved.
+That test, fixed in advance, was inconclusive, and the daily holdings of \PBookFunds{} of
+the funds, all from one family, then refuted its assumption: they write their calls in
+listed series and use FLEX for synthetic stock, and they account for \PBookFundShare{} of
+the netted FLEX book in those names. For those funds at least, the hidden book is mostly
+someone else's, and which side dealers take of it remains unobserved.
 
 \paragraph{Whether it pins.} Pinning to large FLEX strikes is not detected either, on the
 \PinEvents{} expiries, on \PinDates{} dates, when only FLEX options expire
 ($\PinMean\sigma$, $t=\PinT$; Section~\ref{sec:pinning}). The design needs no listed
-data, and its minimum detectable pull is \PinMDE{} daily standard deviations. Its
-simulated size and power assume independent returns, so we check both on real ones,
-moving each event to \PinNullOffsets{} dates in its own name when nothing expires: the
-test rejects on \PinNullSize{} of them at the 5\% level, and with pins planted in the real
-closes it detects pinning in one expiry in ten \PinNullPowerTen{} of the time. Run as a
-positive control at listed strikes on monthly expirations, though, it detects no pinning
-there either, once a placebo matched to each event removes a term that short-horizon
-reversal adds to the design. The FLEX result is therefore a statement about what the
+data, and its minimum detectable effect is \PinMDE{} daily standard deviations of
+relative closeness. Its simulated size and power assume independent returns, so we check
+both on real ones, moving each event to \PinNullOffsets{} sets of dates in its own name
+when nothing expires: the test rejects at the 5\% level on \PinNullSize{} of them, and
+when one expiry in ten is pinned in the real closes it rejects on \PinNullPowerTen{}. Run
+as a positive control at listed strikes on monthly expirations, though, it finds closes
+farther from the strike, not nearer, through a term that short-horizon reversal adds to
+the design; net of a placebo matched to each event, added after that control was read,
+it still detects no pinning there. The FLEX result is therefore a statement about what the
 design can see, and it covers only names without listed weekday expiries, which leaves out
 the largest books.
 
@@ -707,8 +712,8 @@ precision, and a lenient one: the mean over structures of the share of each one'
 which any two of its legs share a holder (\PosPrecisionLow{}--\PosPrecisionHigh{}). Under the
 strict reading, every leg held by one fund, it is \PosPrecisionExact{}
 (\PosPrecisionExactLow{}--\PosPrecisionExactHigh{}). Those intervals count each structure
-as one trial, though structures cluster within funds. Resampling the \PosBootFunds{}
-funds instead gives \PosRecallFundLow{}--\PosRecallFundHigh{} for recall and
+as one trial, though structures cluster within funds. Resampling funds instead, the
+\PosBootFunds{} that hold a true structure or a leg of a detected one, gives \PosRecallFundLow{}--\PosRecallFundHigh{} for recall and
 \PosPrecisionFundLow{}--\PosPrecisionFundHigh{} for the lenient precision. Scored one date at a time, the medians
 over \PosScoreDates{} dates are \PosMedianRecall{} and \PosMedianPrecision{}, with recall
 between \PosLowRecall{} and \PosHighRecall{}. Against the report of the file's own date the
@@ -898,8 +903,8 @@ gamma is the change in dollar delta for a 1\% move. Open interest has no sign, s
 report gamma notional under two attribution rules rather than a position: \emph{gross}
 counts every contract, and \emph{pair-netted} matches call against put open interest at
 each strike and counts only the excess, because a long call and a short put at one strike
-is a forward with no gamma. Section~\ref{sec:structures} showed that such pairs are most
-of the FLEX book; where funds disclose their sides they are synthetic forwards. A
+is a forward with no gamma. Section~\ref{sec:structures} showed that such pairs hold
+\PosShareSynthetic{} of the open interest in structures; where funds disclose their sides they are synthetic forwards. A
 straddle would be understated by the rule, so it is a floor for books of that kind, not a
 bound in general.
 
@@ -934,8 +939,10 @@ volatilities differ by a median of \GammaMarkVolGap{} points.
 
 A listed-only gamma figure therefore misses nearly a fifth of gross gamma notional in the median
 market we follow, but most of what it misses is the convexity of forwards, which is none.
-Where FLEX holds outright options, as in SPY, NDX and the single names written by
-option-income funds, the omission survives netting. Whether FLEX positions move the
+Where FLEX holds outright options, as in SPY and NDX, the omission survives netting. In
+the \GammaProgrammeCount{} single names written by option-income funds it does not:
+FLEX is \GammaProgrammeGross{} of the median one's gamma gross and \GammaProgrammeNetted{}
+netted. Whether FLEX positions move the
 underlying is a question about those books, signed; the next section tests the cruder
 quantity, gross inventory.
 
@@ -1007,7 +1014,7 @@ as support for the null.
 
 The minimum detectable effect at 80\% power is $\PredInnovMDE\times10^{-4}$ per log point
 of innovation, \PredMDEShare{} of the mean next-day absolute return. The bound is on
-contracts. Most FLEX contracts are forwards (Section~\ref{sec:gamma}), which carry no
+contracts. Many FLEX contracts are forwards (Section~\ref{sec:gamma}), which carry no
 convexity, and an unsigned count cannot tell dealer-long from dealer-short books, so the
 null does not reach the hedging channel. The next test removes the forwards; it is still
 unsigned.
@@ -1016,20 +1023,24 @@ unsigned.
 \label{sec:gamma-pred}
 
 We repeat the test with the quantity the hedging channel names, under a specification
-fixed in a dated log entry before any estimate: pair-netted FLEX dollar gamma, each
+fixed in a dated log entry before any estimate, with one amendment after the estimate
+was seen, when the split defect described in Section~\ref{sec:pricing} was corrected; it
+records every estimate the correction changed. The predictor is pair-netted FLEX dollar
+gamma, each
 series priced at the volatility its own mark inverts to inside a validated cell, over the
 mean dollar volume of the twenty sessions ending at $T$. Section~\ref{sec:gamma} found
-gamma from the marks \GammaMarkRatio{} times gamma from the listed surface. The ratio is the dollar
-delta a dealer holding the book would trade for a 1\% move, as a fraction of a day's
+gamma from the marks \GammaMarkRatio{} times gamma from the listed surface. The predictor
+is the dollar delta a dealer holding the book would trade for a 1\% move, as a fraction of a day's
 dollar volume. It is small: \GPredMedianX{} basis points for the median underlying-day and
 \GPredNinetyX{} at the ninetieth percentile, with a standard deviation of \GPredSdX{}
 basis points after winsorising. Around each underlying's own mean, the variation the
-fixed effects leave to identify the slope, the standard deviation is \GPredWithinSdX{}
-basis points. It is standardised on the pooled one, so coefficients are per pooled
+underlying fixed effects leave to identify the slope, the standard deviation is
+\GPredWithinSdX{} basis points. The predictor is standardised on the pooled standard
+deviation, so coefficients are per pooled
 standard deviation, and an underlying-day with under half of its FLEX open interest priced is
 left out. Of the base panel's underlying-days, \GPredExcluded{} fail that rule,
 \GPredNoGammaRow{} have no live FLEX series that day and \GPredNoVolume{} lack twenty
-sessions of dollar volume. Two tests were fixed as of record, with Holm's adjustment across them: the
+sessions of dollar volume. Two tests were fixed in advance, with Holm's adjustment across them: the
 main coefficient, and its interaction with the top tercile of underlyings by gamma
 intensity.
 
@@ -1089,13 +1100,14 @@ names the estimate is $\GProgControlBeta\times10^{-4}$ ($t=\GProgControlT$).
 The assumption does not survive the holdings. Checked after the test was run, against the
 daily holdings of \PBookFunds{} programme funds over \PBookCaptureDates{} dates, the funds'
 written calls are listed: \PBookWrittenFlex{} of them are FLEX. Their FLEX legs are the
-short puts of the synthetic, \PBookPutFlex{} FLEX, of which \PBookPutsPaired{} sit opposite
-a FLEX long call at the same strike and net out. What these funds leave in the netted FLEX
+synthetic stock. Its short puts are \PBookPutFlex{} FLEX, and \PBookPutsPaired{} of them
+sit opposite the fund's own FLEX long call at the same strike and net out. What these funds leave in the netted FLEX
 book is \PBookFundShare{} of the netted FLEX open interest in the \PBookNames{} names, and
 that book is \PBookCallShare{} calls, held by others whose side the data do not show. The
 programme test is therefore not sign-identified after all, and its inconclusive result
 says nothing about a signed channel. The same holdings sharpen what the netted measure
-is: in names known for option-income funds, the netted FLEX book is mostly not theirs.
+is: in names known for option-income funds, the netted FLEX book is mostly not these
+funds'. They come from one fund family, and other programmes may use FLEX differently.
 
 At daily resolution, then, netted hidden gamma does not predict the underlying's
 volatility. The measure is unsigned, so this bounds the net of dealer-long and
@@ -1107,7 +1119,7 @@ assumes the hedge is traded in the stock. \citet{prakash2026} find listed open i
 rising after FLEX events, consistent with dealers laying some FLEX risk off in listed
 options, which this test would not see. And with underlying and date fixed effects the
 variation left is each book's movement around its own level, much of it mechanical, as
-the lead shows; persistent differences in book size across names are taken out by the fixed effects. That leaves effects concentrated at particular strikes and
+the lead shows. That leaves effects concentrated at particular strikes and
 dates, which a daily aggregate could dilute. The next test looks at the one with the
 sharpest prediction.
 
@@ -1152,7 +1164,7 @@ larger where the book is large relative to trading, top tercile less bottom
 $\PinSizeDiff\sigma$ at $t=\PinSizeT$. Within a quarter of $\sigma$ of the strike the
 difference is $\PinBandQuarterMean$ percentage points. The minimum detectable effect is
 $\PinMDE\sigma$, and $\PinMDEHolm\sigma$ at the level Holm's adjustment applies. Pulling one expiry in ten halfway to the strike moves the statistic by
-$\PinEffectTen\sigma$, and one in seven by $\PinEffectSeven\sigma$; at the standard error
+$\PinEffectTen\sigma$, and three in twenty by $\PinEffectSeven\sigma$; at the standard error
 observed, the test detects the first \PinPowerTen{} of the time and the second
 \PinPowerSeven{}, and one in twenty only \PinPowerTwenty{}. On \PinSimWorlds{} sets of
 simulated returns without pinning, with these events' strikes, $\sigma$ and dates, it
@@ -1162,11 +1174,13 @@ It moves every event to \PinNullOffsets{} placebo dates in its own name, ten to 
 sessions away, on Monday to Thursday and not on a FLEX expiry, with the strike as many
 daily standard deviations from the previous close as the pin strike was. On those dates,
 with a median of \PinNullEvents{} events each, the statistic is centred at
-$\PinNullCentre\sigma$ and rejects at 5\% on \PinNullSize{} of them. Its spread across
+$\PinNullCentre\sigma$ and rejects at 5\% on \PinNullSize{} of them. The sets share their
+events and overlap in their sessions after expiry, so they are not independent draws, and
+that size is itself imprecise. Its spread across
 dates, $\PinNullSpread\sigma$ on the smaller samples, is in line with the registered
 standard error. \PinNullShare{} of the placebo dates lie at least as far from the centre
 as the registered estimate. Planting the same alternative in real closes, the test finds
-pins in one expiry in ten on \PinNullPowerTen{} of the dates, in one in seven on
+pins in one expiry in ten on \PinNullPowerTen{} of the dates, in three in twenty on
 \PinNullPowerSeven{} and in one in twenty on \PinNullPowerTwenty{}, as the observed
 standard error implied. The books are
 small next to trading: the pin strike's open interest, in shares, is a median
@@ -1197,7 +1211,8 @@ each side. Their closeness on the expiry date cancels exactly, so the placebo ca
 the design's own term. For the listed control it is $\PinCtlPlaceboMatched\sigma$, most
 of the estimate. Net of it, event by event, monthly expirations give $\PinCtlNetMean\sigma$
 ($t=\PinCtlNetT$, sign-flip $p$ \PinCtlNetFlipP{}) and other Fridays
-$\PinCtlWeeklyNetMean\sigma$ ($t=\PinCtlWeeklyNetT$). For the FLEX events the placebo is
+$\PinCtlWeeklyNetMean\sigma$ ($t=\PinCtlWeeklyNetT$), still away from the strike, so on
+average the placebo takes out most of that term but, on other Fridays, not all of it. For the FLEX events the placebo is
 $\PinPlaceboMatched\sigma$, and the FLEX estimate net of it is $\PinNetMean\sigma$
 ($t=\PinNetT$), as registered. The design, then, detects no pinning at listed strikes in
 this panel, and the FLEX null has to be read as not detected rather than absent. The pinning sample also
@@ -1213,8 +1228,9 @@ sign what remains, so no measure here is a dealer position.
 products have no bars and are in neither test, and the pinning sample excludes the names
 with listed weekday expiries. Fixed effects leave each book's movement around its own
 level. Run at listed strikes on monthly expirations, the pinning design detects no pinning
-there either, and its post-expiry differencing carries a small baseline under
-short-horizon reversal, which a placebo matched to each event removes only after the fact;
+there either, and under short-horizon reversal its post-expiry differencing carries a
+baseline that is most of the listed estimate, which a placebo matched to each event,
+added after the fact, takes out only in part;
 the gamma test has no positive control. Names leave the pinning sample for listed
 weekday expiries found in OCC's census or the stored chains, both from August 2026 on.
 \PinInListed{} of the \PinUnderlyings{} event names appear in either; the rest are taken to
@@ -1247,19 +1263,20 @@ been found four times in five, and the result holds with the book priced a day e
 with its implied volatility as a control. The
 hedging such a book calls for is a small fraction of a day's trading, though an unsigned
 measure cannot exclude books that offset within an underlying, and these data cannot sign
-it: in the names known for option-income funds, the funds' own holdings show that the
-netted FLEX book is mostly not theirs. Gross inventory does not predict either. At a hidden
+it: in the names known for option-income funds, the holdings of one fund family show
+that the netted FLEX book is mostly not theirs. Gross inventory does not predict either. At a hidden
 book's largest strike on a date when nothing else expires, no pinning is detected. On real
-returns that test keeps close to its nominal size and detects pinning in one expiry in ten
-\PinNullPowerTen{} of the time, but it detects none at listed strikes on monthly
-expirations either. It covers only names without listed weekday expiries, which leaves out
-SPY, QQQ and the largest single names, where FLEX holds the most gamma, and the books it
+returns that test rejects on \PinNullSize{} of \PinNullOffsets{} overlapping sets of
+placebo dates and, when one expiry in ten is pinned, on \PinNullPowerTen{}, but it detects
+none at listed strikes on monthly expirations either. It covers only names without listed
+weekday expiries, which leaves out SPY, where FLEX holds the most gamma, along with QQQ and
+the largest single names, and the books it
 does cover are small: a median \PinMedianSize{} of a day's share volume. What the gamma
 test bounds is an average net slope across equity names at daily resolution; effects that
 differ in sign across books or names, index products, intraday effects and the option
 surface remain open.
 
-Two measurement findings travel further than the setting. A natural strike-based rule
+Measurement findings travel further than the setting. A natural strike-based rule
 for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the
 listing grid. Cleared series are not economic positions: \PosStructuredMean{} of open
 interest sits in groups of series with near-equal counts, against \PosChance{} by chance.
@@ -1272,7 +1289,7 @@ The market itself has grown fast and recently levelled. A one-break fit dates th
 of its growth to \BreakMonth{}; averaged over the latest expiry cycle its open interest is
 \OICycleLatest{} million contracts, \GrowthMultiple{} times the level before, though the
 latest quarter added only $\OIQuarterChange$, and on the last date it carried
-\ValueEnd{} of mark value. It is a large part of many single options markets: on every one
+\ValueEnd{} of mark value. It is a large part of many underlyings' options markets: on every one
 of \HiddenDailyDates{} settlements FLEX is at least a tenth of option open interest for
 \HiddenStableTen{} of the \HiddenDailyComplete{} underlyings we follow that are observed
 on every settlement, and across a census of \HiddenCensusUnderlyings{} underlyings the
