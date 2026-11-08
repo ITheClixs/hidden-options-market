@@ -57,10 +57,14 @@ Most empirical work on option markets observes the listed chain: the set of
 exchange-listed series with continuously disseminated quotes. FLEX options are not in
 it. Their strike, expiry, exercise style and settlement are chosen by the counterparties;
 the trades are executed on an exchange, typically as negotiated crosses, and cleared
-centrally like any listed option. What they lack is a place in the standard listed
-chains, and so in the data most empirical option research uses.
+centrally like any listed option. Their requests for quotes and completed trades are
+reported to OPRA, the consolidated options tape, as administrative messages
+\citep{phlx2021}. Those prints are transactions: a print does not say whether it opens or
+closes a position, so the tape does not give open interest by series. What FLEX options
+lack is a place in the standard listed chains, and so in the data most empirical option
+research uses.
 
-They are nonetheless publicly reported. The Options Clearing Corporation publishes a
+Their open interest is public all the same. The Options Clearing Corporation publishes a
 daily FLEX open-interest report --- one for equity classes and one for index classes
 --- giving symbol, right, expiry, strike, mark price and open interest for every
 cleared FLEX series, with roughly twenty months of history. The one study we know of
@@ -1321,6 +1325,11 @@ Park, T. and U.~Kurucak (2025).
 Growth of income funds and death of volatility: A study of inelastic option supply and
 market impact.
 Working paper, University of Texas at Dallas. SSRN 5705222.
+
+\bibitem[Nasdaq PHLX(2021)]{phlx2021}
+Nasdaq PHLX LLC (2021).
+Proposed rule change to amend FLEX floor trading rules, SR-Phlx-2021-45, Exhibit 5.
+Securities Exchange Act Release No.~34-92699.
 
 \bibitem[Prakash et al.(2026)]{prakash2026}
 Prakash, S., F.~Ferstler, and N.~Pezolano (2026).
