@@ -501,8 +501,10 @@ find. That leaves \CensusSeries{} series, \CensusFlexSeries{} of them FLEX.
 \input{tables/confusion}
 
 The rule finds \RuleFlexFound{} of the \CensusFlexSeries{} FLEX series, a recall of
-\RuleRecall{}, and so misses \FlexOnGridShare{} of them (Table~\ref{tab:confusion}). Of
-the series it flags, \RuleListedFlagged{} are listed: its precision is \RulePrecision{},
+\RuleRecall{} (95\% interval \RuleRecallLow{}--\RuleRecallHigh{}), and so misses
+\FlexOnGridShare{} of them (Table~\ref{tab:confusion}). Of the series it flags,
+\RuleListedFlagged{} are listed: its precision is \RulePrecision{}
+(\RulePrecisionLow{}--\RulePrecisionHigh{}),
 and \RuleFalseShare{} of what it calls FLEX is not. Counting the series with nothing open
 as well changes little (precision \RulePrecisionWithEmpty{}, recall
 \RuleRecallWithEmpty{}). Weighted by open interest the rule's flags are mostly right,
@@ -643,16 +645,22 @@ averaged over its dates. That leaves \PosTruth{} structures, held by \PosFunds{}
 \PosUnderlyings{} over \PosStructureDates{} structure-dates, and \PosSyntheticTruth{} of them
 are a call and a put at one strike. The detector puts all of a structure's legs together
 \PosGrouped{} of the time, and into a structure of the same type \PosRecall{} of the time, our
-recall (Table~\ref{tab:positions}). Of the \PosTouching{} distinct detected structures with a
+recall (Table~\ref{tab:positions}; 95\% Wilson interval \PosRecallLow{}--\PosRecallHigh{}). Of the \PosTouching{} distinct detected structures with a
 leg some fund holds, \PosPrecision{} have two or more legs held by one fund. That is our
 precision, and a lenient one: the mean over structures of the share of each one's dates on
-which any two of its legs share a holder. Under the strict reading, every leg held by one fund,
-it is \PosPrecisionExact{}. Scored one date at a time, the medians
+which any two of its legs share a holder (\PosPrecisionLow{}--\PosPrecisionHigh{}). Under the
+strict reading, every leg held by one fund, it is \PosPrecisionExact{}
+(\PosPrecisionExactLow{}--\PosPrecisionExactHigh{}). The intervals count each structure as
+one trial and ignore that structures cluster within funds, so they are too narrow if
+anything. Scored one date at a time, the medians
 over \PosScoreDates{} dates are \PosMedianRecall{} and \PosMedianPrecision{}, with recall
 between \PosLowRecall{} and \PosHighRecall{}. Against the report of the file's own date the
 two scores are \PosSameDayRecall{} and \PosSameDayPrecision{}. All \PosSyntheticTouching{}
 detected same-strike pairs that touch a holding are consistent with a disclosed holder, and the misses on precision are
-mostly groups of three legs. Both scores clear the bar of one half we set in advance for making a market-wide statement at all.
+mostly groups of three legs. Recall and the lenient precision clear the bar of one half we
+set in advance for making a market-wide statement at all, intervals included; the strict
+precision's interval contains it. The validation rests on \PosTruth{} structures from one
+fund family, almost all same-strike pairs, and does not speak for spreads or collars.
 
 \input{tables/positions}
 

@@ -14,6 +14,7 @@ from typing import Any
 import pandas as pd
 
 from hidden_options.measure.hidden_share_macros import name_list
+from hidden_options.measure.intervals import wilson
 from hidden_options.publish import formats
 
 SCORE_DIGITS = 3
@@ -30,6 +31,18 @@ def _score(value: float) -> str:
 
 def _share(value: float) -> str:
     return formats.percent(value, 1)
+
+
+def _rule_intervals(rule: Mapping[str, Any]) -> dict[str, str]:
+    """Wilson 95% intervals on the rule's precision and recall, one trial per series."""
+    precision = wilson(rule["tp"], rule["tp"] + rule["fp"])
+    recall = wilson(rule["tp"], rule["tp"] + rule["fn"])
+    return {
+        "RulePrecisionLow": _score(precision[0]),
+        "RulePrecisionHigh": _score(precision[1]),
+        "RuleRecallLow": _score(recall[0]),
+        "RuleRecallHigh": _score(recall[1]),
+    }
 
 
 def _census_macros(values: Mapping[str, Any]) -> dict[str, str]:
@@ -55,6 +68,7 @@ def _rule_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "RulePrecision": _score(rule["precision"]),
         "RuleRecall": _score(rule["recall"]),
         "RuleFOne": _score(rule["f1"]),
+        **_rule_intervals(rule),
         "RuleFalseShare": _share(rule["fp"] / (rule["tp"] + rule["fp"])),
         "FlexOnGridShare": _share(rule["fn"] / (rule["tp"] + rule["fn"])),
         "FlexOnGridOpenInterest": _share(weighted["fn"] / (weighted["tp"] + weighted["fn"])),

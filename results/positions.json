@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T14:55:45+00:00",
+  "generated_at": "2026-11-08T09:14:53+00:00",
   "inputs": {
     "ci_runs": [
       "2026-08-16",
@@ -145,6 +145,10 @@
     "PosOutside": "30.6\\%",
     "PosPrecision": "86.0\\%",
     "PosPrecisionExact": "59.6\\%",
+    "PosPrecisionExactHigh": "71.4\\%",
+    "PosPrecisionExactLow": "46.7\\%",
+    "PosPrecisionHigh": "92.7\\%",
+    "PosPrecisionLow": "74.7\\%",
     "PosPriced": "80.0\\%",
     "PosRate": "4\\%",
     "PosRateHigh": "5\\%",
@@ -158,6 +162,8 @@
     "PosRatioThreeQuarters": "5.1",
     "PosRatioUnderlyings": "1,458",
     "PosRecall": "77.9\\%",
+    "PosRecallHigh": "88.3\\%",
+    "PosRecallLow": "62.0\\%",
     "PosRuleOverSigned": "0.53",
     "PosSameDayPrecision": "83.6\\%",
     "PosSameDayRecall": "77.8\\%",

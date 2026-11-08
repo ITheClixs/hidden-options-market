@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T15:02:05+00:00",
+  "generated_at": "2026-11-08T09:14:53+00:00",
   "inputs": {
     "census_rows": 486895,
     "sources": {
@@ -34,9 +34,13 @@
     "RuleListedFlaggedUnderlyings": "15 underlyings",
     "RuleListedPassed": "396,750",
     "RulePrecision": "0.707",
+    "RulePrecisionHigh": "0.718",
+    "RulePrecisionLow": "0.696",
     "RulePrecisionOpenInterest": "0.937",
     "RulePrecisionWithEmpty": "0.704",
     "RuleRecall": "0.465",
+    "RuleRecallHigh": "0.475",
+    "RuleRecallLow": "0.456",
     "RuleRecallWithEmpty": "0.461"
   },
   "name": "identification",

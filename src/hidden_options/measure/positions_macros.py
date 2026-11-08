@@ -13,6 +13,7 @@ from typing import Any
 
 import pandas as pd
 
+from hidden_options.measure.intervals import wilson
 from hidden_options.publish import formats
 
 MISSING = "--"
@@ -96,7 +97,23 @@ def _score_macros(validation: Mapping[str, Any]) -> dict[str, str]:
         "PosSyntheticTruth": formats.count(synthetic.get("truth", 0)),
         "PosSyntheticPrecision": _share(synthetic.get("precision")),
         "PosSyntheticTouching": formats.count(synthetic.get("touching", 0)),
+        **_intervals(score),
     }
+
+
+def _intervals(score: Mapping[str, Any]) -> dict[str, str]:
+    """Wilson 95% intervals, one trial per detected structure (precision) or per disclosed
+    structure (recall). They ignore clustering by fund, so they understate the uncertainty."""
+    touching, truth = int(score["n_detected_touching"]), int(score["n_truth_structures"])
+    out: dict[str, str] = {}
+    for stem, share, trials in (
+        ("Precision", score["precision"], touching),
+        ("PrecisionExact", score["precision_exact"], touching),
+        ("Recall", score["recall"], truth),
+    ):
+        low, high = wilson(share * trials, trials)
+        out[f"Pos{stem}Low"], out[f"Pos{stem}High"] = _share(low), _share(high)
+    return out
 
 
 def _holdings_macros(validation: Mapping[str, Any]) -> dict[str, str]:
