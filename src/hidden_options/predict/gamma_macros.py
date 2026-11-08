@@ -66,6 +66,7 @@ def gamma_predictive_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "GPredMedianX": formats.decimal(sample["x_net_raw_median"] * 1e4, 2),
         "GPredNinetyX": formats.decimal(sample["x_net_raw_p90"] * 1e4, 1),
         "GPredSdX": formats.decimal(sample["x_net_sd"] * 1e4, 1),
+        "GPredWithinSdX": formats.decimal(sample["x_net_within_sd"] * 1e4, 1),
         "GPredMeanAbs": bp(sample["mean_abs_ret"]),
     }
     for row in values["secondary"]:

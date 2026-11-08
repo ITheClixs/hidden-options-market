@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T13:49:56+00:00",
+  "generated_at": "2026-11-08T15:11:39+00:00",
   "inputs": {
     "bars": "data/flex_underlying_bars.parquet",
     "first_date": "2024-12-09",
@@ -74,6 +74,7 @@
     "GPredTopTotalT": "-0.68",
     "GPredUnderlyings": "1,403",
     "GPredVerdict": "a bounded null",
+    "GPredWithinSdX": "51.8",
     "GProgBeta": "-7.29",
     "GProgControlBeta": "7.27",
     "GProgControlNames": "27",
@@ -200,7 +201,8 @@
       "underlyings": 1403,
       "x_net_raw_median": 0.000586336681082679,
       "x_net_raw_p90": 0.0090271101506863,
-      "x_net_sd": 0.009443117794824067
+      "x_net_sd": 0.009443117794824067,
+      "x_net_within_sd": 0.005178074092544066
     },
     "secondary": [
       {

@@ -112,6 +112,7 @@ def test_macros_cover_every_secondary_row():
             "x_net_raw_median": 1e-4,
             "x_net_raw_p90": 1e-3,
             "x_net_sd": 5e-4,
+            "x_net_within_sd": 3e-4,
             "mean_abs_ret": 0.02,
         },
     }
@@ -142,6 +143,7 @@ def test_table_lists_the_tests_of_record_first():
             "x_net_raw_median": 1e-4,
             "x_net_raw_p90": 1e-3,
             "x_net_sd": 5e-4,
+            "x_net_within_sd": 3e-4,
             "mean_abs_ret": 0.02,
         },
     }

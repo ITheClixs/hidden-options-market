@@ -302,8 +302,17 @@ def _sample(
         "x_net_raw_median": float(used["x_net_raw"].median()),
         "x_net_raw_p90": float(used["x_net_raw"].quantile(0.9)),
         "x_net_sd": float(_winsorised_sd(used["x_net_raw"])),
+        "x_net_within_sd": float(_within_sd(used)),
         "gamma_dates": int(gamma["date"].nunique()),
     }
+
+
+def _within_sd(used: pd.DataFrame) -> float:
+    """The standard deviation of winsorised x_net_raw around each underlying's own mean:
+    the variation the underlying fixed effects leave to identify the slope."""
+    low, high = used["x_net_raw"].quantile([0.01, 0.99])
+    clipped = used["x_net_raw"].clip(lower=low, upper=high)
+    return float((clipped - clipped.groupby(used["symbol"]).transform("mean")).std(ddof=1))
 
 
 def _winsorised_sd(values: pd.Series) -> float:

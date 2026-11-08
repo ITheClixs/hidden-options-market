@@ -986,8 +986,10 @@ gamma from the marks \GammaMarkRatio{} times gamma from the listed surface. The 
 delta a dealer holding the book would trade for a 1\% move, as a fraction of a day's
 dollar volume. It is small: \GPredMedianX{} basis points for the median underlying-day and
 \GPredNinetyX{} at the ninetieth percentile, with a standard deviation of \GPredSdX{}
-basis points after winsorising. It is standardised, so coefficients are per standard
-deviation, and an underlying-day with under half of its FLEX open interest priced is
+basis points after winsorising. Around each underlying's own mean, the variation the
+fixed effects leave to identify the slope, the standard deviation is \GPredWithinSdX{}
+basis points. It is standardised on the pooled one, so coefficients are per pooled
+standard deviation, and an underlying-day with under half of its FLEX open interest priced is
 left out. Of the base panel's underlying-days, \GPredExcluded{} fail that rule,
 \GPredNoGammaRow{} have no live FLEX series that day and \GPredNoVolume{} lack twenty
 sessions of dollar volume. Two tests were fixed as of record, with Holm's adjustment across them: the
