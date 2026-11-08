@@ -59,6 +59,7 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PinNearAfter": formats.percent(sample["near_after"], 1),
         "PinExcluded": formats.count(len(sample["excluded_names"])),
         "PinFridayEvents": formats.count(sample["friday_events"]),
+        "PinSplitDropped": formats.count(sample["split_dropped"]),
     }
     simulation = values["simulation"]
     out["PinSimSize"] = formats.percent(simulation["size"], 1)

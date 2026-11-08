@@ -84,19 +84,20 @@ def refresh_splits(symbols: Iterable[str], out: Path) -> pd.DataFrame:
     return splits
 
 
-def unadjust(bars: pd.DataFrame, splits: pd.DataFrame) -> pd.DataFrame:
-    """`bars` with prices and volumes on the basis of each session; a new frame."""
-    out = bars.copy()
+def split_factors(bars: pd.DataFrame, splits: pd.DataFrame) -> pd.Series:
+    """Per row of `bars`, the product of the ratios of the splits it precedes: the factor
+    by which `unadjust` multiplies its prices and divides its volume. Prices divided by it
+    are on the provider's adjusted basis, so returns across a split are true returns."""
+    factor = pd.Series(1.0, index=bars.index)
     if splits.empty:
-        return out
+        return factor
     session = (
-        pd.to_datetime(out["timestamp"], utc=True)
+        pd.to_datetime(bars["timestamp"], utc=True)
         .dt.tz_convert(NEW_YORK)
         .dt.tz_localize(None)
         .dt.normalize()
     )
-    last_bar = session.groupby(out["symbol"]).transform("max")
-    factor = pd.Series(1.0, index=out.index)
+    last_bar = session.groupby(bars["symbol"]).transform("max")
     events = zip(
         splits["symbol"].astype(str),
         pd.to_datetime(splits["session"]),
@@ -104,8 +105,15 @@ def unadjust(bars: pd.DataFrame, splits: pd.DataFrame) -> pd.DataFrame:
         strict=True,
     )
     for symbol, ex_date, ratio in events:
-        hit = (out["symbol"] == symbol) & (session < ex_date) & (ex_date <= last_bar)
+        hit = (bars["symbol"] == symbol) & (session < ex_date) & (ex_date <= last_bar)
         factor[hit] *= ratio
+    return factor
+
+
+def unadjust(bars: pd.DataFrame, splits: pd.DataFrame) -> pd.DataFrame:
+    """`bars` with prices and volumes on the basis of each session; a new frame."""
+    out = bars.copy()
+    factor = split_factors(bars, splits)
     for column in PRICE_COLUMNS:
         if column in out:
             out[column] = out[column] * factor
@@ -125,10 +133,15 @@ def load_splits(path: Path | None = None) -> pd.DataFrame:
     return splits
 
 
-def read_bars(path: Path, columns: Iterable[str] | None = None) -> pd.DataFrame:
-    """Daily bars put back on each session's basis, for comparison with strikes."""
+def read_bars(
+    path: Path, columns: Iterable[str] | None = None, *, with_factor: bool = False
+) -> pd.DataFrame:
+    """Daily bars put back on each session's basis, for comparison with strikes. With
+    `with_factor`, each row also carries its `split_factor`, for returns across splits."""
     frame = pd.read_parquet(path, columns=None if columns is None else list(columns))
-    return unadjust(frame, load_splits())
+    splits = load_splits()
+    out = unadjust(frame, splits)
+    return out.assign(split_factor=split_factors(frame, splits)) if with_factor else out
 
 
 __all__ = [
@@ -139,5 +152,6 @@ __all__ = [
     "read_bars",
     "parse_splits",
     "refresh_splits",
+    "split_factors",
     "unadjust",
 ]

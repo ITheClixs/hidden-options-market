@@ -55,6 +55,14 @@ class TestSigma:
         assert frame.set_index("session").loc[DAYS[65], "sigma"] == pytest.approx(0.0, abs=1e-12)
         assert frame.set_index("session").loc[DAYS[66], "sigma"] > 0.01
 
+    def test_a_split_is_not_a_return(self):
+        adjusted = 100 * np.exp(np.cumsum(np.r_[0, np.full(70, 0.01)]))
+        factor = np.where(np.arange(71) < 30, 10.0, 1.0)  # a 10:1 split on session 30
+        frame = closes_frame("AAA", adjusted * factor).assign(split_factor=factor)
+        found = with_sigma(frame).set_index("session")
+        assert found.loc[DAYS[70], "sigma"] == pytest.approx(0.0, abs=1e-12)
+        assert found.loc[DAYS[70], "prev_close"] == pytest.approx(adjusted[69])
+
 
 class TestPinStrikes:
     def book(self, rows):

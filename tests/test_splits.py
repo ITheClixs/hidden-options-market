@@ -7,7 +7,7 @@ import json
 import pandas as pd
 import pytest
 
-from hidden_options.collect.splits import parse_splits, unadjust
+from hidden_options.collect.splits import parse_splits, split_factors, unadjust
 
 
 def payload(splits):
@@ -107,6 +107,19 @@ class TestUnadjust:
         found = unadjust(frame, splits)
         assert list(found.loc[found["symbol"] == "AAA", "close"]) == [5.0, 5.0]
         pd.testing.assert_frame_equal(frame, before)
+
+
+def test_split_factors_are_the_multipliers_unadjust_applies():
+    frame = bars("ABC", [10.0] * 5, [1.0] * 5, start="2025-11-10")
+    splits = pd.DataFrame(
+        {
+            "symbol": ["ABC", "ABC"],
+            "session": pd.to_datetime(["2025-11-11", "2025-11-13"]),
+            "ratio": [2.0, 3.0],
+        }
+    )
+    assert list(split_factors(frame, splits)) == pytest.approx([6.0, 3.0, 3.0, 1.0, 1.0])
+    assert list(split_factors(frame, splits.iloc[:0])) == [1.0] * 5
 
 
 def test_read_bars_applies_the_stored_splits(tmp_path, monkeypatch):

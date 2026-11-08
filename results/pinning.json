@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T11:20:42+00:00",
+  "generated_at": "2026-11-08T11:28:35+00:00",
   "inputs": {
     "bars": "data/flex_underlying_bars.parquet",
     "first_expiry": "2024-12-04",
@@ -8,144 +8,145 @@
     "source": "data/raw/occ_flex"
   },
   "macros": {
-    "PinBandHalfMean": "-0.9",
-    "PinBandHalfT": "-0.67",
+    "PinBandHalfMean": "-1.0",
+    "PinBandHalfT": "-0.73",
     "PinBandQuarterMean": "-0.4",
-    "PinBandQuarterT": "-0.42",
-    "PinCallsMean": "0.022",
-    "PinCallsT": "0.64",
-    "PinContracts": "1,163",
+    "PinBandQuarterT": "-0.46",
+    "PinCallsMean": "0.023",
+    "PinCallsT": "0.65",
+    "PinContracts": "1,159",
     "PinDates": "326",
-    "PinEffectSeven": "0.102",
+    "PinEffectSeven": "0.105",
     "PinEffectTen": "0.070",
-    "PinEffectTwenty": "0.035",
-    "PinEvents": "2,709",
+    "PinEffectTwenty": "0.037",
+    "PinEvents": "2,643",
     "PinExcluded": "32",
-    "PinExpiryOnlyMean": "-0.023",
-    "PinExpiryOnlyT": "-0.92",
-    "PinFlipP": "0.25",
-    "PinFridayEvents": "7,308",
-    "PinFridayMean": "-0.004",
-    "PinFridayT": "-0.31",
-    "PinHolm": "0.50",
-    "PinMDE": "0.074",
-    "PinMean": "-0.031",
+    "PinExpiryOnlyMean": "-0.022",
+    "PinExpiryOnlyT": "-0.84",
+    "PinFlipP": "0.29",
+    "PinFridayEvents": "7,228",
+    "PinFridayMean": "-0.005",
+    "PinFridayT": "-0.33",
+    "PinHolm": "0.58",
+    "PinMDE": "0.078",
+    "PinMean": "-0.029",
     "PinMedianSize": "3.5\\%",
-    "PinNearAfter": "10.5\\%",
-    "PinNearExpiry": "12.9\\%",
-    "PinP": "0.25",
+    "PinNearAfter": "9.6\\%",
+    "PinNearExpiry": "11.8\\%",
+    "PinP": "0.29",
     "PinPowerSeven": "97\\%",
-    "PinPowerTen": "75\\%",
-    "PinPowerTwenty": "26\\%",
+    "PinPowerTen": "71\\%",
+    "PinPowerTwenty": "27\\%",
     "PinPseudoOnlyMean": "0.008",
-    "PinPseudoOnlyT": "0.81",
-    "PinPutsMean": "-0.066",
-    "PinPutsT": "-1.73",
-    "PinSE": "0.026",
+    "PinPseudoOnlyT": "0.74",
+    "PinPutsMean": "-0.065",
+    "PinPutsT": "-1.61",
+    "PinSE": "0.028",
     "PinSimPowerSeven": "100\\%",
-    "PinSimPowerTen": "92\\%",
+    "PinSimPowerTen": "90\\%",
     "PinSimPowerTwenty": "39\\%",
     "PinSimPowerWorlds": "400",
-    "PinSimSize": "6.1\\%",
+    "PinSimSize": "4.3\\%",
     "PinSimWorlds": "1,000",
-    "PinSizeBottom": "-0.034",
-    "PinSizeDiff": "0.044",
-    "PinSizeHolm": "0.50",
-    "PinSizeT": "1.05",
-    "PinSizeTop": "0.010",
-    "PinT": "-1.16",
-    "PinUnderlyings": "498"
+    "PinSizeBottom": "-0.030",
+    "PinSizeDiff": "0.029",
+    "PinSizeHolm": "0.58",
+    "PinSizeT": "0.66",
+    "PinSizeTop": "-0.001",
+    "PinSplitDropped": "17",
+    "PinT": "-1.06",
+    "PinUnderlyings": "496"
   },
   "name": "pinning",
   "values": {
     "descriptive": {
       "band_0.25": {
         "clusters": 326,
-        "mde80": 0.029206014423212762,
-        "mean": -0.004355850867478775,
-        "n_obs": 2709,
-        "p_value": 0.6754253657034356,
-        "std_error": 0.010393530341812495,
-        "t_stat": -0.41909252431346367
+        "mde80": 0.026946499858580098,
+        "mean": -0.004388951948543325,
+        "n_obs": 2643,
+        "p_value": 0.6474838410174024,
+        "std_error": 0.009589437977651652,
+        "t_stat": -0.45768604570693844
       },
       "band_0.5": {
         "clusters": 326,
-        "mde80": 0.039100994158540334,
-        "mean": -0.009376153562200075,
-        "n_obs": 2709,
-        "p_value": 0.5009025035292604,
-        "std_error": 0.013914852033313383,
-        "t_stat": -0.6738234470444052
+        "mde80": 0.03883993967463757,
+        "mean": -0.010139992432841471,
+        "n_obs": 2643,
+        "p_value": 0.4637121909937131,
+        "std_error": 0.01382195069936235,
+        "t_stat": -0.7336151498000395
       },
       "calls": {
         "clusters": 280,
-        "mde80": 0.09891081533390284,
-        "mean": 0.022467086025507118,
-        "n_obs": 1083,
-        "p_value": 0.5236080518595484,
-        "std_error": 0.03518186757765825,
-        "t_stat": 0.6385984477917404
+        "mde80": 0.10063183640523397,
+        "mean": 0.023291471849501352,
+        "n_obs": 1067,
+        "p_value": 0.5157702389878634,
+        "std_error": 0.035794022428728194,
+        "t_stat": 0.6507084219405214
       },
       "expiry_only": {
         "clusters": 326,
-        "mde80": 0.06929850655523503,
-        "mean": -0.022798100986557226,
-        "n_obs": 2709,
-        "p_value": 0.35593730099564036,
-        "std_error": 0.024661226283298424,
-        "t_stat": -0.9244512306347482
+        "mde80": 0.07262360987528022,
+        "mean": -0.021700246514043366,
+        "n_obs": 2643,
+        "p_value": 0.40172430994631875,
+        "std_error": 0.025844529206653942,
+        "t_stat": -0.8396456495890207
       },
       "friday": {
         "clusters": 93,
-        "mde80": 0.03838350959187915,
-        "mean": -0.004152373094092395,
-        "n_obs": 7308,
-        "p_value": 0.760046128788501,
-        "std_error": 0.013555260649270338,
-        "t_stat": -0.3063292696120832
+        "mde80": 0.038989507449031006,
+        "mean": -0.004590631229934158,
+        "n_obs": 7228,
+        "p_value": 0.7395934014048521,
+        "std_error": 0.013769270753972454,
+        "t_stat": -0.3333968306643803
       },
       "pseudo_only": {
         "clusters": 326,
-        "mde80": 0.027246394877666134,
-        "mean": 0.007819092375642732,
-        "n_obs": 2709,
-        "p_value": 0.42059552813087164,
-        "std_error": 0.00969616147422542,
-        "t_stat": 0.8064111139678976
+        "mde80": 0.028331984018569775,
+        "mean": 0.007508075005623448,
+        "n_obs": 2643,
+        "p_value": 0.4570125034500018,
+        "std_error": 0.010082489561010051,
+        "t_stat": 0.7446647933718563
       },
       "puts": {
-        "clusters": 222,
-        "mde80": 0.10739400510277397,
-        "mean": -0.06597406579570965,
-        "n_obs": 1626,
-        "p_value": 0.08526028939268256,
-        "std_error": 0.038164086549074154,
-        "t_stat": -1.7286950052079828
+        "clusters": 220,
+        "mde80": 0.11337458619770249,
+        "mean": -0.06475228060907191,
+        "n_obs": 1576,
+        "p_value": 0.10944138266412572,
+        "std_error": 0.04028774443709986,
+        "t_stat": -1.60724511917434
       }
     },
     "h1": {
       "clusters": 326,
-      "holm_p": 0.49740795159013257,
-      "mde80": 0.07445203016154116,
-      "mean": -0.03061719336219996,
-      "n_obs": 2709,
-      "p_value": 0.24870397579506628,
-      "sign_flip_p": 0.2460753924607539,
-      "std_error": 0.02649520825677913,
-      "t_stat": -1.1555747388536253
+      "holm_p": 0.5818352634234646,
+      "mde80": 0.07758880874524997,
+      "mean": -0.029208321519666815,
+      "n_obs": 2643,
+      "p_value": 0.2909176317117323,
+      "sign_flip_p": 0.28857114288571145,
+      "std_error": 0.027611492146559485,
+      "t_stat": -1.05783205647241
     },
     "h2": {
-      "bottom": -0.03406024267838199,
+      "bottom": -0.03021365745161519,
       "clusters": 310,
-      "difference": 0.0438288843584496,
-      "holm_p": 0.49740795159013257,
-      "p_value": 0.29356762202430525,
-      "std_error": 0.04165777724614063,
-      "t_stat": 1.052117689800891,
-      "top": 0.009768641680067611
+      "difference": 0.028986762390034303,
+      "holm_p": 0.5818352634234646,
+      "p_value": 0.5082727643058038,
+      "std_error": 0.04376683001507439,
+      "t_stat": 0.6622997914185362,
+      "top": -0.0012268950615808888
     },
     "sample": {
-      "events": 2709,
+      "events": 2643,
       "excluded_names": [
         "AAPL",
         "AMD",
@@ -181,12 +182,13 @@
         "XLF"
       ],
       "expiry_dates": 326,
-      "friday_events": 7308,
-      "median_contracts": 1163.0,
-      "median_size": 0.03474268196191117,
-      "near_after": 0.10527870062753783,
-      "near_expiry": 0.1288298265042451,
-      "underlyings": 498
+      "friday_events": 7228,
+      "median_contracts": 1159.0,
+      "median_size": 0.03501508342055039,
+      "near_after": 0.09572455542943625,
+      "near_expiry": 0.11766931517215286,
+      "split_dropped": 17,
+      "underlyings": 496
     },
     "settings": {
       "bands": [
@@ -199,23 +201,23 @@
     "simulation": {
       "power": {
         "0.05": {
-          "effect": 0.0348183257186053,
-          "power_observed": 0.2576321156796945,
+          "effect": 0.03718453020967127,
+          "power_observed": 0.2681655096979585,
           "power_simulated": 0.3875
         },
         "0.10": {
-          "effect": 0.06992311179004751,
-          "power_observed": 0.748907250727529,
-          "power_simulated": 0.92
+          "effect": 0.06985476245635926,
+          "power_observed": 0.7129661223864185,
+          "power_simulated": 0.9
         },
         "0.15": {
-          "effect": 0.10243692836101058,
-          "power_observed": 0.970772010216698,
-          "power_simulated": 0.9975
+          "effect": 0.10518422200822104,
+          "power_observed": 0.9668177036851235,
+          "power_simulated": 1.0
         }
       },
       "power_worlds": 400,
-      "size": 0.061,
+      "size": 0.043,
       "size_worlds": 1000
     }
   }

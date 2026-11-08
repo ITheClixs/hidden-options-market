@@ -22,6 +22,7 @@ from hidden_options.measure.hidden_share import is_adjusted_product, is_flex_pro
 from hidden_options.measure.hidden_share_data import load_reports
 from hidden_options.measure.pinning import (
     BANDS,
+    PSEUDO_OFFSETS,
     clustered_mean,
     event_statistics,
     flex_only,
@@ -55,7 +56,8 @@ LATER_FRIDAY_HOLIDAYS = ("2026-12-25", "2027-03-26", "2027-06-18", "2027-12-24")
 
 @dataclass(frozen=True)
 class PinningInputs:
-    """Daily closes and volumes, the FLEX report rows near expiry, and listed expiries."""
+    """Daily closes and volumes on each session's basis (with `split_factor` where splits
+    were applied), the FLEX report rows near expiry, and listed expiries."""
 
     bars: pd.DataFrame
     reports: pd.DataFrame
@@ -73,7 +75,10 @@ def pinning_result(inputs: PinningInputs) -> Result:
     only = book["expiry"].map(dict(zip(days, flex_only(days, holidays), strict=True))).astype(bool)
     eligible = ~book["underlying"].isin(excluded)
     main = _events(book[only & eligible], closes, adv, days)
+    straddling = _straddles_split(main, closes, days)
+    main = main[~straddling].reset_index(drop=True)
     friday = _events(book[book["expiry"].dt.day_of_week == 4], closes, adv, days)
+    friday = friday[~_straddles_split(friday, closes, days)].reset_index(drop=True)
 
     h1 = clustered_mean(main["D"], main["expiry"])
     h2 = size_terciles(main.dropna(subset=["size"]))
@@ -105,6 +110,7 @@ def pinning_result(inputs: PinningInputs) -> Result:
             "near_after": float(main["n0.25_pseudo"].mean()),
             "excluded_names": sorted(excluded),
             "friday_events": len(friday),
+            "split_dropped": int(straddling.sum()),
         },
         "simulation": _simulation(main, h1),
         "settings": {"n_flips": N_FLIPS, "seed": SEED, "bands": list(BANDS)},
@@ -127,7 +133,7 @@ def pinning_analysis() -> Result:
 
 def load_inputs(raw: Path | None = None, bars_path: Path | None = None) -> PinningInputs:
     raw = RAW_DIR if raw is None else raw
-    bars = read_bars(BARS_PATH if bars_path is None else bars_path)
+    bars = read_bars(BARS_PATH if bars_path is None else bars_path, with_factor=True)
     reports = load_reports(raw, pd.Timestamp("2024-01-01"), pd.Timestamp(PANEL_END))
     reports = reports[(reports["kind"] == "equity") & (reports["expiry"] > reports["report_date"])]
     reports = reports[reports["expiry"] <= reports["report_date"] + pd.Timedelta(days=7)]
@@ -141,18 +147,33 @@ def _calendar(bars: pd.DataFrame) -> tuple[pd.DatetimeIndex, set[pd.Timestamp]]:
     return days, holidays | {pd.Timestamp(d) for d in LATER_FRIDAY_HOLIDAYS}
 
 
+def _with_factor(bars: pd.DataFrame) -> pd.DataFrame:
+    return bars if "split_factor" in bars else bars.assign(split_factor=1.0)
+
+
 def _closes(bars: pd.DataFrame) -> pd.DataFrame:
-    frame = bars[["symbol", "timestamp", "close"]].assign(session=_sessions(bars["timestamp"]))
-    return frame[["symbol", "session", "close"]].drop_duplicates(["symbol", "session"])
+    bars = _with_factor(bars)
+    frame = bars[["symbol", "timestamp", "close", "split_factor"]].assign(
+        session=_sessions(bars["timestamp"])
+    )
+    return frame[["symbol", "session", "close", "split_factor"]].drop_duplicates(
+        ["symbol", "session"]
+    )
 
 
 def _adv_shares(bars: pd.DataFrame) -> pd.DataFrame:
-    """Mean share volume of the ADV_SESSIONS sessions ending the session before each date."""
-    frame = bars[["symbol", "timestamp", "volume"]].assign(session=_sessions(bars["timestamp"]))
+    """Mean share volume of the ADV_SESSIONS sessions ending the session before each date,
+    in shares of that session's basis, the basis its open interest is on."""
+    bars = _with_factor(bars)
+    frame = bars[["symbol", "timestamp", "volume", "split_factor"]].assign(
+        session=_sessions(bars["timestamp"])
+    )
     frame = frame.sort_values(["symbol", "session"])
-    frame["adv"] = frame.groupby("symbol")["volume"].transform(
+    adjusted = frame["volume"] * frame["split_factor"]
+    mean = adjusted.groupby(frame["symbol"]).transform(
         lambda v: v.rolling(ADV_SESSIONS, min_periods=ADV_SESSIONS).mean().shift(1)
     )
+    frame["adv"] = mean / frame.groupby("symbol")["split_factor"].shift(1)
     return frame.rename(columns={"symbol": "underlying", "session": "expiry"})[
         ["underlying", "expiry", "adv"]
     ]
@@ -178,6 +199,20 @@ def _events(
     events = pin_strikes(book, prev).merge(adv, on=["underlying", "expiry"], how="left")
     events["size"] = events["open_interest"] * 100 / events["adv"]
     return event_statistics(events, closes, days)
+
+
+def _straddles_split(
+    stats: pd.DataFrame, closes: pd.DataFrame, days: pd.DatetimeIndex
+) -> pd.Series:
+    """Events with a split between the session before expiry and the last pseudo-expiry,
+    where the pin strike and later closes are on different bases."""
+    factor = closes.set_index(["symbol", "session"])["split_factor"]
+    position = days.get_indexer(pd.DatetimeIndex(stats["expiry"]))
+    first = pd.MultiIndex.from_arrays([stats["underlying"], days[position - 1]])
+    last = pd.MultiIndex.from_arrays([stats["underlying"], days[position - min(PSEUDO_OFFSETS)]])
+    before = factor.reindex(first).to_numpy()
+    after = factor.reindex(last).to_numpy()
+    return pd.Series(before != after, index=stats.index)
 
 
 def _simulation(stats: pd.DataFrame, h1: dict[str, Any]) -> dict[str, Any]:

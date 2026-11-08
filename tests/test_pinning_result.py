@@ -19,7 +19,8 @@ from hidden_options.publish.latex import render_macros
 from hidden_options.publish.results import read_results, write_result
 
 DAYS = pd.bdate_range("2025-01-02", periods=260)
-NAMES = [f"N{i:02d}" for i in range(50)]
+# Letters only: a trailing digit marks an adjusted-deliverable root, which is left out.
+NAMES = [f"N{chr(65 + i // 26)}{chr(65 + i % 26)}" for i in range(50)]
 
 
 def world(seed: int = 0) -> PinningInputs:
@@ -62,7 +63,7 @@ def world(seed: int = 0) -> PinningInputs:
             )
         )
     listed = pd.DataFrame(
-        {"symbol": ["WKLY", "N00"], "expiry": pd.to_datetime(["2025-06-04", "2025-06-20"])}
+        {"symbol": ["WKLY", "NAA"], "expiry": pd.to_datetime(["2025-06-04", "2025-06-20"])}
     )
     return PinningInputs(pd.concat(bars, ignore_index=True), pd.DataFrame(reports), listed)
 
@@ -81,8 +82,8 @@ def test_the_planted_pin_is_found(result):
 
 def test_a_name_with_listed_weekday_expiries_is_left_out(result):
     assert "WKLY" in result.values["sample"]["excluded_names"]
-    # N00's listed expiry is a Friday, so it stays in.
-    assert "N00" not in result.values["sample"]["excluded_names"]
+    # NAA's listed expiry is a Friday, so it stays in.
+    assert "NAA" not in result.values["sample"]["excluded_names"]
 
 
 def test_unpinned_fridays_show_no_pin(result):
@@ -102,3 +103,31 @@ def test_table_renders_from_the_macros(result):
     text = pinning_table({"pinning": result})
     assert "\\label{tab:pinning}" in text
     assert result.macros["PinMean"] in text
+
+
+def with_split(inputs: PinningInputs, name: str, ex_date: pd.Timestamp) -> PinningInputs:
+    """`inputs` with a 10:1 split of `name` on `ex_date`: bars before it on their own,
+    unadjusted basis, as `read_bars` gives them, with the factor carried alongside."""
+    bars = inputs.bars.assign(split_factor=1.0)
+    sessions = bars["timestamp"].dt.tz_localize(None).dt.normalize()
+    before = (bars["symbol"] == name) & (sessions < ex_date)
+    for column in ("open", "high", "low", "close"):
+        bars.loc[before, column] *= 10
+    bars.loc[before, "volume"] /= 10
+    bars.loc[before, "split_factor"] = 10.0
+    reports = inputs.reports.copy()
+    early = (reports["underlying"] == name) & (reports["expiry"] < ex_date)
+    reports.loc[early, "strike"] *= 10
+    return PinningInputs(bars, reports, inputs.listed)
+
+
+def test_a_split_inside_an_event_window_drops_only_that_event(result):
+    ex_date = DAYS[152]
+    split = pinning_result(with_split(world(), "NAB", ex_date))
+    sample = split.values["sample"]
+    # Expiries from E = ex_date - 5 sessions to E = ex_date straddle the split.
+    straddling = [d for d in DAYS[147:153] if d.day_of_week == 1]
+    assert sample["split_dropped"] == len(straddling)
+    assert sample["events"] == result.values["sample"]["events"] - len(straddling)
+    # Away from the split, sigma and the statistics are those of the unsplit world.
+    assert split.values["h1"]["mean"] == pytest.approx(result.values["h1"]["mean"], rel=0.05)

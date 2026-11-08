@@ -702,7 +702,11 @@ symbol's leading digit agrees with it, 1 with American and 2 and 4 with European
 \IvPrefixContradict{} of the \IvPrefixMarked{} equity series-days with a named style
 contradict that pairing, and \IvPrefixOther{} carry another digit. We therefore take an
 unnamed style from the digit. Where the digit gives no answer too we price the series as
-American, a fallback that covers \IvFallbackRows{}. An equity's spot is its close. An
+American, a fallback that covers \IvFallbackRows{}. An equity's spot is its close, on
+that session's own basis: the bar provider restates a symbol's history after a split,
+and OCC's strikes are not restated, so prices before each split are multiplied back by
+its ratio wherever a price meets a strike. Returns and dollar volume are taken on the
+provider's adjusted basis, on which a split is not a return. An
 index's is its level in the Cboe chain read after the close, and the mini products on
 SPX, NDX and RUT take their fixed fraction of it. The Dow, MSCI and bitcoin indices, and
 equity classes our daily bars do not cover, have no spot.
@@ -1034,7 +1038,9 @@ close at which the pin strike was chosen, which pulls them towards it by constru
 The original specification used the sessions before, and a test on simulated returns
 without pinning rejected it at $p<10^{-7}$. Names with listed Monday-to-Thursday expiries
 are left out (\PinExcluded{} of them, among them SPY, QQQ and the largest single names).
-That leaves \PinEvents{} events on \PinDates{} expiry dates in \PinUnderlyings{}
+So are \PinSplitDropped{} events with a split between the session before expiry and the
+last pseudo-expiry, whose strike and later closes are on different bases. That leaves
+\PinEvents{} events on \PinDates{} expiry dates in \PinUnderlyings{}
 underlyings, with a median of \PinContracts{} contracts at the pin strike.
 
 \input{tables/pinning}

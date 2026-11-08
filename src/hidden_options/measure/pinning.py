@@ -50,11 +50,19 @@ def flex_only(dates: pd.DatetimeIndex, holidays: Iterable[pd.Timestamp]) -> np.n
 
 def with_sigma(closes: pd.DataFrame) -> pd.DataFrame:
     """`closes` (symbol, session, close) with `prev_close` and `sigma`: the standard
-    deviation of daily log returns over the SIGMA_SESSIONS sessions ending the day before."""
+    deviation of daily log returns over the SIGMA_SESSIONS sessions ending the day before.
+
+    Closes are on each session's own basis, as strikes are. With a `split_factor` column
+    (`collect.splits.split_factors`), returns are taken on the adjusted basis, so a split
+    is not a return, and `prev_close` is put on the basis of the session it precedes.
+    """
     frame = closes.sort_values(["symbol", "session"]).reset_index(drop=True)
-    grouped = frame.groupby("symbol", sort=False)["close"]
-    frame["prev_close"] = grouped.shift(1)
-    returns = pd.Series(np.log(frame["close"] / frame["prev_close"]), index=frame.index)
+    if "split_factor" not in frame:
+        frame["split_factor"] = 1.0
+    adjusted = frame["close"] / frame["split_factor"]
+    grouped = adjusted.groupby(frame["symbol"], sort=False)
+    frame["prev_close"] = grouped.shift(1) * frame["split_factor"]
+    returns = pd.Series(np.log(adjusted / grouped.shift(1)), index=frame.index)
     frame["sigma"] = returns.groupby(frame["symbol"], sort=False).transform(
         lambda r: r.rolling(SIGMA_SESSIONS, min_periods=SIGMA_MIN).std().shift(1)
     )
