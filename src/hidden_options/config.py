@@ -30,6 +30,9 @@ ACCEPT_CI_RUNS_ENV = "HIDDEN_OPTIONS_ACCEPT_CI_RUNS"
 INTERIM_DIR = DATA_ROOT / "interim"
 # Daily bars for the FLEX underlyings, rewritten whole by `hidden-options refresh-bars`.
 BARS_PATH = DATA_ROOT / "flex_underlying_bars.parquet"
+# Split events for the bar symbols, to undo the provider's split adjustment where a price
+# meets a strike (see collect/splits.py).
+SPLITS_PATH = DATA_ROOT / "splits.parquet"
 CONFIG_DIR = PROJECT_ROOT / "configs"
 UNIVERSE_FILE = CONFIG_DIR / "universe.json"
 FUNDS_FILE = CONFIG_DIR / "funds.json"

@@ -30,6 +30,7 @@ from types import MappingProxyType
 import numpy as np
 import pandas as pd
 
+from hidden_options.collect.splits import read_bars
 from hidden_options.config import (
     ACCEPT_CI_RUNS_ENV,
     BARS_PATH,
@@ -146,7 +147,7 @@ def load_inputs(
     end = pd.Timestamp(PANEL_END)
     panel = read_panel(raw, ("equity", "index"), PANEL_READ_COLUMNS, readings["date"].min(), end)
     styles = read_panel(raw, ("equity",), STYLE_COLUMNS[:-1], None, end)
-    bars = pd.read_parquet(BARS_PATH if bars_path is None else bars_path, columns=list(BAR_COLUMNS))
+    bars = read_bars(BARS_PATH if bars_path is None else bars_path, BAR_COLUMNS)
     return ImpliedInputs(panel, styles[list(STYLE_COLUMNS)], readings, bars, names, local_only)
 
 

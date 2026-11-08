@@ -171,7 +171,7 @@ solve the sign problem: our gamma is netted for forwards but not signed.
 by option-income funds, one of the identifiable users of FLEX, predicts lower
 subsequent implied and realised volatility, which they attribute to supply pressure on
 dealers. Their variation is the market-wide time series of that selling at a monthly
-horizon. Our date fixed effects absorb exactly that variation: we ask whether an
+horizon. Our date fixed effects remove exactly that variation: we ask whether an
 underlying with more hidden gamma than usual is calmer the next day than other
 underlyings. The two results need not conflict, and ours does not test theirs.
 
@@ -1003,7 +1003,7 @@ assumes the hedge is traded in the stock. \citet{prakash2026} find listed open i
 rising after FLEX events, consistent with dealers laying some FLEX risk off in listed
 options, which this test would not see. And with underlying and date fixed effects the
 variation left is each book's movement around its own level, much of it mechanical, as
-the lead shows; persistent differences in book size across names are absorbed. That leaves effects concentrated at particular strikes and
+the lead shows; persistent differences in book size across names are taken out by the fixed effects. That leaves effects concentrated at particular strikes and
 dates, which a daily aggregate could dilute. The next test looks at the one with the
 sharpest prediction.
 

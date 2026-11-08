@@ -19,6 +19,7 @@ from hidden_options.config import (
     LOCAL_ONLY_ENV,
     PROJECT_ROOT,
     RAW_DIR,
+    SPLITS_PATH,
     load_programmes,
     load_universe,
 )
@@ -98,6 +99,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     refresh.add_argument("--verbose", action="store_true", help="Debug logging")
     refresh.set_defaults(handler=_refresh_bars)
+
+    splits = commands.add_parser(
+        "refresh-splits",
+        help="download split events for the symbols in the bars file",
+        description=(
+            "Download the split events of every symbol in the bars file and write them to "
+            "the splits file. The bars are split-adjusted and OCC strikes are not; the "
+            "events undo the adjustment wherever a price is compared with a strike."
+        ),
+    )
+    splits.add_argument(
+        "--bars", type=Path, default=BARS_PATH, help=f"Bars file. Default: {BARS_PATH}"
+    )
+    splits.add_argument(
+        "--out", type=Path, default=SPLITS_PATH, help=f"Splits file. Default: {SPLITS_PATH}"
+    )
+    splits.add_argument("--verbose", action="store_true", help="Debug logging")
+    splits.set_defaults(handler=_refresh_splits)
 
     results = commands.add_parser(
         "results",
@@ -248,6 +267,29 @@ def _backfill_flex(args: argparse.Namespace) -> int:
         # Not published yet (or a holiday), not a fault; a later run asks again.
         logging.info("%d reports not available from the source", summary.absent)
     return 1 if summary.failed else 0
+
+
+def _refresh_splits(args: argparse.Namespace) -> int:
+    """Refresh the split events. 1 if nothing could be fetched."""
+    logging.basicConfig(
+        level=logging.DEBUG if args.verbose else logging.INFO,
+        format=LOG_FORMAT,
+        stream=sys.stderr,
+    )
+    import pandas as pd
+
+    from hidden_options.collect.splits import refresh_splits
+
+    symbols = pd.read_parquet(args.bars, columns=["symbol"])["symbol"].unique()
+    try:
+        found = refresh_splits(symbols, args.out)
+    except RuntimeError as exc:
+        print(exc, file=sys.stderr)
+        return 1
+    print(
+        f"{len(found)} split events for {found['symbol'].nunique()} symbols written to {args.out}"
+    )
+    return 0
 
 
 def _refresh_bars(args: argparse.Namespace) -> int:

@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from hidden_options.collect.splits import read_bars
 from hidden_options.config import (
     ACCEPT_CI_RUNS_ENV,
     BARS_PATH,
@@ -88,7 +89,7 @@ def load_inputs(
     if not local_only and not accept:
         check_ci_runs(names, RESULT_NAME, results)
     end = pd.Timestamp(PANEL_END)
-    bars = pd.read_parquet(BARS_PATH if bars_path is None else bars_path, columns=list(BAR_COLUMNS))
+    bars = read_bars(BARS_PATH if bars_path is None else bars_path, BAR_COLUMNS)
     closes = equity_closes(bars)
     readings = earliest_readings(
         load_chains(

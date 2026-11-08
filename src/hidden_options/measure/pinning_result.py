@@ -15,6 +15,7 @@ from typing import Any
 
 import pandas as pd
 
+from hidden_options.collect.splits import read_bars
 from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR
 from hidden_options.measure.hidden_share import is_adjusted_product, is_flex_product
 from hidden_options.measure.hidden_share_data import load_reports
@@ -119,7 +120,7 @@ def pinning_analysis() -> Result:
 
 def load_inputs(raw: Path | None = None, bars_path: Path | None = None) -> PinningInputs:
     raw = RAW_DIR if raw is None else raw
-    bars = pd.read_parquet(BARS_PATH if bars_path is None else bars_path)
+    bars = read_bars(BARS_PATH if bars_path is None else bars_path)
     reports = load_reports(raw, pd.Timestamp("2024-01-01"), pd.Timestamp(PANEL_END))
     reports = reports[(reports["kind"] == "equity") & (reports["expiry"] > reports["report_date"])]
     reports = reports[reports["expiry"] <= reports["report_date"] + pd.Timedelta(days=7)]
