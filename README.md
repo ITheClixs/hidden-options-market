@@ -13,7 +13,7 @@ panel.
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
-- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset.
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset. Where the sign is known, in the 34 option-income programme names, a one-sided test leans towards dampening but is underpowered (*t* -0.82, minimum detectable effect 9.4\% of mean \|*r*\|).
 - **Pinning?** No. On 2,643 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.06). The minimum detectable pull is 0.078σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.34-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
@@ -111,7 +111,13 @@ move re-prices the book, carrying spot away from the strikes. The same re-pricin
 bias the test itself, so rows fixed in
 [`docs/log/2026-11-08-gamma-timing-spec.md`](docs/log/2026-11-08-gamma-timing-spec.md)
 before they were run price it on the day before (*t* -0.88) and add an
-implied-volatility control (*t* 1.27). Neither finds an effect.
+implied-volatility control (*t* 1.27). Neither finds an effect. In the
+34 option-income programme names, where netting leaves the funds' written calls and
+dealers are long their gamma, a one-sided test fixed in
+[`docs/log/2026-11-08-programme-gamma-spec.md`](docs/log/2026-11-08-programme-gamma-spec.md)
+gives -7.29bp per standard deviation (*t* -0.82, wild cluster bootstrap *p*
+0.22). Its minimum detectable effect is 22.15bp, 9.4\% of mean
+\|*r*\|, so the test is inconclusive.
 
 **At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
 Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date

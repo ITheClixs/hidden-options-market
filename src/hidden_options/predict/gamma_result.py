@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import time
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict
 from typing import Any
 
@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 
 from hidden_options.collect.splits import load_splits
-from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR
+from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR, load_universe
 from hidden_options.measure.flex_panel import daily_inventory, load_panel, panel_through
 from hidden_options.measure.hidden_gamma import pair_netted
 from hidden_options.measure.implied import RATE
@@ -39,6 +39,7 @@ from hidden_options.predict.gamma_timing import TIMING_COLUMNS, timing_daily, ti
 from hidden_options.predict.inference import N_PERM, SEED, holm, permutation_test
 from hidden_options.predict.panel import CONTROLS, bars_through, build_predictive_panel
 from hidden_options.predict.regressions import PredictiveRow
+from hidden_options.predict.wild import wild_cluster_test
 from hidden_options.publish.registry import ANALYSES
 from hidden_options.publish.results import Result, now_iso
 
@@ -49,6 +50,8 @@ ALPHA = 0.05
 TOP_TERCILE = 2 / 3
 # A null is "bounded" when the MDE per standard deviation is below this share of mean |r|.
 BOUNDED_SHARE = 0.02
+# Draws of the wild cluster bootstrap in the programme test.
+WILD_DRAWS = 9_999
 SECONDARY = (
     ("x_gross", OUTCOME),
     ("x_signed", OUTCOME),
@@ -137,8 +140,12 @@ def gamma_predictive_result(
     n_perm: int = N_PERM,
     seed: int = SEED,
     splits: pd.DataFrame | None = None,
+    groups: Mapping[str, Sequence[str]] | None = None,
 ) -> Result:
-    """The tests of record, the descriptive rows and the verdict the specification sets."""
+    """The tests of record, the descriptive rows and the verdict the specification sets.
+
+    With `groups` (programme and control single names), also the one-sided test of
+    `docs/log/2026-11-08-programme-gamma-spec.md`."""
     started = time.perf_counter()
     panel = gamma_panel(gamma, flex_panel, bars, splits)
     h1 = _row(panel, PRIMARY, OUTCOME, [PRIMARY])
@@ -153,6 +160,7 @@ def gamma_predictive_result(
         "secondary": [asdict(_row(panel, x, y, [x])) for x, y in SECONDARY],
         "verdict": _verdict(h1, adjusted["h1"], mean_abs),
         "timing": _timing(panel) if "x_pre" in panel else None,
+        "programme": None if groups is None else _programme(panel, groups, seed),
         "sample": _sample(panel, used, gamma, mean_abs),
         "settings": {
             "alpha": ALPHA,
@@ -177,8 +185,17 @@ def gamma_predictive_result(
 def gamma_predictive() -> Result:
     """The test on every FLEX report on disk up to PANEL_END and the refreshed bars."""
     gamma = walk_gamma(load_position_inputs())
+    universe = load_universe()
+    groups = {
+        "programme": universe.treated_single_name,
+        "control": universe.control_single_name,
+    }
     return gamma_predictive_result(
-        gamma, load_panel(RAW_DIR), pd.read_parquet(BARS_PATH), splits=load_splits()
+        gamma,
+        load_panel(RAW_DIR),
+        pd.read_parquet(BARS_PATH),
+        splits=load_splits(),
+        groups=groups,
     )
 
 
@@ -199,6 +216,36 @@ TIMING_ROWS = {
 def _timing(panel: pd.DataFrame) -> dict[str, Any]:
     return {
         key: asdict(_row(panel, name, OUTCOME, regs)) for key, (name, regs) in TIMING_ROWS.items()
+    }
+
+
+def _programme(
+    panel: pd.DataFrame, groups: Mapping[str, Sequence[str]], seed: int
+) -> dict[str, Any]:
+    """The one-sided test in the programme names, and its descriptive rows."""
+    base = panel.dropna(subset=[OUTCOME, *CONTROLS, PRIMARY])
+
+    def run(names: Sequence[str], predictor: str = PRIMARY) -> dict[str, Any]:
+        rows = base[base["symbol"].isin(set(names))]
+        found = wild_cluster_test(
+            rows, OUTCOME, predictor, list(CONTROLS), n_draws=WILD_DRAWS, seed=seed
+        )
+        return {**found, "mean_abs_ret": float(rows[OUTCOME].mean())}
+
+    test = run(groups["programme"])
+    share = test["mde80"] / test["mean_abs_ret"]
+    if test["p_value"] < ALPHA and test["coefficient"] < 0:
+        kind = "finding"
+    elif share < BOUNDED_SHARE:
+        kind = "bounded_null"
+    else:
+        kind = "inconclusive"
+    two_way = _row(base[base["symbol"].isin(set(groups["programme"]))], PRIMARY, OUTCOME, [PRIMARY])
+    return {
+        "test": {**test, "two_way_t": two_way.t_stat, "mde_share": share, "kind": kind},
+        "control": run(groups["control"]),
+        "pre": run(groups["programme"], "x_pre") if "x_pre" in base else None,
+        "names_listed": len(groups["programme"]),
     }
 
 

@@ -13,7 +13,7 @@ panel.
 
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
 - **Convexity.** Across the {{GammaUnderlyings}} followed underlyings with stored listed chains, over {{GammaSettlements}} settlements, FLEX is {{GammaMedianGross}} of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is {{GammaMedianNetted}} ({{GammaMedianBoth}} if listed pairs are netted too). It stays large in SPY ({{GammaSPYNetted}} FLEX-netted) and NDX ({{GammaNDXNetted}}).
-- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset.
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset. Where the sign is known, in the {{GProgNames}} option-income programme names, a one-sided test leans towards dampening but is underpowered (*t* {{GProgT}}, minimum detectable effect {{GProgMDEShare}} of mean \|*r*\|).
 - **Pinning?** No. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The minimum detectable pull is {{PinMDE}}σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
@@ -111,7 +111,13 @@ move re-prices the book, carrying spot away from the strikes. The same re-pricin
 bias the test itself, so rows fixed in
 [`docs/log/2026-11-08-gamma-timing-spec.md`](docs/log/2026-11-08-gamma-timing-spec.md)
 before they were run price it on the day before (*t* {{GPredPreT}}) and add an
-implied-volatility control (*t* {{GPredIvT}}). Neither finds an effect.
+implied-volatility control (*t* {{GPredIvT}}). Neither finds an effect. In the
+{{GProgNames}} option-income programme names, where netting leaves the funds' written calls and
+dealers are long their gamma, a one-sided test fixed in
+[`docs/log/2026-11-08-programme-gamma-spec.md`](docs/log/2026-11-08-programme-gamma-spec.md)
+gives {{GProgBeta}}bp per standard deviation (*t* {{GProgT}}, wild cluster bootstrap *p*
+{{GProgWildP}}). Its minimum detectable effect is {{GProgMDE}}bp, {{GProgMDEShare}} of mean
+\|*r*\|, so the test is {{GProgVerdict}}.
 
 **At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
 Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date

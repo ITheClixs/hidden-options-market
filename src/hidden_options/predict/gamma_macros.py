@@ -74,7 +74,36 @@ def gamma_predictive_macros(values: Mapping[str, Any]) -> dict[str, str]:
         out[f"GPred{stem}P"] = p_value(row["p_value"])
         out[f"GPred{stem}MDE"] = bp(row["mde80"])
         out[f"GPred{stem}Days"] = formats.count(row["n_obs"])
+    if values.get("programme"):
+        out.update(programme_macros(values["programme"]))
     return out
 
 
-__all__ = ["gamma_predictive_macros"]
+def programme_macros(programme: Mapping[str, Any]) -> dict[str, str]:
+    """The one-sided test in the programme names (docs/log/2026-11-08-programme-gamma-spec.md)."""
+    test, control, pre = programme["test"], programme["control"], programme["pre"]
+    out = {
+        "GProgBeta": bp(test["coefficient"]),
+        "GProgT": t_stat(test["t_stat"]),
+        "GProgTwoWayT": t_stat(test["two_way_t"]),
+        "GProgWildP": p_value(test["p_value"]),
+        "GProgMDE": bp(test["mde80"]),
+        "GProgMDEShare": formats.percent(test["mde_share"], 1),
+        "GProgVerdict": VERDICT_WORDS[test["kind"]],
+        "GProgNames": formats.count(test["clusters"]),
+        "GProgListed": formats.count(programme["names_listed"]),
+        "GProgDays": formats.count(test["n_obs"]),
+        "GProgDraws": formats.count(test["n_draws"]),
+        "GProgControlBeta": bp(control["coefficient"]),
+        "GProgControlT": t_stat(control["t_stat"]),
+        "GProgControlWildP": p_value(control["p_value"]),
+        "GProgControlNames": formats.count(control["clusters"]),
+    }
+    if pre is not None:
+        out["GProgPreBeta"] = bp(pre["coefficient"])
+        out["GProgPreT"] = t_stat(pre["t_stat"])
+        out["GProgPreWildP"] = p_value(pre["p_value"])
+    return out
+
+
+__all__ = ["gamma_predictive_macros", "programme_macros"]

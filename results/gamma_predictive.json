@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T11:36:04+00:00",
+  "generated_at": "2026-11-08T13:25:49+00:00",
   "inputs": {
     "bars": "data/flex_underlying_bars.parquet",
     "first_date": "2024-12-09",
@@ -60,7 +60,25 @@
     "GPredTopHolm": "0.91",
     "GPredTopT": "0.11",
     "GPredUnderlyings": "1,403",
-    "GPredVerdict": "a bounded null"
+    "GPredVerdict": "a bounded null",
+    "GProgBeta": "-7.29",
+    "GProgControlBeta": "7.27",
+    "GProgControlNames": "27",
+    "GProgControlT": "1.56",
+    "GProgControlWildP": "0.94",
+    "GProgDays": "15,315",
+    "GProgDraws": "9,999",
+    "GProgListed": "34",
+    "GProgMDE": "22.15",
+    "GProgMDEShare": "9.4\\%",
+    "GProgNames": "34",
+    "GProgPreBeta": "-7.16",
+    "GProgPreT": "-0.84",
+    "GProgPreWildP": "0.22",
+    "GProgT": "-0.82",
+    "GProgTwoWayT": "-0.82",
+    "GProgVerdict": "inconclusive",
+    "GProgWildP": "0.22"
   },
   "name": "gamma_predictive",
   "values": {
@@ -96,6 +114,48 @@
       "predictor": "x_net_top",
       "std_error": 0.00017341197628584378,
       "t_stat": 0.11263036328321704
+    },
+    "programme": {
+      "control": {
+        "clusters": 27,
+        "coefficient": 0.0007268243144858368,
+        "mde80": 0.0011571518407354389,
+        "mean_abs_ret": 0.015001403121259459,
+        "n_draws": 9999,
+        "n_obs": 12397,
+        "p_value": 0.9428,
+        "seed": 20261023,
+        "std_error": 0.0004653784597248656,
+        "t_stat": 1.5617919121472434
+      },
+      "names_listed": 34,
+      "pre": {
+        "clusters": 34,
+        "coefficient": -0.0007157243968752996,
+        "mde80": 0.002119846148107814,
+        "mean_abs_ret": 0.023592733525449452,
+        "n_draws": 9999,
+        "n_obs": 15176,
+        "p_value": 0.2193,
+        "seed": 20261023,
+        "std_error": 0.0008525508066712358,
+        "t_stat": -0.8395093773587857
+      },
+      "test": {
+        "clusters": 34,
+        "coefficient": -0.0007288247402606494,
+        "kind": "inconclusive",
+        "mde80": 0.0022150508595643378,
+        "mde_share": 0.09388699521295255,
+        "mean_abs_ret": 0.023592733525449452,
+        "n_draws": 9999,
+        "n_obs": 15315,
+        "p_value": 0.2235,
+        "seed": 20261023,
+        "std_error": 0.0008908398370443181,
+        "t_stat": -0.8181321826365421,
+        "two_way_t": -0.8192475880300034
+      }
     },
     "sample": {
       "base_underlying_days": 377332,

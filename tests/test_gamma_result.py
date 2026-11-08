@@ -169,3 +169,20 @@ def test_timing_rows_recover_a_planted_effect_and_take_the_iv_control():
     assert found["pre"]["p_value"] < 0.001
     assert abs(found["iv_control"]["t_stat"]) < 3
     assert found["lead_fixed"]["p_value"] > 0.001
+
+
+def test_programme_test_finds_a_negative_effect_only_in_the_programme_names(monkeypatch):
+    from hidden_options.predict import gamma_result
+
+    monkeypatch.setattr(gamma_result, "WILD_DRAWS", 199)
+    frame = planted(0.0, seed=7)
+    programme = [f"S{i}" for i in range(20)]
+    inside = frame["symbol"].isin(programme)
+    frame.loc[inside, "abs_ret_next"] -= 0.004 * frame.loc[inside, PRIMARY]
+    found = gamma_result._programme(
+        frame, {"programme": programme, "control": [f"S{i}" for i in range(20, 40)]}, seed=1
+    )
+    assert found["test"]["kind"] == "finding"
+    assert found["test"]["clusters"] == 20
+    assert found["control"]["p_value"] > 0.05
+    assert found["pre"] is None
