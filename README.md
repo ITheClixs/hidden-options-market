@@ -12,11 +12,11 @@ panel.
 **In brief**
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
-- **Convexity.** Counting every contract, FLEX is 18.0\% of the median underlying's option gamma, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is 2.6\%. It stays large in SPY (18.3\%) and NDX (20.5\%).
-- **Does it move prices?** Not at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.53, 347,687 underlying-days). The minimum detectable effect is 2.00bp per standard deviation, 1.0\% of mean \|*r*\|. The hedge a 1% move calls for is 5.84bp of a day's dollar volume in the median case.
-- **Pinning?** No. On the 2,324 dates when only FLEX options expire, stocks do not close nearer the largest FLEX strike (*t* -0.62). The minimum detectable pull is 0.076σ.
+- **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is 2.6\%. It stays large in SPY (18.3\%) and NDX (20.5\%).
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.53, 347,687 underlying-days). The minimum detectable effect is 2.00bp per standard deviation, 1.0\% of mean \|*r*\|. The hedge a 1% move calls for is 5.84bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset.
+- **Pinning?** No. On 2,324 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -0.62). The minimum detectable pull is 0.076σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.35-fold.
-- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. Each test is specified in a dated log entry before it is run.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on 14 August 2026, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -147,7 +147,7 @@ points.
 | near-dated share change | next-day \|r\| | -1.67 | -0.44 | 10.74 | 0.66 | 0.67 |
 | put share | next-day \|r\| | 0.56 | 0.22 | 7.19 | 0.83 | 0.61 |
 | inventory innovation | next-day r² | 0.06 | 0.47 | 0.34 | 0.64 | 0.71 |
-| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **1.02** | **1.86** | 1.53 | 0.063 | 0.057 |
+| **lead: innovation dated *after* the outcome** | next-day \|r\| | **1.02** | **1.86** | 1.53 | 0.063 | 0.057 |
 
 ![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 
@@ -155,9 +155,9 @@ The permutation *p* comes from 1,000 re-estimations with the predictor
 shuffled across underlyings within each date, which treats underlyings as exchangeable
 within a date. Among the genuine predictors the smallest permutation *p* is
 0.45 and the smallest clustered *p* 0.50. The
-placebo is inventory from two dates later, dated after the outcome, so it cannot predict
-it; its clustered *p* is 0.063, and whatever association it shows can
-only run from volatility to later inventory, or through something common to both. The
+lead row is inventory from two dates later. Its change includes contracts created
+during the outcome's own session, so it is a test of reverse flow, volatility moving
+later inventory, and not a placebo; its clustered *p* is 0.063. The
 largest |*t*| among the genuine estimates, across every specification below, is
 0.87.
 
@@ -171,7 +171,7 @@ innovation, 0.8\% of the mean next-day |r| of 201 basis points.
 
 Loading the panel from later start dates moves the estimates, not the conclusion:
 
-| panel loaded from | underlying-days | inventory innovation | placebo |
+| panel loaded from | underlying-days | inventory innovation | lead |
 |---|---:|---:|---:|
 | 2024-12-02 (table above) | 377,332 | -0.37 (*t* -0.68) | 1.02 (*t* 1.86) |
 | 2025-07-23 | 264,825 | -0.19 (*t* -0.27) | 0.98 (*t* 1.38) |

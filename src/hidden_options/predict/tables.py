@@ -19,7 +19,7 @@ ROW_LABELS = {
     "near_share": "Near-dated share change",
     "put_share": "Put share",
     "innovation_squared": "Inventory innovation",
-    "placebo": "Placebo: innovation at $T+2$",
+    "placebo": "Lead: innovation at $T+2$",
 }
 OUTCOME_LABELS = {"abs_ret_next": "$|r_{t+1}|$", "sq_ret_next": "$r_{t+1}^2$"}
 
@@ -64,7 +64,7 @@ def predictive_table(results: Mapping[str, Result]) -> str:
     notes = (
         f"{_SPECIFICATION} {formats.count(sample['underlying_days'])} underlying-days, "
         f"{formats.count(sample['underlyings'])} underlyings, "
-        f"{formats.count(sample['dates'])} activity dates; the placebo row loses the last "
+        f"{formats.count(sample['dates'])} activity dates; the lead row loses the last "
         "two dates. Coefficients and MDE80, the effect detectable with 80\\% power at the "
         "5\\% level, are multiplied by $10^4$, which for $|r|$ is basis points. Clust.\\ $p$ "
         "uses the clustered errors; Perm.\\ $p$ comes from "
@@ -100,18 +100,18 @@ def windows_table(results: Mapping[str, Result]) -> str:
         Column("days", "Underlying-days", ",d"),
         Column("beta", "Innovation $10^4\\beta$", _SIGNED),
         Column("t", "$t$", _SIGNED),
-        Column("placebo_beta", "Placebo $10^4\\beta$", _SIGNED),
+        Column("placebo_beta", "Lead $10^4\\beta$", _SIGNED),
         Column("placebo_t", "$t$", _SIGNED),
     ]
     notes = (
-        "Next-day $|r|$ on the inventory innovation and on its placebo, with the "
+        "Next-day $|r|$ on the inventory innovation and on its lead, with the "
         "specification of Table~\\ref{tab:pred}, rebuilding the panel from each start date. "
         "The first row is the full panel."
     )
     return render_table(
         rows,
         columns,
-        caption="The main estimate and its placebo with the panel loaded from later dates.",
+        caption="The main estimate and its lead with the panel loaded from later dates.",
         label="tab:windows",
         notes=notes,
     )

@@ -212,7 +212,7 @@ class TestTables:
         assert "\\label{tab:pred}" in tex
         body = tex.split("\\midrule")[1].split("\\bottomrule")[0]
         assert body.count("\\\\") == 6
-        assert "Placebo" in body
+        assert "Lead: innovation" in body
         assert "60 re-estimations" in tex
 
     def test_both_p_values_print_as_the_text_cites_them(self, result):

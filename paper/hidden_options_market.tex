@@ -33,13 +33,14 @@ assemble OCC's daily FLEX open-interest report into a panel of \PanelDates{} act
 dates and \PanelUnderlyings{} underlyings, \PanelStart{} to \PanelEnd{}. The market is
 large, \ValueEnd{} of mark value on the last date, and in a census of
 \HiddenCensusUnderlyings{} underlyings it is at least a tenth of option open interest for
-\HiddenCensusTen{}. Counted gross, it is \GammaMedianGross{} of the median underlying's
-option gamma, but most of that sits in same-strike pairs, forwards with no convexity:
-netted, the share is \GammaMedianBoth{}, and large only in a few products such as SPY
+\HiddenCensusTen{}. Among the \GammaUnderlyings{} underlyings with stored listed chains,
+counted gross, it is \GammaMedianGross{} of the median one's option gamma, but most of that sits in same-strike call and put pairs, which are forwards
+with no net gamma where the holders' sides are known: netted, the share is \GammaMedianBoth{}, and large only in a few products such as SPY
 and NDX. In tests specified in advance, netted FLEX dollar gamma does not predict
 next-day volatility (minimum detectable effect \GPredMDEShare{} of mean absolute return
 per standard deviation), and stocks do not pin to large FLEX strikes on dates when only
-FLEX options expire. The hidden books are small next to trading. Two measurement results travel
+FLEX options expire. Both tests are unsigned and cover equity names: they rule out a net
+effect of one sign within an underlying, not books on opposite sides that offset. Two measurement results travel
 further: off-grid strikes miss \FlexOnGridShare{} of FLEX series, and strike notional
 overstates delta exposure at least \PosGrossMedian{}-fold for the median underlying.
 \vspace{0.8em}
@@ -67,9 +68,6 @@ single names outside the S\&P 500 between March 2025 and March 2026, with event-
 designs on listed open interest, implied volatility and returns. We use the whole daily
 report, for every underlying, over twenty-three months, and ask what the market is and
 whether its convexity matters.
-
-This paper assembles that report into a panel and asks what is in it and whether it
-matters.
 
 \paragraph{What the market looks like.} It is large, and far larger than when the panel
 begins, though it has barely grown in the latest cycles. Across \PanelDates{} activity
@@ -127,11 +125,12 @@ $T+1$, should carry information about what follows. In a test fixed in advance, 
 \GPredDays{} underlying-days, netted FLEX dollar gamma scaled by dollar volume does not
 predict next-day absolute returns ($t=\GPredT$, permutation $p=\GPredPermP$), and the
 minimum detectable effect is \GPredMDE{} basis points per standard deviation,
-\GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). The reason is scale: the
-hedge a 1\% move would call for is \GPredMedianX{} basis points of a day's dollar volume
-in the median underlying-day. Gross open interest does not predict either, but that
+\GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). The hedge a 1\% move would
+call for is small, \GPredMedianX{} basis points of a day's dollar volume in the median
+underlying-day, though the measure is unsigned, so books on opposite sides within an
+underlying could offset. Gross open interest does not predict either, but that
 test counts contracts, most of them forwards, and is the weaker of the two. Nor do
-stocks pin to large FLEX strikes on the \PinEvents{} dates when only FLEX options expire
+stocks pin to large FLEX strikes on the \PinEvents{} expiries, on \PinDates{} dates, when only FLEX options expire
 (Section~\ref{sec:pinning}). That design needs no listed data at all: the minimum
 detectable pull is \PinMDE{} daily standard deviations.
 
@@ -170,10 +169,11 @@ show that a natural way to find it without the authoritative source fails. We do
 solve the sign problem: our gamma is netted for forwards but not signed.
 \citet{park2025} find, from the funds' monthly N-PORT filings, that aggregate call selling
 by option-income funds, one of the identifiable users of FLEX, predicts lower
-subsequent volatility. Our test asks a narrower question at a finer grain, whether the
-hidden book's gamma moves the next day's price, and finds no effect at that horizon.
-The two results need not conflict: theirs is about supply pressure over weeks and the
-option market's pricing of it, ours about daily hedging flow in the underlying.
+subsequent implied and realised volatility, which they attribute to supply pressure on
+dealers. Their variation is the market-wide time series of that selling at a monthly
+horizon. Our date fixed effects absorb exactly that variation: we ask whether an
+underlying with more hidden gamma than usual is calmer the next day than other
+underlyings. The two results need not conflict, and ours does not test theirs.
 
 Our gamma test belongs with work on whether option hedging moves the underlying.
 \citet{ni2021} find that option trading affects underlying stock prices broadly through
@@ -956,7 +956,8 @@ The minimum detectable effect at 80\% power is $\PredInnovMDE\times10^{-4}$ per 
 of innovation, \PredMDEShare{} of the mean next-day absolute return. The bound is on
 contracts. Most FLEX contracts are forwards (Section~\ref{sec:gamma}), which carry no
 convexity, and an unsigned count cannot tell dealer-long from dealer-short books, so the
-null does not reach the hedging channel. The next test does.
+null does not reach the hedging channel. The next test removes the forwards; it is still
+unsigned.
 
 \subsection{Gamma in place of contracts}
 \label{sec:gamma-pred}
@@ -992,10 +993,17 @@ $t=\GPredLeadT$, and it is negative. It is mechanical: a large move carries spot
 from the strikes where gamma is largest, and raises the dollar volume in the
 denominator. Volatility moves measured hidden gamma, not the other way round.
 
-At daily resolution, then, hidden gamma does not move the underlying: an effect of
+At daily resolution, then, netted hidden gamma does not predict the underlying's
+volatility. The measure is unsigned, so this bounds the net of dealer-long and
+dealer-short books in each underlying, not either alone. An effect of
 $\GPredMDE\times10^{-4}$ on next-day absolute return per standard deviation of hedging
 demand, \GPredSdX{} basis points of the day's dollar volume per 1\% move, would have been
-found found four times in five. That leaves effects concentrated at particular strikes and
+found four times in five. Two further limits apply. Scaling by the stock's dollar volume
+assumes the hedge is traded in the stock. \citet{prakash2026} find listed open interest
+rising after FLEX events, consistent with dealers laying some FLEX risk off in listed
+options, which this test would not see. And with underlying and date fixed effects the
+variation left is each book's movement around its own level, much of it mechanical, as
+the lead shows; persistent differences in book size across names are absorbed. That leaves effects concentrated at particular strikes and
 dates, which a daily aggregate could dilute. The next test looks at the one with the
 sharpest prediction.
 
@@ -1042,9 +1050,14 @@ small next to trading: the pin strike's open interest, in shares, is a median
 \PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, as an
 option-income fund's written calls would leave it, the estimate leans towards pinning
 ($t=\PinCallsT$), and where it is mostly puts, away ($t=\PinPutsT$). Neither is
-distinguishable from zero, and both are descriptive. The same construction on Friday
-FLEX expiries, when listed options expire too, gives $\PinFridayMean\sigma$
-($t=\PinFridayT$).
+distinguishable from zero, and both are descriptive. If dealers are long the calls and
+short the puts, the two push closes in opposite directions and could offset in the
+pooled estimate, which is why the test bounds only a net effect. The same construction on
+Friday FLEX expiries, when listed options expire too, gives $\PinFridayMean\sigma$
+($t=\PinFridayT$). That is not a positive control: its pin strike is still the FLEX one,
+and we have not run the design on listed strikes, where pinning is documented. The
+pinning sample also leaves out the names with listed weekday expiries, which include the
+largest FLEX books.
 
 \section{Limitations}
 
@@ -1052,6 +1065,10 @@ FLEX expiries, when listed options expire too, gives $\PinFridayMean\sigma$
 \item \textbf{No dealer positions.} Open interest does not identify who is long, and
 is aggregated across holders. Netting same-strike pairs removes forwards; it does not
 sign what remains, so no measure here is a dealer position.
+\item \textbf{Equity names, within-underlying variation, no positive control.} Index
+products have no bars and are in neither test, and the pinning sample excludes the names
+with listed weekday expiries. Fixed effects leave each book's movement around its own
+level. Neither design has been run on listed strikes, where effects are documented.
 \item \textbf{A short panel.} \PanelMonths{} months, set by how far back OCC's rolling
 retention reached when collection began. That is enough to date one turn in growth, and
 too short to say whether the levelling of the latest cycles will last.
@@ -1088,13 +1105,16 @@ gamma figure built from listed chains misses that part, and the rest of what it 
 is forwards.
 
 Whether hidden convexity moves the visible market is a separate question, and at daily
-resolution the answer is no. Netted FLEX dollar gamma, scaled by dollar volume, does not
+resolution we find no effect. Netted FLEX dollar gamma, scaled by dollar volume, does not
 predict next-day volatility in a test specified in advance; an effect of
 \GPredMDEShare{} of the mean daily absolute return per standard deviation would have
 been found four times in five. The hedging such a book calls for is a small fraction of
-a day's trading. Gross inventory does not predict either. And at the one place a hidden
+a day's trading, though an unsigned measure cannot exclude books that offset within an
+underlying. Gross inventory does not predict either. And at the one place a hidden
 book could most plausibly move a price, its largest strike on a date when nothing else
-expires, stocks do not pin. Intraday effects and the option surface remain open.
+expires, stocks without listed weekday expiries do not pin. What these tests rule out is
+a net effect of one sign within equity underlyings at daily resolution; signed books,
+index products and the option surface are what is left. Intraday effects and the option surface remain open.
 
 Two measurement findings travel further than the setting. A natural strike-based rule
 for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the

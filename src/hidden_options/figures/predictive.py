@@ -34,7 +34,7 @@ STEM = "placebo"
 FIGURE_LABELS = {
     "innovation": "Inventory innovation",
     "change": "Inventory change",
-    "placebo": "Placebo: innovation at $T+2$",
+    "placebo": "Lead: innovation at $T+2$",
 }
 _BINS = 30
 

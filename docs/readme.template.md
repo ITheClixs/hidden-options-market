@@ -12,11 +12,11 @@ panel.
 **In brief**
 
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
-- **Convexity.** Counting every contract, FLEX is {{GammaMedianGross}} of the median underlying's option gamma, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is {{GammaMedianBoth}}. It stays large in SPY ({{GammaSPYBoth}}) and NDX ({{GammaNDXBoth}}).
-- **Does it move prices?** Not at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case.
-- **Pinning?** No. On the {{PinEvents}} dates when only FLEX options expire, stocks do not close nearer the largest FLEX strike (*t* {{PinT}}). The minimum detectable pull is {{PinMDE}}σ.
+- **Convexity.** Across the {{GammaUnderlyings}} followed underlyings with stored listed chains, over {{GammaSettlements}} settlements, FLEX is {{GammaMedianGross}} of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is {{GammaMedianBoth}}. It stays large in SPY ({{GammaSPYBoth}}) and NDX ({{GammaNDXBoth}}).
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset.
+- **Pinning?** No. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The minimum detectable pull is {{PinMDE}}σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
-- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. Each test is specified in a dated log entry before it is run.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on {{HiddenCensusDate}}, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -147,7 +147,7 @@ points.
 | near-dated share change | next-day \|r\| | {{PredNearBeta}} | {{PredNearT}} | {{PredNearMDE}} | {{PredNearClusterP}} | {{PredNearPermP}} |
 | put share | next-day \|r\| | {{PredPutBeta}} | {{PredPutT}} | {{PredPutMDE}} | {{PredPutClusterP}} | {{PredPutPermP}} |
 | inventory innovation | next-day r² | {{PredInnovSqBeta}} | {{PredInnovSqT}} | {{PredInnovSqMDE}} | {{PredInnovSqClusterP}} | {{PredInnovSqPermP}} |
-| **placebo: innovation dated *after* the outcome** | next-day \|r\| | **{{PredPlaceboBeta}}** | **{{PredPlaceboT}}** | {{PredPlaceboMDE}} | {{PredPlaceboClusterP}} | {{PredPlaceboPermP}} |
+| **lead: innovation dated *after* the outcome** | next-day \|r\| | **{{PredPlaceboBeta}}** | **{{PredPlaceboT}}** | {{PredPlaceboMDE}} | {{PredPlaceboClusterP}} | {{PredPlaceboPermP}} |
 
 ![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 
@@ -155,9 +155,9 @@ The permutation *p* comes from {{PredPermutations}} re-estimations with the pred
 shuffled across underlyings within each date, which treats underlyings as exchangeable
 within a date. Among the genuine predictors the smallest permutation *p* is
 {{PredMinGenuinePermP}} and the smallest clustered *p* {{PredMinGenuineClusterP}}. The
-placebo is inventory from two dates later, dated after the outcome, so it cannot predict
-it; its clustered *p* is {{PredPlaceboClusterP}}, and whatever association it shows can
-only run from volatility to later inventory, or through something common to both. The
+lead row is inventory from two dates later. Its change includes contracts created
+during the outcome's own session, so it is a test of reverse flow, volatility moving
+later inventory, and not a placebo; its clustered *p* is {{PredPlaceboClusterP}}. The
 largest |*t*| among the genuine estimates, across every specification below, is
 {{PredMaxAbsT}}.
 
@@ -171,7 +171,7 @@ innovation, {{PredMDEShare}} of the mean next-day |r| of {{PredMeanAbsRet}} basi
 
 Loading the panel from later start dates moves the estimates, not the conclusion:
 
-| panel loaded from | underlying-days | inventory innovation | placebo |
+| panel loaded from | underlying-days | inventory innovation | lead |
 |---|---:|---:|---:|
 | {{PredWindowOneStart}} (table above) | {{PredWindowOneDays}} | {{PredWindowOneBeta}} (*t* {{PredWindowOneT}}) | {{PredWindowOnePlaceboBeta}} (*t* {{PredWindowOnePlaceboT}}) |
 | {{PredWindowTwoStart}} | {{PredWindowTwoDays}} | {{PredWindowTwoBeta}} (*t* {{PredWindowTwoT}}) | {{PredWindowTwoPlaceboBeta}} (*t* {{PredWindowTwoPlaceboT}}) |

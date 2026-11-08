@@ -111,7 +111,7 @@ class TestNullFigure:
         )
         assert (-1.5, 0.7) in spans  # the innovation's interval, times 10^4
         labels = [tick.get_text() for tick in bottom.get_yticklabels()]
-        assert labels[0] == "Inventory innovation" and labels[-1].startswith("Placebo")
+        assert labels[0] == "Inventory innovation" and labels[-1].startswith("Lead")
 
 
 class TestBuilder:
