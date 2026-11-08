@@ -18,6 +18,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from hidden_options.collect.splits import load_splits
 from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR
 from hidden_options.measure.flex_panel import daily_inventory, load_panel, panel_through
 from hidden_options.measure.hidden_gamma import pair_netted
@@ -34,6 +35,7 @@ from hidden_options.predict.gamma_panel import (
     range_outcome,
     standardise,
 )
+from hidden_options.predict.gamma_timing import TIMING_COLUMNS, timing_daily, timing_predictors
 from hidden_options.predict.inference import N_PERM, SEED, holm, permutation_test
 from hidden_options.predict.panel import CONTROLS, bars_through, build_predictive_panel
 from hidden_options.predict.regressions import PredictiveRow
@@ -59,11 +61,13 @@ logger = logging.getLogger(__name__)
 
 
 def walk_gamma(inputs: PositionsInputs) -> pd.DataFrame:
-    """`aggregate_gamma` on every report date, each priced at its own date's spots."""
+    """`aggregate_gamma` on every report date, each priced at its own date's spots, with the
+    timing rows of `gamma_timing.timing_daily` alongside."""
     spots = inputs.spots.assign(date=pd.to_datetime(inputs.spots["date"]))
     by_day = dict(iter(spots.groupby("date", sort=False)))
     frames = []
-    for day in inputs.dates:
+
+    def priced_on(day: pd.Timestamp) -> pd.DataFrame:
         rows = inputs.read_day(day).reset_index(drop=True)
         rows = rows.assign(
             expiry=pd.to_datetime(rows["expiry"]).astype("datetime64[ns]"),
@@ -74,12 +78,23 @@ def walk_gamma(inputs: PositionsInputs) -> pd.DataFrame:
         spot = {} if today is None else dict(zip(today["underlying"], today["spot"], strict=True))
         netted = pair_netted(rows.assign(date=rows["report_date"]))["netted_oi"].to_numpy()
         priced = priced_rows(rows, spot, RATE, inputs.domain)
-        frames.append(aggregate_gamma(priced.assign(date=priced["report_date"], netted_oi=netted)))
-    return pd.concat(frames, ignore_index=True)
+        priced = priced.assign(date=priced["report_date"], netted_oi=netted)
+        frames.append(aggregate_gamma(priced))
+        return priced
+
+    timing = timing_daily(inputs.dates, priced_on)
+    gamma = pd.concat(frames, ignore_index=True)
+    return gamma.merge(timing, on=["date", "underlying"], how="left")
 
 
-def gamma_panel(gamma: pd.DataFrame, flex_panel: pd.DataFrame, bars: pd.DataFrame) -> pd.DataFrame:
-    """The predictive panel with the gamma predictors, standardised on the main sample."""
+def gamma_panel(
+    gamma: pd.DataFrame,
+    flex_panel: pd.DataFrame,
+    bars: pd.DataFrame,
+    splits: pd.DataFrame | None = None,
+) -> pd.DataFrame:
+    """The predictive panel with the gamma predictors, standardised on the main sample, and
+    the timing predictors where `gamma` carries them, each standardised on its own."""
     flex_panel = panel_through(flex_panel, PANEL_END)
     kinds = flex_panel.groupby("kind")["underlying"].unique()
     daily = daily_inventory(flex_panel)
@@ -97,6 +112,20 @@ def gamma_panel(gamma: pd.DataFrame, flex_panel: pd.DataFrame, bars: pd.DataFram
     medians = panel[sample].groupby("symbol")["x_net_raw"].median()
     top = medians[medians >= medians.quantile(TOP_TERCILE)].index
     panel[INTERACTION] = panel[PRIMARY] * panel["symbol"].isin(top)
+    if set(TIMING_COLUMNS) <= set(gamma.columns):
+        panel = _with_timing(panel, gamma, bars, splits)
+    return panel
+
+
+def _with_timing(
+    panel: pd.DataFrame, gamma: pd.DataFrame, bars: pd.DataFrame, splits: pd.DataFrame | None
+) -> pd.DataFrame:
+    splits = pd.DataFrame(columns=["symbol", "session", "ratio"]) if splits is None else splits
+    timing = timing_predictors(gamma[list(TIMING_COLUMNS)], bars, splits)
+    panel = panel.merge(timing, on=["symbol", "date"], how="left")
+    base = panel[[OUTCOME, *CONTROLS]].notna().all(axis=1)
+    for raw in ("x_pre_raw", "x_lead_fixed_raw"):
+        panel[raw.removesuffix("_raw")] = standardise(panel[raw].where(base))
     return panel
 
 
@@ -107,10 +136,11 @@ def gamma_predictive_result(
     *,
     n_perm: int = N_PERM,
     seed: int = SEED,
+    splits: pd.DataFrame | None = None,
 ) -> Result:
     """The tests of record, the descriptive rows and the verdict the specification sets."""
     started = time.perf_counter()
-    panel = gamma_panel(gamma, flex_panel, bars)
+    panel = gamma_panel(gamma, flex_panel, bars, splits)
     h1 = _row(panel, PRIMARY, OUTCOME, [PRIMARY])
     h2 = _row(panel, INTERACTION, OUTCOME, [PRIMARY, INTERACTION])
     adjusted = holm({"h1": h1.p_value, "h2": h2.p_value})
@@ -122,6 +152,7 @@ def gamma_predictive_result(
         "h2": {**asdict(h2), "holm_p": adjusted["h2"]},
         "secondary": [asdict(_row(panel, x, y, [x])) for x, y in SECONDARY],
         "verdict": _verdict(h1, adjusted["h1"], mean_abs),
+        "timing": _timing(panel) if "x_pre" in panel else None,
         "sample": _sample(panel, used, gamma, mean_abs),
         "settings": {
             "alpha": ALPHA,
@@ -146,12 +177,29 @@ def gamma_predictive_result(
 def gamma_predictive() -> Result:
     """The test on every FLEX report on disk up to PANEL_END and the refreshed bars."""
     gamma = walk_gamma(load_position_inputs())
-    return gamma_predictive_result(gamma, load_panel(RAW_DIR), pd.read_parquet(BARS_PATH))
+    return gamma_predictive_result(
+        gamma, load_panel(RAW_DIR), pd.read_parquet(BARS_PATH), splits=load_splits()
+    )
 
 
 def _row(panel: pd.DataFrame, name: str, outcome: str, regressors: Sequence[str]) -> PredictiveRow:
     est = fit(panel, outcome, [*regressors, *CONTROLS], entity="symbol", time="date")
     return PredictiveRow.from_estimate(est[name], outcome, placebo=name.endswith("_lead"))
+
+
+# The robustness rows of docs/log/2026-11-08-gamma-timing-spec.md: (predictor, regressors).
+TIMING_ROWS = {
+    "pre": ("x_pre", ["x_pre"]),
+    "iv_control": (PRIMARY, [PRIMARY, "log_iv"]),
+    "pre_iv": ("x_pre", ["x_pre", "log_iv"]),
+    "lead_fixed": ("x_lead_fixed", ["x_lead_fixed"]),
+}
+
+
+def _timing(panel: pd.DataFrame) -> dict[str, Any]:
+    return {
+        key: asdict(_row(panel, name, OUTCOME, regs)) for key, (name, regs) in TIMING_ROWS.items()
+    }
 
 
 def _verdict(h1: PredictiveRow, holm_p: float, mean_abs: float) -> dict[str, Any]:

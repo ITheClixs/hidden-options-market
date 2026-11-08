@@ -994,9 +994,23 @@ advance makes the result \GPredVerdict{}. Gross and vendor-signed gamma, the
 open-to-close return and the session range agree; those rows are descriptive.
 
 The one large coefficient is in the lead, netted gamma two dates later, at
-$t=\GPredLeadT$, and it is negative. It is mechanical: a large move carries spot away
-from the strikes where gamma is largest, and raises the dollar volume in the
-denominator. Volatility moves measured hidden gamma, not the other way round.
+$t=\GPredLeadT$, and it is negative. It comes from re-pricing, not from positions. Priced
+with the spot, implied volatilities and dollar volume of $t$, so that only open interest
+moves, the same lead gives $t=\GPredLeadFixedT$. A large move carries spot away from the
+strikes where gamma is largest and raises dollar volume: volatility moves measured hidden
+gamma, not the other way round.
+
+The same channel could run within date $t$. The registered predictor prices $t$'s open
+interest with $t$'s spot, implied volatilities and dollar volume, and implied volatility
+forecasts realised volatility beyond the controls. Rows fixed in a second log entry before
+they were estimated check it (the last four of Table~\ref{tab:gamma-pred}). Priced with
+each series' gamma and spot at $t-1$ and dollar volume ending at $t-1$, the coefficient is
+$\GPredPreBeta\times10^{-4}$ ($t=\GPredPreT$). With the log of the underlying's
+open-interest-weighted FLEX implied volatility as a control it is
+$\GPredIvBeta\times10^{-4}$ ($t=\GPredIvT$), and with both $t=\GPredPreIvT$. None is
+distinguishable from zero, and their minimum detectable effects,
+$\GPredPreMDE\times10^{-4}$ to $\GPredIvMDE\times10^{-4}$, are those of the test of
+record. The bound does not come from a predictor contaminated by the day's volatility.
 
 At daily resolution, then, netted hidden gamma does not predict the underlying's
 volatility. The measure is unsigned, so this bounds the net of dealer-long and

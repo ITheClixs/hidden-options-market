@@ -21,6 +21,13 @@ SECONDARY_STEMS = {
     ("x_net", "range_next"): "Range",
     ("x_net_lead", "abs_ret_next"): "Lead",
 }
+# The robustness rows of docs/log/2026-11-08-gamma-timing-spec.md.
+TIMING_STEMS = {
+    "pre": "Pre",
+    "iv_control": "Iv",
+    "pre_iv": "PreIv",
+    "lead_fixed": "LeadFixed",
+}
 VERDICT_WORDS = {
     "finding": "a finding",
     "bounded_null": "a bounded null",
@@ -60,6 +67,13 @@ def gamma_predictive_macros(values: Mapping[str, Any]) -> dict[str, str]:
         stem = SECONDARY_STEMS[(row["predictor"], row["outcome"])]
         out[f"GPred{stem}Beta"] = bp(row["coefficient"])
         out[f"GPred{stem}T"] = t_stat(row["t_stat"])
+    for key, row in (values.get("timing") or {}).items():
+        stem = TIMING_STEMS[key]
+        out[f"GPred{stem}Beta"] = bp(row["coefficient"])
+        out[f"GPred{stem}T"] = t_stat(row["t_stat"])
+        out[f"GPred{stem}P"] = p_value(row["p_value"])
+        out[f"GPred{stem}MDE"] = bp(row["mde80"])
+        out[f"GPred{stem}Days"] = formats.count(row["n_obs"])
     return out
 
 

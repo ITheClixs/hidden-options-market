@@ -145,3 +145,27 @@ def test_table_lists_the_tests_of_record_first():
     text = gamma_predictive_table({"gamma_predictive": result})
     assert text.index("H1: Netted gamma") < text.index("Gross gamma")
     assert "\\label{tab:gamma-pred}" in text
+
+
+def test_timing_rows_recover_a_planted_effect_and_take_the_iv_control():
+    from hidden_options.predict.gamma_result import _timing
+
+    frame = planted(0.0, seed=5)
+    rng = np.random.default_rng(6)
+    frame["x_pre"] = rng.normal(size=len(frame))
+    frame["x_lead_fixed"] = rng.normal(size=len(frame))
+    # Volatility loads on log IV, and x_net is correlated with it: only the control
+    # separates the two.
+    frame["log_iv"] = rng.normal(size=len(frame))
+    frame[PRIMARY] = 0.8 * frame["log_iv"] + 0.6 * rng.normal(size=len(frame))
+    frame["abs_ret_next"] = (
+        0.02
+        + 0.003 * frame["log_iv"]
+        - 0.002 * frame["x_pre"]
+        + rng.normal(scale=0.01, size=len(frame))
+    )
+    found = _timing(frame)
+    assert found["pre"]["coefficient"] == pytest.approx(-0.002, abs=4 * found["pre"]["std_error"])
+    assert found["pre"]["p_value"] < 0.001
+    assert abs(found["iv_control"]["t_stat"]) < 3
+    assert found["lead_fixed"]["p_value"] > 0.001

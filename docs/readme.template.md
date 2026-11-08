@@ -105,8 +105,13 @@ The coefficient is {{GPredBeta}}bp per standard deviation (*t* {{GPredT}}, permu
 {{GPredPermP}}, Holm *p* {{GPredHolm}}) on {{GPredDays}} underlying-days. The minimum
 detectable effect is {{GPredMDE}}bp, {{GPredMDEShare}} of mean |*r*|, which the rule fixed in
 advance calls {{GPredVerdict}}. Netted gamma dated two activity dates later is negative
-(*t* {{GPredLeadT}}). That is mechanical: a large move carries spot away from the strikes,
-so measured gamma falls, while volume rises.
+(*t* {{GPredLeadT}}), and priced at the first date's spot, implied volatilities and
+volume, so that only open interest moves, it is not (*t* {{GPredLeadFixedT}}): a large
+move re-prices the book, carrying spot away from the strikes. The same re-pricing could
+bias the test itself, so rows fixed in
+[`docs/log/2026-11-08-gamma-timing-spec.md`](docs/log/2026-11-08-gamma-timing-spec.md)
+before they were run price it on the day before (*t* {{GPredPreT}}) and add an
+implied-volatility control (*t* {{GPredIvT}}). Neither finds an effect.
 
 **At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
 Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date

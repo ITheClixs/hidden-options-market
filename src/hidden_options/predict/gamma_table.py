@@ -20,6 +20,12 @@ PREDICTOR_LABELS = {
     "x_signed": "Vendor-signed gamma",
     "x_net_lead": "Netted gamma, two dates later",
 }
+TIMING_LABELS = {
+    "pre": "Netted, priced at $t-1$",
+    "iv_control": "Netted, IV control",
+    "pre_iv": "Priced at $t-1$, IV control",
+    "lead_fixed": "Two dates later, priced at $t$",
+}
 OUTCOME_LABELS = {
     "abs_ret_next": "$|r_{t+1}|$",
     "oc_abs_next": "$|r^{oc}_{t+1}|$",
@@ -33,18 +39,21 @@ def gamma_predictive_table(results: Mapping[str, Result]) -> str:
     if RESULT not in results:
         raise KeyError(f"No {RESULT!r} result; run `hidden-options results --only {RESULT}`")
     values, macros = results[RESULT].values, results[RESULT].macros
-    records = [("H1: ", values["h1"]), ("H2: ", values["h2"])]
-    records += [("", row) for row in values["secondary"]]
+    records = [("H1: " + PREDICTOR_LABELS["x_net"], values["h1"])]
+    records += [("H2: " + PREDICTOR_LABELS["x_net_top"], values["h2"])]
+    records += [(PREDICTOR_LABELS[row["predictor"]], row) for row in values["secondary"]]
+    timing = values.get("timing") or {}
+    records += [(label, timing[key]) for key, label in TIMING_LABELS.items() if key in timing]
     rows = [
         {
-            "predictor": kind + PREDICTOR_LABELS[row["predictor"]],
+            "predictor": label,
             "outcome": OUTCOME_LABELS[row["outcome"]],
             "beta": f"{row['coefficient'] * 1e4:.2f}",
             "t": f"{row['t_stat']:.2f}",
             "p": _p(row["p_value"]),
             "holm": p_value(row["holm_p"]) if "holm_p" in row else None,
         }
-        for kind, row in records
+        for label, row in records
     ]
     columns = [
         Column("predictor", "Predictor", "{}", "l"),
@@ -80,8 +89,11 @@ def _notes(m: Mapping[str, str]) -> str:
         "interest first. Every regression has underlying and date fixed effects and the "
         "controls of Table~\\ref{tab:pred}; errors are clustered by underlying and date. "
         "H1 and H2 are the two tests of record, fixed in advance with Holm's adjustment across "
-        "them; the other rows are descriptive. The lead row's predictor is dated after its "
-        "outcome."
+        "them; the other rows are descriptive. The lead rows' predictors are dated after their "
+        "outcome. The last four rows, fixed in a second log entry, hold the inputs other than "
+        "open interest at the date named: dollar volume then ends there too, and series not "
+        "priced on that date count as unpriced. The IV control is the log of the underlying's "
+        "open-interest-weighted FLEX implied volatility at $t$."
     )
 
 
