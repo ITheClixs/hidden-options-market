@@ -17,6 +17,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from scipy.stats import t as student_t
 
 from hidden_options.collect.splits import load_splits
 from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR, load_universe
@@ -46,6 +47,9 @@ from hidden_options.publish.results import Result, now_iso
 NAME = "gamma_predictive"
 PRIMARY, OUTCOME = "x_net", "abs_ret_next"
 INTERACTION = "x_net_top"
+# x_net outside the top tercile: with INTERACTION beside it, INTERACTION's coefficient is
+# the top tercile's total slope.
+REST = "x_net_rest"
 ALPHA = 0.05
 TOP_TERCILE = 2 / 3
 # A null is "bounded" when the MDE per standard deviation is below this share of mean |r|.
@@ -115,6 +119,7 @@ def gamma_panel(
     medians = panel[sample].groupby("symbol")["x_net_raw"].median()
     top = medians[medians >= medians.quantile(TOP_TERCILE)].index
     panel[INTERACTION] = panel[PRIMARY] * panel["symbol"].isin(top)
+    panel[REST] = panel[PRIMARY] - panel[INTERACTION]
     if set(TIMING_COLUMNS) <= set(gamma.columns):
         panel = _with_timing(panel, gamma, bars, splits)
     return panel
@@ -155,8 +160,18 @@ def gamma_predictive_result(
     used = panel.dropna(subset=[OUTCOME, PRIMARY, *CONTROLS])
     mean_abs = float(used[OUTCOME].mean())
     values: dict[str, Any] = {
-        "h1": {**asdict(h1), "holm_p": adjusted["h1"], "permutation_p": permutation.p_value},
-        "h2": {**asdict(h2), "holm_p": adjusted["h2"]},
+        "h1": {
+            **asdict(h1),
+            "holm_p": adjusted["h1"],
+            "permutation_p": permutation.p_value,
+            "mde80_holm": holm_mde(h1),
+        },
+        "h2": {
+            **asdict(h2),
+            "holm_p": adjusted["h2"],
+            "mde80_holm": holm_mde(h2),
+            "top_total": asdict(_row(panel, INTERACTION, OUTCOME, [REST, INTERACTION])),
+        },
         "secondary": [asdict(_row(panel, x, y, [x])) for x, y in SECONDARY],
         "verdict": _verdict(h1, adjusted["h1"], mean_abs),
         "timing": _timing(panel) if "x_pre" in panel else None,
@@ -249,6 +264,14 @@ def _programme(
     }
 
 
+def holm_mde(row: PredictiveRow, tests: int = 2) -> float:
+    """The MDE at 80% power at the strictest level Holm's adjustment applies across `tests`
+    tests, two-sided ALPHA / `tests`, on the row's degrees of freedom."""
+    df = max(min(row.n_underlyings, row.n_dates) - 1, 1)
+    level = ALPHA / tests
+    return float((student_t.ppf(1 - level / 2, df) + student_t.ppf(0.80, df)) * row.std_error)
+
+
 def _verdict(h1: PredictiveRow, holm_p: float, mean_abs: float) -> dict[str, Any]:
     mde_share = h1.mde80 / mean_abs
     if holm_p < ALPHA:
@@ -270,6 +293,10 @@ def _sample(
         "dates": int(used["date"].nunique()),
         "mean_abs_ret": mean_abs,
         "excluded_low_coverage": int((in_panel["coverage"] < 0.5).sum()),
+        "no_gamma_row": int(in_panel["coverage"].isna().sum()),
+        "no_volume_history": int(
+            ((in_panel["coverage"] >= 0.5) & in_panel["x_net_raw"].isna()).sum()
+        ),
         "base_underlying_days": len(in_panel),
         "median_coverage": float(used["coverage"].median()),
         "x_net_raw_median": float(used["x_net_raw"].median()),

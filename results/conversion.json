@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T09:11:45+00:00",
+  "generated_at": "2026-11-08T13:49:10+00:00",
   "inputs": {
     "ci_runs": [
       "2026-08-16",
@@ -59,11 +59,22 @@
     "local_only": false
   },
   "macros": {
+    "ConvBoot": "2,000",
     "ConvCreatedMatched": "1.3\\%",
+    "ConvCreatedMatchedTwin": "1.7\\%",
+    "ConvCreatedTwin": "73\\%",
     "ConvDropped": "7.8",
     "ConvDroppedTwin": "50\\%",
+    "ConvExcess": "1.3\\%",
+    "ConvExcessHigh": "2.8\\%",
+    "ConvExcessLow": "0.2\\%",
+    "ConvExcessUpper": "2.5\\%",
+    "ConvLagAfter": "2.1\\%",
+    "ConvLagBefore": "2.0\\%",
     "ConvMatchShare": "90\\%",
     "ConvMatched": "1.5\\%",
+    "ConvMatchedTwin": "3.0\\%",
+    "ConvPower": "90\\%",
     "ConvSettlements": "48",
     "ConvTwinShare": "36\\%"
   },
@@ -71,11 +82,58 @@
   "values": {
     "created_contracts": 11913006.0,
     "created_matched": 0.012681098288710675,
+    "created_matched_twin": 0.017384191789280627,
+    "created_with_twin": 0.729461481006557,
+    "detect_power": 0.9033926706531569,
     "dropped_contracts": 7841850.0,
     "dropped_matched": 0.014886283211232044,
+    "dropped_matched_twin": 0.030057284339190853,
     "dropped_series_days": 6672,
     "dropped_with_twin": 0.49526374516217475,
+    "excess": 0.012673092549910225,
+    "excess_ci_high": 0.028007011917097736,
+    "excess_ci_low": 0.002022663230060937,
+    "excess_upper95": 0.02543656816880235,
+    "lags": {
+      "-1": {
+        "created_contracts": 11913006.0,
+        "created_matched": 0.012641729551718517,
+        "created_matched_twin": 0.01777736279177818,
+        "created_with_twin": 0.7111138867889432,
+        "detect_power": 0.9091812685946391,
+        "dropped_contracts": 7841850.0,
+        "dropped_matched": 0.009642622595433475,
+        "dropped_matched_twin": 0.020329690715330022,
+        "dropped_series_days": 6672,
+        "dropped_with_twin": 0.47431231150812625
+      },
+      "0": {
+        "created_contracts": 11913006.0,
+        "created_matched": 0.012681098288710675,
+        "created_matched_twin": 0.017384191789280627,
+        "created_with_twin": 0.729461481006557,
+        "detect_power": 0.9033926706531569,
+        "dropped_contracts": 7841850.0,
+        "dropped_matched": 0.014886283211232044,
+        "dropped_matched_twin": 0.030057284339190853,
+        "dropped_series_days": 6672,
+        "dropped_with_twin": 0.49526374516217475
+      },
+      "1": {
+        "created_contracts": 11913006.0,
+        "created_matched": 0.017373952468419808,
+        "created_matched_twin": 0.024218497237659568,
+        "created_with_twin": 0.7173835889950866,
+        "detect_power": 0.9033345941761434,
+        "dropped_contracts": 7841850.0,
+        "dropped_matched": 0.008704323597110375,
+        "dropped_matched_twin": 0.021111024168284472,
+        "dropped_series_days": 6672,
+        "dropped_with_twin": 0.41231176316812995
+      }
+    },
     "match_share": 0.9,
+    "n_boot": 2000,
     "settlements": 48,
     "twin_oi_share": 0.3568363352753311
   }

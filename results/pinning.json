@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T13:42:14+00:00",
+  "generated_at": "2026-11-08T13:49:58+00:00",
   "inputs": {
     "bars": "data/flex_underlying_bars.parquet",
     "first_expiry": "2024-12-04",
@@ -49,7 +49,9 @@
     "PinFridayMean": "-0.005",
     "PinFridayT": "-0.33",
     "PinHolm": "0.58",
+    "PinInListed": "278",
     "PinMDE": "0.078",
+    "PinMDEHolm": "0.085",
     "PinMean": "-0.029",
     "PinMedianSize": "3.5\\%",
     "PinNearAfter": "9.6\\%",
@@ -205,6 +207,7 @@
       "clusters": 326,
       "holm_p": 0.5818352634234646,
       "mde80": 0.07758880874524997,
+      "mde80_holm": 0.08544552781481228,
       "mean": -0.029208321519666815,
       "n_obs": 2643,
       "p_value": 0.2909176317117323,
@@ -260,6 +263,7 @@
       ],
       "expiry_dates": 326,
       "friday_events": 7228,
+      "in_listed_sources": 278,
       "median_contracts": 1159.0,
       "median_size": 0.03501508342055039,
       "near_after": 0.09572455542943625,

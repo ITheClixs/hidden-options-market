@@ -21,6 +21,9 @@ from hidden_options.publish.registry import ANALYSES
 from hidden_options.publish.results import Result, now_iso
 
 NAME = "conversion"
+LAGS = (-1, 0, 1)
+N_BOOT = 2_000
+SEED = 20261108
 
 
 def conversion_result(inputs: GammaInputs) -> Result:
@@ -30,7 +33,8 @@ def conversion_result(inputs: GammaInputs) -> Result:
     dates = pd.DatetimeIndex(sorted(listed["date"].unique()))
     flex = flex_series(inputs.panel, dates)
     flex = flex[flex["symbol"].isin(set(listed["symbol"]))]
-    values = {**conversion_check(flex, listed), "match_share": MATCH_SHARE}
+    found = conversion_check(flex, listed, lags=LAGS, n_boot=N_BOOT, seed=SEED)
+    values = {**found, "match_share": MATCH_SHARE}
     run_inputs = {
         "first_date": f"{dates.min():%Y-%m-%d}",
         "last_date": f"{dates.max():%Y-%m-%d}",
@@ -49,6 +53,17 @@ def conversion_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "ConvCreatedMatched": formats.percent(values["created_matched"], 1),
         "ConvSettlements": formats.count(values["settlements"]),
         "ConvMatchShare": formats.percent(values["match_share"]),
+        "ConvMatchedTwin": formats.percent(values["dropped_matched_twin"], 1),
+        "ConvCreatedTwin": formats.percent(values["created_with_twin"]),
+        "ConvCreatedMatchedTwin": formats.percent(values["created_matched_twin"], 1),
+        "ConvPower": formats.percent(values["detect_power"]),
+        "ConvExcess": formats.percent(values["excess"], 1),
+        "ConvExcessLow": formats.percent(values["excess_ci_low"], 1),
+        "ConvExcessHigh": formats.percent(values["excess_ci_high"], 1),
+        "ConvExcessUpper": formats.percent(values["excess_upper95"], 1),
+        "ConvBoot": formats.count(values["n_boot"]),
+        "ConvLagBefore": formats.percent(values["lags"]["-1"]["dropped_matched_twin"], 1),
+        "ConvLagAfter": formats.percent(values["lags"]["1"]["dropped_matched_twin"], 1),
     }
 
 

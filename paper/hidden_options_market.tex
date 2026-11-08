@@ -213,12 +213,19 @@ leave the report before expiry by becoming listed, and the boundary of what is h
 would move. We check on the \ConvSettlements{} settlements with stored chains, which give
 listed open interest per series. \ConvTwinShare{} of FLEX open interest sits in series
 with a listed twin, the same underlying, expiry, right and strike. Of the
-\ConvDropped{} million FLEX contracts that leave the report before expiry, \ConvMatched{}
-leave on a settlement when the listed twin gains at least \ConvMatchShare{} as many. The
-same matching applied to FLEX open interest that is \emph{created}, which no
-consolidation explains, gives \ConvCreatedMatched{}. Consolidation, then, is rare enough
-to be indistinguishable from coincidence here, and we treat the report's FLEX series as
-the hidden book.
+\ConvDropped{} million FLEX contracts that leave the report before expiry, those with a
+twin on both settlements are \ConvDroppedTwin{}, and \ConvMatchedTwin{} of them leave on a
+settlement when the twin gains at least \ConvMatchShare{} as many. The same matching,
+applied to FLEX open interest that is \emph{created}, which no consolidation explains, gives
+\ConvCreatedMatchedTwin{} of the \ConvCreatedTwin{} of created contracts with a twin; that is
+the rate of coincidence. The excess, \ConvExcess{}, has a 95\% interval of \ConvExcessLow{}
+to \ConvExcessHigh{} when settlements are resampled (\ConvBoot{} draws), and a one-sided
+upper bound of \ConvExcessUpper{}. Matching is highest with listed open interest read on
+the same settlement: \ConvLagBefore{} a settlement earlier and \ConvLagAfter{} one later.
+The rule would have caught a conversion of \ConvPower{} of dropped contracts with a twin,
+given the twin's other flow that day. Consolidation therefore happens, but it moves at
+most a few percent of the FLEX contracts that leave before expiry, and we treat the
+report's FLEX series as the hidden book.
 
 \subsection{The panel}
 \label{sec:panel}
@@ -979,7 +986,9 @@ dollar volume. It is small: \GPredMedianX{} basis points for the median underlyi
 \GPredNinetyX{} at the ninetieth percentile, with a standard deviation of \GPredSdX{}
 basis points after winsorising. It is standardised, so coefficients are per standard
 deviation, and an underlying-day with under half of its FLEX open interest priced is
-left out. Two tests were fixed as of record, with Holm's adjustment across them: the
+left out. Of the base panel's underlying-days, \GPredExcluded{} fail that rule,
+\GPredNoGammaRow{} have no live FLEX series that day and \GPredNoVolume{} lack twenty
+sessions of dollar volume. Two tests were fixed as of record, with Holm's adjustment across them: the
 main coefficient, and its interaction with the top tercile of underlyings by gamma
 intensity.
 
@@ -989,10 +998,14 @@ Netted gamma does not predict next-day volatility (Table~\ref{tab:gamma-pred}): 
 coefficient is $\GPredBeta\times10^{-4}$ per standard deviation at $t=\GPredT$,
 clustered $p=\GPredP$, permutation $p=\GPredPermP$ and Holm $p=\GPredHolm$, across
 \GPredDays{} underlying-days, \GPredUnderlyings{} underlyings and \GPredDates{} dates.
-Nor does it in the names with the most of it ($t=\GPredTopT$). The minimum detectable
-effect at 80\% power is $\GPredMDE\times10^{-4}$ per standard deviation,
-\GPredMDEShare{} of the mean next-day absolute return, which under the rule fixed in
-advance makes the result \GPredVerdict{}. Gross and vendor-signed gamma, the
+The within-date permutation keeps each date's cross-section but breaks each name's
+persistence, so with a persistent predictor it overstates significance; the clustered $p$
+is the one we read. Nor does netted gamma predict volatility in the names with the most of
+it: their slope is $\GPredTopTotalBeta\times10^{-4}$ ($t=\GPredTopTotalT$), and its
+difference from the rest has $t=\GPredTopT$. The minimum detectable effect at 80\% power
+is $\GPredMDE\times10^{-4}$ per standard deviation, $\GPredMDEHolm\times10^{-4}$ at the
+level Holm's adjustment applies, and \GPredMDEShare{} of the mean next-day absolute
+return, which under the rule fixed in advance makes the result \GPredVerdict{}. Gross and vendor-signed gamma, the
 open-to-close return and the session range agree; those rows are descriptive.
 
 The one large coefficient is in the lead, netted gamma two dates later, at
@@ -1083,7 +1096,7 @@ $t=\PinT$, with a sign-flip $p$ of \PinFlipP{} and Holm $p$ of \PinHolm{}. It is
 larger where the book is large relative to trading, top tercile less bottom
 $\PinSizeDiff\sigma$ at $t=\PinSizeT$. Within a quarter of $\sigma$ of the strike the
 difference is $\PinBandQuarterMean$ percentage points. The minimum detectable effect is
-$\PinMDE\sigma$. Pulling one expiry in ten halfway to the strike moves the statistic by
+$\PinMDE\sigma$, and $\PinMDEHolm\sigma$ at the level Holm's adjustment applies. Pulling one expiry in ten halfway to the strike moves the statistic by
 $\PinEffectTen\sigma$, and one in seven by $\PinEffectSeven\sigma$; at the standard error
 observed, the test detects the first \PinPowerTen{} of the time and the second
 \PinPowerSeven{}, and one in twenty only \PinPowerTwenty{}. On \PinSimWorlds{} sets of
@@ -1132,7 +1145,11 @@ products have no bars and are in neither test, and the pinning sample excludes t
 with listed weekday expiries. Fixed effects leave each book's movement around its own
 level. Run at listed strikes on monthly expirations, the pinning design detects no pinning
 there either, and its post-expiry differencing carries a small negative baseline at round
-strikes; the gamma test has no positive control.
+strikes; the gamma test has no positive control. Names leave the pinning sample for listed
+weekday expiries found in OCC's census or the stored chains, both from August 2026 on.
+\PinInListed{} of the \PinUnderlyings{} event names appear in either; the rest are taken to
+have none, and a name whose listed weekday expiries began or ended inside the panel is
+misclassified.
 \item \textbf{A short panel.} \PanelMonths{} months, set by how far back OCC's rolling
 retention reached when collection began. That is enough to date one turn in growth, and
 too short to say whether the levelling of the latest cycles will last.

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T13:25:49+00:00",
+  "generated_at": "2026-11-08T13:49:56+00:00",
   "inputs": {
     "bars": "data/flex_underlying_bars.parquet",
     "first_date": "2024-12-09",
@@ -31,10 +31,13 @@
     "GPredLeadT": "-4.93",
     "GPredLow": "-2.09",
     "GPredMDE": "2.13",
+    "GPredMDEHolm": "2.35",
     "GPredMDEShare": "1.1\\%",
     "GPredMeanAbs": "198.03",
     "GPredMedianX": "5.86",
     "GPredNinetyX": "90.3",
+    "GPredNoGammaRow": "2,230",
+    "GPredNoVolume": "0",
     "GPredOpenCloseBeta": "2.10",
     "GPredOpenCloseT": "0.76",
     "GPredP": "0.43",
@@ -59,6 +62,8 @@
     "GPredTopBeta": "0.20",
     "GPredTopHolm": "0.91",
     "GPredTopT": "0.11",
+    "GPredTopTotalBeta": "-0.57",
+    "GPredTopTotalT": "-0.68",
     "GPredUnderlyings": "1,403",
     "GPredVerdict": "a bounded null",
     "GProgBeta": "-7.29",
@@ -88,6 +93,7 @@
       "coefficient": -5.996254528202021e-05,
       "holm_p": 0.8612012694107519,
       "mde80": 0.0002134017809606242,
+      "mde80_holm": 0.00023495872060016313,
       "n_dates": 468,
       "n_obs": 353972,
       "n_underlyings": 1403,
@@ -105,6 +111,7 @@
       "coefficient": 1.9531453886735203e-05,
       "holm_p": 0.9103720090857258,
       "mde80": 0.000486845167226946,
+      "mde80_holm": 0.000536024193927051,
       "n_dates": 468,
       "n_obs": 353972,
       "n_underlyings": 1403,
@@ -113,7 +120,22 @@
       "placebo": false,
       "predictor": "x_net_top",
       "std_error": 0.00017341197628584378,
-      "t_stat": 0.11263036328321704
+      "t_stat": 0.11263036328321704,
+      "top_total": {
+        "ci_high": 0.0001084236675080907,
+        "ci_low": -0.00022278625472504134,
+        "coefficient": -5.718129360847532e-05,
+        "mde80": 0.00023659742784372552,
+        "n_dates": 468,
+        "n_obs": 353972,
+        "n_underlyings": 1403,
+        "outcome": "abs_ret_next",
+        "p_value": 0.4977849796068482,
+        "placebo": false,
+        "predictor": "x_net_top",
+        "std_error": 8.427489951317912e-05,
+        "t_stat": -0.6785091876559659
+      }
     },
     "programme": {
       "control": {
@@ -164,6 +186,8 @@
       "gamma_dates": 475,
       "mean_abs_ret": 0.019803188327749726,
       "median_coverage": 1.0,
+      "no_gamma_row": 2230,
+      "no_volume_history": 0,
       "underlying_days": 353972,
       "underlyings": 1403,
       "x_net_raw_median": 0.000586336681082679,

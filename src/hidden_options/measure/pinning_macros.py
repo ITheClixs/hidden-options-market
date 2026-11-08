@@ -45,6 +45,7 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PinHolm": p_value(h1["holm_p"]),
         "PinFlipP": p_value(h1["sign_flip_p"]),
         "PinMDE": sigma(h1["mde80"]),
+        "PinMDEHolm": sigma(h1["mde80_holm"]),
         "PinSizeDiff": sigma(h2["difference"]),
         "PinSizeTop": sigma(h2["top"]),
         "PinSizeBottom": sigma(h2["bottom"]),
@@ -60,6 +61,7 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PinExcluded": formats.count(len(sample["excluded_names"])),
         "PinFridayEvents": formats.count(sample["friday_events"]),
         "PinSplitDropped": formats.count(sample["split_dropped"]),
+        "PinInListed": formats.count(sample["in_listed_sources"]),
     }
     if values.get("control"):
         out.update(control_macros(values["control"]))

@@ -15,6 +15,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from scipy.stats import t as student_t
 
 from hidden_options.collect.splits import read_bars
 from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR
@@ -88,6 +89,7 @@ def pinning_result(inputs: PinningInputs) -> Result:
         "h1": {
             **h1,
             "holm_p": adjusted["h1"],
+            "mde80_holm": _holm_mde(h1),
             "sign_flip_p": sign_flip_p(main["D"], main["expiry"], n_draws=N_FLIPS, seed=SEED),
         },
         "h2": {**h2, "holm_p": adjusted["h2"]},
@@ -112,6 +114,11 @@ def pinning_result(inputs: PinningInputs) -> Result:
             "excluded_names": sorted(excluded),
             "friday_events": len(friday),
             "split_dropped": int(straddling.sum()),
+            "in_listed_sources": int(
+                main.loc[
+                    main["underlying"].isin(set(inputs.listed["symbol"])), "underlying"
+                ].nunique()
+            ),
         },
         "simulation": _simulation(main, h1),
         "control": _control(closes, days),
@@ -232,6 +239,13 @@ def _control(closes: pd.DataFrame, days: pd.DatetimeIndex) -> dict[str, Any]:
         "placebo": placebo,
         "less_placebo": _difference(found, placebo),
     }
+
+
+def _holm_mde(found: dict[str, Any], tests: int = 2) -> float:
+    """The MDE at 80% power at Holm's strictest level across `tests` tests, on t(G - 1)."""
+    df = found["clusters"] - 1
+    level = 0.05 / tests
+    return float((student_t.ppf(1 - level / 2, df) + student_t.ppf(0.80, df)) * found["std_error"])
 
 
 def _difference(a: dict[str, Any], b: dict[str, Any]) -> dict[str, float]:

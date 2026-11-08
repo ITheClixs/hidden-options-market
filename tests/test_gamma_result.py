@@ -97,8 +97,8 @@ class TestPlantedEffect:
 def test_macros_cover_every_secondary_row():
     est = {**row().__dict__}
     values = {
-        "h1": {**est, "holm_p": 0.5, "permutation_p": 0.5},
-        "h2": {**est, "holm_p": 0.5},
+        "h1": {**est, "holm_p": 0.5, "permutation_p": 0.5, "mde80_holm": 1e-4},
+        "h2": {**est, "holm_p": 0.5, "top_total": est},
         "secondary": [{**est, "predictor": x, "outcome": y} for x, y in SECONDARY],
         "verdict": {"kind": "bounded_null", "mde_share": 0.01, "sign": -1.0},
         "sample": {
@@ -106,6 +106,8 @@ def test_macros_cover_every_secondary_row():
             "underlyings": 10,
             "dates": 10,
             "excluded_low_coverage": 1,
+            "no_gamma_row": 0,
+            "no_volume_history": 0,
             "median_coverage": 0.9,
             "x_net_raw_median": 1e-4,
             "x_net_raw_p90": 1e-3,
@@ -125,8 +127,8 @@ def test_table_lists_the_tests_of_record_first():
 
     est = {**row().__dict__}
     values = {
-        "h1": {**est, "holm_p": 0.5, "permutation_p": 0.5},
-        "h2": {**est, "predictor": "x_net_top", "holm_p": 0.5},
+        "h1": {**est, "holm_p": 0.5, "permutation_p": 0.5, "mde80_holm": 1e-4},
+        "h2": {**est, "predictor": "x_net_top", "holm_p": 0.5, "top_total": est},
         "secondary": [{**est, "predictor": x, "outcome": y} for x, y in SECONDARY],
         "verdict": {"kind": "bounded_null", "mde_share": 0.01, "sign": -1.0},
         "sample": {
@@ -134,6 +136,8 @@ def test_table_lists_the_tests_of_record_first():
             "underlyings": 10,
             "dates": 10,
             "excluded_low_coverage": 1,
+            "no_gamma_row": 0,
+            "no_volume_history": 0,
             "median_coverage": 0.9,
             "x_net_raw_median": 1e-4,
             "x_net_raw_p90": 1e-3,
@@ -186,3 +190,15 @@ def test_programme_test_finds_a_negative_effect_only_in_the_programme_names(monk
     assert found["test"]["clusters"] == 20
     assert found["control"]["p_value"] > 0.05
     assert found["pre"] is None
+
+
+def test_holm_mde_is_the_registered_mde_for_one_test_and_larger_for_two():
+    from hidden_options.predict.gamma_result import holm_mde
+    from hidden_options.predict.regressions import PredictiveRow
+
+    one = PredictiveRow("x", "y", 0.0, 0.0, 0.0, 100, False, 1.0, 1.0, -2.0, 2.0, 50, 50)
+    df = 49
+    from scipy.stats import t
+
+    assert holm_mde(one, tests=1) == pytest.approx(t.ppf(0.975, df) + t.ppf(0.8, df))
+    assert holm_mde(one, tests=2) == pytest.approx(t.ppf(0.9875, df) + t.ppf(0.8, df))
