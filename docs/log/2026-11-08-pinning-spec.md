@@ -92,3 +92,24 @@ mean D is reported from the estimated standard error (2.8 × SE).
 
 Only a defect found in the code. Any change after an outcome has been seen is recorded
 here as a dated amendment, with the estimate it changed.
+
+## Amendment, 2026-11-08, before any outcome was read
+
+**1. The pseudo-expiries move to the five sessions after expiry, E+1 to E+5.** A test on
+simulated returns with no pinning rejected at p < 10⁻⁷, which exposed a defect in the
+design above. K\* is chosen near the close of E−1. The sessions E−6 to E−2 lie on the
+path that ends at that close, so their closes are drawn towards K\* by construction. That
+biases the pseudo-expiry term up and D down.
+
+The sessions after expiry carry no such bias: their returns are independent of how K\*
+was chosen. The FLEX book at K\* has expired by then, and the five sessions still catch
+attraction to K\* that is not specific to its expiry, round-number clustering included.
+Each pseudo-date's mirror is taken about the close of the session before it. Bars must
+exist for E−1 to E+5.
+
+Over 60 simulated null worlds the corrected test rejects at 1.7% for a nominal 5%. The
+power figures above came from independent pseudo-draws and are unaffected.
+
+**2. Clarification of K\*.** The event count above was computed by choosing K\* among the
+strikes that pass both filters, at least 100 contracts and within 2σ, not by choosing the
+largest strike first and then applying the filters. That is the rule.
