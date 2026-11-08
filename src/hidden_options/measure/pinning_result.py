@@ -69,7 +69,7 @@ def pinning_result(inputs: PinningInputs) -> Result:
     friday = _events(book[book["expiry"].dt.day_of_week == 4], closes, adv, days)
 
     h1 = clustered_mean(main["D"], main["expiry"])
-    h2 = size_terciles(main)
+    h2 = size_terciles(main.dropna(subset=["size"]))
     adjusted = holm({"h1": h1["p_value"], "h2": h2["p_value"]})
     values: dict[str, Any] = {
         "h1": {
@@ -169,8 +169,7 @@ def _events(
     ].dropna()
     events = pin_strikes(book, prev).merge(adv, on=["underlying", "expiry"], how="left")
     events["size"] = events["open_interest"] * 100 / events["adv"]
-    stats = event_statistics(events, closes, days)
-    return stats.dropna(subset=["size"]).reset_index(drop=True)
+    return event_statistics(events, closes, days)
 
 
 def _split(stats: pd.DataFrame, mask: pd.Series) -> tuple[pd.Series, pd.Series]:

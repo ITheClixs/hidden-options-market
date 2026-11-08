@@ -1,0 +1,188 @@
+{
+  "generated_at": "2026-11-08T08:52:49+00:00",
+  "inputs": {
+    "bars": "data/flex_underlying_bars.parquet",
+    "first_expiry": "2024-12-04",
+    "last_expiry": "2026-10-15",
+    "panel_end": "2026-10-22",
+    "source": "data/raw/occ_flex"
+  },
+  "macros": {
+    "PinBandHalfMean": "0.0",
+    "PinBandHalfT": "-0.03",
+    "PinBandQuarterMean": "-0.1",
+    "PinBandQuarterT": "-0.10",
+    "PinCallsMean": "0.025",
+    "PinCallsT": "0.70",
+    "PinContracts": "1,116",
+    "PinDates": "326",
+    "PinEvents": "2,324",
+    "PinExcluded": "32",
+    "PinExpiryOnlyMean": "-0.018",
+    "PinExpiryOnlyT": "-0.70",
+    "PinFlipP": "0.54",
+    "PinFridayEvents": "6,908",
+    "PinFridayMean": "-0.007",
+    "PinFridayT": "-0.51",
+    "PinHolm": "1.00",
+    "PinMDE": "0.076",
+    "PinMean": "-0.017",
+    "PinMedianSize": "3.7\\%",
+    "PinNearAfter": "9.3\\%",
+    "PinNearExpiry": "11.7\\%",
+    "PinP": "0.53",
+    "PinPseudoOnlyMean": "-0.001",
+    "PinPseudoOnlyT": "-0.07",
+    "PinPutsMean": "-0.050",
+    "PinPutsT": "-1.23",
+    "PinSE": "0.027",
+    "PinSizeBottom": "-0.021",
+    "PinSizeDiff": "0.027",
+    "PinSizeHolm": "1.00",
+    "PinSizeT": "0.58",
+    "PinSizeTop": "0.006",
+    "PinT": "-0.62",
+    "PinUnderlyings": "494"
+  },
+  "name": "pinning",
+  "values": {
+    "descriptive": {
+      "band_0.25": {
+        "clusters": 326,
+        "mde80": 0.02789058492826102,
+        "mean": -0.0009466437177280533,
+        "n_obs": 2324,
+        "p_value": 0.9240751255028147,
+        "std_error": 0.009925409078493881,
+        "t_stat": -0.09537578856867636
+      },
+      "band_0.5": {
+        "clusters": 326,
+        "mde80": 0.03810244863922959,
+        "mean": -0.00043029259896729626,
+        "n_obs": 2324,
+        "p_value": 0.9747039287301048,
+        "std_error": 0.013559500118387654,
+        "t_stat": -0.03173366239244975
+      },
+      "calls": {
+        "clusters": 280,
+        "mde80": 0.09945998862154341,
+        "mean": 0.024710106076068772,
+        "n_obs": 1031,
+        "p_value": 0.4854617329845428,
+        "std_error": 0.03537720457713333,
+        "t_stat": 0.6984753705509162
+      },
+      "expiry_only": {
+        "clusters": 326,
+        "mde80": 0.070636378903636,
+        "mean": -0.017599699285130527,
+        "n_obs": 2324,
+        "p_value": 0.4843396065099531,
+        "std_error": 0.025137334274107522,
+        "t_stat": -0.7001418325911724
+      },
+      "friday": {
+        "clusters": 93,
+        "mde80": 0.039513771938708794,
+        "mean": -0.007047278129015516,
+        "n_obs": 6908,
+        "p_value": 0.6147514888306632,
+        "std_error": 0.013954416455402597,
+        "t_stat": -0.5050213422781351
+      },
+      "pseudo_only": {
+        "clusters": 326,
+        "mde80": 0.02868391618530947,
+        "mean": -0.0007584201930206319,
+        "n_obs": 2324,
+        "p_value": 0.9408184972851056,
+        "std_error": 0.01020773149235559,
+        "t_stat": -0.07429860332715461
+      },
+      "puts": {
+        "clusters": 220,
+        "mde80": 0.11443835874097948,
+        "mean": -0.04997312604368932,
+        "n_obs": 1293,
+        "p_value": 0.22043755098365825,
+        "std_error": 0.04066575681006687,
+        "t_stat": -1.2288748559898532
+      }
+    },
+    "h1": {
+      "clusters": 326,
+      "holm_p": 1.0,
+      "mde80": 0.07611449671425055,
+      "mean": -0.016841279092109897,
+      "n_obs": 2324,
+      "p_value": 0.534541119795538,
+      "sign_flip_p": 0.5441455854414559,
+      "std_error": 0.027086829431358168,
+      "t_stat": -0.621751583543141
+    },
+    "h2": {
+      "bottom": -0.02064157525966569,
+      "clusters": 309,
+      "difference": 0.02689501202606675,
+      "holm_p": 1.0,
+      "p_value": 0.5625201499222993,
+      "std_error": 0.046392262690838466,
+      "t_stat": 0.5797305513054436,
+      "top": 0.006253436766401059
+    },
+    "sample": {
+      "events": 2324,
+      "excluded_names": [
+        "AAPL",
+        "AMD",
+        "AMZN",
+        "AVGO",
+        "BITO",
+        "DIA",
+        "EEM",
+        "EFA",
+        "EWZ",
+        "FXI",
+        "GDX",
+        "GLD",
+        "GOOGL",
+        "IBIT",
+        "INTC",
+        "IWM",
+        "KRE",
+        "META",
+        "MSFT",
+        "MU",
+        "NVDA",
+        "QQQ",
+        "SLV",
+        "SMH",
+        "SPY",
+        "TLT",
+        "TSLA",
+        "UNG",
+        "USO",
+        "VIX",
+        "XLE",
+        "XLF"
+      ],
+      "expiry_dates": 326,
+      "friday_events": 6908,
+      "median_contracts": 1116.5,
+      "median_size": 0.03745925549438915,
+      "near_after": 0.09294320137693633,
+      "near_expiry": 0.1166092943201377,
+      "underlyings": 494
+    },
+    "settings": {
+      "bands": [
+        0.25,
+        0.5
+      ],
+      "n_flips": 10000,
+      "seed": 20261108
+    }
+  }
+}
