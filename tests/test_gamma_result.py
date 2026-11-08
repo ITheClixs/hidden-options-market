@@ -117,3 +117,31 @@ def test_macros_cover_every_secondary_row():
     assert macros["GPredVerdict"] == "a bounded null"
     for stem in ("Gross", "Signed", "OpenClose", "Range", "Lead"):
         assert f"GPred{stem}T" in macros
+
+
+def test_table_lists_the_tests_of_record_first():
+    from hidden_options.predict.gamma_table import gamma_predictive_table
+    from hidden_options.publish.results import Result
+
+    est = {**row().__dict__}
+    values = {
+        "h1": {**est, "holm_p": 0.5, "permutation_p": 0.5},
+        "h2": {**est, "predictor": "x_net_top", "holm_p": 0.5},
+        "secondary": [{**est, "predictor": x, "outcome": y} for x, y in SECONDARY],
+        "verdict": {"kind": "bounded_null", "mde_share": 0.01, "sign": -1.0},
+        "sample": {
+            "underlying_days": 100,
+            "underlyings": 10,
+            "dates": 10,
+            "excluded_low_coverage": 1,
+            "median_coverage": 0.9,
+            "x_net_raw_median": 1e-4,
+            "x_net_raw_p90": 1e-3,
+            "x_net_sd": 5e-4,
+            "mean_abs_ret": 0.02,
+        },
+    }
+    result = Result("gamma_predictive", values, gamma_predictive_macros(values), {}, "now")
+    text = gamma_predictive_table({"gamma_predictive": result})
+    assert text.index("H1: Netted gamma") < text.index("Gross gamma")
+    assert "\\label{tab:gamma-pred}" in text
