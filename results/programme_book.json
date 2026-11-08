@@ -1,0 +1,31 @@
+{
+  "generated_at": "2026-11-08T15:05:59+00:00",
+  "inputs": {
+    "first_date": "2026-03-02",
+    "last_date": "2026-10-22",
+    "panel_end": "2026-10-22"
+  },
+  "macros": {
+    "PBookCallShare": "79\\%",
+    "PBookCaptureDates": "45",
+    "PBookDates": "45",
+    "PBookFundShare": "4.5\\%",
+    "PBookFunds": "24",
+    "PBookNames": "34",
+    "PBookPutFlex": "100\\%",
+    "PBookPutsPaired": "54\\%",
+    "PBookWrittenFlex": "0\\%"
+  },
+  "name": "programme_book",
+  "values": {
+    "capture_dates": 45,
+    "dates": 45,
+    "fund_share": 0.04503775723214996,
+    "funds": 24,
+    "names": 34,
+    "netted_call_share": 0.7940524296412921,
+    "short_put_flex_share": 1.0,
+    "short_puts_paired": 0.5420759452858489,
+    "written_call_flex_share": 0.00012490262249269243
+  }
+}

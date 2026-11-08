@@ -1033,25 +1033,30 @@ the four rows the 95\% intervals run from $\GPredPreLow\times10^{-4}$ to
 $\GPredIvHigh\times10^{-4}$, so the bound that survives every timing is about that wide,
 in either direction.
 
-Where the sign of the book is known, it can be tested one way. The collector's universe
-file fixed \GProgListed{} single names chosen for the option-income programmes written on
-them. A synthetic covered-call fund there holds a long call and a short put at one strike,
-which pair-netting removes, and writes a call above it: what netting leaves is the written
-call, and the dealer opposite is long its gamma. Hedging should then calm the next day,
-$\beta<0$. A third log entry fixed that test, one-sided, before it was estimated, with a
-wild cluster restricted bootstrap by underlying \citep{cameron2008} for its
-\GProgNames{} clusters. The estimate leans that way, $\GProgBeta\times10^{-4}$ per
-standard deviation, but $t=\GProgT$ and the bootstrap $p$ is \GProgWildP{} over
-\GProgDraws{} draws, on \GProgDays{} underlying-days. The sign rests on an assumption the data do not check: that
-the netted remainder in these names is the funds' written calls, held as FLEX. Calls
-written in listed series would not be in it; the universe file also groups buffer
-programmes with option-income ones, and a buffer book can leave dealers short gamma; and
-the list is fixed while programmes may have begun during the panel. Its minimum detectable effect,
-$\GProgMDE\times10^{-4}$, is \GProgMDEShare{} of mean absolute return there, so under the
-rule fixed in advance the test is \GProgVerdict{}: these names are too few and too
-volatile to bound the signed channel. Priced at $t-1$ it is the same ($t=\GProgPreT$), and
-in the \GProgControlNames{} control names, where no sign is predicted, the estimate is
-$\GProgControlBeta\times10^{-4}$ ($t=\GProgControlT$).
+A third log entry tried to give the book a sign. The collector's universe file fixed
+\GProgListed{} single names chosen for the option-income programmes written on them. The
+entry assumed that a synthetic covered-call fund there holds a long call and a short put at
+one strike, which pair-netting removes, and writes a call above it as FLEX, so that what
+netting leaves is the written call and the dealer opposite is long its gamma. Hedging
+should then calm the next day, $\beta<0$, tested one-sided with a wild cluster restricted
+bootstrap by underlying \citep{cameron2008} for its \GProgNames{} clusters. The estimate
+leans that way, $\GProgBeta\times10^{-4}$ per standard deviation, but $t=\GProgT$ and the
+bootstrap $p$ is \GProgWildP{} over \GProgDraws{} draws, on \GProgDays{} underlying-days.
+Its minimum detectable effect, $\GProgMDE\times10^{-4}$, is \GProgMDEShare{} of mean
+absolute return there, so under the rule fixed in advance the test is \GProgVerdict{}.
+Priced at $t-1$ it is the same ($t=\GProgPreT$), and in the \GProgControlNames{} control
+names the estimate is $\GProgControlBeta\times10^{-4}$ ($t=\GProgControlT$).
+
+The assumption does not survive the holdings. Checked after the test was run, against the
+daily holdings of \PBookFunds{} programme funds over \PBookCaptureDates{} dates, the funds'
+written calls are listed: \PBookWrittenFlex{} of them are FLEX. Their FLEX legs are the
+short puts of the synthetic, \PBookPutFlex{} FLEX, of which \PBookPutsPaired{} sit opposite
+a FLEX long call at the same strike and net out. What these funds leave in the netted FLEX
+book is \PBookFundShare{} of the netted FLEX open interest in the \PBookNames{} names, and
+that book is \PBookCallShare{} calls, held by others whose side the data do not show. The
+programme test is therefore not sign-identified after all, and its inconclusive result
+says nothing about a signed channel. The same holdings sharpen what the netted measure
+is: in names known for option-income funds, the netted FLEX book is mostly not theirs.
 
 At daily resolution, then, netted hidden gamma does not predict the underlying's
 volatility. The measure is unsigned, so this bounds the net of dealer-long and
@@ -1126,8 +1131,8 @@ pins in one expiry in ten on \PinNullPowerTen{} of the dates, in one in seven on
 \PinNullPowerSeven{} and in one in twenty on \PinNullPowerTwenty{}, as the observed
 standard error implied. The books are
 small next to trading: the pin strike's open interest, in shares, is a median
-\PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, as an
-option-income fund's written calls would leave it, the estimate leans towards pinning
+\PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, the
+estimate leans towards pinning
 ($t=\PinCallsT$), and where it is mostly puts, away ($t=\PinPutsT$). Neither is
 distinguishable from zero, and both are descriptive. If dealers are long the calls and
 short the puts, the two push closes in opposite directions and could offset in the

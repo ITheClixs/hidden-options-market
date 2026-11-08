@@ -67,3 +67,24 @@ and H2 for Holm's adjustment; the paper reports it as a separate, sign-identifie
 
 Only a defect found in the code. Any change after an estimate has been seen is recorded
 here as a dated amendment, with the estimate it changed.
+
+## Amendment, 2026-11-08, after the outcome was read: the assumption fails
+
+**Outcome under the rule above.** β = −7.29 bp per SD, t −0.82, wild cluster bootstrap
+p 0.22. The MDE is 9.4% of mean |r|, so the test is inconclusive.
+
+**A check of the identifying assumption, added after that outcome** (result
+`programme_book`). The collector keeps the daily holdings of 24 programme funds. Over the
+45 dates they cover up to the panel end:
+
+- **Written calls are listed.** 0% of the funds' written-call contracts are FLEX.
+- **Short puts are FLEX.** 100% of their short puts are FLEX, and 54% of those sit
+  opposite a FLEX long call at the same strike, which pair-netting removes.
+- **The funds hold little of the netted book.** Their netted FLEX book is 4.5% of the
+  netted FLEX open interest in the 34 names, and that open interest is 79% calls.
+
+So "the netted remainder is the funds' written calls" is false for the funds the data
+show. The test is not sign-identified, and the paper reports that.
+
+The holdings come from one fund family, and other programmes' FLEX use may differ.
+Nothing here can recover the sign of the netted book in these names.

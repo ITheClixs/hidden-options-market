@@ -13,7 +13,7 @@ panel.
 
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
 - **Convexity.** Across the {{GammaUnderlyings}} followed underlyings with stored listed chains, over {{GammaSettlements}} settlements, FLEX is {{GammaMedianGross}} of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is {{GammaMedianNetted}} ({{GammaMedianBoth}} if listed pairs are netted too). It stays large in SPY ({{GammaSPYNetted}} FLEX-netted) and NDX ({{GammaNDXNetted}}).
-- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. Where the sign is known, in the {{GProgNames}} option-income programme names, a one-sided test leans towards dampening but is underpowered (*t* {{GProgT}}, minimum detectable effect {{GProgMDEShare}} of mean \|*r*\|).
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the {{GProgNames}} option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold {{PBookFundShare}} of the netted FLEX book there.
 - **Pinning?** Not detected. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The rule leaves out the {{PinExcluded}} names with listed weekday expiries, among them SPY, QQQ and the largest single names, where FLEX holds the most gamma; the books it covers are a median {{PinMedianSize}} of a day's share volume. The minimum detectable pull is {{PinMDE}}σ, but the same design finds no pinning at listed strikes on {{PinCtlDates}} monthly expirations either (net of a matched placebo added after the fact, *t* {{PinCtlNetT}}), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
@@ -111,13 +111,14 @@ move re-prices the book, carrying spot away from the strikes. The same re-pricin
 bias the test itself, so rows fixed in
 [`docs/log/2026-11-08-gamma-timing-spec.md`](docs/log/2026-11-08-gamma-timing-spec.md)
 before they were run price it on the day before (*t* {{GPredPreT}}) and add an
-implied-volatility control (*t* {{GPredIvT}}). Neither finds an effect. In the
-{{GProgNames}} option-income programme names, where netting leaves the funds' written calls and
-dealers are long their gamma, a one-sided test fixed in
-[`docs/log/2026-11-08-programme-gamma-spec.md`](docs/log/2026-11-08-programme-gamma-spec.md)
-gives {{GProgBeta}}bp per standard deviation (*t* {{GProgT}}, wild cluster bootstrap *p*
-{{GProgWildP}}). Its minimum detectable effect is {{GProgMDE}}bp, {{GProgMDEShare}} of mean
-\|*r*\|, so the test is {{GProgVerdict}}.
+implied-volatility control (*t* {{GPredIvT}}). Neither finds an effect. A one-sided test in the
+{{GProgNames}} option-income programme names, fixed in
+[`docs/log/2026-11-08-programme-gamma-spec.md`](docs/log/2026-11-08-programme-gamma-spec.md),
+assumed the netted FLEX remainder there was the funds' written calls. It is inconclusive
+({{GProgBeta}}bp per standard deviation, *t* {{GProgT}}, wild cluster bootstrap *p*
+{{GProgWildP}}), and the assumption fails: in the daily holdings of {{PBookFunds}} programme
+funds, {{PBookWrittenFlex}} of the written calls are FLEX, and the funds hold
+{{PBookFundShare}} of the netted FLEX open interest in those names.
 
 **At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
 Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date
