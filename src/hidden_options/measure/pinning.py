@@ -120,6 +120,7 @@ def event_statistics(
         out = {"s": closeness(*args)}
         for band in BANDS:
             out[f"b{band}"] = _banded(*args, band)
+            out[f"n{band}"] = _near(args[0], args[2], args[3], band)
         return out
 
     expiry = scores(0)
@@ -135,9 +136,15 @@ def event_statistics(
 
 
 def clustered_mean(values: pd.Series, clusters: pd.Series) -> dict[str, Any]:
-    """The mean with a cluster-robust standard error (CR1) and t on G - 1 degrees of freedom."""
+    """The mean with a cluster-robust standard error (CR1) and t on G - 1 degrees of freedom.
+
+    With fewer than two clusters there is no estimate, and every figure is None.
+    """
     v = np.asarray(values, dtype=float)
     g = pd.Series(clusters).to_numpy()
+    if len(set(g.tolist())) < 2:
+        keys = ("mean", "std_error", "t_stat", "p_value", "mde80")
+        return {**dict.fromkeys(keys), "clusters": len(set(g.tolist())), "n_obs": len(v)}
     n, mean = len(v), float(np.mean(v))
     sums = pd.Series(v - mean).groupby(pd.Series(g)).sum().to_numpy()
     groups = len(sums)
@@ -193,6 +200,13 @@ def size_terciles(stats: pd.DataFrame) -> dict[str, Any]:
         "p_value": float(2 * student_t.sf(abs(t), groups - 1)),
         "clusters": groups,
     }
+
+
+def _near(close: np.ndarray, strike: np.ndarray, sigma: np.ndarray, band: float) -> np.ndarray:
+    """1 where the close is within `band` sigma of the strike, NaN where there is no close."""
+    out = (np.abs(np.log(close / strike)) <= band * sigma).astype(float)
+    out[~np.isfinite(close)] = np.nan
+    return np.asarray(out, dtype=float)
 
 
 def _banded(

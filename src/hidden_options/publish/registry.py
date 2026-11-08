@@ -59,6 +59,8 @@ REGISTRATION_MODULES: tuple[str, ...] = (
     "hidden_options.predict.tables",
     "hidden_options.predict.gamma_result",
     "hidden_options.predict.gamma_table",
+    "hidden_options.measure.pinning_result",
+    "hidden_options.measure.pinning_table",
 )
 
 # Modules whose import registers figure builders, loaded only to draw figures.

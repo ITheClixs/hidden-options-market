@@ -189,3 +189,9 @@ class TestSizeTerciles:
         )
         found = size_terciles(frame)
         assert found["difference"] == pytest.approx(2.0)
+
+
+def test_clustered_mean_with_one_cluster_has_no_estimate():
+    found = clustered_mean(pd.Series([1.0, 2.0]), pd.Series(["a", "a"]))
+    assert found["mean"] is None
+    assert found["clusters"] == 1

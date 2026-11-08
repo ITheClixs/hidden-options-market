@@ -1,0 +1,72 @@
+"""The strings the paper and README print for the `pinning` result.
+
+D and the closeness statistics are in units of the event's daily sigma, printed to three
+places. Banded statistics are differences in the frequency of closing within the band,
+printed as percentage points.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from typing import Any
+
+from hidden_options.predict.macros import p_value, t_stat
+from hidden_options.publish import formats
+
+DESCRIPTIVE_STEMS = {
+    "band_0.25": "BandQuarter",
+    "band_0.5": "BandHalf",
+    "expiry_only": "ExpiryOnly",
+    "pseudo_only": "PseudoOnly",
+    "friday": "Friday",
+    "calls": "Calls",
+    "puts": "Puts",
+}
+BANDED = {"band_0.25", "band_0.5"}
+
+
+def sigma(value: float) -> str:
+    return formats.decimal(value, 3)
+
+
+def points(value: float) -> str:
+    """A difference in frequency, in percentage points to one place."""
+    return formats.decimal(value * 100, 1)
+
+
+def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
+    """Every macro the `pinning` result defines."""
+    h1, h2, sample = values["h1"], values["h2"], values["sample"]
+    out = {
+        "PinMean": sigma(h1["mean"]),
+        "PinSE": sigma(h1["std_error"]),
+        "PinT": t_stat(h1["t_stat"]),
+        "PinP": p_value(h1["p_value"]),
+        "PinHolm": p_value(h1["holm_p"]),
+        "PinFlipP": p_value(h1["sign_flip_p"]),
+        "PinMDE": sigma(h1["mde80"]),
+        "PinSizeDiff": sigma(h2["difference"]),
+        "PinSizeTop": sigma(h2["top"]),
+        "PinSizeBottom": sigma(h2["bottom"]),
+        "PinSizeT": t_stat(h2["t_stat"]),
+        "PinSizeHolm": p_value(h2["holm_p"]),
+        "PinEvents": formats.count(sample["events"]),
+        "PinDates": formats.count(sample["expiry_dates"]),
+        "PinUnderlyings": formats.count(sample["underlyings"]),
+        "PinContracts": formats.count(round(sample["median_contracts"])),
+        "PinMedianSize": formats.percent(sample["median_size"], 1),
+        "PinNearExpiry": formats.percent(sample["near_expiry"], 1),
+        "PinNearAfter": formats.percent(sample["near_after"], 1),
+        "PinExcluded": formats.count(len(sample["excluded_names"])),
+        "PinFridayEvents": formats.count(sample["friday_events"]),
+    }
+    for key, stem in DESCRIPTIVE_STEMS.items():
+        row = values["descriptive"][key]
+        scale = points if key in BANDED else sigma
+        empty = row["mean"] is None
+        out[f"Pin{stem}Mean"] = "n/a" if empty else scale(row["mean"])
+        out[f"Pin{stem}T"] = "n/a" if empty else t_stat(row["t_stat"])
+    return out
+
+
+__all__ = ["pinning_macros"]

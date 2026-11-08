@@ -510,7 +510,7 @@ class TestDrift:
         assert run.returncode == 0, run.stderr
         assert run.stdout.strip() == (
             "[] ['gamma_predictive', 'hidden_gamma', 'hidden_share', 'identification', "
-            "'implied_validation', 'market', 'positions', 'predictive']"
+            "'implied_validation', 'market', 'pinning', 'positions', 'predictive']"
         )
 
 

@@ -12,10 +12,10 @@ from hidden_options.predict.gamma_result import (
     BOUNDED_SHARE,
     PRIMARY,
     SECONDARY,
-    _holm,
     _row,
     _verdict,
 )
+from hidden_options.predict.inference import holm as _holm
 from hidden_options.predict.panel import CONTROLS
 from hidden_options.predict.regressions import PredictiveRow
 

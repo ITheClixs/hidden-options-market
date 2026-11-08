@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import asdict
 from typing import Any
 
@@ -34,7 +34,7 @@ from hidden_options.predict.gamma_panel import (
     range_outcome,
     standardise,
 )
-from hidden_options.predict.inference import N_PERM, SEED, permutation_test
+from hidden_options.predict.inference import N_PERM, SEED, holm, permutation_test
 from hidden_options.predict.panel import CONTROLS, bars_through, build_predictive_panel
 from hidden_options.predict.regressions import PredictiveRow
 from hidden_options.publish.registry import ANALYSES
@@ -113,15 +113,15 @@ def gamma_predictive_result(
     panel = gamma_panel(gamma, flex_panel, bars)
     h1 = _row(panel, PRIMARY, OUTCOME, [PRIMARY])
     h2 = _row(panel, INTERACTION, OUTCOME, [PRIMARY, INTERACTION])
-    holm = _holm({"h1": h1.p_value, "h2": h2.p_value})
+    adjusted = holm({"h1": h1.p_value, "h2": h2.p_value})
     permutation = permutation_test(panel, OUTCOME, PRIMARY, CONTROLS, n_perm=n_perm, seed=seed)
     used = panel.dropna(subset=[OUTCOME, PRIMARY, *CONTROLS])
     mean_abs = float(used[OUTCOME].mean())
     values: dict[str, Any] = {
-        "h1": {**asdict(h1), "holm_p": holm["h1"], "permutation_p": permutation.p_value},
-        "h2": {**asdict(h2), "holm_p": holm["h2"]},
+        "h1": {**asdict(h1), "holm_p": adjusted["h1"], "permutation_p": permutation.p_value},
+        "h2": {**asdict(h2), "holm_p": adjusted["h2"]},
         "secondary": [asdict(_row(panel, x, y, [x])) for x, y in SECONDARY],
-        "verdict": _verdict(h1, holm["h1"], mean_abs),
+        "verdict": _verdict(h1, adjusted["h1"], mean_abs),
         "sample": _sample(panel, used, gamma, mean_abs),
         "settings": {
             "alpha": ALPHA,
@@ -152,16 +152,6 @@ def gamma_predictive() -> Result:
 def _row(panel: pd.DataFrame, name: str, outcome: str, regressors: Sequence[str]) -> PredictiveRow:
     est = fit(panel, outcome, [*regressors, *CONTROLS], entity="symbol", time="date")
     return PredictiveRow.from_estimate(est[name], outcome, placebo=name.endswith("_lead"))
-
-
-def _holm(p_values: Mapping[str, float]) -> dict[str, float]:
-    """Holm's step-down adjusted p-values."""
-    ordered = sorted(p_values.items(), key=lambda pair: pair[1])
-    adjusted, running = {}, 0.0
-    for rank, (key, p) in enumerate(ordered):
-        running = max(running, min(1.0, (len(ordered) - rank) * p))
-        adjusted[key] = running
-    return adjusted
 
 
 def _verdict(h1: PredictiveRow, holm_p: float, mean_abs: float) -> dict[str, Any]:

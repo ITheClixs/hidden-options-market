@@ -17,7 +17,7 @@ inner products.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -184,12 +184,23 @@ def permutation_test(
     )
 
 
+def holm(p_values: Mapping[str, float]) -> dict[str, float]:
+    """Holm's step-down adjusted p-values, keyed as given."""
+    ordered = sorted(p_values.items(), key=lambda pair: pair[1])
+    adjusted, running = {}, 0.0
+    for rank, (key, p) in enumerate(ordered):
+        running = max(running, min(1.0, (len(ordered) - rank) * p))
+        adjusted[key] = running
+    return adjusted
+
+
 __all__ = [
     "N_PERM",
     "SEED",
     "PermutationResult",
     "TwoWayProjector",
     "WithinGroupShuffle",
+    "holm",
     "permutation_test",
     "permute_within",
     "two_way_residuals",
