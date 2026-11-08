@@ -113,3 +113,42 @@ power figures above came from independent pseudo-draws and are unaffected.
 **2. Clarification of K\*.** The event count above was computed by choosing K\* among the
 strikes that pass both filters, at least 100 contracts and within 2σ, not by choosing the
 largest strike first and then applying the filters. That is the rule.
+
+## Amendment, 2026-11-08, after the outcome was seen: split adjustment, sample, power
+
+**1. A defect in the price data, found in review.** Stored bars were split-adjusted as
+of the fetch date; OCC strikes are not. Before a split, the previous close, σ's scale
+and the distance to K\* were all off by the split's ratio, so pin strikes of split names
+failed the 2σ filter or were measured against the wrong price. Bars are now put back on
+each session's basis (`collect/splits.py`, `read_bars`). The design is unchanged; the
+sample and the estimates change.
+
+| | before | after |
+|---|---|---|
+| Events (expiry dates; names) | 2,324 (326; 494) | 2,709 (326; 498) |
+| H1 mean D (σ) | −0.017 | −0.031 |
+| H1 t | −0.62 | −1.16 |
+| H1 sign-flip p | 0.54 | 0.25 |
+| H1 Holm p | 1.00 | 0.50 |
+| MDE (σ) | 0.076 | 0.074 |
+| H2 t | 0.58 | 1.05 |
+
+The finding under the rule above is unchanged: no pinning detectable at this power.
+
+**2. Event count.** The 2,383 events on 330 dates above were counted on the split-adjusted
+bars and before requiring bars through E+5; on corrected bars with that requirement the
+sample is 2,709 events on 326 dates.
+
+**3. Excluded names: 32, not 31.** The count above was taken on OCC's census alone. The
+rule also uses the stored Cboe chains, which add GDX. The code applied the rule as
+written; only the count in the text was short.
+
+**4. Power, now computed in the repository.** The power figures above were computed
+outside the repository and cannot be reproduced exactly. The result now carries its own
+(`simulate_worlds`, `power_at`): the same alternative, on the corrected events. Over 1,000
+null worlds the test rejects in 6.1% at a nominal 5%. Independent normal returns give a
+standard error of about 0.021σ, below the observed 0.026σ, so power is reported at the
+observed standard error: 26% when one event in twenty is pulled halfway to K\*, 75% at one
+in ten and 97% at one in seven (39%, 92% and 100% on the simulated standard error). The
+statement above, that the test can find attraction in about one event in seven and not in
+one in twenty, stands.

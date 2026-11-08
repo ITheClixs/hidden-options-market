@@ -13,9 +13,9 @@ panel.
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
-- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.53, 347,687 underlying-days). The minimum detectable effect is 2.00bp per standard deviation, 1.0\% of mean \|*r*\|. The hedge a 1% move calls for is 5.84bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset.
-- **Pinning?** No. On 2,324 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -0.62). The minimum detectable pull is 0.076σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
-- **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.35-fold.
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset.
+- **Pinning?** No. On 2,709 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.16). The minimum detectable pull is 0.074σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
+- **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.34-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on 14 August 2026, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
@@ -101,22 +101,22 @@ interest), is 1.02 times gamma from the listed surface. Specification:
 twenty-session dollar volume, with underlying and date fixed effects and two-way
 clustering. It was fixed in advance in
 [`docs/log/2026-11-08-gamma-predictive-spec.md`](docs/log/2026-11-08-gamma-predictive-spec.md).
-The coefficient is -0.38bp per standard deviation (*t* -0.53, permutation *p*
-0.30, Holm *p* 1.00) on 347,687 underlying-days. The minimum
-detectable effect is 2.00bp, 1.0\% of mean |*r*|, which the rule fixed in
+The coefficient is -0.60bp per standard deviation (*t* -0.79, permutation *p*
+0.092, Holm *p* 0.86) on 353,972 underlying-days. The minimum
+detectable effect is 2.13bp, 1.1\% of mean |*r*|, which the rule fixed in
 advance calls a bounded null. Netted gamma dated two activity dates later is negative
-(*t* -4.86). That is mechanical: a large move carries spot away from the strikes,
+(*t* -4.93). That is mechanical: a large move carries spot away from the strikes,
 so measured gamma falls, while volume rises.
 
 **At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
 Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date
-on which only FLEX expires. On 2,324 such expiries (326 dates,
-494 names), the test compares the close's distance to the largest expiring
+on which only FLEX expires. On 2,709 such expiries (326 dates,
+498 names), the test compares the close's distance to the largest expiring
 FLEX strike with its distance to the mirror strike on the other side of the previous
 close. It then subtracts the same comparison on the five sessions after expiry. The
-result is -0.017σ (*t* -0.62, sign-flip *p* 0.54), with a minimum
-detectable effect of 0.076σ. Large books do no better than small ones (*t*
-0.58). Specification and its pre-outcome amendment:
+result is -0.031σ (*t* -1.16, sign-flip *p* 0.25), with a minimum
+detectable effect of 0.074σ. Large books do no better than small ones (*t*
+1.05). Specification and its pre-outcome amendment:
 [`docs/log/2026-11-08-pinning-spec.md`](docs/log/2026-11-08-pinning-spec.md).
 
 **On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
@@ -203,10 +203,10 @@ random. Scored against disclosed fund holdings, with the settings frozen first, 
 recalls 77.9\% of 36 held structures with precision 86.0\%. The test
 rests on 18 funds of one family, where in the median held leg the fund holds
 98.5\% of the open interest, and almost entirely on same-strike pairs; a match means consistent with a disclosed
-holder, no more. On the 69.4\% of open interest with a validated delta, the median
-underlying's strike notional, across 1,458 underlyings, is at least
-2.35 times its delta exposure, whatever the signs of the legs. Counting every leg as long gives
-3.65, a reading that is neither a floor nor a ceiling and that overstates the
+holder, no more. On the 70.0\% of open interest with a validated delta, the median
+underlying's strike notional, across 1,461 underlyings, is at least
+2.34 times its delta exposure, whatever the signs of the legs. Counting every leg as long gives
+3.60, a reading that is neither a floor nor a ceiling and that overstates the
 ratio on the same-strike pairs funds disclose. On single
 positions, recomputed from the report:
 

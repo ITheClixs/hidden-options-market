@@ -1045,8 +1045,14 @@ $t=\PinT$, with a sign-flip $p$ of \PinFlipP{} and Holm $p$ of \PinHolm{}. It is
 larger where the book is large relative to trading, top tercile less bottom
 $\PinSizeDiff\sigma$ at $t=\PinSizeT$. Within a quarter of $\sigma$ of the strike the
 difference is $\PinBandQuarterMean$ percentage points. The minimum detectable effect is
-$\PinMDE\sigma$. In the simulations the specification reports, that is attraction
-strong enough to pull about one expiry in seven halfway to the strike. The books are
+$\PinMDE\sigma$. Pulling one expiry in ten halfway to the strike moves the statistic by
+$\PinEffectTen\sigma$, and one in seven by $\PinEffectSeven\sigma$; at the standard error
+observed, the test detects the first \PinPowerTen{} of the time and the second
+\PinPowerSeven{}, and one in twenty only \PinPowerTwenty{}. On \PinSimWorlds{} sets of
+simulated returns without pinning, with these events' strikes, $\sigma$ and dates, it
+rejects in \PinSimSize{} at a nominal 5\%. Simulated returns are independent and
+normal, so their standard error is below the observed one, and power computed on them
+would be higher; the figures here use the observed one. The books are
 small next to trading: the pin strike's open interest, in shares, is a median
 \PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, as an
 option-income fund's written calls would leave it, the estimate leans towards pinning

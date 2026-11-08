@@ -87,3 +87,27 @@ the small-cluster correction and t critical values on the smaller cluster count.
 
 Only a defect found in the code. Any change after an estimate has been seen is recorded
 here as a dated amendment, with the estimate it changed.
+
+## Amendment, 2026-11-08, after the estimate was seen: split adjustment
+
+**A defect in the price data, found in review.** The provider restates a symbol's whole
+bar history after a split, so stored bars were split-adjusted as of the fetch date while
+OCC strikes are not. Before any split, an equity's price was off by the split's ratio
+when compared with a strike: NFLX near 93 on 1 April 2025, against FLEX strikes between
+855 and 1,120. Gamma at those strikes was priced against the wrong spot, and dollar
+volume in the denominator was unaffected only because price and volume move inversely.
+Bars are now put back on each session's basis (`collect/splits.py`, `read_bars`) before
+any price meets a strike. Nothing in the specification above changes; the estimates do.
+
+| | before | after |
+|---|---|---|
+| H1 β (bp per SD) | −0.38 | −0.60 |
+| H1 t | −0.53 | −0.79 |
+| H1 permutation p | 0.30 | 0.092 |
+| H1 Holm p | 1.00 | 0.86 |
+| MDE (bp per SD; share of mean \|r\|) | 2.00; 1.0% | 2.13; 1.1% |
+| H2 t | 0.31 | 0.11 |
+| Lead t | −4.86 | −4.93 |
+| Underlying-days | 347,687 | 353,972 |
+
+The verdict under the rule above is unchanged: a bounded null.

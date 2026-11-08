@@ -6,16 +6,16 @@
 \toprule
  & Estimate &  & $t$ & Holm $p$ \\
 \midrule
-H1: expiry less the five sessions after & -0.017 & $\sigma$ & -0.62 & 1.00 \\
-H2: top less bottom size tercile & 0.027 & $\sigma$ & 0.58 & 1.00 \\
-Expiry alone & -0.018 & $\sigma$ & -0.70 & -- \\
-Sessions after alone & -0.001 & $\sigma$ & -0.07 & -- \\
-Within $0.25\sigma$, expiry less after & -0.1 & pp & -0.10 & -- \\
-Within $0.5\sigma$, expiry less after & 0.0 & pp & -0.03 & -- \\
-Pin strike mostly calls & 0.025 & $\sigma$ & 0.70 & -- \\
-Pin strike mostly puts & -0.050 & $\sigma$ & -1.23 & -- \\
-Friday expiries, listed also expiring & -0.007 & $\sigma$ & -0.51 & -- \\
+H1: expiry less the five sessions after & -0.031 & $\sigma$ & -1.16 & 0.50 \\
+H2: top less bottom size tercile & 0.044 & $\sigma$ & 1.05 & 0.50 \\
+Expiry alone & -0.023 & $\sigma$ & -0.92 & -- \\
+Sessions after alone & 0.008 & $\sigma$ & 0.81 & -- \\
+Within $0.25\sigma$, expiry less after & -0.4 & pp & -0.42 & -- \\
+Within $0.5\sigma$, expiry less after & -0.9 & pp & -0.67 & -- \\
+Pin strike mostly calls & 0.022 & $\sigma$ & 0.64 & -- \\
+Pin strike mostly puts & -0.066 & $\sigma$ & -1.73 & -- \\
+Friday expiries, listed also expiring & -0.004 & $\sigma$ & -0.31 & -- \\
 \bottomrule
 \end{tabular}
-\par\smallskip{\footnotesize 2,324 events on 326 expiry dates in 494 underlyings: FLEX expiries on Monday to Thursday, in names that list no option expiring that day (32 names with listed weekday expiries are left out). The pin strike is the expiring FLEX strike with the most open interest, at least 100 contracts, within $2\sigma$ of the previous close, $\sigma$ being the standard deviation of daily log returns over the 60 sessions before. Closeness is distance to the strike's mirror about the previous close less distance to the strike, each in $\sigma$ units and capped at 2; positive is nearer the strike. The sessions after are the five after expiry, with the strike held fixed. Banded rows difference the frequency of closing within the band of the strike and of its mirror, in percentage points. Errors are clustered by expiry date. H1 and H2 were fixed in advance with Holm's adjustment across them; the other rows are descriptive.\par}
+\par\smallskip{\footnotesize 2,709 events on 326 expiry dates in 498 underlyings: FLEX expiries on Monday to Thursday, in names that list no option expiring that day (32 names with listed weekday expiries are left out). The pin strike is the expiring FLEX strike with the most open interest, at least 100 contracts, within $2\sigma$ of the previous close, $\sigma$ being the standard deviation of daily log returns over the 60 sessions before. Closeness is distance to the strike's mirror about the previous close less distance to the strike, each in $\sigma$ units and capped at 2; positive is nearer the strike. The sessions after are the five after expiry, with the strike held fixed. Banded rows difference the frequency of closing within the band of the strike and of its mirror, in percentage points. Errors are clustered by expiry date. H1 and H2 were fixed in advance with Holm's adjustment across them; the other rows are descriptive.\par}
 \end{table}

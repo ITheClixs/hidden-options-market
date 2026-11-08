@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T21:01:45+00:00",
+  "generated_at": "2026-11-08T10:10:08+00:00",
   "inputs": {
     "bar_rows": 1054212,
     "ci_runs": [
@@ -69,9 +69,9 @@
   "macros": {
     "IvAtFloor": "22",
     "IvBelowDeepCalls": "89.1\\%",
-    "IvBelowIntrinsic": "87,430",
+    "IvBelowIntrinsic": "86,957",
     "IvBelowTopNames": "SPX, SPY, RUT, XSP and IWM",
-    "IvBelowTopShare": "77.6\\%",
+    "IvBelowTopShare": "78.0\\%",
     "IvClippedGap": "0.46",
     "IvCompared": "115,902",
     "IvDates": "48",
@@ -83,8 +83,8 @@
     "IvDomainFail": "7",
     "IvDomainFailShort": "6",
     "IvDomainOfCells": "50",
-    "IvDomainOpenInterest": "89.1\\%",
-    "IvDomainOpenInterestEquity": "89.3\\%",
+    "IvDomainOpenInterest": "89.2\\%",
+    "IvDomainOpenInterestEquity": "89.5\\%",
     "IvDomainOpenInterestIndex": "85.7\\%",
     "IvExpired": "18,142",
     "IvFallbackRows": "0 series-days",
@@ -100,10 +100,10 @@
     "IvMedianGapHigh": "0.46",
     "IvMedianGapLow": "0.71",
     "IvMinMatched": "50",
-    "IvNoConvergence": "6,082",
+    "IvNoConvergence": "5,826",
     "IvNoSpot": "29,261",
-    "IvOkOpenInterest": "92.7\\%",
-    "IvOkShare": "93.2\\%",
+    "IvOkOpenInterest": "92.9\\%",
+    "IvOkShare": "93.3\\%",
     "IvPrefixContradict": "0",
     "IvPrefixGap": "0.48",
     "IvPrefixMarked": "3,812,321",
@@ -133,8 +133,8 @@
     "coverage": {
       "at_floor": 22,
       "below_intrinsic": {
-        "deep_calls": 77882,
-        "rows": 87430,
+        "deep_calls": 77500,
+        "rows": 86957,
         "top": [
           {
             "rows": 33488,
@@ -157,15 +157,15 @@
             "symbol": "IWM"
           }
         ],
-        "top_share": 0.7758778451332494
+        "top_share": 0.780098209459848
       },
       "by_kind": {
         "equity": {
-          "below_intrinsic": 44440,
+          "below_intrinsic": 43967,
           "expired": 14315,
-          "no_convergence": 5965,
+          "no_convergence": 5709,
           "no_spot": 6222,
-          "ok": 665402,
+          "ok": 666131,
           "zero_price": 1
         },
         "index": {
@@ -178,11 +178,11 @@
         }
       },
       "by_status": {
-        "below_intrinsic": 87430,
+        "below_intrinsic": 86957,
         "expired": 18142,
-        "no_convergence": 6082,
+        "no_convergence": 5826,
         "no_spot": 29261,
-        "ok": 1945172,
+        "ok": 1945901,
         "zero_price": 1
       },
       "no_spot_underlyings": [
@@ -508,14 +508,14 @@
       "compared_share": 0.9500353747131197,
       "failing_short": 6,
       "of_cells": 50,
-      "ok_open_interest": 0.9272082156290948,
+      "ok_open_interest": 0.9291136584756794,
       "ok_open_interest_by_kind": {
-        "equity": 0.9322780399420296,
+        "equity": 0.9343354602474706,
         "index": 0.8636444441118266
       },
-      "usable_open_interest": 0.8905716807034723,
+      "usable_open_interest": 0.8924810355479252,
       "usable_open_interest_by_kind": {
-        "equity": 0.8932379280122839,
+        "equity": 0.895299572335183,
         "index": 0.8571431584737293
       }
     },
