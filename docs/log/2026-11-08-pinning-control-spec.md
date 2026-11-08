@@ -87,3 +87,34 @@ as independent), not distinguishable from zero at 5%. The result carries both fi
 The registered FLEX test is not changed. Its K\* is the FLEX strike with the most open
 interest, often round too, so a bias of that order may sit in its estimate. That is small
 next to its MDE of 0.078σ, and its sign would push the estimate away from pinning.
+
+## Amendment 2, 2026-11-08: a matched placebo replaces the ordinary-day baseline
+
+A re-review found that the ordinary-day baseline does not explain the negative D, and is
+not the right comparison either.
+
+- **Strikes are not the cause.** Random off-grid strikes at the same distances give
+  about the same negative D. So the bias does not come from round strikes. It comes from
+  the design: K\* is fixed by the close of E−1, while each pseudo-date's mirror is
+  re-centred on the close before it. Short-horizon reversal pulls later closes back
+  towards the E−1 close, and so towards any K\* near it.
+- **The independence assumption is unsafe.** The ordinary-day baseline is a different
+  sample, and its standard error was combined with the control's as if the two were
+  independent. They share names and overlapping windows.
+- **The statistic's centre.** It is centred on zero only for serially independent returns.
+
+The diagnostic is now matched to each event. Placebo strikes sit at C(E−1)·exp(±|d|), at
+the pin strike's distance |d| on each side. Their closeness on the expiry date cancels
+exactly, so their mean D is the design's own term for that event. D net of it is
+reported per event, with the registered inference. It is a post-hoc diagnostic, labelled
+so in the paper. The control's registered outcome, above, stands.
+
+On the 34 monthly expirations:
+- the matched placebo is −0.016σ;
+- the control net of it is −0.007σ (t −1.64, sign-flip p 0.11);
+- the MDE is 0.013σ, since pairing removes the common noise.
+
+On the FLEX events of the registered test, the matched placebo is +0.001σ. Net of it,
+the FLEX estimate is −0.031σ (t −1.14), so the registered estimate is not materially
+biased by this term. The superseded comparison against ordinary sessions (t −1.85) is no
+longer reported.

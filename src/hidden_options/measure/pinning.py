@@ -284,6 +284,38 @@ def _log_closeness(returns: np.ndarray, distances: np.ndarray, sigmas: np.ndarra
     return np.asarray(to_mirror - to_strike)
 
 
+def matched_placebo(
+    stats: pd.DataFrame, closes: pd.DataFrame, days: pd.DatetimeIndex
+) -> pd.DataFrame:
+    """Per event of `stats`: the design's own D at strikes as far from the previous close
+    as the pin strike, one on each side, and the event's D net of it.
+
+    The two placebo strikes are each other's mirror about the previous close, so their
+    closeness on the expiry date cancels exactly and the placebo carries only what the
+    pseudo-expiry term does without a strike. That term is not zero when returns are
+    serially dependent: the pin strike is fixed by the close before expiry, while each
+    later mirror is re-centred, so reversal towards that close favours any strike near it.
+    """
+    base = stats[["underlying", "expiry", "prev_close", "sigma", "strike"]].reset_index(drop=True)
+    base = base.assign(row=np.arange(len(base)))
+    distance = np.abs(np.log(base["strike"] / base["prev_close"]))
+    sides = []
+    for sign in (1.0, -1.0):
+        placed = base.assign(strike=base["prev_close"] * np.exp(sign * distance))
+        found = event_statistics(placed, closes, days).set_index("row")
+        sides.append(found.reindex(base["row"]))
+    d_placebo = (sides[0]["D"].to_numpy() + sides[1]["D"].to_numpy()) / 2
+    s_placebo = (sides[0]["s_expiry"].to_numpy() + sides[1]["s_expiry"].to_numpy()) / 2
+    return pd.DataFrame(
+        {
+            "D_placebo": d_placebo,
+            "s_expiry_placebo": s_placebo,
+            "D_net": stats["D"].to_numpy() - d_placebo,
+        },
+        index=stats.index,
+    )
+
+
 __all__ = [
     "BANDS",
     "CAP",
@@ -294,6 +326,7 @@ __all__ = [
     "event_statistics",
     "flex_only",
     "listed_nonfriday",
+    "matched_placebo",
     "pin_strikes",
     "sign_flip_p",
     "power_at",

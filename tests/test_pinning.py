@@ -239,3 +239,30 @@ def test_power_at_a_standard_error():
     # 2.8 standard errors is the 80% minimum detectable effect.
     assert power_at(2.8 * 0.03, 0.03, clusters=300) == pytest.approx(0.80, abs=0.01)
     assert power_at(-2.8 * 0.03, 0.03, clusters=300) == pytest.approx(0.80, abs=0.01)
+
+
+def test_matched_placebo_cancels_on_the_expiry_day_and_keeps_the_pseudo_bias():
+    from hidden_options.measure.pinning import matched_placebo
+
+    rng = np.random.default_rng(3)
+    days = pd.bdate_range("2025-01-02", periods=120)
+    rows = []
+    for i in range(30):
+        path = 100 * np.exp(np.cumsum(rng.normal(0, 0.02, size=len(days))))
+        rows.append(pd.DataFrame({"symbol": f"S{i}", "session": days, "close": path}))
+    closes = with_sigma(pd.concat(rows, ignore_index=True))
+    prev = closes[closes["session"] == days[80]]
+    events = pd.DataFrame(
+        {
+            "underlying": prev["symbol"].to_numpy(),
+            "expiry": days[80],
+            "strike": prev["prev_close"].to_numpy() * 1.01,
+            "prev_close": prev["prev_close"].to_numpy(),
+            "sigma": prev["sigma"].to_numpy(),
+        }
+    )
+    stats = event_statistics(events, closes, days)
+    found = matched_placebo(stats, closes, days)
+    # Strikes at the same distance on both sides: their expiry-day closeness cancels.
+    assert found["s_expiry_placebo"].to_numpy() == pytest.approx(0.0, abs=1e-12)
+    assert found["D_net"].to_numpy() == pytest.approx((stats["D"] - found["D_placebo"]).to_numpy())

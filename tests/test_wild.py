@@ -73,3 +73,14 @@ def test_no_effect_and_the_wrong_sign_are_not_found():
 def test_mde_is_the_one_sided_multiple_of_the_standard_error():
     found = wild_cluster_test(panel(0.0), "y", "x", ["c"], n_draws=99, seed=1)
     assert found["mde80"] == pytest.approx((1.6449 + 0.8416) * found["std_error"], rel=1e-3)
+
+
+def test_size_on_simulated_null_panels():
+    """Rejections at 5% over many null panels stay near 5% (binomial range for 120)."""
+    p_values = [
+        wild_cluster_test(
+            panel(0.0, names=15, dates=40, seed=100 + s), "y", "x", ["c"], n_draws=99, seed=s
+        )["p_value"]
+        for s in range(120)
+    ]
+    assert 0.0 < np.mean(np.array(p_values) < 0.05) < 0.11

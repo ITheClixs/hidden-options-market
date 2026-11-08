@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T13:49:58+00:00",
+  "generated_at": "2026-11-08T14:08:18+00:00",
   "inputs": {
     "bars": "data/flex_underlying_bars.parquet",
     "first_expiry": "2024-12-04",
@@ -25,16 +25,20 @@
     "PinCtlMean": "-0.024",
     "PinCtlNearAfter": "11.2\\%",
     "PinCtlNearExpiry": "16.9\\%",
-    "PinCtlNetMean": "-0.018",
-    "PinCtlNetT": "-1.85",
+    "PinCtlNetFlipP": "0.11",
+    "PinCtlNetMean": "-0.007",
+    "PinCtlNetT": "-1.64",
     "PinCtlP": "0.015",
     "PinCtlPlaceboDates": "558",
+    "PinCtlPlaceboMatched": "-0.016",
     "PinCtlPlaceboMean": "-0.006",
     "PinCtlPlaceboT": "-2.43",
     "PinCtlT": "-2.56",
     "PinCtlUnderlyings": "1,433",
     "PinCtlWeeklyEvents": "119,237",
     "PinCtlWeeklyMean": "-0.011",
+    "PinCtlWeeklyNetMean": "-0.006",
+    "PinCtlWeeklyNetT": "-2.57",
     "PinCtlWeeklyT": "-2.26",
     "PinDates": "326",
     "PinEffectSeven": "0.105",
@@ -56,7 +60,12 @@
     "PinMedianSize": "3.5\\%",
     "PinNearAfter": "9.6\\%",
     "PinNearExpiry": "11.8\\%",
+    "PinNetFlipP": "0.25",
+    "PinNetMDE": "0.075",
+    "PinNetMean": "-0.031",
+    "PinNetT": "-1.14",
     "PinP": "0.29",
+    "PinPlaceboMatched": "0.001",
     "PinPowerSeven": "97\\%",
     "PinPowerTen": "71\\%",
     "PinPowerTwenty": "27\\%",
@@ -101,11 +110,6 @@
         "std_error": 0.0045083597215688975,
         "t_stat": -2.4905950973577116
       },
-      "less_placebo": {
-        "mean": -0.017806555739172295,
-        "std_error": 0.009607073259332665,
-        "t_stat": -1.853483913206798
-      },
       "monthly": {
         "clusters": 34,
         "mde80": 0.02682648972874149,
@@ -118,6 +122,17 @@
         "std_error": 0.009291638101807203,
         "t_stat": -2.555518134867298,
         "underlyings": 1433
+      },
+      "monthly_net": {
+        "clusters": 34,
+        "mde80": 0.012823336052934148,
+        "mean": -0.007273360619336359,
+        "n_obs": 37672,
+        "p_value": 0.11100894677682208,
+        "placebo_mean": -0.016471589052455902,
+        "sign_flip_p": 0.11248875112488751,
+        "std_error": 0.0044414979025029,
+        "t_stat": -1.6375918167692098
       },
       "placebo": {
         "clusters": 558,
@@ -136,6 +151,17 @@
         "p_value": 0.02572873859890592,
         "std_error": 0.004727674992495351,
         "t_stat": -2.2618357543370045
+      },
+      "weekly_net": {
+        "clusters": 108,
+        "mde80": 0.0065185801718809005,
+        "mean": -0.005914285654717354,
+        "n_obs": 119237,
+        "p_value": 0.011694817723611053,
+        "placebo_mean": -0.00477893867819356,
+        "sign_flip_p": 0.011898810118988102,
+        "std_error": 0.0023055222884659984,
+        "t_stat": -2.5652693466921463
       }
     },
     "descriptive": {
@@ -214,6 +240,17 @@
       "sign_flip_p": 0.28857114288571145,
       "std_error": 0.027611492146559485,
       "t_stat": -1.05783205647241
+    },
+    "h1_net": {
+      "clusters": 326,
+      "mde80": 0.07522064997157232,
+      "mean": -0.030581386836527797,
+      "n_obs": 2643,
+      "p_value": 0.25411657938244137,
+      "placebo_mean": 0.001373065316860981,
+      "sign_flip_p": 0.254974502549745,
+      "std_error": 0.026768736619845596,
+      "t_stat": -1.142429217741102
     },
     "h2": {
       "bottom": -0.03021365745161519,

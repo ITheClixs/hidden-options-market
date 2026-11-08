@@ -80,3 +80,27 @@ the same historical surface data.
 The honest statement is therefore narrow: per-underlying FLEX inventory does not
 predict next-day or next-fortnight realised volatility in the underlying, to a
 resolution of a few percent, over eleven months.
+
+## Amendment, 2026-11-08: contract counts across splits
+
+A re-review found that OCC multiplies the contract count of a whole-number forward split
+by its ratio. NFLX FLEX open interest went from 38,497 contracts on 14 November 2025 to
+369,520 on 17 November, the ex-date of its 10:1 split. So the log open-interest
+innovation jumped by about 2.3 at each such split and decayed over the twenty-report
+window, and the change jumped once.
+
+Open interest is now put on one contract basis before the predictors are formed
+(`collect.splits.contract_basis`): counts before a whole-number split's ex-date are
+scaled up by its ratio. Fractional and reverse splits adjust the deliverable instead and
+are left as they are. The test is otherwise unchanged. Estimates before → after:
+
+| | before | after |
+|---|---|---|
+| Innovation β (bp), t | −0.37, −0.68 | −0.41, −0.74 |
+| Innovation clustered p; permutation p | 0.50; 0.45 | 0.46; 0.42 |
+| Innovation MDE (bp) | 1.53 | 1.54 |
+| Change β (bp), t | −0.68, −0.64 | −0.67, −0.63 |
+| Lead row t | 1.86 | 1.73 |
+| Top-decile t | −0.87 | −0.81 |
+
+No conclusion changes.

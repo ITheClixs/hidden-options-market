@@ -33,6 +33,7 @@ from hidden_options.collect.bars import (
     flex_underlyings,
     missing_bar_reason,
 )
+from hidden_options.collect.splits import contract_basis, load_splits
 from hidden_options.config import BARS_PATH, PANEL_END, RAW_DIR
 from hidden_options.measure.flex_panel import daily_inventory, load_panel, panel_through
 from hidden_options.predict.inference import N_PERM, SEED, permutation_test
@@ -75,6 +76,7 @@ def predictive_result(
     n_perm: int = N_PERM,
     seed: int = SEED,
     later_starts: Sequence[str] = LATER_STARTS,
+    splits: pd.DataFrame | None = None,
 ) -> Result:
     """The `predictive` result for an assembled FLEX panel and the underlyings' bars.
 
@@ -87,6 +89,10 @@ def predictive_result(
     equity = set(kinds.get("equity", []))
     daily = daily_inventory(flex_panel)
     daily = daily[daily["underlying"].isin(equity)]
+    if splits is not None:
+        # Whole-number splits multiply contract counts; one basis keeps them out of the
+        # innovation and the change.
+        daily = contract_basis(daily, splits)
     bars_end = pd.Timestamp(daily["available_at"].max())
     bars = bars_through(bars, bars_end)
     panel = build_predictive_panel(daily, bars)
@@ -158,7 +164,7 @@ def predictive_result(
 @ANALYSES.register(NAME)
 def predictive() -> Result:
     """P1 on every FLEX report on disk up to PANEL_END and the refreshed bars."""
-    return predictive_result(load_panel(RAW_DIR), pd.read_parquet(BARS_PATH))
+    return predictive_result(load_panel(RAW_DIR), pd.read_parquet(BARS_PATH), splits=load_splits())
 
 
 def _sample(

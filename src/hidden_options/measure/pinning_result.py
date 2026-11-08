@@ -28,6 +28,7 @@ from hidden_options.measure.pinning import (
     event_statistics,
     flex_only,
     listed_nonfriday,
+    matched_placebo,
     pin_strikes,
     power_at,
     sign_flip_p,
@@ -93,6 +94,7 @@ def pinning_result(inputs: PinningInputs) -> Result:
             "sign_flip_p": sign_flip_p(main["D"], main["expiry"], n_draws=N_FLIPS, seed=SEED),
         },
         "h2": {**h2, "holm_p": adjusted["h2"]},
+        "h1_net": _net(main, closes, days),
         "descriptive": {
             **{
                 f"band_{band}": clustered_mean(main[f"D_b{band}"], main["expiry"]) for band in BANDS
@@ -237,7 +239,8 @@ def _control(closes: pd.DataFrame, days: pd.DatetimeIndex) -> dict[str, Any]:
         **{f"band_{band}": clustered_mean(stats[f"D_b{band}"], stats["expiry"]) for band in BANDS},
         "weekly": clustered_mean(weekly["D"], weekly["expiry"]),
         "placebo": placebo,
-        "less_placebo": _difference(found, placebo),
+        "monthly_net": _net(stats, closes, days),
+        "weekly_net": _net(weekly, closes, days),
     }
 
 
@@ -248,11 +251,15 @@ def _holm_mde(found: dict[str, Any], tests: int = 2) -> float:
     return float((student_t.ppf(1 - level / 2, df) + student_t.ppf(0.80, df)) * found["std_error"])
 
 
-def _difference(a: dict[str, Any], b: dict[str, Any]) -> dict[str, float]:
-    """`a` less `b`, two means on distinct clusters, with independent standard errors."""
-    se = float(np.hypot(a["std_error"], b["std_error"]))
-    mean = float(a["mean"] - b["mean"])
-    return {"mean": mean, "std_error": se, "t_stat": mean / se}
+def _net(stats: pd.DataFrame, closes: pd.DataFrame, days: pd.DatetimeIndex) -> dict[str, Any]:
+    """D net of the matched placebo at the same distance (`pinning.matched_placebo`), per
+    event, with the registered inference. A diagnostic added after the outcomes were read."""
+    net = matched_placebo(stats, closes, days)
+    return {
+        **clustered_mean(net["D_net"], stats["expiry"]),
+        "placebo_mean": float(np.nanmean(net["D_placebo"])),
+        "sign_flip_p": sign_flip_p(net["D_net"], stats["expiry"], n_draws=N_FLIPS, seed=SEED),
+    }
 
 
 def _straddles_split(

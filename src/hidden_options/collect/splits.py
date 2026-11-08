@@ -144,7 +144,34 @@ def read_bars(
     return out.assign(split_factor=split_factors(frame, splits)) if with_factor else out
 
 
+def contract_basis(
+    daily: pd.DataFrame,
+    splits: pd.DataFrame,
+    columns: Iterable[str] = ("open_interest", "put_open_interest"),
+) -> pd.DataFrame:
+    """Open interest per underlying and report date, on the contract basis of the last
+    report: OCC multiplies the contracts of a whole-number forward split by its ratio, so
+    counts before the ex-date are scaled up by it. Other splits adjust the deliverable
+    and leave the count alone. A new frame; `daily` has `underlying` and `report_date`."""
+    out = daily.copy()
+    whole = splits[(splits["ratio"] > 1) & (splits["ratio"] % 1 == 0)]
+    if whole.empty:
+        return out
+    dates = pd.to_datetime(out["report_date"])
+    last = dates.groupby(out["underlying"]).transform("max")
+    factor = pd.Series(1.0, index=out.index)
+    for symbol, ex_date, ratio in zip(
+        whole["symbol"].astype(str), pd.to_datetime(whole["session"]), whole["ratio"], strict=True
+    ):
+        factor[(out["underlying"] == symbol) & (dates < ex_date) & (ex_date <= last)] *= ratio
+    for column in columns:
+        if column in out:
+            out[column] = out[column] * factor
+    return out
+
+
 __all__ = [
+    "contract_basis",
     "PRICE_COLUMNS",
     "SPLIT_COLUMNS",
     "fetch_splits",

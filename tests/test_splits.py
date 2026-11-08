@@ -142,3 +142,31 @@ def test_missing_splits_file_is_refused(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "SPLITS_PATH", tmp_path / "absent.parquet")
     with pytest.raises(FileNotFoundError, match="refresh-splits"):
         module.load_splits()
+
+
+def test_contract_basis_scales_open_interest_before_whole_number_splits_only():
+    from hidden_options.collect.splits import contract_basis
+
+    daily = pd.DataFrame(
+        {
+            "underlying": ["NFLX"] * 3 + ["ABC"] * 2 + ["XYZ"] * 2,
+            "report_date": pd.to_datetime(
+                ["2025-11-13", "2025-11-14", "2025-11-17"]
+                + ["2025-11-14", "2025-11-17"]
+                + ["2025-11-14", "2025-11-17"]
+            ),
+            "open_interest": [100, 100, 1000, 10, 10, 40, 40],
+            "put_open_interest": [30, 30, 300, 2, 2, 8, 8],
+        }
+    )
+    splits = pd.DataFrame(
+        {
+            "symbol": ["NFLX", "ABC", "XYZ"],
+            "session": pd.to_datetime(["2025-11-17"] * 3),
+            "ratio": [10.0, 1.5, 0.125],  # OCC multiplies contracts for whole numbers only
+        }
+    )
+    found = contract_basis(daily, splits)
+    assert list(found["open_interest"]) == [1000, 1000, 1000, 10, 10, 40, 40]
+    assert list(found["put_open_interest"])[:3] == [300, 300, 300]
+    assert list(daily["open_interest"])[:2] == [100, 100]  # input unchanged

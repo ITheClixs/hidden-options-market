@@ -13,8 +13,8 @@ panel.
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
-- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset. Where the sign is known, in the 34 option-income programme names, a one-sided test leans towards dampening but is underpowered (*t* -0.82, minimum detectable effect 9.4\% of mean \|*r*\|).
-- **Pinning?** Not detected. On 2,643 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.06). The minimum detectable pull is 0.078σ, but the same design finds no pinning at listed strikes on 34 monthly expirations either (net of its baseline, *t* -1.85), so this is what the design can see, not proof of absence. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
+- **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. Where the sign is known, in the 34 option-income programme names, a one-sided test leans towards dampening but is underpowered (*t* -0.82, minimum detectable effect 9.4\% of mean \|*r*\|).
+- **Pinning?** Not detected. On 2,643 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.06). The rule leaves out the 32 names with listed weekday expiries, among them SPY, QQQ and the largest single names, where FLEX holds the most gamma; the books it covers are a median 3.5\% of a day's share volume. The minimum detectable pull is 0.078σ, but the same design finds no pinning at listed strikes on 34 monthly expirations either (net of a matched placebo added after the fact, *t* -1.64), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.34-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
@@ -132,10 +132,13 @@ detectable effect of 0.078σ. Large books do no better than small ones (*t*
 As a positive control, fixed in
 [`docs/log/2026-11-08-pinning-control-spec.md`](docs/log/2026-11-08-pinning-control-spec.md),
 the same statistic at the nearest listed strike on 34 monthly expirations
-(37,672 events) finds no pinning: -0.024σ (*t* -2.56), against a
-baseline of -0.006σ on ordinary sessions, so -0.018σ net (*t*
--1.85). The design does not detect listed pinning in this panel, so the FLEX null
-reads as not detected, not absent.
+(37,672 events) finds no pinning: -0.024σ (*t* -2.56). Most of
+that is the design's own: with short-horizon reversal the statistic is not centred on zero.
+A placebo added after the control was read, at strikes as far from the previous close on
+each side, gives -0.016σ, and the control net of it is -0.007σ
+(*t* -1.64). At FLEX strikes the same placebo is 0.001σ, and the
+FLEX estimate net of it -0.031σ (*t* -1.14). The design does not detect
+listed pinning in this panel, so the FLEX null reads as not detected, not absent.
 
 **On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published
@@ -160,40 +163,40 @@ points.
 
 | predictor | outcome | β ×10⁴ | *t* | MDE80 ×10⁴ | clustered *p* | permutation *p* |
 |---|---|---:|---:|---:|---:|---:|
-| inventory innovation | next-day \|r\| | -0.37 | -0.68 | 1.53 | 0.50 | 0.45 |
-| inventory change | next-day \|r\| | -0.68 | -0.64 | 2.99 | 0.52 | 0.46 |
-| near-dated share change | next-day \|r\| | -1.67 | -0.44 | 10.74 | 0.66 | 0.67 |
+| inventory innovation | next-day \|r\| | -0.41 | -0.74 | 1.54 | 0.46 | 0.42 |
+| inventory change | next-day \|r\| | -0.67 | -0.63 | 3.01 | 0.53 | 0.47 |
+| near-dated share change | next-day \|r\| | -1.52 | -0.39 | 10.89 | 0.69 | 0.69 |
 | put share | next-day \|r\| | 0.56 | 0.22 | 7.19 | 0.83 | 0.61 |
-| inventory innovation | next-day r² | 0.06 | 0.47 | 0.34 | 0.64 | 0.71 |
-| **lead: innovation dated *after* the outcome** | next-day \|r\| | **1.02** | **1.86** | 1.53 | 0.063 | 0.057 |
+| inventory innovation | next-day r² | 0.06 | 0.49 | 0.34 | 0.62 | 0.68 |
+| **lead: innovation dated *after* the outcome** | next-day \|r\| | **0.93** | **1.73** | 1.51 | 0.084 | 0.085 |
 
 ![The innovation's coefficient with the predictor shuffled within dates, above the estimates and their 95% intervals](docs/figures/placebo.png)
 
 The permutation *p* comes from 1,000 re-estimations with the predictor
 shuffled across underlyings within each date, which treats underlyings as exchangeable
 within a date. Among the genuine predictors the smallest permutation *p* is
-0.45 and the smallest clustered *p* 0.50. The
+0.42 and the smallest clustered *p* 0.46. The
 lead row is inventory from two dates later. Its change includes contracts created
 during the outcome's own session, so it is a test of reverse flow, volatility moving
-later inventory, and not a placebo; its clustered *p* is 0.063. The
+later inventory, and not a placebo; its clustered *p* is 0.084. The
 largest |*t*| among the genuine estimates, across every specification below, is
-0.87.
+0.81.
 
 Longer horizons say the same: mean |r| over the next 3, 5 and 10 sessions gives
-*t* = -0.55, -0.57 and -0.18. Keeping only the
-tenth of underlying-days with the largest inventory changes gives *t* = -0.87.
+*t* = -0.64, -0.66 and -0.31. Keeping only the
+tenth of underlying-days with the largest inventory changes gives *t* = -0.81.
 The close-to-close return includes an overnight move that partly precedes the report;
-the open-to-close return of the day it becomes usable gives *t* = -0.77. The
-minimum detectable effect at 80% power is 1.53 basis points per log point of
+the open-to-close return of the day it becomes usable gives *t* = -0.80. The
+minimum detectable effect at 80% power is 1.54 basis points per log point of
 innovation, 0.8\% of the mean next-day |r| of 201 basis points.
 
 Loading the panel from later start dates moves the estimates, not the conclusion:
 
 | panel loaded from | underlying-days | inventory innovation | lead |
 |---|---:|---:|---:|
-| 2024-12-02 (table above) | 377,332 | -0.37 (*t* -0.68) | 1.02 (*t* 1.86) |
-| 2025-07-23 | 264,825 | -0.19 (*t* -0.27) | 0.98 (*t* 1.38) |
-| 2025-09-09 | 239,318 | 0.16 (*t* 0.22) | 0.93 (*t* 1.23) |
+| 2024-12-02 (table above) | 377,332 | -0.41 (*t* -0.74) | 0.93 (*t* 1.73) |
+| 2025-07-23 | 264,825 | -0.23 (*t* -0.34) | 0.86 (*t* 1.23) |
+| 2025-09-09 | 239,318 | 0.11 (*t* 0.15) | 0.81 (*t* 1.07) |
 
 Not ruled out: strike-local effects, intraday responses, and effects on the listed option
 surface rather than the underlying. Each needs data that cannot be collected

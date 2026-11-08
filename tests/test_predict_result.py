@@ -263,6 +263,11 @@ class TestRegistration:
 
         monkeypatch.setattr(result_module, "load_panel", load)
         monkeypatch.setattr(pd, "read_parquet", read)
+        monkeypatch.setattr(
+            result_module,
+            "load_splits",
+            lambda: pd.DataFrame(columns=["symbol", "session", "ratio"]),
+        )
         found = result_module.predictive()
         assert found.name == "predictive"
         assert [w["start"] for w in found.values["windows"]][1:] == list(result_module.LATER_STARTS)

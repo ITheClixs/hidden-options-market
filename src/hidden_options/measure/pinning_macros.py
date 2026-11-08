@@ -46,6 +46,11 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PinFlipP": p_value(h1["sign_flip_p"]),
         "PinMDE": sigma(h1["mde80"]),
         "PinMDEHolm": sigma(h1["mde80_holm"]),
+        "PinNetMean": sigma(values["h1_net"]["mean"]),
+        "PinNetT": t_stat(values["h1_net"]["t_stat"]),
+        "PinNetFlipP": p_value(values["h1_net"]["sign_flip_p"]),
+        "PinNetMDE": sigma(values["h1_net"]["mde80"]),
+        "PinPlaceboMatched": sigma(values["h1_net"]["placebo_mean"]),
         "PinSizeDiff": sigma(h2["difference"]),
         "PinSizeTop": sigma(h2["top"]),
         "PinSizeBottom": sigma(h2["bottom"]),
@@ -106,8 +111,12 @@ def control_macros(control: Mapping[str, Any]) -> dict[str, str]:
         "PinCtlPlaceboMean": sigma(control["placebo"]["mean"]),
         "PinCtlPlaceboT": t_stat(control["placebo"]["t_stat"]),
         "PinCtlPlaceboDates": formats.count(control["placebo"]["clusters"]),
-        "PinCtlNetMean": sigma(control["less_placebo"]["mean"]),
-        "PinCtlNetT": t_stat(control["less_placebo"]["t_stat"]),
+        "PinCtlNetMean": sigma(control["monthly_net"]["mean"]),
+        "PinCtlNetT": t_stat(control["monthly_net"]["t_stat"]),
+        "PinCtlNetFlipP": p_value(control["monthly_net"]["sign_flip_p"]),
+        "PinCtlPlaceboMatched": sigma(control["monthly_net"]["placebo_mean"]),
+        "PinCtlWeeklyNetMean": sigma(control["weekly_net"]["mean"]),
+        "PinCtlWeeklyNetT": t_stat(control["weekly_net"]["t_stat"]),
     }
 
 

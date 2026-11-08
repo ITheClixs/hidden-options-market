@@ -79,6 +79,8 @@ def gamma_predictive_macros(values: Mapping[str, Any]) -> dict[str, str]:
         out[f"GPred{stem}P"] = p_value(row["p_value"])
         out[f"GPred{stem}MDE"] = bp(row["mde80"])
         out[f"GPred{stem}Days"] = formats.count(row["n_obs"])
+        out[f"GPred{stem}Low"] = bp(row["ci_low"])
+        out[f"GPred{stem}High"] = bp(row["ci_high"])
     if values.get("programme"):
         out.update(programme_macros(values["programme"]))
     return out
