@@ -110,7 +110,7 @@ in-the-money legs and from call and put lines paired at the same strike: on
 \HiddenValueCompositionDate{}, \HiddenValueIntrinsic{} of the \HiddenValueFlexTotal{} of
 FLEX value on these underlyings is intrinsic, \HiddenValueDeep{} sits in series worth more than
 \HiddenValueDeepThreshold{} intrinsic and \HiddenValuePaired{} in paired lines
-(Section~\ref{sec:hidden}).
+(Section~\ref{sec:hidden}). Much of the value, that is, is financing rather than risk.
 
 \paragraph{How much convexity it holds.} Contracts are not risk. What a dealer on the
 other side of a FLEX trade hedges is its gamma near spot, and gamma figures in use are
@@ -479,7 +479,12 @@ series by value is the \HiddenLineSymbol{} \HiddenLineRight{} struck at
 contracts open beside a \HiddenLineOpposite{} line of \HiddenLineOppositeOpenInterest{}
 at the same strike. It is marked at \HiddenLineValue{}, against \HiddenLineListed{} for
 every listed \HiddenLineSymbol{} option together. We therefore report the value share
-beside the open-interest share and not in its place.
+beside the open-interest share and not in its place. Neither is a measure of risk.
+Intrinsic value and paired lines are mostly financing: a deep in-the-money pair at one
+strike is a forward, whose value is large and whose convexity is none. The risk measure
+is gamma. Section~\ref{sec:gamma} prices it on the listed surface and nets same-strike
+pairs: FLEX is \GammaMedianGross{} of the median underlying's gamma counted gross, and
+\GammaMedianBoth{} netted.
 
 \section{Strike-based identification fails}
 \label{sec:identification}
