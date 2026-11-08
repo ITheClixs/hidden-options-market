@@ -35,7 +35,7 @@ large, \ValueEnd{} of mark value on the last date, and in a census of
 \HiddenCensusUnderlyings{} underlyings it is at least a tenth of option open interest for
 \HiddenCensusTen{}. Among the \GammaUnderlyings{} underlyings with stored listed chains,
 counted gross, it is \GammaMedianGross{} of the median one's option gamma, but most of that sits in same-strike call and put pairs, which are forwards
-with no net gamma where the holders' sides are known: netted, the share is \GammaMedianBoth{}, and large only in a few products such as SPY
+with no net gamma where the holders' sides are known: with those pairs netted, the share is \GammaMedianNetted{}, and large only in a few products such as SPY
 and NDX. In tests specified in advance, netted FLEX dollar gamma does not predict
 next-day volatility (minimum detectable effect \GPredMDEShare{} of mean absolute return
 per standard deviation), and stocks do not pin to large FLEX strikes on dates when only
@@ -114,8 +114,8 @@ FLEX value on these underlyings is intrinsic, \HiddenValueDeep{} sits in series 
 other side of a FLEX trade hedges is its gamma near spot, and gamma figures in use are
 built from listed chains (Section~\ref{sec:gamma}). Pricing listed and FLEX series on one
 listed volatility surface, FLEX is \GammaMedianGross{} of the median underlying's option
-gamma counted gross, and \GammaMedianBoth{} once same-strike call and put pairs, forwards
-with no gamma, are netted on both sides. The omission survives netting in a few products
+gamma counted gross, and \GammaMedianNetted{} once its same-strike call and put pairs,
+forwards with no gamma, are netted (\GammaMedianBoth{} if listed pairs are netted too). The omission survives netting in a few products
 where FLEX holds outright options: \GammaSPYBoth{} of SPY's gamma and \GammaNDXBoth{} of
 NDX's.
 
@@ -488,7 +488,7 @@ Intrinsic value and paired lines are mostly financing: a deep in-the-money pair 
 strike is a forward, whose value is large and whose convexity is none. The risk measure
 is gamma. Section~\ref{sec:gamma} prices it on the listed surface and nets same-strike
 pairs: FLEX is \GammaMedianGross{} of the median underlying's gamma counted gross, and
-\GammaMedianBoth{} netted.
+\GammaMedianNetted{} netted.
 
 \section{Strike-based identification fails}
 \label{sec:identification}
@@ -865,7 +865,8 @@ when listed pairs are netted by the same rule, and at least a tenth only for
 weigh, the shares are \GammaPooledGross{}, \GammaPooledNetted{} and \GammaPooledBoth{}.
 The index products split: in SPY and NDX the share barely moves with the rule
 (\GammaSPYGross{} and \GammaNDXGross{} gross, \GammaSPYBoth{} and \GammaNDXBoth{} netted
-on both sides), so their FLEX gamma is outright options, while in SPX it falls from
+on both sides; netting the listed side too shrinks the denominator, which is why a
+both-sides share can exceed the gross one), so their FLEX gamma is outright options, while in SPX it falls from
 \GammaSPXGross{} to \GammaSPXBoth{}.
 
 Under the sign convention vendors apply to listed chains, calls positive and puts
@@ -1099,8 +1100,8 @@ and across a census of
 \HiddenCensusMedian{}.
 
 Counted in contracts, that is a large hidden book; counted in convexity, it is smaller.
-FLEX is \GammaMedianGross{} of the median underlying's gamma gross and \GammaMedianBoth{}
-once forwards are netted, though it stays near a fifth of the gamma in SPY and NDX. A
+FLEX is \GammaMedianGross{} of the median underlying's gamma gross and \GammaMedianNetted{}
+once its forwards are netted, though it stays near a fifth of the gamma in SPY and NDX. A
 gamma figure built from listed chains misses that part, and the rest of what it misses
 is forwards.
 
