@@ -70,6 +70,8 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
     }
     if values.get("control"):
         out.update(control_macros(values["control"]))
+    if values.get("empirical_null"):
+        out.update(null_macros(values["empirical_null"]))
     simulation = values["simulation"]
     out["PinSimSize"] = formats.percent(simulation["size"], 1)
     out["PinSimWorlds"] = formats.count(simulation["size_worlds"])
@@ -120,4 +122,19 @@ def control_macros(control: Mapping[str, Any]) -> dict[str, str]:
     }
 
 
-__all__ = ["control_macros", "pinning_macros"]
+def null_macros(null: Mapping[str, Any]) -> dict[str, str]:
+    """Size and power on real returns (docs/log/2026-11-08-pinning-empirical-null-spec.md)."""
+    out = {
+        "PinNullOffsets": formats.count(len(null["offsets"])),
+        "PinNullEvents": formats.count(round(null["median_events"])),
+        "PinNullCentre": sigma(null["centre"]),
+        "PinNullSpread": sigma(null["spread"]),
+        "PinNullSize": formats.percent(null["size"]),
+        "PinNullShare": formats.percent(null["observed_share"]),
+    }
+    for key, word in (("0.05", "Twenty"), ("0.10", "Ten"), ("0.15", "Seven")):
+        out[f"PinNullPower{word}"] = formats.percent(null["power"][key])
+    return out
+
+
+__all__ = ["control_macros", "null_macros", "pinning_macros"]

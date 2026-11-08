@@ -1113,8 +1113,18 @@ observed, the test detects the first \PinPowerTen{} of the time and the second
 \PinPowerSeven{}, and one in twenty only \PinPowerTwenty{}. On \PinSimWorlds{} sets of
 simulated returns without pinning, with these events' strikes, $\sigma$ and dates, it
 rejects in \PinSimSize{} at a nominal 5\%. Simulated returns are independent and
-normal, so their standard error is below the observed one, and power computed on them
-would be higher; the figures here use the observed one. The books are
+normal, so a further log entry, fixed before it was run, checks the test on real returns.
+It moves every event to \PinNullOffsets{} placebo dates in its own name, ten to forty
+sessions away, on Monday to Thursday and not on a FLEX expiry, with the strike as many
+daily standard deviations from the previous close as the pin strike was. On those dates,
+with a median of \PinNullEvents{} events each, the statistic is centred at
+$\PinNullCentre\sigma$ and rejects at 5\% on \PinNullSize{} of them. Its spread across
+dates, $\PinNullSpread\sigma$ on the smaller samples, is in line with the registered
+standard error. \PinNullShare{} of the placebo dates lie at least as far from the centre
+as the registered estimate. Planting the same alternative in real closes, the test finds
+pins in one expiry in ten on \PinNullPowerTen{} of the dates, in one in seven on
+\PinNullPowerSeven{} and in one in twenty on \PinNullPowerTwenty{}, as the observed
+standard error implied. The books are
 small next to trading: the pin strike's open interest, in shares, is a median
 \PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, as an
 option-income fund's written calls would leave it, the estimate leans towards pinning

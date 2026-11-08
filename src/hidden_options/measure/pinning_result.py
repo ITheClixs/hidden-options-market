@@ -23,7 +23,6 @@ from hidden_options.measure.hidden_share import is_adjusted_product, is_flex_pro
 from hidden_options.measure.hidden_share_data import load_reports
 from hidden_options.measure.pinning import (
     BANDS,
-    PSEUDO_OFFSETS,
     clustered_mean,
     event_statistics,
     flex_only,
@@ -34,10 +33,12 @@ from hidden_options.measure.pinning import (
     sign_flip_p,
     simulate_worlds,
     size_terciles,
+    straddles_split,
     with_sigma,
 )
 from hidden_options.measure.pinning_control import control_statistics, monthly_expiries
 from hidden_options.measure.pinning_macros import pinning_macros
+from hidden_options.measure.pinning_null import empirical_null
 from hidden_options.predict.inference import holm
 from hidden_options.predict.panel import _sessions
 from hidden_options.publish.registry import ANALYSES
@@ -78,10 +79,10 @@ def pinning_result(inputs: PinningInputs) -> Result:
     only = book["expiry"].map(dict(zip(days, flex_only(days, holidays), strict=True))).astype(bool)
     eligible = ~book["underlying"].isin(excluded)
     main = _events(book[only & eligible], closes, adv, days)
-    straddling = _straddles_split(main, closes, days)
+    straddling = straddles_split(main, closes, days)
     main = main[~straddling].reset_index(drop=True)
     friday = _events(book[book["expiry"].dt.day_of_week == 4], closes, adv, days)
-    friday = friday[~_straddles_split(friday, closes, days)].reset_index(drop=True)
+    friday = friday[~straddles_split(friday, closes, days)].reset_index(drop=True)
 
     h1 = clustered_mean(main["D"], main["expiry"])
     h2 = size_terciles(main.dropna(subset=["size"]))
@@ -124,6 +125,14 @@ def pinning_result(inputs: PinningInputs) -> Result:
         },
         "simulation": _simulation(main, h1),
         "control": _control(closes, days),
+        "empirical_null": empirical_null(
+            main,
+            closes,
+            days,
+            set(zip(book["underlying"], book["expiry"], strict=True)),
+            seed=SEED,
+            observed=h1["mean"],
+        ),
         "settings": {"n_flips": N_FLIPS, "seed": SEED, "bands": list(BANDS)},
     }
     run_inputs = {
@@ -219,7 +228,7 @@ def _control(closes: pd.DataFrame, days: pd.DatetimeIndex) -> dict[str, Any]:
 
     def statistics(expiries: pd.DatetimeIndex) -> pd.DataFrame:
         stats = control_statistics(closes, days, expiries)
-        return stats[~_straddles_split(stats, closes, days)].reset_index(drop=True)
+        return stats[~straddles_split(stats, closes, days)].reset_index(drop=True)
 
     stats, weekly = statistics(monthly), statistics(pd.DatetimeIndex(fridays))
     # Diagnostic, added after the control was read: ordinary Monday-to-Thursday sessions,
@@ -260,20 +269,6 @@ def _net(stats: pd.DataFrame, closes: pd.DataFrame, days: pd.DatetimeIndex) -> d
         "placebo_mean": float(np.nanmean(net["D_placebo"])),
         "sign_flip_p": sign_flip_p(net["D_net"], stats["expiry"], n_draws=N_FLIPS, seed=SEED),
     }
-
-
-def _straddles_split(
-    stats: pd.DataFrame, closes: pd.DataFrame, days: pd.DatetimeIndex
-) -> pd.Series:
-    """Events with a split between the session before expiry and the last pseudo-expiry,
-    where the pin strike and later closes are on different bases."""
-    factor = closes.set_index(["symbol", "session"])["split_factor"]
-    position = days.get_indexer(pd.DatetimeIndex(stats["expiry"]))
-    first = pd.MultiIndex.from_arrays([stats["underlying"], days[position - 1]])
-    last = pd.MultiIndex.from_arrays([stats["underlying"], days[position - min(PSEUDO_OFFSETS)]])
-    before = factor.reindex(first).to_numpy()
-    after = factor.reindex(last).to_numpy()
-    return pd.Series(before != after, index=stats.index)
 
 
 def _simulation(stats: pd.DataFrame, h1: dict[str, Any]) -> dict[str, Any]:

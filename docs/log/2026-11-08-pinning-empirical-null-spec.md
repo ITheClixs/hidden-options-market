@@ -58,3 +58,26 @@ the paper says so.
 
 Only a defect found in the code. Any change after a figure has been seen is recorded here
 as a dated amendment.
+
+## Result, 2026-11-08
+
+Computed as specified, with no change after the figures were seen.
+
+- **Offsets.** All 32 offsets have an estimate. The median is 1,502 events per offset,
+  fewer than the registered 2,643, because placebo dates must fall Monday to Thursday and
+  avoid the name's FLEX expiries.
+- **Centre of the null:** +0.009σ.
+- **Spread across offsets:** 0.032σ. Scaled to the registered sample size, that is about
+  0.024σ, against the registered clustered standard error of 0.028σ. So the registered
+  standard error is not too small.
+- **Size at 5%:** 6.3% (2 of 32 offsets).
+- **The registered estimate (−0.029σ):** 22% of offsets lie at least as far from the
+  centre.
+- **Power on real returns:** 28% when one event in twenty is pulled halfway to the strike,
+  75% at one in ten and 97% at one in seven. These match the power at the observed
+  standard error (27%, 71%, 97%).
+
+**Reading.** On real returns the registered test is close to its nominal size at FLEX
+pin-strike distances, its standard error is adequate, and its power is as reported. The
+reversal term that dominates the listed control is small at these distances. The FLEX
+null stands as a null with the stated power.

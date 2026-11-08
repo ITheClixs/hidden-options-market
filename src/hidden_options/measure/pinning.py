@@ -316,6 +316,20 @@ def matched_placebo(
     )
 
 
+def straddles_split(stats: pd.DataFrame, closes: pd.DataFrame, days: pd.DatetimeIndex) -> pd.Series:
+    """Events with a split between the session before expiry and the last pseudo-expiry,
+    where the pin strike and later closes are on different bases."""
+    if "split_factor" not in closes:
+        return pd.Series(False, index=stats.index)
+    factor = closes.set_index(["symbol", "session"])["split_factor"]
+    position = days.get_indexer(pd.DatetimeIndex(stats["expiry"]))
+    first = pd.MultiIndex.from_arrays([stats["underlying"], days[position - 1]])
+    last = pd.MultiIndex.from_arrays([stats["underlying"], days[position - min(PSEUDO_OFFSETS)]])
+    before = factor.reindex(first).to_numpy()
+    after = factor.reindex(last).to_numpy()
+    return pd.Series(before != after, index=stats.index)
+
+
 __all__ = [
     "BANDS",
     "CAP",
@@ -329,6 +343,7 @@ __all__ = [
     "matched_placebo",
     "pin_strikes",
     "sign_flip_p",
+    "straddles_split",
     "power_at",
     "simulate_worlds",
     "size_terciles",
