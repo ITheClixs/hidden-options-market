@@ -29,7 +29,7 @@ scripts that produced the numbers below are in [`archive/`](../../archive/README
 | 2026-08-19 | [predictive-result](2026-08-19-predictive-result.md) | The first test of whether per-underlying FLEX inventory predicts the underlying's next-day volatility, on the shorter panel then on disk: a null, with a placebo dated after the outcome that matched the genuine estimate. | The same test rebuilt in code on the full panel, with gap-safe changes, outcomes joined on the date each report became usable, and permutation inference; its numbers are in the paper's predictive section and the README. |
 
 | 2026-11-07 | [hidden-gamma-spec](2026-11-07-hidden-gamma-spec.md) | Specification, written before any figure, of how much option gamma a listed-only calculation leaves out: gamma from one listed surface for both sides, two attribution rules for FLEX (gross, pair-netted). | Done: result `hidden_gamma`, paper Section 6. |
-| 2026-11-08 | [gamma-predictive-spec](2026-11-08-gamma-predictive-spec.md) | Specification, written before any estimate, of the predictive test on pair-netted FLEX dollar gamma scaled by dollar volume, in place of open interest: two tests of record with Holm's adjustment, MDE per standard deviation. | Open. |
+| 2026-11-08 | [gamma-predictive-spec](2026-11-08-gamma-predictive-spec.md) | Specification, written before any estimate, of the predictive test on pair-netted FLEX dollar gamma scaled by dollar volume, in place of open interest: two tests of record with Holm's adjustment, MDE per standard deviation. | Done: result `gamma_predictive`, paper Section 7.1, a bounded null. |
 
 ## Former names
 

@@ -2,11 +2,20 @@
 
 **FLEX inventory in clearing data, and whether it predicts the visible market.**
 
-FLEX options are negotiated bilaterally, cleared centrally, and absent from the listed
-option chains that most option research is built on. They are not unobservable. The
+FLEX options are exchange options whose terms the counterparties choose. They are cleared
+centrally, and they are absent from the listed option chains that most option research is
+built on. They are not unobservable. The
 Options Clearing Corporation publishes a free daily report of every cleared FLEX series —
 root, strike, expiry, mark price and open interest — and this repository turns it into a
 panel.
+
+**In brief**
+
+- **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
+- **Convexity.** Counting every contract, FLEX is {{GammaMedianGross}} of the median underlying's option gamma, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is {{GammaMedianBoth}}. It stays large in SPY ({{GammaSPYBoth}}) and NDX ({{GammaNDXBoth}}).
+- **Does it move prices?** Not at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case.
+- **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. Each test is specified in a dated log entry before it is run.
 
 ![FLEX against listed open interest per underlying on {{HiddenCensusDate}}, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -67,9 +76,38 @@ series across {{UnderlyingsEnd}} underlyings: the ten largest underlyings hold
 {{OverOneYear}} is more than a year from expiry (up from {{OverOneYearStart}} on the first
 date), and {{CallShare}} is calls.
 
+## How much gamma do listed chains leave out?
+
+Gamma figures in public use are built from listed chains, and FLEX is not in them. Pricing
+listed and FLEX series on one listed volatility surface over {{GammaSettlements}} settlements
+({{GammaStart}} to {{GammaEnd}}, {{GammaUnderlyings}} underlyings) gives the following FLEX
+shares of total dollar gamma:
+
+| FLEX attribution | Median underlying | Pooled | SPX | SPY | NDX |
+|---|---:|---:|---:|---:|---:|
+| Gross | {{GammaMedianGross}} | {{GammaPooledGross}} | {{GammaSPXGross}} | {{GammaSPYGross}} | {{GammaNDXGross}} |
+| Same-strike pairs netted, FLEX side | {{GammaMedianNetted}} | {{GammaPooledNetted}} | {{GammaSPXNetted}} | {{GammaSPYNetted}} | {{GammaNDXNetted}} |
+| Same-strike pairs netted, both sides | {{GammaMedianBoth}} | {{GammaPooledBoth}} | {{GammaSPXBoth}} | {{GammaSPYBoth}} | {{GammaNDXBoth}} |
+
+FLEX gamma is not deep in the money: {{GammaNearMoneyGross}} of it sits within 5% of spot.
+Gamma from the FLEX marks, where their inversion is validated ({{GammaMarkShare}} of open
+interest), is {{GammaMarkRatio}} times gamma from the listed surface. Specification:
+[`docs/log/2026-11-07-hidden-gamma-spec.md`](docs/log/2026-11-07-hidden-gamma-spec.md).
+
 ## Does hidden inventory predict the visible market?
 
-A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
+**On gamma.** The test regresses next-day absolute returns on pair-netted FLEX dollar gamma, scaled by
+twenty-session dollar volume, with underlying and date fixed effects and two-way
+clustering. It was fixed in advance in
+[`docs/log/2026-11-08-gamma-predictive-spec.md`](docs/log/2026-11-08-gamma-predictive-spec.md).
+The coefficient is {{GPredBeta}}bp per standard deviation (*t* {{GPredT}}, permutation *p*
+{{GPredPermP}}, Holm *p* {{GPredHolm}}) on {{GPredDays}} underlying-days. The minimum
+detectable effect is {{GPredMDE}}bp, {{GPredMDEShare}} of mean |*r*|, which the rule fixed in
+advance calls {{GPredVerdict}}. Netted gamma dated two activity dates later is negative
+(*t* {{GPredLeadT}}). That is mechanical: a large move carries spot away from the strikes,
+so measured gamma falls, while volume rises.
+
+**On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published
 overnight for day *T* should say something about the underlying from day *T+1*, the first
 day the report can be read.

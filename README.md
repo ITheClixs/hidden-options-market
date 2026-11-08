@@ -2,11 +2,20 @@
 
 **FLEX inventory in clearing data, and whether it predicts the visible market.**
 
-FLEX options are negotiated bilaterally, cleared centrally, and absent from the listed
-option chains that most option research is built on. They are not unobservable. The
+FLEX options are exchange options whose terms the counterparties choose. They are cleared
+centrally, and they are absent from the listed option chains that most option research is
+built on. They are not unobservable. The
 Options Clearing Corporation publishes a free daily report of every cleared FLEX series —
 root, strike, expiry, mark price and open interest — and this repository turns it into a
 panel.
+
+**In brief**
+
+- **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
+- **Convexity.** Counting every contract, FLEX is 18.0\% of the median underlying's option gamma, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is 2.6\%. It stays large in SPY (18.3\%) and NDX (20.5\%).
+- **Does it move prices?** Not at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.53, 347,687 underlying-days). The minimum detectable effect is 2.00bp per standard deviation, 1.0\% of mean \|*r*\|. The hedge a 1% move calls for is 5.84bp of a day's dollar volume in the median case.
+- **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.35-fold.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. Each test is specified in a dated log entry before it is run.
 
 ![FLEX against listed open interest per underlying on 14 August 2026, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -67,9 +76,38 @@ series across 1,030 underlyings: the ten largest underlyings hold
 22\% is more than a year from expiry (up from 13\% on the first
 date), and 59\% is calls.
 
+## How much gamma do listed chains leave out?
+
+Gamma figures in public use are built from listed chains, and FLEX is not in them. Pricing
+listed and FLEX series on one listed volatility surface over 48 settlements
+(13 August 2026 to 22 October 2026, 71 underlyings) gives the following FLEX
+shares of total dollar gamma:
+
+| FLEX attribution | Median underlying | Pooled | SPX | SPY | NDX |
+|---|---:|---:|---:|---:|---:|
+| Gross | 18.0\% | 10.6\% | 8.2\% | 18.0\% | 20.3\% |
+| Same-strike pairs netted, FLEX side | 1.5\% | 3.3\% | 2.1\% | 12.0\% | 15.0\% |
+| Same-strike pairs netted, both sides | 2.6\% | 7.0\% | 4.7\% | 18.3\% | 20.5\% |
+
+FLEX gamma is not deep in the money: 68\% of it sits within 5% of spot.
+Gamma from the FLEX marks, where their inversion is validated (88.9\% of open
+interest), is 1.02 times gamma from the listed surface. Specification:
+[`docs/log/2026-11-07-hidden-gamma-spec.md`](docs/log/2026-11-07-hidden-gamma-spec.md).
+
 ## Does hidden inventory predict the visible market?
 
-A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
+**On gamma.** The test regresses next-day absolute returns on pair-netted FLEX dollar gamma, scaled by
+twenty-session dollar volume, with underlying and date fixed effects and two-way
+clustering. It was fixed in advance in
+[`docs/log/2026-11-08-gamma-predictive-spec.md`](docs/log/2026-11-08-gamma-predictive-spec.md).
+The coefficient is -0.38bp per standard deviation (*t* -0.53, permutation *p*
+0.30, Holm *p* 1.00) on 347,687 underlying-days. The minimum
+detectable effect is 2.00bp, 1.0\% of mean |*r*|, which the rule fixed in
+advance calls a bounded null. Netted gamma dated two activity dates later is negative
+(*t* -4.86). That is mechanical: a large move carries spot away from the strikes,
+so measured gamma falls, while volume rises.
+
+**On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published
 overnight for day *T* should say something about the underlying from day *T+1*, the first
 day the report can be read.
