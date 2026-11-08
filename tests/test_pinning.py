@@ -195,3 +195,39 @@ def test_clustered_mean_with_one_cluster_has_no_estimate():
     found = clustered_mean(pd.Series([1.0, 2.0]), pd.Series(["a", "a"]))
     assert found["mean"] is None
     assert found["clusters"] == 1
+
+
+def test_log_closeness_matches_closeness():
+    from hidden_options.measure.pinning import _log_closeness
+
+    prev, strike, close, sigma = 100.0, 102.0, 101.0, 0.02
+    direct = closeness(close, prev, strike, sigma)
+    via_logs = _log_closeness(
+        np.array([np.log(close / prev)]), np.array([np.log(strike / prev)]), np.array([sigma])
+    )
+    assert via_logs[0] == pytest.approx(float(direct))
+
+
+def test_simulated_size_power_and_effect():
+    from hidden_options.measure.pinning import simulate_worlds
+
+    rng = np.random.default_rng(0)
+    n = 1500
+    sigmas = np.full(n, 0.02)
+    distances = rng.uniform(-1.5, 1.5, n) * sigmas
+    clusters = np.arange(n) % 200
+    null = simulate_worlds(distances, sigmas, clusters, pulled=0.0, worlds=300, seed=1)
+    pulled = simulate_worlds(distances, sigmas, clusters, pulled=0.3, worlds=50, seed=2)
+    assert null["rejections"] < 0.10
+    assert abs(null["mean_effect"]) < 0.02
+    assert pulled["rejections"] > 0.9
+    assert pulled["mean_effect"] > 0.1
+
+
+def test_power_at_a_standard_error():
+    from hidden_options.measure.pinning import power_at
+
+    assert power_at(0.0, 0.03, clusters=300) == pytest.approx(0.05, abs=1e-3)
+    # 2.8 standard errors is the 80% minimum detectable effect.
+    assert power_at(2.8 * 0.03, 0.03, clusters=300) == pytest.approx(0.80, abs=0.01)
+    assert power_at(-2.8 * 0.03, 0.03, clusters=300) == pytest.approx(0.80, abs=0.01)

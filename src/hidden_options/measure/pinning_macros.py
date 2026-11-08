@@ -60,6 +60,15 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PinExcluded": formats.count(len(sample["excluded_names"])),
         "PinFridayEvents": formats.count(sample["friday_events"]),
     }
+    simulation = values["simulation"]
+    out["PinSimSize"] = formats.percent(simulation["size"], 1)
+    out["PinSimWorlds"] = formats.count(simulation["size_worlds"])
+    out["PinSimPowerWorlds"] = formats.count(simulation["power_worlds"])
+    for key, word in (("0.05", "Twenty"), ("0.10", "Ten"), ("0.15", "Seven")):
+        row = simulation["power"][key]
+        out[f"PinSimPower{word}"] = formats.percent(row["power_simulated"])
+        out[f"PinPower{word}"] = formats.percent(row["power_observed"])
+        out[f"PinEffect{word}"] = sigma(row["effect"])
     for key, stem in DESCRIPTIVE_STEMS.items():
         row = values["descriptive"][key]
         scale = points if key in BANDED else sigma

@@ -220,6 +220,62 @@ def _banded(
     return np.asarray(out, dtype=float)
 
 
+def simulate_worlds(
+    distances: np.ndarray,
+    sigmas: np.ndarray,
+    clusters: np.ndarray,
+    *,
+    pulled: float,
+    worlds: int,
+    seed: int,
+    alpha: float = 0.05,
+) -> dict[str, float]:
+    """H1 on simulated returns with the real events' structure.
+
+    Each event keeps its pin strike's distance from the previous close (in log terms),
+    its sigma and its expiry date. Expiry and pseudo-expiry returns are normal at that
+    sigma, drawn independently. In a share `pulled` of events the expiry return is
+    pulled halfway to the pin strike, the alternative the specification's power uses.
+    Returns the share of worlds in which H1 rejects and the mean D across worlds, the
+    effect that alternative implies.
+
+    Independent normal draws give a smaller standard error than real returns, which are
+    fat-tailed and move together on a date; `power_at` takes the observed one instead.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(distances)
+    rejections, means = 0, []
+    for _ in range(worlds):
+        expiry = rng.standard_normal(n) * sigmas
+        pull = rng.random(n) < pulled
+        expiry = np.where(pull, 0.5 * expiry + 0.5 * distances, expiry)
+        pseudo = [
+            _log_closeness(rng.standard_normal(n) * sigmas, distances, sigmas)
+            for _ in PSEUDO_OFFSETS
+        ]
+        d = _log_closeness(expiry, distances, sigmas) - np.mean(pseudo, axis=0)
+        found = clustered_mean(pd.Series(d), pd.Series(clusters))
+        rejections += int(found["p_value"] is not None and found["p_value"] < alpha)
+        means.append(float(np.mean(d)))
+    return {"rejections": rejections / worlds, "mean_effect": float(np.mean(means))}
+
+
+def power_at(effect: float, std_error: float, *, clusters: int, alpha: float = 0.05) -> float:
+    """Power of a two-sided t test, on `clusters` - 1 degrees of freedom, against a true
+    mean of `effect` estimated with standard error `std_error`."""
+    df = clusters - 1
+    crit = float(student_t.ppf(1 - alpha / 2, df))
+    shift = effect / std_error
+    return float(student_t.sf(crit - shift, df) + student_t.cdf(-crit - shift, df))
+
+
+def _log_closeness(returns: np.ndarray, distances: np.ndarray, sigmas: np.ndarray) -> np.ndarray:
+    """`closeness` for log returns and log strike distances from the previous close."""
+    to_strike = np.minimum(np.abs(returns - distances) / sigmas, CAP)
+    to_mirror = np.minimum(np.abs(returns + distances) / sigmas, CAP)
+    return np.asarray(to_mirror - to_strike)
+
+
 __all__ = [
     "BANDS",
     "CAP",
@@ -232,6 +288,8 @@ __all__ = [
     "listed_nonfriday",
     "pin_strikes",
     "sign_flip_p",
+    "power_at",
+    "simulate_worlds",
     "size_terciles",
     "with_sigma",
 ]

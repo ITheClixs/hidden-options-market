@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from hidden_options.collect.splits import read_bars
@@ -26,7 +27,9 @@ from hidden_options.measure.pinning import (
     flex_only,
     listed_nonfriday,
     pin_strikes,
+    power_at,
     sign_flip_p,
+    simulate_worlds,
     size_terciles,
     with_sigma,
 )
@@ -41,6 +44,9 @@ CALENDAR_SYMBOL = "SPY"
 ADV_SESSIONS = 20
 N_FLIPS = 10_000
 SEED = 20261108
+SIZE_WORLDS = 1000
+POWER_WORLDS = 400
+PULLED = (0.05, 0.10, 0.15)
 # NYSE Friday holidays after the last bar, for classifying listed expiries in the census
 # and chains that fall beyond it (Christmas 2026, Good Friday, Juneteenth and Christmas
 # observed in 2027).
@@ -100,6 +106,7 @@ def pinning_result(inputs: PinningInputs) -> Result:
             "excluded_names": sorted(excluded),
             "friday_events": len(friday),
         },
+        "simulation": _simulation(main, h1),
         "settings": {"n_flips": N_FLIPS, "seed": SEED, "bands": list(BANDS)},
     }
     run_inputs = {
@@ -171,6 +178,38 @@ def _events(
     events = pin_strikes(book, prev).merge(adv, on=["underlying", "expiry"], how="left")
     events["size"] = events["open_interest"] * 100 / events["adv"]
     return event_statistics(events, closes, days)
+
+
+def _simulation(stats: pd.DataFrame, h1: dict[str, Any]) -> dict[str, Any]:
+    """Size of H1 on simulated returns with these events' structure, and its power
+    against attraction in a share of events, both on the simulated standard error and on
+    the one observed."""
+    distances = np.log(
+        stats["strike"].to_numpy(dtype=float) / stats["prev_close"].to_numpy(dtype=float)
+    )
+    sigmas = stats["sigma"].to_numpy(dtype=float)
+    clusters = stats["expiry"].to_numpy()
+
+    def run(pulled: float, worlds: int, offset: int) -> dict[str, float]:
+        return simulate_worlds(
+            distances, sigmas, clusters, pulled=pulled, worlds=worlds, seed=SEED + offset
+        )
+
+    def alternative(pulled: float, offset: int) -> dict[str, float]:
+        found = run(pulled, POWER_WORLDS, offset)
+        observed = power_at(found["mean_effect"], h1["std_error"], clusters=h1["clusters"])
+        return {
+            "effect": found["mean_effect"],
+            "power_simulated": found["rejections"],
+            "power_observed": observed,
+        }
+
+    return {
+        "size_worlds": SIZE_WORLDS,
+        "power_worlds": POWER_WORLDS,
+        "size": run(0.0, SIZE_WORLDS, 0)["rejections"],
+        "power": {f"{q:.2f}": alternative(q, i + 1) for i, q in enumerate(PULLED)},
+    }
 
 
 def _split(stats: pd.DataFrame, mask: pd.Series) -> tuple[pd.Series, pd.Series]:
