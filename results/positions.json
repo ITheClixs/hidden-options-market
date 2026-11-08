@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T11:14:24+00:00",
+  "generated_at": "2026-11-08T15:35:33+00:00",
   "inputs": {
     "ci_runs": [
       "2026-08-16",
@@ -73,6 +73,7 @@
     "PosAboveTen": "5.7\\%",
     "PosBelowFloor": "4.9\\%",
     "PosBelowOne": "1.8\\%",
+    "PosBootFunds": "21",
     "PosButterflyDate": "28 September 2026",
     "PosButterflyExpiries": "3",
     "PosButterflyGrouped": "3",
@@ -147,6 +148,8 @@
     "PosPrecisionExact": "59.6\\%",
     "PosPrecisionExactHigh": "71.4\\%",
     "PosPrecisionExactLow": "46.7\\%",
+    "PosPrecisionFundHigh": "97.1\\%",
+    "PosPrecisionFundLow": "70.0\\%",
     "PosPrecisionHigh": "92.7\\%",
     "PosPrecisionLow": "74.7\\%",
     "PosPriced": "80.5\\%",
@@ -162,6 +165,8 @@
     "PosRatioThreeQuarters": "5.0",
     "PosRatioUnderlyings": "1,461",
     "PosRecall": "77.9\\%",
+    "PosRecallFundHigh": "88.7\\%",
+    "PosRecallFundLow": "66.1\\%",
     "PosRecallHigh": "88.3\\%",
     "PosRecallLow": "62.0\\%",
     "PosRuleOverSigned": "0.53",
@@ -7914,6 +7919,14 @@
           "found": 1987,
           "legs": 1987
         }
+      },
+      "fund_intervals": {
+        "funds": 21,
+        "n_boot": 2000,
+        "precision_high": 0.9710144927536232,
+        "precision_low": 0.6999528301886793,
+        "recall_high": 0.8866728605210904,
+        "recall_low": 0.6608110452444378
       },
       "globalx": {
         "fund_dates": 2267,

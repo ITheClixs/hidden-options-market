@@ -674,9 +674,10 @@ leg some fund holds, \PosPrecision{} have two or more legs held by one fund. Tha
 precision, and a lenient one: the mean over structures of the share of each one's dates on
 which any two of its legs share a holder (\PosPrecisionLow{}--\PosPrecisionHigh{}). Under the
 strict reading, every leg held by one fund, it is \PosPrecisionExact{}
-(\PosPrecisionExactLow{}--\PosPrecisionExactHigh{}). The intervals count each structure as
-one trial and ignore that structures cluster within funds, so they are too narrow if
-anything. Scored one date at a time, the medians
+(\PosPrecisionExactLow{}--\PosPrecisionExactHigh{}). Those intervals count each structure
+as one trial, though structures cluster within funds. Resampling the \PosBootFunds{}
+funds instead gives \PosRecallFundLow{}--\PosRecallFundHigh{} for recall and
+\PosPrecisionFundLow{}--\PosPrecisionFundHigh{} for the lenient precision. Scored one date at a time, the medians
 over \PosScoreDates{} dates are \PosMedianRecall{} and \PosMedianPrecision{}, with recall
 between \PosLowRecall{} and \PosHighRecall{}. Against the report of the file's own date the
 two scores are \PosSameDayRecall{} and \PosSameDayPrecision{}. All \PosSyntheticTouching{}

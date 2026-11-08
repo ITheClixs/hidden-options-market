@@ -23,6 +23,7 @@ from hidden_options.config import PANEL_END
 from hidden_options.measure.holdings_truth import (
     MAX_STALENESS_BDAYS,
     floor_check,
+    fund_intervals,
     globalx_overlap,
     holdings_structures,
     score_against_holdings,
@@ -59,6 +60,8 @@ from hidden_options.publish.registry import ANALYSES
 from hidden_options.publish.results import Result, now_iso
 
 NAME = RESULT_NAME
+# Resampling funds for the validation intervals.
+FUND_BOOT_SEED = 20261108
 PRECISION_RECALL_FLOOR = 0.5
 SENSITIVITY_RATES = (0.03, 0.05)
 # The chance baseline is drawn on every CHANCE_EVERY-th report date.
@@ -337,6 +340,7 @@ def _validation(
     daily = score_by_date(detected, truth)
     return {
         "score": asdict(score_against_holdings(detected, truth)),
+        "fund_intervals": fund_intervals(detected, truth, seed=FUND_BOOT_SEED),
         "same_day": asdict(score_against_holdings(detected, same_day)),
         "by_date": {
             "dates": len(daily),

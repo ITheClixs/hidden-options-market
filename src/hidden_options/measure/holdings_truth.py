@@ -221,10 +221,15 @@ def _with_ids(kept: pd.DataFrame) -> pd.DataFrame:
     return truth
 
 
-def score_against_holdings(legs_with_ids: pd.DataFrame, truth: pd.DataFrame) -> ValidationScore:
-    """The score of a detector's legs (`report_date`, `root`, `expiry`, `right`, `strike`,
-    `contracts`, `structure_id`) against `holdings_structures`. Defined in the module docstring.
-    """
+def _placement(
+    legs_with_ids: pd.DataFrame,
+) -> tuple[
+    pd.DataFrame,
+    list[LegKey],
+    dict[tuple[Any, int], list[int]],
+    dict[LegKey, tuple[Any, int]],
+]:
+    """The detected legs, their keys, each structure's rows, and each leg's structure."""
     detected = legs_with_ids[legs_with_ids["structure_id"] >= 0]
     keys = _leg_keys(detected)
     days = pd.to_datetime(detected["report_date"]).to_numpy()
@@ -234,11 +239,19 @@ def score_against_holdings(legs_with_ids: pd.DataFrame, truth: pd.DataFrame) -> 
     for row, (key, day, sid) in enumerate(zip(keys, days, ids, strict=True)):
         members[(day, int(sid))].append(row)
         placed[key] = (day, int(sid))
+    return detected, keys, members, placed
+
+
+def score_against_holdings(legs_with_ids: pd.DataFrame, truth: pd.DataFrame) -> ValidationScore:
+    """The score of a detector's legs (`report_date`, `root`, `expiry`, `right`, `strike`,
+    `contracts`, `structure_id`) against `holdings_structures`. Defined in the module docstring.
+    """
+    detected, keys, members, placed = _placement(legs_with_ids)
     holders = _holders(truth)
     types = _StructureTypes(detected, members)
 
-    recalled, grouped_share, agreement, structure_dates = _recall(truth, placed, types)
-    consistent, exact, n_dates = _precision(keys, members, placed, holders, detected)
+    recalled, grouped_share, agreement, structure_dates, _ = _recall(truth, placed, types)
+    consistent, exact, n_dates, _ = _precision(keys, members, placed, holders, detected)
     multi = truth[truth["n_legs"] >= 2] if len(truth) else truth
     return ValidationScore(
         precision=_mean(consistent),
@@ -276,13 +289,15 @@ class _StructureTypes:
 
 def _recall(
     truth: pd.DataFrame, placed: dict[LegKey, tuple[Any, int]], types: _StructureTypes
-) -> tuple[list[float], list[float], list[float], int]:
+) -> tuple[list[float], list[float], list[float], int, list[str]]:
     """Per distinct truth structure: the recalled share, the grouped share and, for those
-    grouped at least once, the share of grouped dates on which the types agree."""
+    grouped at least once, the share of grouped dates on which the types agree; and the
+    fund holding each structure."""
     if truth.empty:
-        return [], [], [], 0
+        return [], [], [], 0, []
     multi = truth[truth["n_legs"] >= 2]
     recalled: list[float] = []
+    funds: list[str] = []
     grouped_shares: list[float] = []
     agreement: list[float] = []
     structure_dates = 0
@@ -298,10 +313,11 @@ def _recall(
             hits += types.of(home) == legs["structure"].iloc[0]  # type: ignore[arg-type]
         structure_dates += dates
         recalled.append(hits / dates)
+        funds.append(str(structure["fund"].iloc[0]))
         grouped_shares.append(grouped / dates)
         if grouped:
             agreement.append(hits / grouped)
-    return recalled, grouped_shares, agreement, structure_dates
+    return recalled, grouped_shares, agreement, structure_dates, funds
 
 
 def _precision(
@@ -310,11 +326,13 @@ def _precision(
     placed: dict[LegKey, tuple[Any, int]],
     holders: dict[LegKey, set[str]],
     detected: pd.DataFrame,
-) -> tuple[list[float], list[float], int]:
-    """Per distinct detected structure that touches: the consistent and exact shares."""
+) -> tuple[list[float], list[float], int, list[str]]:
+    """Per distinct detected structure that touches: the consistent and exact shares, and
+    the fund holding most of its legs."""
     touched = {placed[key] for key in holders if key in placed}
     underlyings = detected["underlying"].to_numpy(dtype=object)
     outcomes: dict[tuple[Any, ...], list[tuple[bool, bool]]] = defaultdict(list)
+    holder_of: dict[tuple[Any, ...], str] = {}
     for structure in touched:
         rows = members[structure]
         legs = [keys[row] for row in rows]
@@ -322,9 +340,11 @@ def _precision(
         most = max(counts.values())
         distinct = (underlyings[rows[0]], tuple(sorted(leg[1:] for leg in legs)))
         outcomes[distinct].append((most >= 2, most == len(legs)))
+        holder_of.setdefault(distinct, str(counts.most_common(1)[0][0]))
     consistent = [float(np.mean([one[0] for one in dates])) for dates in outcomes.values()]
     exact = [float(np.mean([one[1] for one in dates])) for dates in outcomes.values()]
-    return consistent, exact, len(touched)
+    funds = [holder_of[key] for key in outcomes]
+    return consistent, exact, len(touched), funds
 
 
 def score_by_date(legs_with_ids: pd.DataFrame, truth: pd.DataFrame) -> pd.DataFrame:
@@ -468,7 +488,55 @@ def _mean(values: Sequence[float]) -> float:
     return float(np.mean(values)) if len(values) else 0.0
 
 
+def fund_intervals(
+    legs_with_ids: pd.DataFrame,
+    truth: pd.DataFrame,
+    *,
+    n_boot: int = 2_000,
+    seed: int = 0,
+    level: float = 0.95,
+) -> dict[str, float]:
+    """Percentile intervals for recall and precision, resampling funds with replacement:
+    structures of one fund share its trading, so they are not independent draws."""
+    detected, keys, members, placed = _placement(legs_with_ids)
+    types = _StructureTypes(detected, members)
+    recalled, _, _, _, recall_funds = _recall(truth, placed, types)
+    consistent, _, _, precision_funds = _precision(keys, members, placed, _holders(truth), detected)
+    rng = np.random.default_rng(seed)
+    funds = sorted(set(recall_funds) | set(precision_funds))
+    recall_by = _by_fund(recalled, recall_funds)
+    precision_by = _by_fund(consistent, precision_funds)
+    draws = []
+    for _ in range(n_boot):
+        sample = rng.choice(funds, size=len(funds), replace=True)
+        draws.append((_pooled(recall_by, sample), _pooled(precision_by, sample)))
+    tail = (1 - level) / 2
+    recall_draws = np.array([d[0] for d in draws], dtype=float)
+    precision_draws = np.array([d[1] for d in draws], dtype=float)
+    return {
+        "recall_low": float(np.nanquantile(recall_draws, tail)),
+        "recall_high": float(np.nanquantile(recall_draws, 1 - tail)),
+        "precision_low": float(np.nanquantile(precision_draws, tail)),
+        "precision_high": float(np.nanquantile(precision_draws, 1 - tail)),
+        "funds": len(funds),
+        "n_boot": n_boot,
+    }
+
+
+def _by_fund(values: list[float], funds: list[str]) -> dict[str, list[float]]:
+    grouped: dict[str, list[float]] = defaultdict(list)
+    for value, fund in zip(values, funds, strict=True):
+        grouped[fund].append(value)
+    return grouped
+
+
+def _pooled(by_fund: dict[str, list[float]], sample: np.ndarray) -> float:
+    values = [v for fund in sample for v in by_fund.get(str(fund), [])]
+    return float(np.mean(values)) if values else float("nan")
+
+
 __all__ = [
+    "fund_intervals",
     "MAX_STALENESS_BDAYS",
     "TRUTH_COLUMNS",
     "ValidationScore",

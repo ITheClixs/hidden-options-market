@@ -136,6 +136,19 @@ def _holdings_macros(validation: Mapping[str, Any]) -> dict[str, str]:
         "PosGlobalxLegs": formats.count(globalx["legs"]),
         "PosGlobalxOnReport": formats.count(globalx["legs_on_flex_report"]),
         "PosGlobalxMulti": formats.count(globalx["multi_leg_holdings"]),
+        **_fund_interval_macros(validation.get("fund_intervals")),
+    }
+
+
+def _fund_interval_macros(intervals: Mapping[str, Any] | None) -> dict[str, str]:
+    if not intervals:
+        return {}
+    return {
+        "PosRecallFundLow": _share(intervals["recall_low"]),
+        "PosRecallFundHigh": _share(intervals["recall_high"]),
+        "PosPrecisionFundLow": _share(intervals["precision_low"]),
+        "PosPrecisionFundHigh": _share(intervals["precision_high"]),
+        "PosBootFunds": formats.count(intervals["funds"]),
     }
 
 

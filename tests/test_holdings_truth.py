@@ -342,3 +342,13 @@ class TestLoaders:
         assert overlap["legs"] == 3
         assert overlap["legs_on_flex_report"] == 1
         assert overlap["multi_leg_holdings"] == 1
+
+
+def test_fund_intervals_collapse_on_a_perfect_score_and_bound_the_point():
+    from hidden_options.measure.holdings_truth import fund_intervals
+
+    truth = holdings_structures(pd.DataFrame(_synthetic()), FLEX_DATES)
+    perfect = fund_intervals(_detected(PAIR), truth, n_boot=200, seed=1)
+    assert perfect["recall_low"] == perfect["recall_high"] == 1.0
+    assert perfect["precision_low"] == perfect["precision_high"] == 1.0
+    assert perfect["funds"] == 1
