@@ -61,6 +61,8 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "PinFridayEvents": formats.count(sample["friday_events"]),
         "PinSplitDropped": formats.count(sample["split_dropped"]),
     }
+    if values.get("control"):
+        out.update(control_macros(values["control"]))
     simulation = values["simulation"]
     out["PinSimSize"] = formats.percent(simulation["size"], 1)
     out["PinSimWorlds"] = formats.count(simulation["size_worlds"])
@@ -79,4 +81,32 @@ def pinning_macros(values: Mapping[str, Any]) -> dict[str, str]:
     return out
 
 
-__all__ = ["pinning_macros"]
+def control_macros(control: Mapping[str, Any]) -> dict[str, str]:
+    """The positive control at listed strikes (docs/log/2026-11-08-pinning-control-spec.md)."""
+    monthly, quarter, weekly = control["monthly"], control["band_0.25"], control["weekly"]
+    return {
+        "PinCtlMean": sigma(monthly["mean"]),
+        "PinCtlT": t_stat(monthly["t_stat"]),
+        "PinCtlP": p_value(monthly["p_value"]),
+        "PinCtlFlipP": p_value(monthly["sign_flip_p"]),
+        "PinCtlMDE": sigma(monthly["mde80"]),
+        "PinCtlEvents": formats.count(monthly["n_obs"]),
+        "PinCtlDates": formats.count(monthly["clusters"]),
+        "PinCtlUnderlyings": formats.count(monthly["underlyings"]),
+        "PinCtlNearExpiry": formats.percent(monthly["near_expiry"], 1),
+        "PinCtlNearAfter": formats.percent(monthly["near_after"], 1),
+        "PinCtlBandQuarterMean": points(quarter["mean"]),
+        "PinCtlBandQuarterT": t_stat(quarter["t_stat"]),
+        "PinCtlBandQuarterMDE": points(quarter["mde80"]),
+        "PinCtlWeeklyMean": sigma(weekly["mean"]),
+        "PinCtlWeeklyT": t_stat(weekly["t_stat"]),
+        "PinCtlWeeklyEvents": formats.count(weekly["n_obs"]),
+        "PinCtlPlaceboMean": sigma(control["placebo"]["mean"]),
+        "PinCtlPlaceboT": t_stat(control["placebo"]["t_stat"]),
+        "PinCtlPlaceboDates": formats.count(control["placebo"]["clusters"]),
+        "PinCtlNetMean": sigma(control["less_placebo"]["mean"]),
+        "PinCtlNetT": t_stat(control["less_placebo"]["t_stat"]),
+    }
+
+
+__all__ = ["control_macros", "pinning_macros"]

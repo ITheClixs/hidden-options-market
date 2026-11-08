@@ -66,3 +66,24 @@ draws, fixed seed). The MDE is at 80% power.
 
 Only a defect found in the code. Any change after an outcome has been seen is recorded
 here as a dated amendment, with the estimate it changed.
+
+## Amendment, 2026-11-08, after the outcome was read: the result, and a baseline
+
+**Outcome under the rule above.** The control rejects with D < 0: −0.024σ, t −2.56,
+sign-flip p 0.016, on 37,672 events over 34 monthly expirations in 1,433 names. Under the
+rule this is reported as such and is not a control. The design does not detect listed
+pinning in this panel. The paper drops "do not pin" and says "not detected".
+
+**A baseline, found while reading it.** It was added as a diagnostic, not a test. The same
+construction on ordinary Monday-to-Thursday sessions, when nothing standard expires, gives
+D = −0.006σ (t −2.43, 558 dates). D should average zero there, and it does not: s on the
+day itself is near zero, while s over the following five sessions is slightly positive.
+Closes drift towards the round strike chosen the day before. So the post-expiry
+differencing carries a small negative bias when K\* is a round number. Monthly
+expirations net of that baseline give −0.018σ (t −1.85, the two standard errors combined
+as independent), not distinguishable from zero at 5%. The result carries both figures
+(`control.placebo`, `control.less_placebo`).
+
+The registered FLEX test is not changed. Its K\* is the FLEX strike with the most open
+interest, often round too, so a bias of that order may sit in its estimate. That is small
+next to its MDE of 0.078σ, and its sign would push the estimate away from pinning.

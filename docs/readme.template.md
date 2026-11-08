@@ -14,7 +14,7 @@ panel.
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
 - **Convexity.** Across the {{GammaUnderlyings}} followed underlyings with stored listed chains, over {{GammaSettlements}} settlements, FLEX is {{GammaMedianGross}} of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is {{GammaMedianNetted}} ({{GammaMedianBoth}} if listed pairs are netted too). It stays large in SPY ({{GammaSPYNetted}} FLEX-netted) and NDX ({{GammaNDXNetted}}).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The measure is unsigned, so books on opposite sides of an underlying could offset. Where the sign is known, in the {{GProgNames}} option-income programme names, a one-sided test leans towards dampening but is underpowered (*t* {{GProgT}}, minimum detectable effect {{GProgMDEShare}} of mean \|*r*\|).
-- **Pinning?** No. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The minimum detectable pull is {{PinMDE}}σ. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
+- **Pinning?** Not detected. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The minimum detectable pull is {{PinMDE}}σ, but the same design finds no pinning at listed strikes on {{PinCtlDates}} monthly expirations either (net of its baseline, *t* {{PinCtlNetT}}), so this is what the design can see, not proof of absence. Both tests are unsigned: they rule out a net effect of one sign, not books on opposite sides that offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
@@ -129,6 +129,13 @@ result is {{PinMean}}σ (*t* {{PinT}}, sign-flip *p* {{PinFlipP}}), with a minim
 detectable effect of {{PinMDE}}σ. Large books do no better than small ones (*t*
 {{PinSizeT}}). Specification and its pre-outcome amendment:
 [`docs/log/2026-11-08-pinning-spec.md`](docs/log/2026-11-08-pinning-spec.md).
+As a positive control, fixed in
+[`docs/log/2026-11-08-pinning-control-spec.md`](docs/log/2026-11-08-pinning-control-spec.md),
+the same statistic at the nearest listed strike on {{PinCtlDates}} monthly expirations
+({{PinCtlEvents}} events) finds no pinning: {{PinCtlMean}}σ (*t* {{PinCtlT}}), against a
+baseline of {{PinCtlPlaceboMean}}σ on ordinary sessions, so {{PinCtlNetMean}}σ net (*t*
+{{PinCtlNetT}}). The design does not detect listed pinning in this panel, so the FLEX null
+reads as not detected, not absent.
 
 **On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published

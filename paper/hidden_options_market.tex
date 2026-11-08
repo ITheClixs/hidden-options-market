@@ -38,8 +38,8 @@ counted gross, it is \GammaMedianGross{} of the median one's option gamma, but m
 with no net gamma where the holders' sides are known: with those pairs netted, the share is \GammaMedianNetted{}, and large only in a few products such as SPY
 and NDX. In tests specified in advance, netted FLEX dollar gamma does not predict
 next-day volatility (minimum detectable effect \GPredMDEShare{} of mean absolute return
-per standard deviation), and stocks do not pin to large FLEX strikes on dates when only
-FLEX options expire. Both tests are unsigned and cover equity names: they rule out a net
+per standard deviation), and no pinning to large FLEX strikes is detected on dates when
+only FLEX options expire, by a design that detects none at listed strikes either. Both tests are unsigned and cover equity names: they rule out a net
 effect of one sign within an underlying, not books on opposite sides that offset. Two measurement results travel
 further: off-grid strikes miss \FlexOnGridShare{} of FLEX series, and strike notional
 overstates delta exposure at least \PosGrossMedian{}-fold for the median underlying.
@@ -129,10 +129,12 @@ minimum detectable effect is \GPredMDE{} basis points per standard deviation,
 call for is small, \GPredMedianX{} basis points of a day's dollar volume in the median
 underlying-day, though the measure is unsigned, so books on opposite sides within an
 underlying could offset. Gross open interest does not predict either, but that
-test counts contracts, most of them forwards, and is the weaker of the two. Nor do
-stocks pin to large FLEX strikes on the \PinEvents{} expiries, on \PinDates{} dates, when only FLEX options expire
-(Section~\ref{sec:pinning}). That design needs no listed data at all: the minimum
-detectable pull is \PinMDE{} daily standard deviations.
+test counts contracts, most of them forwards, and is the weaker of the two. Nor is
+pinning to large FLEX strikes detected on the \PinEvents{} expiries, on \PinDates{}
+dates, when only FLEX options expire (Section~\ref{sec:pinning}). That design needs no
+listed data, and its minimum detectable pull is \PinMDE{} daily standard deviations. Run
+as a positive control at listed strikes on monthly expirations, though, it detects no
+pinning there either, so the FLEX result is a statement about what the design can see.
 
 \paragraph{Two measurement results.} Both emerged from building the census and both
 apply beyond FLEX.
@@ -1097,10 +1099,27 @@ distinguishable from zero, and both are descriptive. If dealers are long the cal
 short the puts, the two push closes in opposite directions and could offset in the
 pooled estimate, which is why the test bounds only a net effect. The same construction on
 Friday FLEX expiries, when listed options expire too, gives $\PinFridayMean\sigma$
-($t=\PinFridayT$). That is not a positive control: its pin strike is still the FLEX one,
-and we have not run the design on listed strikes, where pinning is documented. The
-pinning sample also leaves out the names with listed weekday expiries, which include the
-largest FLEX books.
+($t=\PinFridayT$), but its pin strike is still the FLEX one.
+
+A positive control runs the same statistic where pinning has been documented
+\citep{ni2005}: at the listed strike nearest the previous close, on a coarse grid that
+every optionable name lists, at the standard monthly expiration. A further log entry fixed
+it before any close was read. On \PinCtlEvents{} events, \PinCtlDates{} monthly
+expirations and \PinCtlUnderlyings{} names, it finds no pinning. Closes on expiry are, if
+anything, farther from the strike: $\PinCtlMean\sigma$ ($t=\PinCtlT$, sign-flip $p$
+\PinCtlFlipP{}). Part of that is the design's own. On ordinary Monday-to-Thursday
+sessions, when nothing standard expires, the statistic at round strikes averages
+$\PinCtlPlaceboMean\sigma$ ($t=\PinCtlPlaceboT$, \PinCtlPlaceboDates{} dates), because
+closes over the following week drift slightly towards round strikes. Net of that
+baseline, monthly expirations give $\PinCtlNetMean\sigma$ ($t=\PinCtlNetT$). Fridays that
+are not monthly expirations give $\PinCtlWeeklyMean\sigma$ before the baseline is taken
+off ($t=\PinCtlWeeklyT$).
+A lean away from the strike at expiry is the direction hedging by dealers net short
+gamma would push \citep{ni2021}, but net of the baseline it is not distinguishable from
+zero. The design, then, does not detect pinning at listed strikes in this panel, and the
+FLEX null has to be read as not detected rather than absent. The baseline is small next to
+the FLEX test's minimum detectable effect of $\PinMDE\sigma$. The pinning sample also
+leaves out the names with listed weekday expiries, which include the largest FLEX books.
 
 \section{Limitations}
 
@@ -1111,7 +1130,9 @@ sign what remains, so no measure here is a dealer position.
 \item \textbf{Equity names, within-underlying variation, no positive control.} Index
 products have no bars and are in neither test, and the pinning sample excludes the names
 with listed weekday expiries. Fixed effects leave each book's movement around its own
-level. Neither design has been run on listed strikes, where effects are documented.
+level. Run at listed strikes on monthly expirations, the pinning design detects no pinning
+there either, and its post-expiry differencing carries a small negative baseline at round
+strikes; the gamma test has no positive control.
 \item \textbf{A short panel.} \PanelMonths{} months, set by how far back OCC's rolling
 retention reached when collection began. That is enough to date one turn in growth, and
 too short to say whether the levelling of the latest cycles will last.
@@ -1155,7 +1176,8 @@ been found four times in five. The hedging such a book calls for is a small frac
 a day's trading, though an unsigned measure cannot exclude books that offset within an
 underlying. Gross inventory does not predict either. And at the one place a hidden
 book could most plausibly move a price, its largest strike on a date when nothing else
-expires, stocks without listed weekday expiries do not pin. What these tests rule out is
+expires, no pinning is detected in stocks without listed weekday expiries, by a design
+that detects none at listed strikes on monthly expirations either. What these tests rule out is
 a net effect of one sign within equity underlyings at daily resolution; signed books,
 index products and the option surface are what is left. Intraday effects and the option surface remain open.
 

@@ -34,6 +34,7 @@ from hidden_options.measure.pinning import (
     size_terciles,
     with_sigma,
 )
+from hidden_options.measure.pinning_control import control_statistics, monthly_expiries
 from hidden_options.measure.pinning_macros import pinning_macros
 from hidden_options.predict.inference import holm
 from hidden_options.predict.panel import _sessions
@@ -113,6 +114,7 @@ def pinning_result(inputs: PinningInputs) -> Result:
             "split_dropped": int(straddling.sum()),
         },
         "simulation": _simulation(main, h1),
+        "control": _control(closes, days),
         "settings": {"n_flips": N_FLIPS, "seed": SEED, "bands": list(BANDS)},
     }
     run_inputs = {
@@ -199,6 +201,44 @@ def _events(
     events = pin_strikes(book, prev).merge(adv, on=["underlying", "expiry"], how="left")
     events["size"] = events["open_interest"] * 100 / events["adv"]
     return event_statistics(events, closes, days)
+
+
+def _control(closes: pd.DataFrame, days: pd.DatetimeIndex) -> dict[str, Any]:
+    """The positive control of docs/log/2026-11-08-pinning-control-spec.md."""
+    monthly = monthly_expiries(days)
+    fridays = days[(days.day_of_week == 4) & ~days.isin(monthly)]
+
+    def statistics(expiries: pd.DatetimeIndex) -> pd.DataFrame:
+        stats = control_statistics(closes, days, expiries)
+        return stats[~_straddles_split(stats, closes, days)].reset_index(drop=True)
+
+    stats, weekly = statistics(monthly), statistics(pd.DatetimeIndex(fridays))
+    # Diagnostic, added after the control was read: ordinary Monday-to-Thursday sessions,
+    # where nothing standard expires, show the statistic's baseline at round strikes.
+    ordinary = days[(days.day_of_week < 4) & ~days.isin(monthly)]
+    ordinary_stats = statistics(pd.DatetimeIndex(ordinary))
+    placebo = clustered_mean(ordinary_stats["D"], ordinary_stats["expiry"])
+    found = clustered_mean(stats["D"], stats["expiry"])
+    return {
+        "monthly": {
+            **found,
+            "sign_flip_p": sign_flip_p(stats["D"], stats["expiry"], n_draws=N_FLIPS, seed=SEED),
+            "underlyings": int(stats["underlying"].nunique()),
+            "near_expiry": float(stats["n0.25_expiry"].mean()),
+            "near_after": float(stats["n0.25_pseudo"].mean()),
+        },
+        **{f"band_{band}": clustered_mean(stats[f"D_b{band}"], stats["expiry"]) for band in BANDS},
+        "weekly": clustered_mean(weekly["D"], weekly["expiry"]),
+        "placebo": placebo,
+        "less_placebo": _difference(found, placebo),
+    }
+
+
+def _difference(a: dict[str, Any], b: dict[str, Any]) -> dict[str, float]:
+    """`a` less `b`, two means on distinct clusters, with independent standard errors."""
+    se = float(np.hypot(a["std_error"], b["std_error"]))
+    mean = float(a["mean"] - b["mean"])
+    return {"mean": mean, "std_error": se, "t_stat": mean / se}
 
 
 def _straddles_split(
