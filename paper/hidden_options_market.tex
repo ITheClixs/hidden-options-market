@@ -16,7 +16,7 @@
 \input{numbers}
 
 \title{\textbf{The Hidden Options Market}\\[0.4em]
-\large FLEX Inventory in Clearing Data, and Whether It Predicts the Visible Market}
+\large How Much Option Convexity Listed Chains Miss, and Whether It Moves Prices}
 
 \author{Anonymous}
 
@@ -168,8 +168,12 @@ strike-level open interest to identify price clustering at expiration. Each take
 observable series set as given. We add a category of series that listed data omits, and
 show that a natural way to find it without the authoritative source fails. We do not
 solve the sign problem: our gamma is netted for forwards but not signed.
-\citet{park2025} study option-income funds, one of the identifiable users of FLEX; our
-panel places them within the wider market.
+\citet{park2025} find, from the funds' monthly N-PORT filings, that aggregate call selling
+by option-income funds, one of the identifiable users of FLEX, predicts lower
+subsequent volatility. Our test asks a narrower question at a finer grain, whether the
+hidden book's gamma moves the next day's price, and finds no effect at that horizon.
+The two results need not conflict: theirs is about supply pressure over weeks and the
+option market's pricing of it, ours about daily hedging flow in the underlying.
 
 Our gamma test belongs with work on whether option hedging moves the underlying.
 \citet{ni2021} find that option trading affects underlying stock prices broadly through
@@ -1166,8 +1170,9 @@ Does option trading have a pervasive impact on underlying stock prices?
 
 \bibitem[Park and Kurucak(2025)]{park2025}
 Park, T. and U.~Kurucak (2025).
-Growth of income funds and death of volatility.
-Working paper, University of Texas at Dallas.
+Growth of income funds and death of volatility: A study of inelastic option supply and
+market impact.
+Working paper, University of Texas at Dallas. SSRN 5705222.
 
 \bibitem[Prakash et al.(2026)]{prakash2026}
 Prakash, S., F.~Ferstler, and N.~Pezolano (2026).

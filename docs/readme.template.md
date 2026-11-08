@@ -1,6 +1,6 @@
 # The Hidden Options Market
 
-**FLEX inventory in clearing data, and whether it predicts the visible market.**
+**How much option convexity listed chains miss, and whether it moves prices.**
 
 FLEX options are exchange options whose terms the counterparties choose. They are cleared
 centrally, and they are absent from the listed option chains that most option research is
