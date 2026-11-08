@@ -24,7 +24,9 @@ NAME = "conversion"
 
 
 def conversion_result(inputs: GammaInputs) -> Result:
-    listed = inputs.chains.groupby(["date", *KEY], as_index=False)["open_interest"].sum()
+    listed = pd.DataFrame(
+        inputs.chains.groupby(["date", *KEY], as_index=False)["open_interest"].sum()
+    )
     dates = pd.DatetimeIndex(sorted(listed["date"].unique()))
     flex = flex_series(inputs.panel, dates)
     flex = flex[flex["symbol"].isin(set(listed["symbol"]))]

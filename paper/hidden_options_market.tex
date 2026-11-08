@@ -201,6 +201,19 @@ byte-identical across every series for exactly this reason. Partitioning by capt
 date would have entered one settlement into the panel twice as two apparently stable
 days.
 
+Exchange rules allow FLEX open interest in a series whose terms match a listed series to
+be consolidated into the listed one. If that were common, some FLEX open interest would
+leave the report before expiry by becoming listed, and the boundary of what is hidden
+would move. We check on the \ConvSettlements{} settlements with stored chains, which give
+listed open interest per series. \ConvTwinShare{} of FLEX open interest sits in series
+with a listed twin, the same underlying, expiry, right and strike. Of the
+\ConvDropped{} million FLEX contracts that leave the report before expiry, \ConvMatched{}
+leave on a settlement when the listed twin gains at least \ConvMatchShare{} as many. The
+same matching applied to FLEX open interest that is \emph{created}, which no
+consolidation explains, gives \ConvCreatedMatched{}. Consolidation, then, is rare enough
+to be indistinguishable from coincidence here, and we treat the report's FLEX series as
+the hidden book.
+
 \subsection{The panel}
 \label{sec:panel}
 
