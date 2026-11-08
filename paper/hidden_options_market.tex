@@ -36,9 +36,10 @@ large, \ValueEnd{} of mark value on the last date, and in a census of
 \HiddenCensusTen{}. Counted gross, it is \GammaMedianGross{} of the median underlying's
 option gamma, but most of that sits in same-strike pairs, forwards with no convexity:
 netted, the share is \GammaMedianBoth{}, and large only in a few products such as SPY
-and NDX. In a test specified in advance, netted FLEX dollar gamma does not predict
-next-day volatility, with a minimum detectable effect of \GPredMDE{} basis points per
-standard deviation, \GPredMDEShare{} of mean absolute return. Two measurement results travel
+and NDX. In tests specified in advance, netted FLEX dollar gamma does not predict
+next-day volatility (minimum detectable effect \GPredMDEShare{} of mean absolute return
+per standard deviation), and stocks do not pin to large FLEX strikes on dates when only
+FLEX options expire. The hidden books are small next to trading. Two measurement results travel
 further: off-grid strikes miss \FlexOnGridShare{} of FLEX series, and strike notional
 overstates delta exposure at least \PosGrossMedian{}-fold for the median underlying.
 \vspace{0.8em}
@@ -129,7 +130,10 @@ minimum detectable effect is \GPredMDE{} basis points per standard deviation,
 \GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). The reason is scale: the
 hedge a 1\% move would call for is \GPredMedianX{} basis points of a day's dollar volume
 in the median underlying-day. Gross open interest does not predict either, but that
-test counts contracts, most of them forwards, and is the weaker of the two.
+test counts contracts, most of them forwards, and is the weaker of the two. Nor do
+stocks pin to large FLEX strikes on the \PinEvents{} dates when only FLEX options expire
+(Section~\ref{sec:pinning}). That design needs no listed data at all: the minimum
+detectable pull is \PinMDE{} daily standard deviations.
 
 \paragraph{Two measurement results.} Both emerged from building the census and both
 apply beyond FLEX.
@@ -961,8 +965,56 @@ denominator. Volatility moves measured hidden gamma, not the other way round.
 At daily resolution, then, hidden gamma does not move the underlying: an effect of
 $\GPredMDE\times10^{-4}$ on next-day absolute return per standard deviation of hedging
 demand, \GPredSdX{} basis points of the day's dollar volume per 1\% move, would have been
-found four times in five. Strike-local effects at expiry, intraday effects and the option
-surface are not tested here.
+found found four times in five. That leaves effects concentrated at particular strikes and
+dates, which a daily aggregate could dilute. The next test looks at the one with the
+sharpest prediction.
+
+\subsection{Pinning at hidden strikes}
+\label{sec:pinning}
+
+Stocks with listed options tend to close near strikes on expiration dates
+\citep{ni2005}, and the hedge rebalancing of option dealers who are net long gamma can
+produce it \citep{avellaneda2003,golez2012}. If FLEX books are large and hedged, the same
+should happen at FLEX strikes. Listed and FLEX strikes often coincide, and most listed
+expiries are Fridays, so a test at a FLEX strike on a Friday cannot tell the two books
+apart. FLEX expiries, however, can fall on any day. A Monday-to-Thursday expiry in a name
+that lists no option expiring that day is one at which only FLEX options expire. We use
+those, under a specification fixed in a dated log entry before any expiry-date close was
+read. The entry carries one amendment, made before any outcome was seen and described
+below.
+
+For each such expiry, the pin strike is the expiring FLEX strike with the most open
+interest, at least 100 contracts, within two daily standard deviations $\sigma$ of the
+previous close. Closeness to it is measured against its mirror, the strike equally far
+from the previous close on the other side. That comparison is unbiased under any
+symmetric return, whatever the strike's distance from spot. Closes cluster at round
+prices, and a pin strike is often round where its mirror is not, so the same comparison
+is made on the five sessions after expiry, with the strike held fixed, and subtracted.
+The sessions \emph{after} are used because sessions before expiry lie on the path to the
+close at which the pin strike was chosen, which pulls them towards it by construction.
+The original specification used the sessions before, and a test on simulated returns
+without pinning rejected it at $p<10^{-7}$. Names with listed Monday-to-Thursday expiries
+are left out (\PinExcluded{} of them, among them SPY, QQQ and the largest single names).
+That leaves \PinEvents{} events on \PinDates{} expiry dates in \PinUnderlyings{}
+underlyings, with a median of \PinContracts{} contracts at the pin strike.
+
+\input{tables/pinning}
+
+Stocks do not close nearer the largest FLEX strike when it expires
+(Table~\ref{tab:pinning}). The expiry-less-after statistic is $\PinMean\sigma$ at
+$t=\PinT$, with a sign-flip $p$ of \PinFlipP{} and Holm $p$ of \PinHolm{}. It is no
+larger where the book is large relative to trading, top tercile less bottom
+$\PinSizeDiff\sigma$ at $t=\PinSizeT$. Within a quarter of $\sigma$ of the strike the
+difference is $\PinBandQuarterMean$ percentage points. The minimum detectable effect is
+$\PinMDE\sigma$. In the simulations the specification reports, that is attraction
+strong enough to pull about one expiry in seven halfway to the strike. The books are
+small next to trading: the pin strike's open interest, in shares, is a median
+\PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, as an
+option-income fund's written calls would leave it, the estimate leans towards pinning
+($t=\PinCallsT$), and where it is mostly puts, away ($t=\PinPutsT$). Neither is
+distinguishable from zero, and both are descriptive. The same construction on Friday
+FLEX expiries, when listed options expire too, gives $\PinFridayMean\sigma$
+($t=\PinFridayT$).
 
 \section{Limitations}
 
@@ -1010,8 +1062,9 @@ resolution the answer is no. Netted FLEX dollar gamma, scaled by dollar volume, 
 predict next-day volatility in a test specified in advance; an effect of
 \GPredMDEShare{} of the mean daily absolute return per standard deviation would have
 been found four times in five. The hedging such a book calls for is a small fraction of
-a day's trading. Gross inventory does not predict either. Strike-local effects at expiry,
-intraday effects and the option surface remain open.
+a day's trading. Gross inventory does not predict either. And at the one place a hidden
+book could most plausibly move a price, its largest strike on a date when nothing else
+expires, stocks do not pin. Intraday effects and the option surface remain open.
 
 Two measurement findings travel further than the setting. A natural strike-based rule
 for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the

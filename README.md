@@ -14,6 +14,7 @@ panel.
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
 - **Convexity.** Counting every contract, FLEX is 18.0\% of the median underlying's option gamma, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is 2.6\%. It stays large in SPY (18.3\%) and NDX (20.5\%).
 - **Does it move prices?** Not at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.53, 347,687 underlying-days). The minimum detectable effect is 2.00bp per standard deviation, 1.0\% of mean \|*r*\|. The hedge a 1% move calls for is 5.84bp of a day's dollar volume in the median case.
+- **Pinning?** No. On the 2,324 dates when only FLEX options expire, stocks do not close nearer the largest FLEX strike (*t* -0.62). The minimum detectable pull is 0.076σ.
 - **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.35-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. Each test is specified in a dated log entry before it is run.
 
@@ -106,6 +107,17 @@ detectable effect is 2.00bp, 1.0\% of mean |*r*|, which the rule fixed in
 advance calls a bounded null. Netted gamma dated two activity dates later is negative
 (*t* -4.86). That is mechanical: a large move carries spot away from the strikes,
 so measured gamma falls, while volume rises.
+
+**At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
+Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date
+on which only FLEX expires. On 2,324 such expiries (326 dates,
+494 names), the test compares the close's distance to the largest expiring
+FLEX strike with its distance to the mirror strike on the other side of the previous
+close. It then subtracts the same comparison on the five sessions after expiry. The
+result is -0.017σ (*t* -0.62, sign-flip *p* 0.54), with a minimum
+detectable effect of 0.076σ. Large books do no better than small ones (*t*
+0.58). Specification and its pre-outcome amendment:
+[`docs/log/2026-11-08-pinning-spec.md`](docs/log/2026-11-08-pinning-spec.md).
 
 **On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published

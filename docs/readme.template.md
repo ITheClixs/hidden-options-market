@@ -14,6 +14,7 @@ panel.
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
 - **Convexity.** Counting every contract, FLEX is {{GammaMedianGross}} of the median underlying's option gamma, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. Netted, it is {{GammaMedianBoth}}. It stays large in SPY ({{GammaSPYBoth}}) and NDX ({{GammaNDXBoth}}).
 - **Does it move prices?** Not at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case.
+- **Pinning?** No. On the {{PinEvents}} dates when only FLEX options expire, stocks do not close nearer the largest FLEX strike (*t* {{PinT}}). The minimum detectable pull is {{PinMDE}}σ.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
 - **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. Each test is specified in a dated log entry before it is run.
 
@@ -106,6 +107,17 @@ detectable effect is {{GPredMDE}}bp, {{GPredMDEShare}} of mean |*r*|, which the 
 advance calls {{GPredVerdict}}. Netted gamma dated two activity dates later is negative
 (*t* {{GPredLeadT}}). That is mechanical: a large move carries spot away from the strikes,
 so measured gamma falls, while volume rises.
+
+**At hidden strikes.** Most listed options expire on Fridays, but FLEX options can expire on any weekday. A
+Monday-to-Thursday FLEX expiry in a name that lists no option expiring that day is a date
+on which only FLEX expires. On {{PinEvents}} such expiries ({{PinDates}} dates,
+{{PinUnderlyings}} names), the test compares the close's distance to the largest expiring
+FLEX strike with its distance to the mirror strike on the other side of the previous
+close. It then subtracts the same comparison on the five sessions after expiry. The
+result is {{PinMean}}σ (*t* {{PinT}}, sign-flip *p* {{PinFlipP}}), with a minimum
+detectable effect of {{PinMDE}}σ. Large books do no better than small ones (*t*
+{{PinSizeT}}). Specification and its pre-outcome amendment:
+[`docs/log/2026-11-08-pinning-spec.md`](docs/log/2026-11-08-pinning-spec.md).
 
 **On contracts.** The original, cruder test regresses on open interest instead. A dealer on the other side of a FLEX trade hedges it in the listed market and carries the
 residual convexity while the position lives. If that matters, inventory published
