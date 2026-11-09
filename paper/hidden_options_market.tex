@@ -925,7 +925,20 @@ The index products split: in SPY and NDX the share barely moves with the rule
 (\GammaSPYGross{} and \GammaNDXGross{} gross, \GammaSPYBoth{} and \GammaNDXBoth{} netted
 on both sides; netting the listed side too shrinks the denominator, which is why a
 both-sides share can exceed the gross one), so their FLEX gamma is outright options, while in SPX it falls from
-\GammaSPXGross{} to \GammaSPXBoth{}.
+\GammaSPXGross{} to \GammaSPXBoth{}. Figure~\ref{fig:gamma-share} shows every market at
+once: most fall to the floor when pairs are netted, and a few stay near the diagonal,
+among them SPY, NDX and, among the single underlyings, EFA and MSFT.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\textwidth]{figures/gamma_share.pdf}
+\caption{FLEX share of each market's option gamma, counted gross (horizontal) and with
+same-strike call and put pairs netted (vertical), averaged over the
+\GammaSettlements{} settlements. A point on the diagonal holds outright options; a point
+on the floor holds forwards. Index products in red, option-income underlyings in black,
+controls in grey.}
+\label{fig:gamma-share}
+\end{figure}
 
 Under the sign convention vendors apply to listed chains, calls positive and puts
 negative, adding FLEX would reverse the sign of the listed figure on \GammaFlipShare{} of
@@ -941,7 +954,7 @@ volatilities differ by a median of \GammaMarkVolGap{} points.
 A listed-only gamma figure therefore misses nearly a fifth of gross gamma notional in the median
 market we follow, but most of what it misses is the convexity of forwards, which is none.
 Where FLEX holds outright options, as in SPY and NDX, the omission survives netting. In
-the \GammaProgrammeCount{} single names written by option-income funds it does not:
+the \GammaProgrammeCount{} underlyings chosen for option-income programmes it mostly does not:
 FLEX is \GammaProgrammeGross{} of the median one's gamma gross and \GammaProgrammeNetted{}
 netted. Whether FLEX positions move the
 underlying is a question about those books, signed; the next section tests the cruder
@@ -1182,10 +1195,21 @@ events and overlap in their sessions after expiry, so they are not independent d
 that size is itself imprecise. Its spread across
 dates, $\PinNullSpread\sigma$ on the smaller samples, is in line with the registered
 standard error. \PinNullShare{} of the placebo dates lie at least as far from the centre
-as the registered estimate. Planting the same alternative in real closes, the test finds
+as the registered estimate (Figure~\ref{fig:pinning-null}). Planting the same alternative
+in real closes, the test finds
 pins in one expiry in ten on \PinNullPowerTen{} of the dates, in three in twenty on
 \PinNullPowerSeven{} and in one in twenty on \PinNullPowerTwenty{}, as the observed
-standard error implied. The books are
+standard error implied.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/pinning_null.pdf}
+\caption{The registered pinning statistic on the expiry (red) and, for the same events
+moved to placebo dates where nothing expires, on each of the \PinNullOffsets{} offsets
+(grey), with 95\% intervals. Positive values mean closes nearer the strike than its
+mirror on the expiry date, relative to the five sessions after.}
+\label{fig:pinning-null}
+\end{figure} The books are
 small next to trading: the pin strike's open interest, in shares, is a median
 \PinMedianSize{} of a day's share volume. Where the pin strike is mostly calls, the
 estimate leans towards pinning

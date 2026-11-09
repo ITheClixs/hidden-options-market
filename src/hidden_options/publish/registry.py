@@ -70,6 +70,7 @@ FIGURE_MODULES: tuple[str, ...] = (
     "hidden_options.figures.market",
     "hidden_options.figures.measurement",
     "hidden_options.figures.predictive",
+    "hidden_options.figures.convexity",
 )
 
 
