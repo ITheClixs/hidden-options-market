@@ -85,9 +85,8 @@ exposed two measurement errors that any study of open interest can make. The
 market's size and growth are the setting rather than the finding, and we describe them
 last.
 
-\paragraph{How much convexity it holds.} Counted in contracts the book is large: in a
-census of \HiddenCensusUnderlyings{} underlyings FLEX is at least a tenth of option open
-interest for \HiddenCensusTen{}. But contracts are not risk. What a dealer on the
+\paragraph{How much convexity it holds.} Counted in contracts the book is large, for
+many underlyings a tenth or more of option open interest. But contracts are not risk. What a dealer on the
 other side of a FLEX trade hedges is its gamma near spot, and gamma figures in use are
 built from listed chains (Section~\ref{sec:gamma}). Pricing listed and FLEX series on one
 listed volatility surface, in the \GammaUnderlyings{} underlyings whose listed chains we
@@ -130,9 +129,10 @@ relative closeness. Its simulated size and power assume independent returns, so 
 both on real ones, moving each event to \PinNullOffsets{} sets of dates in its own name
 when nothing expires: the test rejects at the 5\% level on \PinNullSize{} of them, and
 when one expiry in ten is pinned in the real closes it rejects on \PinNullPowerTen{}. Run
-as a positive control at listed strikes on monthly expirations, though, it finds closes
-farther from the strike, not nearer, through a term that short-horizon reversal adds to
-the design; net of a placebo matched to each event, added after that control was read,
+as a positive control, where pinning has been documented, at listed strikes on monthly
+expirations, though, it finds closes farther from the strike, not nearer, through a term
+that short-horizon reversal, the partial undoing of a day's move over the next few days,
+adds to the design; net of a placebo matched to each event, added after that control was read,
 it still detects no pinning there. The FLEX result is therefore a statement about what the
 design can see, and it covers only names without listed weekday expiries, which leaves out
 the largest books.
@@ -169,7 +169,8 @@ dates from \PanelStart{} to \PanelEnd{}, a one-break fit dates the turn to
 million contracts before it and \OICycleLatest{} million in the latest cycle,
 \GrowthMultiple{} times as much, with the latest quarter adding $\OIQuarterChange$. On
 the last date, \SeriesEnd{} series across \UnderlyingsEnd{}
-underlyings carry \OIEnd{} million contracts worth \ValueEnd{} at the report's marks.
+underlyings carry \OIEnd{} million contracts worth \ValueEnd{} at the report's marks,
+OCC's end-of-day valuation of each series.
 The ten largest underlyings hold \TopTenShare{} of that open interest, down from
 \TopTenShareStart{} when the panel begins, and calls are \CallShare{} of it. Much of
 the book is near expiry: on an average date \WithinSixtyMean{} of open interest expires
@@ -1040,7 +1041,8 @@ deviation, so coefficients are per pooled
 standard deviation, and an underlying-day with under half of its FLEX open interest priced is
 left out. Of the base panel's underlying-days, \GPredExcluded{} fail that rule,
 \GPredNoGammaRow{} have no live FLEX series that day and \GPredNoVolume{} lack twenty
-sessions of dollar volume. Two tests were fixed in advance, with Holm's adjustment across them: the
+sessions of dollar volume. Two tests were fixed in advance, with Holm's step-down
+adjustment for multiple tests across them \citep{holm1979}: the
 main coefficient, and its interaction with the top tercile of underlyings by gamma
 intensity.
 
@@ -1159,7 +1161,8 @@ underlyings, with a median of \PinContracts{} contracts at the pin strike.
 
 Stocks do not close nearer the largest FLEX strike when it expires
 (Table~\ref{tab:pinning}). The expiry-less-after statistic is $\PinMean\sigma$ at
-$t=\PinT$, with a sign-flip $p$ of \PinFlipP{} and Holm $p$ of \PinHolm{}. It is no
+$t=\PinT$, with a sign-flip $p$ of \PinFlipP{}, from randomly flipping the sign of whole
+expiry dates, and Holm $p$ of \PinHolm{}. It is no
 larger where the book is large relative to trading, top tercile less bottom
 $\PinSizeDiff\sigma$ at $t=\PinSizeT$. Within a quarter of $\sigma$ of the strike the
 difference is $\PinBandQuarterMean$ percentage points. The minimum detectable effect is
@@ -1348,6 +1351,11 @@ Demand-based option pricing.
 Golez, B. and J.~C. Jackwerth (2012).
 Pinning in the S\&P 500 futures.
 \emph{Journal of Financial Economics}. doi:10.1016/j.jfineco.2012.06.010.
+
+\bibitem[Holm(1979)]{holm1979}
+Holm, S. (1979).
+A simple sequentially rejective multiple test procedure.
+\emph{Scandinavian Journal of Statistics} 6(2), 65--70.
 
 \bibitem[Lakonishok et al.(2007)]{lakonishok2007}
 Lakonishok, J., I.~Lee, N.~D. Pearson, and A.~M. Poteshman (2007).
