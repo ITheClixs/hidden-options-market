@@ -14,11 +14,12 @@ panel.
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
 - **What it is made of.** By mark value, {{AnatFinancingValueShare}} is not outright options: box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards). Box positions carry {{AnatBoxFace}} of face, {{AnatBoxGrowth}} times the level {{PanelMonths}} months earlier; {{BoxRTradedShare}} of that is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
 - **The price of the lending.** {{BoxRHeadlineTrades}} box spreads of up to a year traded on Cboe at {{BoxRSpread}}bp over the Treasury curve (standard error {{BoxRSpreadSE}}bp, median {{BoxRSpreadMedian}}bp). OCC's marks value the same boxes at about the Treasury rate.
+- **Who holds it.** On one date, issuer files name holders and sides. One ETF (BOXX) holds {{HoldBoxShareOfItsBox}} of the largest box, {{HoldBoxMarketShare}} of all box face. For {{HoldFlexFunds}} defined-outcome funds of one issuer, {{HoldFoundLines}} of FLEX lines are in OCC's report, the product design predicts the side of {{HoldDesign}} of package legs, and the dealer opposite is net long {{HoldGammaNet}} of gamma per 1% move, where the vendor convention (dealers long calls, short puts) would show {{HoldGammaConventionNet}}.
 - **Convexity.** Across the {{GammaUnderlyings}} followed underlyings with stored listed chains, over {{GammaSettlements}} settlements, FLEX is {{GammaMedianGross}} of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is {{GammaMedianNetted}} ({{GammaMedianBoth}} if listed pairs are netted too). It stays large in SPY ({{GammaSPYNetted}} FLEX-netted) and NDX ({{GammaNDXNetted}}).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the {{GProgNames}} option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold {{PBookFundShare}} of the netted FLEX book there.
 - **Pinning?** Not detected. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The rule leaves out the {{PinExcluded}} names with listed weekday expiries, among them SPY, where FLEX holds the most gamma, QQQ and the largest single names; the books it covers are a median {{PinMedianSize}} of a day's share volume. The minimum detectable effect is {{PinMDE}}σ. Moved to {{PinNullOffsets}} sets of placebo dates in the same names, the test rejects on {{PinNullSize}} of them and, with one expiry in ten pinned in the real closes, on {{PinNullPowerTen}}. But the same design finds no pinning at listed strikes on {{PinCtlDates}} monthly expirations either (net of a matched placebo added after the fact, *t* {{PinCtlNetT}}), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
-- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The product split, the box rates, the gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The product split, the box rates, the holders check, the gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on {{HiddenCensusDate}}, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -121,6 +122,19 @@ trade date. The rate in OCC's marks for the same boxes is {{BoxRMarkGap}}bp from
 traded rate on average: the marks value a box at about the Treasury rate.
 
 ![Box face in open interest, and each month's median traded spread over Treasuries](docs/figures/box_lending.png)
+
+### Who holds it: two issuers on one date
+
+Issuers publish signed holdings. Innovator's file of all its funds and the BOXX fund's
+holdings table, captured on {{HoldFileDate}}, were set against OCC's report of
+{{HoldReportDate}}
+(specification: [`docs/log/2026-11-10-holders-spec.md`](docs/log/2026-11-10-holders-spec.md)).
+One date, two issuers; nothing here is known for others.
+
+- **Matching.** {{HoldFoundLines}} of {{HoldLines}} FLEX lines from {{HoldFlexFunds}} funds are in the report, and the funds hold a median {{HoldMedianShare}} of each series' open interest.
+- **Rules.** The stock-leg rule finds {{HoldStockRecall}} of the funds' stock legs; the equal-count package rule finds {{HoldPackageRecall}} of their package legs, missing strikes that several funds share.
+- **Sides.** The product design predicts the side of {{HoldDesign}} of package legs. The dealer opposite is long {{HoldGammaLong}} and short {{HoldGammaShort}} of dollar gamma per 1% move: net long {{HoldGammaNet}}, against {{HoldGammaConventionNet}} under the vendor convention.
+- **The lender.** BOXX holds {{HoldBoxContracts}} contracts of the largest SPY box on the lending side: {{HoldBoxFace}} of face, {{HoldBoxShareOfItsBox}} of that box's open interest.
 
 ## How much gamma do listed chains leave out?
 

@@ -78,3 +78,39 @@ paper says so for these funds and uses the design signs nowhere else.
 
 Only a defect found in the code or the data. Any change after a figure has been seen is
 recorded here as a dated amendment.
+
+## Result, 2026-11-10
+
+Computed as specified, with no change after the figures were seen.
+
+- **The funds.** The file holds 173 funds with option lines and $36.4bn of net assets
+  among them. Their true stock legs are worth $22.1bn at the funds' prices.
+- **Matching.** 730 FLEX lines from 168 funds. 99.2% of the lines and 98.0% of the
+  contracts are in OCC's report of 2026-11-09, as 720 series. The funds hold a median
+  98% of a series' open interest, at least 95% of it in 59% of the series, and 91% of
+  the open interest of all the series taken together.
+- **The stock-leg rule** finds every true stock leg (100% by contracts).
+- **The package rule** finds 58% of true package legs by contracts. The rest have a
+  count in the report that differs from their stock leg's, because several funds share
+  the strike.
+- **How much of each category these funds are.** 34% of the report's stock-leg open
+  interest and 31% of its package-leg open interest.
+- **Sign by design.** 96.0% of true package legs, by contracts, are held on the side
+  the design predicts: 100% of upper puts, 98.9% of calls and 90.4% of lower puts.
+- **The dealer's side in gamma**, as the change in dollar delta for a 1% move. Every
+  matched package leg was priced.
+  - All underlyings: dealer long $1,477m, dealer short $853m, net long $623m. The
+    vendor convention gives a net of $40m and signs 14% of the legs' gross gamma wrongly.
+  - SPY: long $1,210m, short $702m, net long $508m, against $85m under the convention.
+    The legs are 16% of SPY's gross FLEX gamma on the date.
+  - The legs are 28% of gross FLEX gamma in EFA, 36% in EEM, 11% in IWM and 8% in QQQ.
+- **The box.** The BOXX fund holds 14,902 contracts of the SPY 10.01/10,010.01 box of
+  December 2026 on the lending side: $14.9bn of face, 92% of that box's open interest
+  and 21% of the $69.9bn of box face the anatomy rules find on the date. It is short a
+  QQQ box of $0.45bn. The anatomy rules classify its SPY box as a box.
+
+**Reading.** For this issuer's funds on this date the stock-leg rule is exact, the
+package rule finds a little over half of the legs, and the design predicts the side of
+96% of them. The dealer opposite these funds is net long gamma, and the convention that
+signs every put as dealer-short misses most of that. One fund is the lender in the
+largest box. None of this is known for other issuers or other dates.

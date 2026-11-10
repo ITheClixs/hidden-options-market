@@ -14,11 +14,12 @@ panel.
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
 - **What it is made of.** By mark value, 77\% is not outright options: box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards). Box positions carry \$68bn of face, 3.1 times the level 23 months earlier; 41\% of that is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
 - **The price of the lending.** 1,099 box spreads of up to a year traded on Cboe at 36bp over the Treasury curve (standard error 4.9bp, median 39bp). OCC's marks value the same boxes at about the Treasury rate.
+- **Who holds it.** On one date, issuer files name holders and sides. One ETF (BOXX) holds 92\% of the largest box, 21\% of all box face. For 168 defined-outcome funds of one issuer, 99.2\% of FLEX lines are in OCC's report, the product design predicts the side of 96.0\% of package legs, and the dealer opposite is net long \$623m of gamma per 1% move, where the vendor convention (dealers long calls, short puts) would show \$40m.
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the 34 option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold 4.5\% of the netted FLEX book there.
 - **Pinning?** Not detected. On 2,643 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.06). The rule leaves out the 32 names with listed weekday expiries, among them SPY, where FLEX holds the most gamma, QQQ and the largest single names; the books it covers are a median 3.5\% of a day's share volume. The minimum detectable effect is 0.078σ. Moved to 32 sets of placebo dates in the same names, the test rejects on 6\% of them and, with one expiry in ten pinned in the real closes, on 75\%. But the same design finds no pinning at listed strikes on 34 monthly expirations either (net of a matched placebo added after the fact, *t* -1.64), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.34-fold.
-- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The product split, the box rates, the gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The product split, the box rates, the holders check, the gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on 14 August 2026, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -121,6 +122,19 @@ trade date. The rate in OCC's marks for the same boxes is -35bp from the
 traded rate on average: the marks value a box at about the Treasury rate.
 
 ![Box face in open interest, and each month's median traded spread over Treasuries](docs/figures/box_lending.png)
+
+### Who holds it: two issuers on one date
+
+Issuers publish signed holdings. Innovator's file of all its funds and the BOXX fund's
+holdings table, captured on 10 November 2026, were set against OCC's report of
+9 November 2026
+(specification: [`docs/log/2026-11-10-holders-spec.md`](docs/log/2026-11-10-holders-spec.md)).
+One date, two issuers; nothing here is known for others.
+
+- **Matching.** 99.2\% of 730 FLEX lines from 168 funds are in the report, and the funds hold a median 98\% of each series' open interest.
+- **Rules.** The stock-leg rule finds 100\% of the funds' stock legs; the equal-count package rule finds 58\% of their package legs, missing strikes that several funds share.
+- **Sides.** The product design predicts the side of 96.0\% of package legs. The dealer opposite is long \$1,477m and short \$853m of dollar gamma per 1% move: net long \$623m, against \$40m under the vendor convention.
+- **The lender.** BOXX holds 14,902 contracts of the largest SPY box on the lending side: \$15bn of face, 92\% of that box's open interest.
 
 ## How much gamma do listed chains leave out?
 

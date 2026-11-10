@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-11-10T16:09:14+00:00",
+  "inputs": {
+    "box_fund_lines": 8,
+    "family_lines": 768,
+    "file_date": "2026-11-10",
+    "report_date": "2026-11-09"
+  },
+  "macros": {
+    "HoldBoxBorrowedFace": "\\$0.5bn",
+    "HoldBoxContracts": "14,902",
+    "HoldBoxFace": "\\$15bn",
+    "HoldBoxMarketFace": "\\$70bn",
+    "HoldBoxMarketShare": "21\\%",
+    "HoldBoxShareOfItsBox": "92\\%",
+    "HoldDesign": "96.0\\%",
+    "HoldDesignCall": "98.9\\%",
+    "HoldDesignContracts": "1,792,021",
+    "HoldDesignLowerPut": "90.4\\%",
+    "HoldDesignUpperPut": "100.0\\%",
+    "HoldFileDate": "10 November 2026",
+    "HoldFlexFunds": "168",
+    "HoldFoundContracts": "98.0\\%",
+    "HoldFoundLines": "99.2\\%",
+    "HoldFullSeries": "59\\%",
+    "HoldFunds": "173",
+    "HoldGammaConventionNet": "\\$40m",
+    "HoldGammaLong": "\\$1,477m",
+    "HoldGammaNet": "\\$623m",
+    "HoldGammaQQQConventionNet": "-\\$27m",
+    "HoldGammaQQQLong": "\\$86m",
+    "HoldGammaQQQNet": "\\$32m",
+    "HoldGammaQQQShare": "8\\%",
+    "HoldGammaQQQShort": "\\$54m",
+    "HoldGammaQQQWrong": "28\\%",
+    "HoldGammaSPYConventionNet": "\\$85m",
+    "HoldGammaSPYLong": "\\$1,210m",
+    "HoldGammaSPYNet": "\\$508m",
+    "HoldGammaSPYShare": "16\\%",
+    "HoldGammaSPYShort": "\\$702m",
+    "HoldGammaSPYWrong": "12\\%",
+    "HoldGammaShare": "3\\%",
+    "HoldGammaShort": "\\$853m",
+    "HoldGammaWrong": "14\\%",
+    "HoldHeldShare": "91\\%",
+    "HoldLines": "730",
+    "HoldMedianShare": "98\\%",
+    "HoldNetAssets": "\\$36bn",
+    "HoldPackageCategoryShare": "31\\%",
+    "HoldPackageRecall": "58\\%",
+    "HoldPricedShare": "100\\%",
+    "HoldReportDate": "9 November 2026",
+    "HoldSeries": "720",
+    "HoldStockCategoryShare": "34\\%",
+    "HoldStockRecall": "100\\%",
+    "HoldStockValue": "\\$22bn"
+  },
+  "name": "holders",
+  "values": {
+    "box": {
+      "borrowed_face": 452547000.0,
+      "its_box_is_a_box": true,
+      "lent_contracts": 14902.0,
+      "lent_face": 14902000000.0,
+      "market_face": 69909501581.0,
+      "share_of_box_face": 0.21316129657617333,
+      "share_of_its_box": 0.9215261888565951
+    },
+    "category_shares": {
+      "package_leg": 0.3073402080735556,
+      "stock_leg": 0.33716049267023396
+    },
+    "dealer_gamma": {
+      "EEM": {
+        "convention_net": -8570464.728704551,
+        "convention_wrong_share": 0.2686468383742982,
+        "dealer_long": 17826128.73822378,
+        "dealer_short": 10940477.717013817,
+        "net": 6885651.021209964,
+        "share_of_flex_gamma": 0.360593850188257
+      },
+      "EFA": {
+        "convention_net": 12424187.790002704,
+        "convention_wrong_share": 0.12108162676298793,
+        "dealer_long": 87164497.75228319,
+        "dealer_short": 43176507.952872254,
+        "net": 43987989.79941093,
+        "share_of_flex_gamma": 0.2772093300392296
+      },
+      "IWM": {
+        "convention_net": 5718368.058108861,
+        "convention_wrong_share": 0.14197255163182532,
+        "dealer_long": 61218019.95580932,
+        "dealer_short": 29687480.253526714,
+        "net": 31530539.702282593,
+        "share_of_flex_gamma": 0.10482986201092717
+      },
+      "QQQ": {
+        "convention_net": -26506683.80823325,
+        "convention_wrong_share": 0.2809995208853711,
+        "dealer_long": 86084715.23926665,
+        "dealer_short": 54270903.90022608,
+        "net": 31813811.339040563,
+        "share_of_flex_gamma": 0.08096228707388829
+      },
+      "SPX": {
+        "convention_net": -27110514.29590234,
+        "convention_wrong_share": 0.5169116516655852,
+        "dealer_long": 14013740.72219834,
+        "dealer_short": 13096773.573704008,
+        "net": 916967.1484943316,
+        "share_of_flex_gamma": 0.00047790609255419055
+      },
+      "SPY": {
+        "convention_net": 85433771.23370242,
+        "convention_wrong_share": 0.11835005930231855,
+        "dealer_long": 1209542234.163259,
+        "dealer_short": 701751592.917309,
+        "net": 507790641.24594975,
+        "share_of_flex_gamma": 0.16362112903078485
+      },
+      "TLT": {
+        "convention_net": -522501.78758007847,
+        "convention_wrong_share": 0.3174097180582857,
+        "dealer_long": 379814.76429233234,
+        "dealer_short": 404450.0222888569,
+        "net": -24635.257996524626,
+        "share_of_flex_gamma": 0.0010764975108505995
+      },
+      "XSP": {
+        "convention_net": -554366.3061079928,
+        "convention_wrong_share": 1.0,
+        "dealer_long": 554366.3061079928,
+        "dealer_short": 0.0,
+        "net": 554366.3061079928,
+        "share_of_flex_gamma": 0.00501775859032498
+      },
+      "all": {
+        "convention_net": 40311796.155285776,
+        "convention_wrong_share": 0.13599119903338938,
+        "dealer_long": 1476783517.6414404,
+        "dealer_short": 853328186.3369408,
+        "net": 623455331.3044996,
+        "share_of_flex_gamma": 0.03218445778834042
+      }
+    },
+    "design": {
+      "all": 0.9601807121679936,
+      "call": 0.9888174378411374,
+      "contracts": 1792021.0,
+      "lower_put": 0.9035569266896254,
+      "upper_put": 1.0
+    },
+    "family": {
+      "funds": 173,
+      "net_assets": 36417773302.5,
+      "stock_leg_value": 22129984730.17
+    },
+    "file_date": "2026-11-10",
+    "matching": {
+      "found_contracts_share": 0.9795229327837185,
+      "found_lines_share": 0.9917808219178083,
+      "funds": 168,
+      "held_share_of_their_open_interest": 0.9138609295106754,
+      "lines": 730,
+      "median_share_of_open_interest": 0.9828423304805793,
+      "series": 720,
+      "series_at_least_95": 0.5875
+    },
+    "priced_share": 1.0,
+    "report_date": "2026-11-09",
+    "rule_recall": {
+      "package_leg": 0.5754854435299587,
+      "stock_leg": 1.0
+    },
+    "spots": {
+      "BIL": 89.29780000000001,
+      "COPX": 75.2458,
+      "EEM": 60.4457,
+      "EFA": 105.03,
+      "GDX": 91.4354,
+      "HYG": 76.6823,
+      "IBIT": 42.3774,
+      "IEF": 88.443,
+      "IWM": 282.4521,
+      "LQD": 103.75630000000001,
+      "NDX": 27919.949999999997,
+      "QQQ": 679.2532,
+      "RSP": 221.288,
+      "SMH": 486.9924,
+      "SPX": 7548.599,
+      "SPY": 753.0405,
+      "SPYM": 88.8806,
+      "TLT": 81.3181,
+      "URA": 34.3565,
+      "XME": 98.58340000000001,
+      "XND": 278.9343,
+      "XSP": 754.6196
+    }
+  }
+}

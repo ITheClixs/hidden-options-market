@@ -14,8 +14,9 @@ UNDERLYINGS = ("SPY", "QQQ")
 
 
 def millions(value: float) -> str:
-    r"""Dollars in whole millions with the escaped sign: `\$412m`."""
-    return f"\\${formats.count(value / 1e6)}m"
+    r"""Dollars in whole millions with the escaped sign: `\$412m`, `-\$27m`."""
+    sign = "-" if value < 0 else ""
+    return f"{sign}\\${formats.count(abs(value) / 1e6)}m"
 
 
 def holders_macros(values: Mapping[str, Any]) -> dict[str, str]:

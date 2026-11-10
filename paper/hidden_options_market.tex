@@ -100,7 +100,12 @@ which defined-outcome funds hold their underlying, are worth \AnatStockValue{}. 
 with equal call and put open interest, which are forwards if held on opposite sides, are
 \AnatPairOIShare{} of open interest. Together the three hold \AnatFinancingValueShare{} of
 mark value. What is left as options is \AnatOptionOIShare{} of open interest and
-\AnatGammaOptions{} of gross FLEX gamma.
+\AnatGammaOptions{} of gross FLEX gamma. On one date issuer files also name holders
+and sides (Section~\ref{sec:holders}). One exchange-traded fund holds
+\HoldBoxShareOfItsBox{} of the largest box. For the \HoldFlexFunds{} funds of one
+defined-outcome issuer, the dealer opposite is net long \HoldGammaNet{} of gamma for a
+1\% move, where the sign convention applied to listed chains would show
+\HoldGammaConventionNet{}.
 
 \paragraph{How much convexity it holds.} Counted in contracts the book is large, for
 many underlyings a tenth or more of option open interest. But contracts are not risk. What a dealer on the
@@ -231,7 +236,8 @@ show that a natural way to find it without the authoritative source fails. Much 
 category turns out to be financing: the rates of box spreads have been measured in quoted
 prices of listed options \citep{binsbergen2022,kozlowski2025}, and we add traded prices
 and the amounts outstanding. We do not
-solve the sign problem: our gamma is netted for forwards but not signed.
+solve the sign problem in general: our gamma is netted for forwards but not signed,
+except for the funds of one issuer on one date (Section~\ref{sec:holders}).
 \citet{park2025} find, from the funds' monthly N-PORT filings, that aggregate call selling
 by option-income funds, one of the identifiable users of FLEX, predicts lower
 subsequent implied and realised volatility, which they attribute to supply pressure on
@@ -1081,7 +1087,58 @@ value a box at about the Treasury rate, and lenders were paid more. Mark value t
 overstates what a box traded for by that gap times its remaining life, about
 \BoxRMarkThreeMonth{} basis points of face on a three-month box.
 
-The reports carry no buyer or seller, so they do not say who lends.
+The reports carry no buyer or seller, so they do not say who lends. The next
+subsection names one lender.
+
+\subsection{Who holds it: two issuers on one date}
+\label{sec:holders}
+
+Counts cannot say who holds a position or on which side. Fund issuers can: they publish
+their funds' holdings daily, with signed quantities. A further log entry fixed a check
+against two such sources before any holding was matched. One is Innovator's file of all
+its funds' holdings and the other the holdings table of the BOXX fund, both captured on
+\HoldFileDate{} and set against OCC's report of \HoldReportDate{}. That date is after the
+panel ends. The check covers one date and two issuers, and nothing below is known for
+other issuers or other dates.
+
+The file holds \HoldFunds{} funds with options and \HoldNetAssets{} of net assets.
+\HoldFoundLines{} of their \HoldLines{} FLEX lines are in the report, and the funds hold
+a median \HoldMedianShare{} of the open interest of each series found. A FLEX series is
+close to bespoke: where one of these funds holds a series, little of it is held
+elsewhere.
+
+The holdings score the rules of Section~\ref{sec:products}. Take a fund's stock leg to
+be a long call struck at no more than 5\% of the fund's own price plus the strike, and
+its package legs to be its other FLEX lines at that root and expiry. The stock-leg rule
+finds \HoldStockRecall{} of the stock legs. The package rule finds \HoldPackageRecall{}
+of the package legs, by contracts. It misses legs at a strike several funds share, whose
+count in the report is the sum of theirs, so the package legs of Table~\ref{tab:anatomy}
+are a lower bound and the rest sit in other. These funds alone are
+\HoldStockCategoryShare{} of the report's stock-leg open interest.
+
+The holdings also give sides. The design of a defined-outcome fund predicts each one:
+long the stock leg and the highest put, short the lower puts and every other call.
+\HoldDesign{} of the package legs, by contracts, are held as predicted: \HoldDesignUpperPut{}
+of the upper puts, \HoldDesignCall{} of the calls and \HoldDesignLowerPut{} of the lower
+puts. The dealer holds the opposite, so in these legs the dealer's side is known. Priced
+from OCC's marks, the dealer is long \HoldGammaLong{} of dollar gamma for a 1\% move, in
+the lower puts and the caps, and short \HoldGammaShort{}, in the upper puts: net long
+\HoldGammaNet{}. In SPY the net is \HoldGammaSPYNet{}, and the legs are
+\HoldGammaSPYShare{} of SPY's gross FLEX gamma on the date. The convention applied to
+listed chains, dealers long calls and short puts, gets the lower puts wrong. It puts
+\HoldGammaWrong{} of these legs' gross gamma on the wrong side and gives a net of
+\HoldGammaConventionNet{}. Section~\ref{sec:gamma} reports FLEX under that convention
+only as an assumption; where it can be checked, it misses most of the dealer's position.
+
+The box fund answers the question the trade reports left open. BOXX holds
+\HoldBoxContracts{} contracts of the SPY box struck at 10.01 and 10,010.01 that expires
+in December 2026, on the lending side. That is \HoldBoxFace{} of face,
+\HoldBoxShareOfItsBox{} of that box's open interest and \HoldBoxMarketShare{} of the
+\HoldBoxMarketFace{} of box face in the report. The lender in the largest box of the
+market is one exchange-traded fund. The peak of September 2026 in
+Figure~\ref{fig:box-lending} is that box's predecessor and the box itself open together:
+both stood at about 15,000 contracts on 10 September, a week before the older one
+expired.
 
 \section{How much gamma do listed chains leave out?}
 \label{sec:gamma}
@@ -1452,7 +1509,8 @@ leaves out the names with listed weekday expiries, which include the largest FLE
 \begin{enumerate}
 \item \textbf{No dealer positions.} Open interest does not identify who is long, and
 is aggregated across holders. Netting same-strike pairs removes forwards; it does not
-sign what remains, so no measure here is a dealer position.
+sign what remains, so no measure in the tests is a dealer position. The one signed
+reading, in Section~\ref{sec:holders}, covers one issuer's funds on one date.
 \item \textbf{Equity names, within-underlying variation, no positive control.} Index
 products have no bars and are in neither test, and the pinning sample excludes the names
 with listed weekday expiries. Fixed effects leave each book's movement around its own
@@ -1477,8 +1535,9 @@ and other multi-strike structures enter at gross gamma.
 Section~\ref{sec:anatomy} see equal counts and marks. A same-strike pair may be a
 straddle and not a forward. \BoxRTradedShare{} of the box face is confirmed by traded box
 orders, so the rest may not have been lent as boxes. The trade reports cover one exchange
-and carry no buyer or seller, so the lenders are not identified, and rates on boxes
-beyond a year are set against par yields.
+and carry no buyer or seller, and rates on boxes beyond a year are set against par
+yields. Holders and sides are known for two issuers on one date after the panel ends,
+and for no one else.
 \end{enumerate}
 
 \section{Conclusion}
@@ -1489,7 +1548,10 @@ same-strike pairs hold \AnatFinancingValueShare{} of its mark value on the last 
 box positions carry \AnatBoxFace{} of face, of which \BoxRTradedFace{} is confirmed by
 traded box orders, and boxes of up to a year traded at \BoxRSpread{} basis points over
 Treasuries. The hidden options market is in large part a market for cash and for
-delta-one exposure.
+delta-one exposure. Where an issuer's holdings can be set beside the report, holders and
+sides are known: one fund is the lender in the largest box, and the dealer opposite one
+issuer's defined-outcome funds is net long gamma, which the sign convention of listed
+gamma figures mostly misses.
 
 Counted in convexity, what remains is small. FLEX is \GammaMedianGross{} of the median underlying's gamma
 gross and \GammaMedianNetted{} once its forwards are netted, though it stays at
