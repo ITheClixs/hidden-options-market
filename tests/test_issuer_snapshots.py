@@ -5,11 +5,15 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
+from hidden_options.collect.http import FetchError
 from hidden_options.collect.issuer_snapshots import (
     HOLDING_COLUMNS,
+    SOURCES,
     SnapshotParseError,
+    collect_snapshots,
     parse_box_fund_page,
     parse_family_file,
+    snapshot_folder,
 )
 
 FAMILY = (
@@ -69,3 +73,27 @@ def test_box_fund_page_reads_the_holdings_table_only():
 def test_a_page_without_option_rows_is_an_error():
     with pytest.raises(SnapshotParseError, match="no option"):
         parse_box_fund_page(b"<html><table><tr><td>x</td></tr></table></html>", "BOXX", None)
+
+
+def test_snapshots_are_stored_raw_once_and_failures_recorded(tmp_path, monkeypatch):
+    from datetime import date
+
+    class Found:
+        def __init__(self, content):
+            self.content = content
+
+    def fake_fetch(session, url, **_):
+        if "innovator" in url:
+            return Found(FAMILY)
+        raise FetchError("down")
+
+    monkeypatch.setattr("hidden_options.collect.issuer_snapshots.fetch", fake_fetch)
+    day = date(2026, 11, 10)
+    first = collect_snapshots(object(), day, tmp_path)
+    assert first["innovator_xt_holdings.csv"] == "written"
+    assert first["alphaarchitect_boxx.html"].startswith("failed")
+    stored = tmp_path / snapshot_folder(day) / "innovator_xt_holdings.csv"
+    assert stored.read_bytes() == FAMILY
+    again = collect_snapshots(object(), day, tmp_path)
+    assert again["innovator_xt_holdings.csv"] == "held"
+    assert set(first) == set(SOURCES)

@@ -27,6 +27,11 @@ echo "$(date -u +%FT%TZ) starting collection" >>"${LOG_FILE}"
 status=$?
 echo "$(date -u +%FT%TZ) finished with exit ${status}" >>"${LOG_FILE}"
 
+# Issuer holdings that the collector above does not cover: Innovator's all-funds file
+# and the BOXX page. Stored raw; a failure here is logged and does not stop the run.
+"${PROJECT_DIR}/.venv/bin/python" "${PROJECT_DIR}/scripts/collect_issuer_snapshots.py" \
+  --root "${PROJECT_DIR}/data/raw" >>"${LOG_FILE}" 2>&1 || true
+
 # Deliberately exit 0 on partial failure: a run that captured most symbols is far
 # more valuable than a retry storm, and the manifest records exactly what was missed.
 exit 0

@@ -12,7 +12,11 @@ from typing import Any
 
 import pandas as pd
 
-from hidden_options.collect.issuer_snapshots import parse_box_fund_page, parse_family_file
+from hidden_options.collect.issuer_snapshots import (
+    parse_box_fund_page,
+    parse_family_file,
+    snapshot_folder,
+)
 from hidden_options.config import RAW_DIR
 from hidden_options.measure.anatomy import classify
 from hidden_options.measure.holders import (
@@ -122,7 +126,7 @@ def _box(box_fund: pd.DataFrame, boxes: pd.DataFrame, series: pd.DataFrame) -> d
 @ANALYSES.register(NAME)
 def holders_analysis() -> Result:
     """The check on the snapshot held under RAW_DIR."""
-    folder = RAW_DIR / "issuer_snapshots" / f"date={SNAPSHOT_DATE:%Y-%m-%d}"
+    folder = RAW_DIR / snapshot_folder(SNAPSHOT_DATE)
     report_day = pd.Timestamp(REPORT_DATE)
     family = parse_family_file((folder / FAMILY_FILE).read_bytes())
     box_fund = parse_box_fund_page((folder / BOX_FUND_PAGE).read_bytes(), BOX_FUND, report_day)

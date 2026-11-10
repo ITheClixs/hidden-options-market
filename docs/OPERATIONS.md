@@ -24,6 +24,20 @@ hidden-options backfill-flex --start YYYY-MM-DD   # skips dates already held
 Because OCC keeps only about twenty months, the reports already collected are archived
 (see [The FLEX archive](#the-flex-archive)).
 
+Two more sources sit outside `hidden-options collect`:
+
+| source | what it captures | recoverable later? |
+|---|---|---|
+| issuer snapshots | Innovator's all-funds holdings file and the BOXX fund page, stored raw | no, both are overwritten in place |
+| Cboe FLEX executions | every FLEX trade on Cboe's options exchange, one file a day | yes, from 31 March 2025 |
+
+`scripts/collect_daily.sh` runs `scripts/collect_issuer_snapshots.py` after the main
+collection. The execution reports and the Treasury yield curve are fetched by hand:
+
+```bash
+.venv/bin/python scripts/backfill_cboe_flex_trades.py   # skips dates already held
+```
+
 ## Scheduled capture
 
 There are two collectors. Either one runs `hidden-options collect`, all five sources.

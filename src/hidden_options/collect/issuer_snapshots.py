@@ -15,13 +15,22 @@ from __future__ import annotations
 import html
 import io
 import re
+from datetime import date
+from pathlib import Path
 
 import pandas as pd
+import requests
 
 from hidden_options.collect.holdings import split_option_ticker
+from hidden_options.collect.http import FetchError, fetch
 
 INNOVATOR_URL = "https://www.innovatoretfs.com/etf/xt_holdings.csv"
 BOXX_URL = "https://funds.alphaarchitect.com/boxx/"
+# File name under the day's folder, and where it comes from.
+SOURCES = {
+    "innovator_xt_holdings.csv": INNOVATOR_URL,
+    "alphaarchitect_boxx.html": BOXX_URL,
+}
 HOLDING_COLUMNS = (
     "fund",
     "as_of",
@@ -113,6 +122,37 @@ def parse_box_fund_page(payload: bytes, fund: str, as_of: pd.Timestamp | None) -
     return pd.DataFrame.from_records(records, columns=list(HOLDING_COLUMNS))
 
 
+def snapshot_folder(day: date) -> str:
+    return f"issuer_snapshots/date={day:%Y-%m-%d}"
+
+
+def collect_snapshots(session: requests.Session, day: date, root: Path) -> dict[str, str]:
+    """Store each source's payload as published under the day's folder.
+
+    The raw bytes are kept, not a parsed table, so a change of layout loses nothing. A
+    file already held is left alone. Returns each file's outcome: `written`, `held` or
+    the error that stopped it.
+    """
+    folder = root / snapshot_folder(day)
+    outcomes = {}
+    for name, url in SOURCES.items():
+        destination = folder / name
+        if destination.exists():
+            outcomes[name] = "held"
+            continue
+        try:
+            payload = fetch(session, url).content
+        except FetchError as exc:
+            outcomes[name] = f"failed: {exc}"
+            continue
+        folder.mkdir(parents=True, exist_ok=True)
+        staging = destination.with_name(destination.name + ".partial")
+        staging.write_bytes(payload)
+        staging.replace(destination)
+        outcomes[name] = "written"
+    return outcomes
+
+
 def _number(text: str) -> float:
     return float(text.replace(",", ""))
 
@@ -121,7 +161,10 @@ __all__ = [
     "BOXX_URL",
     "HOLDING_COLUMNS",
     "INNOVATOR_URL",
+    "SOURCES",
     "SnapshotParseError",
+    "collect_snapshots",
     "parse_box_fund_page",
     "parse_family_file",
+    "snapshot_folder",
 ]
