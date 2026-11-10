@@ -1,4 +1,5 @@
-"""F11 and F12: what the FLEX market is made of, and what its box lending costs.
+"""F11 to F13: what the FLEX market is made of, what its box lending costs, and the
+dealer's side of one issuer's legs.
 
 F11 stacks the market's mark value by product on every report date: box legs, stock-leg
 calls and same-strike pairs in a blue ramp (lending and delta-one exposure), package legs
@@ -8,7 +9,10 @@ F12 has two panels on one date axis. Above, the face of the boxes found in open 
 under the outside-in matching and under the neighbour matching. Below, each month's median
 spread of traded box rates over the Treasury curve.
 
-Everything drawn is read from the `anatomy` and `box_rates` results.
+F13 draws the dealer's net gamma in one issuer's legs across spot levels, with the sides
+the funds disclose and under the convention applied to listed chains.
+
+Everything drawn is read from the `anatomy`, `box_rates` and `holders` results.
 """
 
 from __future__ import annotations
@@ -35,6 +39,9 @@ from hidden_options.publish.results import RESULTS_DIR, read_results
 
 ANATOMY = "anatomy"
 BOX_RATES = "box_rates"
+HOLDERS = "holders"
+MAP_STEM = "dealer_gamma_map"
+MILLION = 1e6
 SPLIT_STEM = "product_split"
 LENDING_STEM = "box_lending"
 BILLION = 1e9
@@ -95,6 +102,26 @@ def fig_box_lending(
     return fig
 
 
+def fig_dealer_map(profile: Mapping[str, Any]) -> Figure:
+    """The dealer's net gamma in one issuer's legs across spot levels: with the sides the
+    funds disclose, and under the convention that dealers are long calls and short puts."""
+    fig = new_figure(0.8, aspect=0.5)
+    ax = fig.subplots()
+    moves = np.array(profile["moves"], dtype=float) * 100
+    dealer = np.array(profile["dealer"], dtype=float) / MILLION
+    convention = np.array(profile["convention"], dtype=float) / MILLION
+    ax.axhline(0.0, color=PALETTE["faint"], linewidth=0.8, zorder=0)
+    ax.axvline(0.0, color=PALETTE["faint"], linewidth=0.8, zorder=0)
+    ax.plot(moves, convention, color=PALETTE["muted"])
+    ax.plot(moves, dealer, color=PALETTE["accent"])
+    label_line_end(ax, moves[-1], dealer[-1], "Disclosed sides")
+    label_line_end(ax, moves[-1], convention[-1], "Convention")
+    ax.set_xlabel(f"{profile['underlying']} move from spot, %")
+    ax.set_ylabel("Dealer net gamma, \\$m per 1%")
+    ax.margins(x=0)
+    return fig
+
+
 def _values(results: Path, name: str) -> Mapping[str, Any]:
     found = read_results(results)
     if name not in found:
@@ -121,10 +148,20 @@ def build_box_lending(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) ->
     save(fig_box_lending(daily, monthly), LENDING_STEM, paper=True, readme=True, root=root)
 
 
+@FIGURES.register(MAP_STEM)
+def build_dealer_map(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) -> None:
+    """F13, for the paper and the README."""
+    profile = _values(results, HOLDERS)["profile"]
+    apply_style()
+    save(fig_dealer_map(profile), MAP_STEM, paper=True, readme=True, root=root)
+
+
 __all__ = [
     "LAYERS",
     "build_box_lending",
+    "build_dealer_map",
     "build_product_split",
     "fig_box_lending",
+    "fig_dealer_map",
     "fig_product_split",
 ]

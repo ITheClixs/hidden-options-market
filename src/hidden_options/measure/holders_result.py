@@ -26,6 +26,7 @@ from hidden_options.measure.holders import (
     dealer_gamma,
     design_agreement,
     flex_lines,
+    gamma_profile,
     match,
     matching,
     rule_recall,
@@ -43,6 +44,7 @@ SNAPSHOT_DATE = date(2026, 11, 10)
 REPORT_DATE = date(2026, 11, 9)
 CONTRACT_MULTIPLIER = 100
 BOX_FUND = "BOXX"
+PROFILE_UNDERLYING = "SPY"
 FAMILY_FILE = "innovator_xt_holdings.csv"
 BOX_FUND_PAGE = "alphaarchitect_boxx.html"
 
@@ -82,6 +84,7 @@ def holders_result(family: pd.DataFrame, box_fund: pd.DataFrame, report: pd.Data
         "priced_share": float(with_gamma.mean()) if len(legs) else 0.0,
         "spots": {name: spots[name] for name in sorted(spots)},
         "dealer_gamma": dealer_gamma(found, gamma),
+        "profile": _profile(found, priced),
         "box": _box(box_fund, anatomy.boxes, series),
     }
     run_inputs = {
@@ -91,6 +94,20 @@ def holders_result(family: pd.DataFrame, box_fund: pd.DataFrame, report: pd.Data
         "box_fund_lines": len(box_fund),
     }
     return Result(NAME, values, holders_macros(values), run_inputs, now_iso())
+
+
+def _profile(found: pd.DataFrame, priced: pd.DataFrame) -> dict[str, Any]:
+    """The dealer's net gamma in the matched legs of PROFILE_UNDERLYING across spot
+    levels, and the moves from spot at which it changes sign. Not in the specification:
+    added after its figures were seen, as another view of the same legs."""
+    profile = gamma_profile(found, priced, PROFILE_UNDERLYING, rate=RATE)
+    moves, dealer = profile["moves"], profile["dealer"]
+    flips = [
+        (moves[i] + moves[i + 1]) / 2
+        for i in range(len(dealer) - 1)
+        if (dealer[i] < 0) != (dealer[i + 1] < 0)
+    ]
+    return {"underlying": PROFILE_UNDERLYING, **profile, "flips": flips}
 
 
 def _box(box_fund: pd.DataFrame, boxes: pd.DataFrame, series: pd.DataFrame) -> dict[str, Any]:

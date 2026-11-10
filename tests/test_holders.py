@@ -12,6 +12,7 @@ from hidden_options.measure.holders import (
     dealer_gamma,
     design_agreement,
     flex_lines,
+    gamma_profile,
     match,
     matching,
     rule_recall,
@@ -192,3 +193,40 @@ def test_box_positions_of_a_fund():
     assert lent["face"] == pytest.approx(10000 * 100 * 100)
     assert (borrowed["root"], borrowed["contracts"]) == ("2QQQ", 5)
     assert borrowed["face"] == pytest.approx(9990 * 100 * 5)
+
+
+def test_gamma_profile_matches_the_point_estimate_at_spot_and_flips_with_it():
+    from hidden_options.measure.pricing import black_scholes_greeks
+
+    found = match(with_roles(flex_lines(FUND)), SERIES)
+    strikes = [6.83, 681.93, 620.56, 794.23, 700.0]
+    priced = pd.DataFrame(
+        {
+            "root": ["4SPY"] * 5,
+            "expiry": [E] * 5,
+            "right": ["C", "P", "P", "C", "P"],
+            "strike": strikes,
+            "iv": [0.2] * 5,
+            "years": [0.15] * 5,
+            "spot": [750.0] * 5,
+            "open_interest": [4623, 4623, 4623, 4700, 900],
+            "underlying": ["SPY"] * 5,
+        }
+    )
+    priced["gamma"] = black_scholes_greeks(
+        priced["spot"],
+        priced["strike"],
+        priced["years"],
+        priced["iv"],
+        rate=0.04,
+        carry=0.0,
+        is_call=True,
+    ).gamma
+    profile = gamma_profile(found, priced, "SPY", rate=0.04, moves=(-0.1, 0.0, 0.05))
+    at_spot = dealer_gamma(found, priced)["SPY"]
+    assert profile["spot"] == pytest.approx(750.0)
+    assert profile["dealer"][1] == pytest.approx(at_spot["net"])
+    assert profile["convention"][1] == pytest.approx(at_spot["convention_net"])
+    # Near the upper put the dealer is short gamma; near the cap, long.
+    assert profile["dealer"][0] < profile["dealer"][2]
+    assert gamma_profile(found, priced, "QQQ", rate=0.04)["dealer"] == []

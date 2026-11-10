@@ -114,3 +114,20 @@ package rule finds a little over half of the legs, and the design predicts the s
 96% of them. The dealer opposite these funds is net long gamma, and the convention that
 signs every put as dealer-short misses most of that. One fund is the lender in the
 largest box. None of this is known for other issuers or other dates.
+
+## Added 2026-11-10, after the figures above were seen
+
+A profile of the dealer's net gamma in the matched SPY legs across spot levels, from 15%
+below the report date's spot to 15% above, with each leg's volatility held at the value
+its mark implies. It is another view of the same legs and changes no figure above.
+
+- With the disclosed sides the net is positive at every level above a fall of about 6%,
+  between −$54m and zero from there to a fall of about 13%, and positive again below.
+- Under the vendor convention the net turns negative just below spot and reaches about
+  −$900m at a fall of 13%.
+- At 10% below spot: −$52m with the disclosed sides, −$846m under the convention.
+
+The convention reads these funds as a large source of dealer short gamma in a fall. The
+holdings say there is almost none, because the dealer who is short the upper puts is
+long the lower ones. The profile holds volatility fixed and covers one issuer on one
+date.

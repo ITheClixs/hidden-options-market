@@ -63,3 +63,17 @@ def test_a_missing_result_says_what_to_run(tmp_path):
     (tmp_path / "results").mkdir()
     with pytest.raises(FileNotFoundError, match="anatomy"):
         figures.build_product_split(tmp_path / "results", tmp_path)
+
+
+def test_dealer_map_draws_both_readings(styled):
+    profile = {
+        "underlying": "SPY",
+        "moves": [-0.1, 0.0, 0.1],
+        "dealer": [-5e7, 5e8, 4e8],
+        "convention": [-9e8, 8e7, 3e8],
+    }
+    fig = figures.fig_dealer_map(profile)
+    (ax,) = fig.axes
+    curves = [line for line in ax.get_lines() if len(line.get_xdata()) == 3]
+    assert len(curves) == 2
+    assert {text.get_text() for text in ax.texts} == {"Disclosed sides", "Convention"}

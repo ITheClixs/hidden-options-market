@@ -113,3 +113,11 @@ def test_macros(result):
     assert macros["HoldBoxShareOfItsBox"] == "80\\%"
     assert macros["HoldGammaSPYNet"].startswith("\\$")
     assert result.macros == macros
+
+
+def test_profile_across_spot_levels(result):
+    profile = result.values["profile"]
+    assert profile["underlying"] == "SPY"
+    assert len(profile["dealer"]) == len(profile["moves"]) == 61
+    middle = profile["moves"].index(0.0)
+    assert profile["dealer"][middle] == pytest.approx(result.values["dealer_gamma"]["SPY"]["net"])

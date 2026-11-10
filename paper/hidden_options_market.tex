@@ -1130,6 +1130,25 @@ listed chains, dealers long calls and short puts, gets the lower puts wrong. It 
 \HoldGammaConventionNet{}. Section~\ref{sec:gamma} reports FLEX under that convention
 only as an assumption; where it can be checked, it misses most of the dealer's position.
 
+Figure~\ref{fig:dealer-map} carries the comparison across price levels in SPY, with each
+leg's volatility held where its mark puts it. With the disclosed sides the dealer is long
+gamma at every level above a fall of \HoldProfileShortFrom{}, and close to flat between
+falls of \HoldProfileShortFrom{} and \HoldProfileShortTo{}. At \HoldProfileDrop{} below
+spot the dealer's net is \HoldProfileDropDealer{} for a 1\% move, and the convention
+would put it at \HoldProfileDropConvention{}. The convention reads these funds as a
+large source of dealer short gamma in a fall. Their holdings say there is almost none,
+because the dealer who is short the upper puts is long the lower ones. This view was
+added after the figures the log entry specified had been seen.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/dealer_gamma_map.pdf}
+\caption{The dealer's net dollar gamma in the SPY legs of one issuer's defined-outcome
+funds on \HoldReportDate{}, at other price levels: with the sides the funds disclose,
+and under the convention that dealers are long calls and short puts.}
+\label{fig:dealer-map}
+\end{figure}
+
 The box fund answers the question the trade reports left open. BOXX holds
 \HoldBoxContracts{} contracts of the SPY box struck at 10.01 and 10,010.01 that expires
 in December 2026, on the lending side. That is \HoldBoxFace{} of face,

@@ -136,6 +136,10 @@ One date, two issuers; nothing here is known for others.
 - **Sides.** The product design predicts the side of 96.0\% of package legs. The dealer opposite is long \$1,477m and short \$853m of dollar gamma per 1% move: net long \$623m, against \$40m under the vendor convention.
 - **The lender.** BOXX holds 14,902 contracts of the largest SPY box on the lending side: \$15bn of face, 92\% of that box's open interest.
 
+![The dealer's net gamma in one issuer's SPY legs across price levels: with the sides the funds disclose, and under the convention that dealers are long calls and short puts](docs/figures/dealer_gamma_map.png)
+
+At 10\% below spot the dealer's net gamma in these legs is -\$52m per 1% move; the convention would put it at -\$846m.
+
 ## How much gamma do listed chains leave out?
 
 Gamma figures in public use are built from listed chains, and FLEX is not in them. Pricing

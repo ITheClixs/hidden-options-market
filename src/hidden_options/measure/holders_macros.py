@@ -11,6 +11,7 @@ from hidden_options.measure.anatomy_macros import dollars
 from hidden_options.publish import formats
 
 UNDERLYINGS = ("SPY", "QQQ")
+PROFILE_DROP = -0.1
 
 
 def millions(value: float) -> str:
@@ -54,6 +55,7 @@ def holders_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "HoldBoxMarketShare": formats.percent(box["share_of_box_face"]),
         "HoldBoxMarketFace": dollars(box["market_face"]),
     }
+    macros.update(_profile(values["profile"]))
     for name in ("all", *UNDERLYINGS):
         if name not in gamma:
             continue
@@ -69,6 +71,25 @@ def holders_macros(values: Mapping[str, Any]) -> dict[str, str]:
                 f"{stem}Share": formats.percent(row["share_of_flex_gamma"]),
             }
         )
+    return macros
+
+
+def _profile(profile: Mapping[str, Any]) -> dict[str, str]:
+    """The dealer's net gamma and the convention's at PROFILE_DROP below spot, and the
+    falls from spot between which the dealer's net is negative."""
+    moves = list(profile["moves"])
+    if PROFILE_DROP not in moves or not profile["dealer"]:
+        return {}
+    place = moves.index(PROFILE_DROP)
+    below = sorted(-move for move in profile["flips"] if move < 0)
+    macros = {
+        "HoldProfileDrop": formats.percent(-PROFILE_DROP),
+        "HoldProfileDropDealer": millions(profile["dealer"][place]),
+        "HoldProfileDropConvention": millions(profile["convention"][place]),
+    }
+    if len(below) >= 2:
+        macros["HoldProfileShortFrom"] = formats.percent(below[0])
+        macros["HoldProfileShortTo"] = formats.percent(below[1])
     return macros
 
 

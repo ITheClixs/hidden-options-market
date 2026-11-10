@@ -23,12 +23,15 @@ import pandas as pd
 
 from hidden_options.measure.anatomy import STOCK_LEG_MAX_SHARE
 from hidden_options.measure.hidden_gamma import dollar_gamma
+from hidden_options.measure.pricing import black_scholes_greeks
 
 CONTRACT_MULTIPLIER = 100
 KEY = ["root", "expiry", "right", "strike"]
 HOME = ["fund", "root", "expiry"]
 FULL_SHARE = 0.95
 LEG_TYPES = ("upper_put", "lower_put", "call")
+# Spot levels of the gamma profile, as moves from the report date's spot.
+PROFILE_MOVES = tuple(round(-0.15 + 0.005 * step, 3) for step in range(61))
 
 
 def flex_lines(holdings: pd.DataFrame) -> pd.DataFrame:
@@ -185,6 +188,41 @@ def dealer_gamma(found: pd.DataFrame, gamma: pd.DataFrame) -> dict[str, dict[str
     return out
 
 
+def gamma_profile(
+    found: pd.DataFrame,
+    priced: pd.DataFrame,
+    underlying: str,
+    *,
+    rate: float,
+    moves: tuple[float, ...] = PROFILE_MOVES,
+) -> dict[str, Any]:
+    """The dealer's net dollar gamma in one underlying's matched legs at other spot
+    levels, with each leg's volatility held where the report date's mark puts it, and
+    the same under the vendor convention.
+
+    `priced` holds each report series' `iv`, `years` and `spot`. Only European legs are
+    in the funds' files, so the closed form applies.
+    """
+    legs = found.merge(priced[[*KEY, "iv", "years", "spot"]], on=KEY, how="inner")
+    legs = legs[(legs["underlying"] == underlying) & legs["iv"].notna() & (legs["years"] > 0)]
+    if legs.empty:
+        return {"spot": None, "moves": list(moves), "dealer": [], "convention": []}
+    spot = float(legs["spot"].iloc[0])
+    size = legs["contracts"].abs().to_numpy(float)
+    dealer = -np.sign(legs["contracts"].to_numpy(float))
+    convention = np.where(legs["right"] == "C", 1.0, -1.0)
+    out: dict[str, Any] = {"spot": spot, "moves": list(moves), "dealer": [], "convention": []}
+    for move in moves:
+        level = np.full(len(legs), spot * (1 + move))
+        unit = black_scholes_greeks(
+            level, legs["strike"], legs["years"], legs["iv"], rate=rate, carry=0.0, is_call=True
+        ).gamma
+        dollars = dollar_gamma(unit, size, level)
+        out["dealer"].append(float((dollars * dealer).sum()))
+        out["convention"].append(float((dollars * convention).sum()))
+    return out
+
+
 def box_positions(lines: pd.DataFrame) -> pd.DataFrame:
     """A fund's boxes: at one root and expiry, two strikes each held as a call and a put on
     opposite sides. Long the lower call is a box bought, which lends; the reverse borrows."""
@@ -225,6 +263,7 @@ __all__ = [
     "dealer_gamma",
     "design_agreement",
     "flex_lines",
+    "gamma_profile",
     "match",
     "matching",
     "rule_recall",

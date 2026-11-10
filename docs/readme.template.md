@@ -136,6 +136,10 @@ One date, two issuers; nothing here is known for others.
 - **Sides.** The product design predicts the side of {{HoldDesign}} of package legs. The dealer opposite is long {{HoldGammaLong}} and short {{HoldGammaShort}} of dollar gamma per 1% move: net long {{HoldGammaNet}}, against {{HoldGammaConventionNet}} under the vendor convention.
 - **The lender.** BOXX holds {{HoldBoxContracts}} contracts of the largest SPY box on the lending side: {{HoldBoxFace}} of face, {{HoldBoxShareOfItsBox}} of that box's open interest.
 
+![The dealer's net gamma in one issuer's SPY legs across price levels: with the sides the funds disclose, and under the convention that dealers are long calls and short puts](docs/figures/dealer_gamma_map.png)
+
+At {{HoldProfileDrop}} below spot the dealer's net gamma in these legs is {{HoldProfileDropDealer}} per 1% move; the convention would put it at {{HoldProfileDropConvention}}.
+
 ## How much gamma do listed chains leave out?
 
 Gamma figures in public use are built from listed chains, and FLEX is not in them. Pricing
