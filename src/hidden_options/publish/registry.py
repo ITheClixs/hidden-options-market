@@ -67,6 +67,7 @@ REGISTRATION_MODULES: tuple[str, ...] = (
     "hidden_options.measure.anatomy_table",
     "hidden_options.measure.box_rates_result",
     "hidden_options.measure.box_rates_table",
+    "hidden_options.measure.holders_result",
 )
 
 # Modules whose import registers figure builders, loaded only to draw figures.
