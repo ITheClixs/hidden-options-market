@@ -42,8 +42,14 @@ No benchmark rate was set beside those trades.
   root, expiry and size that consists of exactly four legs: a call and a put at each of
   two strikes. Its price is (C1 − P1) − (C2 − P2), where 1 is the lower strike. Its face
   is the distance between the strikes times 100 times the size.
-  - A group with the same timestamp, root, expiry and size but more than two strikes
-    carrying both rights is not resolved into boxes. Such groups are counted.
+  - A group with the same timestamp, root, expiry and size that has two or more strikes
+    carrying both rights but is not exactly such a box is not resolved into boxes. That
+    covers more than two such strikes, extra legs, and a leg at more than one price.
+    Such groups are counted. (Wording widened on 2026-11-10 while the code was written,
+    before any file beyond the two named above was read: the first version named only
+    the case of more than two strikes.)
+  - A box executed several times at one instant, each leg equally often, counts with
+    that multiple of its size.
 - **Rate.** The continuously compounded rate that discounts the distance between the
   strikes to the price over the calendar days from trade date to expiry, on a 365-day
   year.
