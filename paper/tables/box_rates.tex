@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\caption{Traded box-spread rates less the Treasury curve, in basis points.}
+\label{tab:box-rates}
+\begin{tabular}{lrrrrr}
+\toprule
+Box trades & Trades & Face & Mean & Median & Interquartile \\
+\midrule
+All, up to 1 year & 1,099 & \$147bn & 36 & 39 & 25 to 49 \\
+7 days to 1 month & 172 & \$59bn & 31 & 39 & 15 to 54 \\
+1 to 3 months & 539 & \$9.7bn & 35 & 35 & 22 to 46 \\
+3 to 12 months & 388 & \$78bn & 40 & 41 & 33 to 51 \\
+1 to 2 years & 125 & \$2.2bn & 31 & 28 & 22 to 40 \\
+Over 2 years & 83 & \$4.5bn & -42 & 25 & 10 to 34 \\
+SPX, up to 1 year & 118 & \$13bn & 40 & 40 & 35 to 51 \\
+SPY, up to 1 year & 604 & \$71bn & 39 & 41 & 30 to 51 \\
+Other, up to 1 year & 377 & \$63bn & 31 & 29 & 8 to 46 \\
+\bottomrule
+\end{tabular}
+\par\smallskip{\footnotesize Box spreads traded as four-leg orders in Cboe's FLEX execution reports from 31 March 2025 to 22 October 2026, with at least 7 days to expiry. A box's rate discounts the distance between its strikes to its net price, continuously compounded over calendar days. The spread is that rate less the Treasury par yield curve of the trade date at the same maturity, converted to continuous compounding. Mean is weighted by face; median and interquartile range are across trades. Beyond one year the benchmark is a par yield, not a zero rate, so those rows are approximate.\par}
+\end{table}

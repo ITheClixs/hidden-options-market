@@ -36,6 +36,9 @@ from hidden_options.publish.results import Result, now_iso
 NAME = "box_rates"
 HEADLINE_MAX_DAYS = 365
 MATURITY_EDGES = (30, 91, 365, 730)
+# Bands of trade size by face, for a diagnostic added after the first figures were seen.
+SIZE_EDGES = (1e6, 1e7, 1e8, 1e9)
+SIZE_LABELS = ("to_1m", "1m_10m", "10m_100m", "100m_1bn", "over_1bn")
 BOX_KEY = ["root", "expiry", "lower", "upper"]
 
 
@@ -98,6 +101,7 @@ def box_rates_result(
             name: spread_summary(headline[group == name]) for name in UNDERLYING_GROUPS
         },
         "monthly": _monthly(headline, trades),
+        "by_size": _by_size(headline),
         "marks": _marks(sample, read_report),
         "open_interest": _seen_trading(last_boxes, trades),
     }
@@ -119,6 +123,15 @@ def _levels(trades: pd.DataFrame) -> dict[str, float | None]:
     return {
         "rate": float(np.average(trades["rate"].to_numpy(float), weights=face)),
         "benchmark": float(np.average(trades["benchmark"].to_numpy(float), weights=face)),
+    }
+
+
+def _by_size(headline: pd.DataFrame) -> dict[str, dict[str, Any]]:
+    """The spread by band of trade size. Not in the specification: added after the first
+    figures showed one roll moving a month's face-weighted mean."""
+    band = np.searchsorted(SIZE_EDGES, headline["face"].to_numpy(float), side="left")
+    return {
+        label: spread_summary(headline[band == place]) for place, label in enumerate(SIZE_LABELS)
     }
 
 

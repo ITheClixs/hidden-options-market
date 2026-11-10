@@ -1,6 +1,6 @@
 # The Hidden Options Market
 
-**How much option convexity listed chains miss, and whether it moves prices.**
+**What the options market's hidden part is made of, how much convexity it holds, and whether it moves prices.**
 
 FLEX options are exchange options whose terms the counterparties choose. They are cleared
 centrally, and they are absent from the listed option chains that most option research is
@@ -12,11 +12,13 @@ panel.
 **In brief**
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
+- **What it is made of.** By mark value, 77\% is not outright options: box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards). Box positions carry \$68bn of face, 3.1 times the level 23 months earlier; 41\% of that is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
+- **The price of the lending.** 1,099 box spreads of up to a year traded on Cboe at 36bp over the Treasury curve (standard error 4.9bp, median 39bp). OCC's marks value the same boxes at about the Treasury rate.
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the 34 option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold 4.5\% of the netted FLEX book there.
 - **Pinning?** Not detected. On 2,643 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.06). The rule leaves out the 32 names with listed weekday expiries, among them SPY, where FLEX holds the most gamma, QQQ and the largest single names; the books it covers are a median 3.5\% of a day's share volume. The minimum detectable effect is 0.078σ. Moved to 32 sets of placebo dates in the same names, the test rejects on 6\% of them and, with one expiry in ten pinned in the real closes, on 75\%. But the same design finds no pinning at listed strikes on 34 monthly expirations either (net of a matched placebo added after the fact, *t* -1.64), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses 53.5\% of FLEX series, and strike notional overstates delta exposure at least 2.34-fold.
-- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The product split, the box rates, the gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on 14 August 2026, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -76,6 +78,49 @@ series across 1,030 underlyings: the ten largest underlyings hold
 30\% of open interest, 50\% expires within sixty days,
 22\% is more than a year from expiry (up from 13\% on the first
 date), and 59\% is calls.
+
+## What the hidden market is made of
+
+Three products can be read from open interest alone, within one root and one expiry
+(specification: [`docs/log/2026-11-10-anatomy-spec.md`](docs/log/2026-11-10-anatomy-spec.md)).
+The split on 22 October 2026:
+
+| | Series | Open interest | Mark value | Value share | Gross gamma |
+|---|---:|---:|---:|---:|---:|
+| Box spreads: two strikes with equal call and put counts, one count at both | 10,340 | 3\% | \$171bn | 31\% | 16\% |
+| Stock-leg calls: unpaired calls struck under 5% of spot | 742 | 2\% | \$91bn | 17\% | 0\% |
+| Package legs: series with a stock leg's count beside it | 1,716 | 5\% | \$6.6bn | 1\% | 6\% |
+| Same-strike pairs: equal call and put counts at one strike | 10,562 | 44\% | \$159bn | 29\% | 52\% |
+| Other | 20,148 | 45\% | \$119bn | 22\% | 27\% |
+
+![Mark value of FLEX open interest by product on every report date](docs/figures/product_split.png)
+
+- **Boxes.** \$68bn of face on the last date against \$22bn on the first (\$52bn and \$18bn under the smallest matching of strikes that share a count). All of it is in European-style roots, and 57\% matures within three months. Shuffled counts reproduce 3.7\% of it.
+- **Not all of it was lent as a box.** 41\% of the last date's face (\$28bn) is at strikes that traded as a four-leg box order. Much of the rest is pairs of SPX forwards at uneven strikes whose counts match.
+- **Stock legs.** \$91bn of stock exposure held through deep FLEX calls, \$74bn of it in SPY.
+- **Pairs.** Read as forwards, \$869bn of notional.
+
+### What a box costs
+
+Cboe publishes every FLEX execution. A box traded as one order is four legs with one
+timestamp, and its net price is the amount lent
+(specification: [`docs/log/2026-11-10-box-rates-spec.md`](docs/log/2026-11-10-box-rates-spec.md)).
+Over 391 daily files from 31 March 2025 to 22 October 2026 there are
+1,359 box trades with \$159bn of face. Spread over the Treasury curve of the
+trade date at the same maturity, in basis points:
+
+| Box trades | Trades | Face | Mean | Median | Interquartile |
+|---|---:|---:|---:|---:|---:|
+| All, 7 days to 1 year | 1,099 | \$147bn | 36 | 39 | 25 to 49 |
+| 7 days to 1 month | 172 | \$59bn | 31 | 39 | 15 to 54 |
+| 1 to 3 months | 539 | \$9.7bn | 35 | 35 | 22 to 46 |
+| 3 to 12 months | 388 | \$78bn | 40 | 41 | 33 to 51 |
+
+The mean is weighted by face and has a standard error of 4.9bp, clustered by
+trade date. The rate in OCC's marks for the same boxes is -35bp from the
+traded rate on average: the marks value a box at about the Treasury rate.
+
+![Box face in open interest, and each month's median traded spread over Treasuries](docs/figures/box_lending.png)
 
 ## How much gamma do listed chains leave out?
 
@@ -252,6 +297,9 @@ uv venv && uv pip install -e '.[dev,paper]'
 
 # daily bars for the FLEX underlyings, far enough back for the trailing controls
 .venv/bin/hidden-options refresh-bars
+
+# Cboe's FLEX execution reports (from 31 March 2025) and the Treasury yield curve
+.venv/bin/python scripts/backfill_cboe_flex_trades.py
 
 # results, figures, the generated paper numbers and this README, then the PDF
 make all

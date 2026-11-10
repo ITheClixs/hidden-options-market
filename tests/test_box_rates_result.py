@@ -156,6 +156,15 @@ def test_groups_and_months(result):
     assert month["trades"] == 2
 
 
+def test_size_bands_are_a_diagnostic(result):
+    bands = result.values["by_size"]
+    assert bands["to_1m"]["trades"] == 1  # exactly 1m of face
+    assert bands["1m_10m"]["trades"] == 1  # 3m of face
+    assert bands["over_1bn"]["trades"] == 0
+    macros = box_rates_macros(result.values)
+    assert float(macros["BoxRSizeMedianLow"]) < float(macros["BoxRSizeMedianHigh"])
+
+
 def test_marks_against_trades(result):
     marks = result.values["marks"]
     assert marks["matched"] == 2
@@ -171,6 +180,9 @@ def test_macros(result):
     assert macros["BoxRTrades"] == "3"
     assert macros["BoxRSpread"] == f"{(result.values['headline']['mean']) * 1e4:.0f}"
     assert macros["BoxRTradedShare"] == "75\\%"
+    assert macros["BoxRTradedFace"] == "\\$0.0bn"
+    assert macros["BoxRMonths"] == "1"
+    assert macros["BoxRQuarterEndShare"] == "0\\%"
     assert result.macros == macros
 
 

@@ -19,6 +19,7 @@ MATURITY_STEMS = {
 }
 GROUP_STEMS = {"SPX": "SPX", "SPY": "SPY", "other": "Else"}
 MISSING = "n/a"
+THREE_MONTHS = 0.25
 
 
 def basis_points(rate: float | None, digits: int = 0) -> str:
@@ -58,12 +59,43 @@ def box_rates_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "BoxRMarkGap": basis_points(marks["mean"]),
         "BoxRMarkGapMedian": basis_points(marks["median"]),
         "BoxRTradedShare": formats.percent(values["open_interest"]["traded_face_share"]),
+        "BoxRTradedFace": dollars(
+            values["open_interest"]["face"] * values["open_interest"]["traded_face_share"]
+        ),
+        **_months(values["monthly"]),
+        **_sizes(values["by_size"]),
+        "BoxRMarkThreeMonth": basis_points(
+            None if marks["mean"] is None else abs(marks["mean"]) * THREE_MONTHS
+        ),
     }
     for name, stem in MATURITY_STEMS.items():
         macros.update(_bucket(f"BoxR{stem}", values["by_maturity"][name]))
     for name, stem in GROUP_STEMS.items():
         macros.update(_bucket(f"BoxR{stem}", values["by_underlying"][name]))
     return macros
+
+
+def _months(monthly: list[Mapping[str, Any]]) -> dict[str, str]:
+    """The range of the monthly median spread, and the share of traded face that falls in
+    the last month of a calendar quarter."""
+    medians = [row["median"] for row in monthly if row["median"] is not None]
+    face = sum(row["traded_face"] for row in monthly)
+    closing = sum(row["traded_face"] for row in monthly if int(row["month"][5:7]) % 3 == 0)
+    return {
+        "BoxRMonths": formats.count(len(medians)),
+        "BoxRMonthLow": basis_points(min(medians) if medians else None),
+        "BoxRMonthHigh": basis_points(max(medians) if medians else None),
+        "BoxRQuarterEndShare": formats.percent(closing / face if face else 0.0),
+    }
+
+
+def _sizes(by_size: Mapping[str, Mapping[str, Any]]) -> dict[str, str]:
+    """The lowest and highest median spread across bands of trade size."""
+    medians = [band["median"] for band in by_size.values() if band["median"] is not None]
+    return {
+        "BoxRSizeMedianLow": basis_points(min(medians) if medians else None),
+        "BoxRSizeMedianHigh": basis_points(max(medians) if medians else None),
+    }
 
 
 def _bucket(stem: str, found: Mapping[str, Any]) -> dict[str, str]:

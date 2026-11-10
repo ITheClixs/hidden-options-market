@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T15:45:54+00:00",
+  "generated_at": "2026-11-10T15:56:32+00:00",
   "inputs": {
     "files": 391,
     "first_date": "2025-03-31",
@@ -30,6 +30,10 @@
     "BoxRMarkGapMedian": "-42",
     "BoxRMarkMatched": "1,304",
     "BoxRMarkMatchedShare": "100\\%",
+    "BoxRMarkThreeMonth": "9",
+    "BoxRMonthHigh": "67",
+    "BoxRMonthLow": "7",
+    "BoxRMonths": "20",
     "BoxRNoBenchmark": "0",
     "BoxROneToThreeFace": "\\$9.7bn",
     "BoxROneToThreeHigh": "46",
@@ -49,6 +53,7 @@
     "BoxROverTwoYearsMedian": "25",
     "BoxROverTwoYearsSpread": "-42",
     "BoxROverTwoYearsTrades": "83",
+    "BoxRQuarterEndShare": "85\\%",
     "BoxRRate": "4.25\\%",
     "BoxRSPXFace": "\\$13bn",
     "BoxRSPXHigh": "51",
@@ -64,6 +69,8 @@
     "BoxRSPYTrades": "604",
     "BoxRSampleFace": "\\$153bn",
     "BoxRSampleTrades": "1,307",
+    "BoxRSizeMedianHigh": "42",
+    "BoxRSizeMedianLow": "36",
     "BoxRSpread": "36",
     "BoxRSpreadHigh": "49",
     "BoxRSpreadLow": "25",
@@ -81,6 +88,7 @@
     "BoxRToOneMonthMedian": "39",
     "BoxRToOneMonthSpread": "31",
     "BoxRToOneMonthTrades": "172",
+    "BoxRTradedFace": "\\$28bn",
     "BoxRTradedShare": "41\\%",
     "BoxRTrades": "1,359",
     "BoxRUnresolved": "8"
@@ -137,6 +145,58 @@
         "q75": 0.00537559697128683,
         "std_error": 0.0007538801807261439,
         "trades": 172
+      }
+    },
+    "by_size": {
+      "100m_1bn": {
+        "dates": 56,
+        "face": 25683144600.0,
+        "mean": 0.0035871026351128607,
+        "median": 0.0037129974696600287,
+        "q25": 0.003114562875192208,
+        "q75": 0.004479682731476019,
+        "std_error": 0.00039649659874191687,
+        "trades": 74
+      },
+      "10m_100m": {
+        "dates": 260,
+        "face": 12796142580.0,
+        "mean": 0.003780576759653691,
+        "median": 0.0038404762315469958,
+        "q25": 0.0025308369241013335,
+        "q75": 0.004673721671824742,
+        "std_error": 0.00014825506808291018,
+        "trades": 356
+      },
+      "1m_10m": {
+        "dates": 198,
+        "face": 1108233184.0,
+        "mean": 0.0031665001004073583,
+        "median": 0.0035691681391195676,
+        "q25": 0.0016788072252752057,
+        "q75": 0.004564985500237184,
+        "std_error": 0.00045665271028304624,
+        "trades": 266
+      },
+      "over_1bn": {
+        "dates": 6,
+        "face": 106720812000.0,
+        "mean": 0.0035535777593788597,
+        "median": 0.003941604979701814,
+        "q25": 0.003172814345052292,
+        "q75": 0.0046495479980517215,
+        "std_error": 0.000647066713002909,
+        "trades": 40
+      },
+      "to_1m": {
+        "dates": 235,
+        "face": 241783438.0,
+        "mean": 0.004310646990324878,
+        "median": 0.004182160768849155,
+        "q25": 0.0025386459953506933,
+        "q75": 0.005711456920229896,
+        "std_error": 0.00031847320279194166,
+        "trades": 363
       }
     },
     "by_underlying": {

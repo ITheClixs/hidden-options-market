@@ -1,6 +1,6 @@
 # The Hidden Options Market
 
-**How much option convexity listed chains miss, and whether it moves prices.**
+**What the options market's hidden part is made of, how much convexity it holds, and whether it moves prices.**
 
 FLEX options are exchange options whose terms the counterparties choose. They are cleared
 centrally, and they are absent from the listed option chains that most option research is
@@ -12,11 +12,13 @@ panel.
 **In brief**
 
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
+- **What it is made of.** By mark value, {{AnatFinancingValueShare}} is not outright options: box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards). Box positions carry {{AnatBoxFace}} of face, {{AnatBoxGrowth}} times the level {{PanelMonths}} months earlier; {{BoxRTradedShare}} of that is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
+- **The price of the lending.** {{BoxRHeadlineTrades}} box spreads of up to a year traded on Cboe at {{BoxRSpread}}bp over the Treasury curve (standard error {{BoxRSpreadSE}}bp, median {{BoxRSpreadMedian}}bp). OCC's marks value the same boxes at about the Treasury rate.
 - **Convexity.** Across the {{GammaUnderlyings}} followed underlyings with stored listed chains, over {{GammaSettlements}} settlements, FLEX is {{GammaMedianGross}} of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is {{GammaMedianNetted}} ({{GammaMedianBoth}} if listed pairs are netted too). It stays large in SPY ({{GammaSPYNetted}} FLEX-netted) and NDX ({{GammaNDXNetted}}).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* {{GPredT}}, {{GPredDays}} underlying-days). The minimum detectable effect is {{GPredMDE}}bp per standard deviation, {{GPredMDEShare}} of mean \|*r*\|. The hedge a 1% move calls for is {{GPredMedianX}}bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the {{GProgNames}} option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold {{PBookFundShare}} of the netted FLEX book there.
 - **Pinning?** Not detected. On {{PinEvents}} expiries, over {{PinDates}} dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* {{PinT}}). The rule leaves out the {{PinExcluded}} names with listed weekday expiries, among them SPY, where FLEX holds the most gamma, QQQ and the largest single names; the books it covers are a median {{PinMedianSize}} of a day's share volume. The minimum detectable effect is {{PinMDE}}σ. Moved to {{PinNullOffsets}} sets of placebo dates in the same names, the test rejects on {{PinNullSize}} of them and, with one expiry in ten pinned in the real closes, on {{PinNullPowerTen}}. But the same design finds no pinning at listed strikes on {{PinCtlDates}} monthly expirations either (net of a matched placebo added after the fact, *t* {{PinCtlNetT}}), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
 - **Measurement.** Treating off-grid strikes as FLEX misses {{FlexOnGridShare}} of FLEX series, and strike notional overstates delta exposure at least {{PosGrossMedian}}-fold.
-- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
+- **Method.** Every number in the paper and in this README is generated from `results/*.json`, and CI checks that. The product split, the box rates, the gamma measurement, the gamma test and the pinning test were each specified in a dated log entry before they were run.
 
 ![FLEX against listed open interest per underlying on {{HiddenCensusDate}}, both on log scales; coloured points are underlyings where FLEX is at least half of all open interest, squares are index products](docs/figures/hidden_share.png)
 
@@ -76,6 +78,49 @@ series across {{UnderlyingsEnd}} underlyings: the ten largest underlyings hold
 {{TopTenShare}} of open interest, {{WithinSixtyShare}} expires within sixty days,
 {{OverOneYear}} is more than a year from expiry (up from {{OverOneYearStart}} on the first
 date), and {{CallShare}} is calls.
+
+## What the hidden market is made of
+
+Three products can be read from open interest alone, within one root and one expiry
+(specification: [`docs/log/2026-11-10-anatomy-spec.md`](docs/log/2026-11-10-anatomy-spec.md)).
+The split on {{AnatLastDate}}:
+
+| | Series | Open interest | Mark value | Value share | Gross gamma |
+|---|---:|---:|---:|---:|---:|
+| Box spreads: two strikes with equal call and put counts, one count at both | {{AnatBoxSeries}} | {{AnatBoxOIShare}} | {{AnatBoxValue}} | {{AnatBoxValueShare}} | {{AnatGammaBox}} |
+| Stock-leg calls: unpaired calls struck under 5% of spot | {{AnatStockSeries}} | {{AnatStockOIShare}} | {{AnatStockValue}} | {{AnatStockValueShare}} | {{AnatGammaStock}} |
+| Package legs: series with a stock leg's count beside it | {{AnatPackageSeries}} | {{AnatPackageOIShare}} | {{AnatPackageValue}} | {{AnatPackageValueShare}} | {{AnatGammaPackage}} |
+| Same-strike pairs: equal call and put counts at one strike | {{AnatPairSeries}} | {{AnatPairOIShare}} | {{AnatPairValue}} | {{AnatPairValueShare}} | {{AnatGammaPair}} |
+| Other | {{AnatOtherSeries}} | {{AnatOtherOIShare}} | {{AnatOtherValue}} | {{AnatOtherValueShare}} | {{AnatGammaOther}} |
+
+![Mark value of FLEX open interest by product on every report date](docs/figures/product_split.png)
+
+- **Boxes.** {{AnatBoxFace}} of face on the last date against {{AnatBoxFaceFirst}} on the first ({{AnatBoxNeighbourFace}} and {{AnatBoxNeighbourFaceFirst}} under the smallest matching of strikes that share a count). All of it is in European-style roots, and {{AnatBoxToThreeMonths}} matures within three months. Shuffled counts reproduce {{AnatChanceBox}} of it.
+- **Not all of it was lent as a box.** {{BoxRTradedShare}} of the last date's face ({{BoxRTradedFace}}) is at strikes that traded as a four-leg box order. Much of the rest is pairs of SPX forwards at uneven strikes whose counts match.
+- **Stock legs.** {{AnatStockValue}} of stock exposure held through deep FLEX calls, {{AnatStockTopValue}} of it in {{AnatStockTopName}}.
+- **Pairs.** Read as forwards, {{AnatPairNotional}} of notional.
+
+### What a box costs
+
+Cboe publishes every FLEX execution. A box traded as one order is four legs with one
+timestamp, and its net price is the amount lent
+(specification: [`docs/log/2026-11-10-box-rates-spec.md`](docs/log/2026-11-10-box-rates-spec.md)).
+Over {{BoxRFiles}} daily files from {{BoxRFirstDate}} to {{BoxRLastDate}} there are
+{{BoxRTrades}} box trades with {{BoxRFace}} of face. Spread over the Treasury curve of the
+trade date at the same maturity, in basis points:
+
+| Box trades | Trades | Face | Mean | Median | Interquartile |
+|---|---:|---:|---:|---:|---:|
+| All, 7 days to 1 year | {{BoxRHeadlineTrades}} | {{BoxRHeadlineFace}} | {{BoxRSpread}} | {{BoxRSpreadMedian}} | {{BoxRSpreadLow}} to {{BoxRSpreadHigh}} |
+| 7 days to 1 month | {{BoxRToOneMonthTrades}} | {{BoxRToOneMonthFace}} | {{BoxRToOneMonthSpread}} | {{BoxRToOneMonthMedian}} | {{BoxRToOneMonthLow}} to {{BoxRToOneMonthHigh}} |
+| 1 to 3 months | {{BoxROneToThreeTrades}} | {{BoxROneToThreeFace}} | {{BoxROneToThreeSpread}} | {{BoxROneToThreeMedian}} | {{BoxROneToThreeLow}} to {{BoxROneToThreeHigh}} |
+| 3 to 12 months | {{BoxRThreeToTwelveTrades}} | {{BoxRThreeToTwelveFace}} | {{BoxRThreeToTwelveSpread}} | {{BoxRThreeToTwelveMedian}} | {{BoxRThreeToTwelveLow}} to {{BoxRThreeToTwelveHigh}} |
+
+The mean is weighted by face and has a standard error of {{BoxRSpreadSE}}bp, clustered by
+trade date. The rate in OCC's marks for the same boxes is {{BoxRMarkGap}}bp from the
+traded rate on average: the marks value a box at about the Treasury rate.
+
+![Box face in open interest, and each month's median traded spread over Treasuries](docs/figures/box_lending.png)
 
 ## How much gamma do listed chains leave out?
 
@@ -252,6 +297,9 @@ uv venv && uv pip install -e '.[dev,paper]'
 
 # daily bars for the FLEX underlyings, far enough back for the trailing controls
 .venv/bin/hidden-options refresh-bars
+
+# Cboe's FLEX execution reports (from 31 March 2025) and the Treasury yield curve
+.venv/bin/python scripts/backfill_cboe_flex_trades.py
 
 # results, figures, the generated paper numbers and this README, then the PDF
 make all
