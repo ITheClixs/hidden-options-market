@@ -172,3 +172,19 @@ def test_macros(result):
     assert macros["BoxRSpread"] == f"{(result.values['headline']['mean']) * 1e4:.0f}"
     assert macros["BoxRTradedShare"] == "75\\%"
     assert result.macros == macros
+
+
+def test_a_day_without_boxes_does_not_disturb_the_rest():
+    quiet = box_rows(D1, root="2SPY", lower=100.0, upper=1100.0, size=30, price=950.0).iloc[:2]
+    busy = box_rows(
+        D2, root="2SPY", lower=100.0, upper=1100.0, size=10, price=price_at(0.043, 1000.0, D2, E)
+    )
+    found = box_rates_result([quiet, busy], CURVE, report_for, LAST_BOXES)
+    assert found.values["sample"]["files"] == 2
+    assert found.values["sample"]["box_trades"] == 1
+
+
+def test_no_box_at_all_is_an_error():
+    quiet = box_rows(D1, root="2SPY", lower=100.0, upper=1100.0, size=30, price=950.0).iloc[:2]
+    with pytest.raises(ValueError, match="No box trade"):
+        box_rates_result([quiet], CURVE, report_for, LAST_BOXES)

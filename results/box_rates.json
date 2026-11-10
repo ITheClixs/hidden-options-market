@@ -1,0 +1,356 @@
+{
+  "generated_at": "2026-11-10T15:45:54+00:00",
+  "inputs": {
+    "files": 391,
+    "first_date": "2025-03-31",
+    "headline_max_days": 365,
+    "last_date": "2026-10-22",
+    "min_days": 7
+  },
+  "macros": {
+    "BoxRBenchmark": "3.89\\%",
+    "BoxRDroppedPrice": "9",
+    "BoxRDroppedRange": "14",
+    "BoxRDroppedShort": "29",
+    "BoxRElseFace": "\\$63bn",
+    "BoxRElseHigh": "46",
+    "BoxRElseLow": "8",
+    "BoxRElseMedian": "29",
+    "BoxRElseSpread": "31",
+    "BoxRElseTrades": "377",
+    "BoxRExecutions": "499,633",
+    "BoxRFace": "\\$159bn",
+    "BoxRFiles": "391",
+    "BoxRFirstDate": "31 March 2025",
+    "BoxRHeadlineDates": "369",
+    "BoxRHeadlineFace": "\\$147bn",
+    "BoxRHeadlineTrades": "1,099",
+    "BoxRLastDate": "22 October 2026",
+    "BoxRMarkGap": "-35",
+    "BoxRMarkGapMedian": "-42",
+    "BoxRMarkMatched": "1,304",
+    "BoxRMarkMatchedShare": "100\\%",
+    "BoxRNoBenchmark": "0",
+    "BoxROneToThreeFace": "\\$9.7bn",
+    "BoxROneToThreeHigh": "46",
+    "BoxROneToThreeLow": "22",
+    "BoxROneToThreeMedian": "35",
+    "BoxROneToThreeSpread": "35",
+    "BoxROneToThreeTrades": "539",
+    "BoxROneToTwoYearsFace": "\\$2.2bn",
+    "BoxROneToTwoYearsHigh": "40",
+    "BoxROneToTwoYearsLow": "22",
+    "BoxROneToTwoYearsMedian": "28",
+    "BoxROneToTwoYearsSpread": "31",
+    "BoxROneToTwoYearsTrades": "125",
+    "BoxROverTwoYearsFace": "\\$4.5bn",
+    "BoxROverTwoYearsHigh": "34",
+    "BoxROverTwoYearsLow": "10",
+    "BoxROverTwoYearsMedian": "25",
+    "BoxROverTwoYearsSpread": "-42",
+    "BoxROverTwoYearsTrades": "83",
+    "BoxRRate": "4.25\\%",
+    "BoxRSPXFace": "\\$13bn",
+    "BoxRSPXHigh": "51",
+    "BoxRSPXLow": "35",
+    "BoxRSPXMedian": "40",
+    "BoxRSPXSpread": "40",
+    "BoxRSPXTrades": "118",
+    "BoxRSPYFace": "\\$71bn",
+    "BoxRSPYHigh": "51",
+    "BoxRSPYLow": "30",
+    "BoxRSPYMedian": "41",
+    "BoxRSPYSpread": "39",
+    "BoxRSPYTrades": "604",
+    "BoxRSampleFace": "\\$153bn",
+    "BoxRSampleTrades": "1,307",
+    "BoxRSpread": "36",
+    "BoxRSpreadHigh": "49",
+    "BoxRSpreadLow": "25",
+    "BoxRSpreadMedian": "39",
+    "BoxRSpreadSE": "4.9",
+    "BoxRThreeToTwelveFace": "\\$78bn",
+    "BoxRThreeToTwelveHigh": "51",
+    "BoxRThreeToTwelveLow": "33",
+    "BoxRThreeToTwelveMedian": "41",
+    "BoxRThreeToTwelveSpread": "40",
+    "BoxRThreeToTwelveTrades": "388",
+    "BoxRToOneMonthFace": "\\$59bn",
+    "BoxRToOneMonthHigh": "54",
+    "BoxRToOneMonthLow": "15",
+    "BoxRToOneMonthMedian": "39",
+    "BoxRToOneMonthSpread": "31",
+    "BoxRToOneMonthTrades": "172",
+    "BoxRTradedShare": "41\\%",
+    "BoxRTrades": "1,359",
+    "BoxRUnresolved": "8"
+  },
+  "name": "box_rates",
+  "values": {
+    "by_maturity": {
+      "1m_3m": {
+        "dates": 281,
+        "face": 9728358725.0,
+        "mean": 0.0034533819802520654,
+        "median": 0.0035291266510197594,
+        "q25": 0.002169473962683896,
+        "q75": 0.004571780794044005,
+        "std_error": 0.00012612475103573962,
+        "trades": 539
+      },
+      "1y_2y": {
+        "dates": 35,
+        "face": 2150571450.0,
+        "mean": 0.0031407608462125786,
+        "median": 0.0028453436155541287,
+        "q25": 0.0021773399162145005,
+        "q75": 0.003952390990782345,
+        "std_error": 0.0005745775666748451,
+        "trades": 125
+      },
+      "3m_12m": {
+        "dates": 195,
+        "face": 77692102210.0,
+        "mean": 0.0039737260216417295,
+        "median": 0.004115826246475149,
+        "q25": 0.0032647338295703106,
+        "q75": 0.005098813740903308,
+        "std_error": 0.00046573381110845896,
+        "trades": 388
+      },
+      "over_2y": {
+        "dates": 56,
+        "face": 4549799203.0,
+        "mean": -0.004208416433204441,
+        "median": 0.002459027752379675,
+        "q25": 0.00104179278843472,
+        "q75": 0.003404435511395347,
+        "std_error": 0.005665702621236888,
+        "trades": 83
+      },
+      "to_1m": {
+        "dates": 105,
+        "face": 59129654867.0,
+        "mean": 0.0030775450306726924,
+        "median": 0.0038922755364053305,
+        "q25": 0.0015112816155903267,
+        "q75": 0.00537559697128683,
+        "std_error": 0.0007538801807261439,
+        "trades": 172
+      }
+    },
+    "by_underlying": {
+      "SPX": {
+        "dates": 59,
+        "face": 13162100000.0,
+        "mean": 0.004034422903483757,
+        "median": 0.003955398327782061,
+        "q25": 0.00348296894409667,
+        "q75": 0.005069047616390853,
+        "std_error": 0.0001640385946734998,
+        "trades": 118
+      },
+      "SPY": {
+        "dates": 326,
+        "face": 70672988168.0,
+        "mean": 0.003923725820554615,
+        "median": 0.004125428574928137,
+        "q25": 0.003011644098550738,
+        "q75": 0.005125640551873261,
+        "std_error": 0.0005130764419366981,
+        "trades": 604
+      },
+      "other": {
+        "dates": 243,
+        "face": 62715027634.0,
+        "mean": 0.0030916694702053083,
+        "median": 0.0028979354105297048,
+        "q25": 0.0007958632235753188,
+        "q75": 0.004603787794223532,
+        "std_error": 0.0007074983714674926,
+        "trades": 377
+      }
+    },
+    "headline": {
+      "benchmark": 0.038925543789077525,
+      "dates": 369,
+      "face": 146550115802.0,
+      "mean": 0.0035775955520632955,
+      "median": 0.0038686189590930523,
+      "q25": 0.0024797062996362654,
+      "q75": 0.004925745975677111,
+      "rate": 0.042503139341140826,
+      "std_error": 0.0004931142485908145,
+      "trades": 1099
+    },
+    "marks": {
+      "matched": 1304,
+      "matched_share": 0.9977046671767407,
+      "mean": -0.0035241399164751856,
+      "median": -0.00415965703791546
+    },
+    "monthly": [
+      {
+        "mean": 0.0026579031605784872,
+        "median": 0.0030180654980417956,
+        "month": "2025-03",
+        "traded_face": 51391000.0,
+        "trades": 5
+      },
+      {
+        "mean": 0.0013509233728704363,
+        "median": 0.0018584977024610483,
+        "month": "2025-04",
+        "traded_face": 361487097.0,
+        "trades": 42
+      },
+      {
+        "mean": 0.00205982463602346,
+        "median": 0.002032142827633799,
+        "month": "2025-05",
+        "traded_face": 610413433.0,
+        "trades": 40
+      },
+      {
+        "mean": -0.00058729464149524,
+        "median": 0.000721191913529682,
+        "month": "2025-06",
+        "traded_face": 15500568834.0,
+        "trades": 62
+      },
+      {
+        "mean": 0.0023362361216576638,
+        "median": 0.0019424415344482526,
+        "month": "2025-07",
+        "traded_face": 798201382.0,
+        "trades": 48
+      },
+      {
+        "mean": 0.002674401583838025,
+        "median": 0.0027034165456452652,
+        "month": "2025-08",
+        "traded_face": 1049721406.0,
+        "trades": 49
+      },
+      {
+        "mean": 0.0031758310271334804,
+        "median": 0.0032004522102061644,
+        "month": "2025-09",
+        "traded_face": 21441128304.0,
+        "trades": 54
+      },
+      {
+        "mean": 0.0037299240798492183,
+        "median": 0.004388225842275384,
+        "month": "2025-10",
+        "traded_face": 4364171935.0,
+        "trades": 61
+      },
+      {
+        "mean": 0.005902306509078689,
+        "median": 0.006653918426329484,
+        "month": "2025-11",
+        "traded_face": 1098232568.0,
+        "trades": 54
+      },
+      {
+        "mean": 0.004245684222824153,
+        "median": 0.006029522783277272,
+        "month": "2025-12",
+        "traded_face": 18205053672.0,
+        "trades": 61
+      },
+      {
+        "mean": 0.0038748816173577753,
+        "median": 0.004007309264386031,
+        "month": "2026-01",
+        "traded_face": 3210160641.0,
+        "trades": 50
+      },
+      {
+        "mean": 0.003453328083853335,
+        "median": 0.003604986200139479,
+        "month": "2026-02",
+        "traded_face": 1418660690.0,
+        "trades": 55
+      },
+      {
+        "mean": 0.0036033335548573083,
+        "median": 0.003885627144093677,
+        "month": "2026-03",
+        "traded_face": 28083736207.0,
+        "trades": 93
+      },
+      {
+        "mean": 0.003988494591916922,
+        "median": 0.004122367267906338,
+        "month": "2026-04",
+        "traded_face": 1641738185.0,
+        "trades": 53
+      },
+      {
+        "mean": 0.004194709453239683,
+        "median": 0.004194181811388798,
+        "month": "2026-05",
+        "traded_face": 1941037050.0,
+        "trades": 54
+      },
+      {
+        "mean": 0.004756025389615816,
+        "median": 0.005560066826148277,
+        "month": "2026-06",
+        "traded_face": 18358967945.0,
+        "trades": 71
+      },
+      {
+        "mean": 0.0043262756308256696,
+        "median": 0.004304671056957733,
+        "month": "2026-07",
+        "traded_face": 2292094455.0,
+        "trades": 57
+      },
+      {
+        "mean": 0.004250120001514966,
+        "median": 0.004194504843414763,
+        "month": "2026-08",
+        "traded_face": 2079957345.0,
+        "trades": 66
+      },
+      {
+        "mean": 0.00458938164109487,
+        "median": 0.004603787794223532,
+        "month": "2026-09",
+        "traded_face": 33030562895.0,
+        "trades": 79
+      },
+      {
+        "mean": 0.003621578646507487,
+        "median": 0.003191377296003356,
+        "month": "2026-10",
+        "traded_face": 2977223027.0,
+        "trades": 45
+      }
+    ],
+    "open_interest": {
+      "face": 67852374021.0,
+      "traded_face_share": 0.4056689543608445
+    },
+    "sample": {
+      "box_face": 158514508071.0,
+      "box_trades": 1359,
+      "dropped": {
+        "no_price": 9,
+        "out_of_range": 14,
+        "short": 29
+      },
+      "executions": 499633,
+      "files": 391,
+      "first_date": "2025-03-31",
+      "last_date": "2026-10-22",
+      "no_benchmark": 0,
+      "rate_face": 153250486455.0,
+      "rate_trades": 1307,
+      "unresolved": 8
+    }
+  }
+}

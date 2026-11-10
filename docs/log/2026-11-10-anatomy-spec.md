@@ -111,3 +111,43 @@ and of gamma that remains as outright options.
 
 Only a defect found in the code or the data. Any change after the panel figures have
 been seen is recorded here as a dated amendment, with the figure it changed.
+
+## Result, 2026-11-10
+
+Computed as specified, on 475 report dates from 2024-12-02 to 2026-10-22, with no change
+after the figures were seen.
+
+- **The split on the last date** (series; share of open interest; mark value; share of
+  value):
+  - box spreads: 10,340; 3%; $171bn; 31%;
+  - stock-leg calls: 742; 2%; $91bn; 17%;
+  - package legs: 1,716; 5%; $6.6bn; 1%;
+  - same-strike pairs: 10,562; 44%; $159bn; 29%;
+  - other: 20,148; 45%; $119bn; 22%.
+- **Box lending.** 2,585 boxes with $67.9bn of face and $65.4bn of value at the marks,
+  against $21.9bn of face on the first date: 3.1 times. The neighbour matching gives
+  $52.5bn and $18.3bn. The peak is $96bn on 2026-09-10. All of the face is in
+  European-style roots, 85% in boxes whose upper strike is at least 1.25 times the
+  lower, and 57% expires within three months. SPX holds $45.2bn, SPY $19.2bn. The marks
+  imply 4.2%.
+- **Stock legs.** $90.7bn on the last date against $65.0bn on the first, in 22
+  underlyings: SPY $73.6bn, QQQ $8.7bn, IWM $2.7bn.
+- **Pairs.** Forward notional of $869bn on the last date and $619bn on the first.
+- **Co-location.** 6% of the open interest in "other" sits beside a stock-leg call on
+  the last date, 8% on average.
+- **Gamma**, on 48 settlements: pairs 52%, other 27%, boxes 16%, package legs 6%, stock
+  legs 0%.
+- **Chance**, on 24 dates: shuffled counts give 3.7% of the box face found in the
+  report. They give 75% of the package-leg open interest and 35% of the pair open
+  interest. The shuffle keeps each bucket's counts, so wherever several series of one
+  bucket share a count it reproduces the match; it is a weak benchmark for those two
+  categories and a strong one for boxes, which need the same count on four lines.
+
+**Reading.** By mark value, 77% of the market on the last date is box legs, stock-leg
+calls and same-strike pairs: lending and delta-one exposure. Half of open interest, and
+about a third of gross gamma, is in package legs and "other".
+
+**Qualified by the trade reports** ([`box-rates-spec`](2026-11-10-box-rates-spec.md)):
+41% of the box face on the last date is at strikes that traded as a box package on Cboe
+since April 2025. Much of the rest is pairs of same-strike pairs in SPX whose counts
+match. The box figure is therefore an upper bound on lending done as boxes.

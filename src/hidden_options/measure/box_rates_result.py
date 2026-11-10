@@ -21,7 +21,6 @@ from hidden_options.config import PANEL_END, RAW_DIR
 from hidden_options.measure.anatomy import MATURITY_LABELS, UNDERLYING_GROUPS, classify
 from hidden_options.measure.anatomy_result import REPORT_COLUMNS
 from hidden_options.measure.box_rates import (
-    BOX_COLUMNS,
     MIN_DAYS,
     benchmark_rates,
     box_trades,
@@ -59,12 +58,13 @@ def box_rates_result(
         executed += int(rows.loc[rows["root"].notna(), "executions"].sum())
         boxes, left = box_trades(rows)
         unresolved += left
-        found.append(boxes)
-    if not found:
+        if not boxes.empty:  # an empty frame would turn the dates of the rest into objects
+            found.append(boxes)
+    if not files:
         raise ValueError("No execution reports to read")
+    if not found:
+        raise ValueError("No box trade in the execution reports")
     trades = pd.concat(found, ignore_index=True)
-    if trades.empty:
-        trades = pd.DataFrame(columns=list(BOX_COLUMNS))
     kept, dropped = rate_sample(trades)
     benchmark = benchmark_rates(curve, kept["trade_date"], kept["days"].to_numpy())
     kept = kept.assign(benchmark=benchmark, spread=kept["rate"] - benchmark)

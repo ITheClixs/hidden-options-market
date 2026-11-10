@@ -93,3 +93,50 @@ these traded prices and how it varies with maturity.
 
 Only a defect found in the code or the data. Any change after a rate has been seen is
 recorded here as a dated amendment, with the figure it changed.
+
+## Result, 2026-11-10
+
+Computed as specified. One defect was fixed before any figure was produced: a day with no
+box trade returned an empty table that broke the joining of days; such days are now
+skipped when the days are joined.
+
+- **Sample.** 391 files from 2025-03-31 to 2026-10-22, with 499,633 executions. The
+  files of 2025-11-12 and 2026-04-13 were published with a header and no rows.
+  1,359 box trades with $158.5bn of face. 8 groups were not resolved. Dropped from the
+  rate sample: 29 with under 7 days to run, 9 without a positive price, 14 with a rate
+  out of range. Every remaining trade had a benchmark.
+- **Headline, 7 days to one year.** 1,099 trades on 369 dates, $146.6bn of face. The
+  face-weighted mean spread over the Treasury curve is 35.8bp (standard error 4.9bp),
+  the median 38.7bp, the interquartile range 24.8bp to 49.3bp. The traded rate averages
+  4.25% against 3.89% for the benchmark.
+- **By maturity (face-weighted mean, median).** 7 days to 1 month: 30.8bp, 38.9bp.
+  1 to 3 months: 34.5bp, 35.3bp. 3 to 12 months: 39.7bp, 41.2bp. 1 to 2 years: 31.4bp,
+  28.5bp. Over 2 years: −42.1bp, 24.6bp, on 83 trades with a standard error of 57bp.
+- **By underlying, up to one year.** SPX 40.3bp, SPY 39.2bp, everything else 30.9bp.
+- **By month.** The median runs from about 20bp in spring 2025 to 40bp to 45bp in 2026.
+  Traded face peaks in the last month of each quarter.
+- **Marks against trades.** 1,304 of 1,307 trades have all four series in OCC's report
+  of the trade date. The rate in the marks is 35bp below the traded rate on average and
+  42bp below at the median: OCC's marks value a box at about the Treasury rate.
+- **The open-interest rule against trades.** 41% of the box face found in open interest
+  on 2026-10-22 ($27.5bn of $67.9bn) is at a root, expiry and pair of strikes that
+  traded as a box package in the files.
+
+**Diagnostics added after these figures were seen.** They are not part of the
+specification.
+
+- The face-weighted mean of June 2025 is −5.9bp against a median of 7.2bp. It comes from
+  one roll on 2025-06-06, a QQQ box of 24 days and a SPY box of 105 days traded seconds
+  apart in near-equal size. The two legs of a roll are priced together, so the rate of
+  each alone is loose. Medians do not move with it: by trade size, the median spread is
+  between 36bp and 42bp in every band from under $1m to over $1bn of face.
+- Of the $40.3bn of open-interest box face not seen trading as a package, $27.7bn is in
+  boxes of 100 to 1,000 contracts, mostly SPX strike pairs at uneven levels such as
+  3673.53 and 7729.26. Those look like two forwards struck at index levels of different
+  dates whose counts match, which pays a fixed amount at expiry as a box does but need
+  not have been lent as one. The largest untraded box is 2SPY 100/1200 of December 2026
+  ($2.6bn).
+
+**Reading.** Box spreads on Cboe traded about 36bp above Treasuries of the same
+maturity. The figure for box positions in open interest is an upper bound on lending
+done through boxes; the part confirmed by traded packages since April 2025 is 41% of it.
