@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T20:57:23+00:00",
+  "generated_at": "2026-11-14T16:40:05+00:00",
   "inputs": {
     "box_fund_lines": 8,
     "family_lines": 768,
@@ -13,6 +13,8 @@
     "HoldBoxMarketFace": "\\$70bn",
     "HoldBoxMarketShare": "21\\%",
     "HoldBoxShareOfItsBox": "92\\%",
+    "HoldCoverageContracts": "73\\%",
+    "HoldCoverageFunds": "119",
     "HoldDesign": "96.0\\%",
     "HoldDesignCall": "98.9\\%",
     "HoldDesignContracts": "1,792,021",
@@ -47,6 +49,10 @@
     "HoldMedianShare": "98\\%",
     "HoldNetAssets": "\\$36bn",
     "HoldPackageCategoryShare": "31\\%",
+    "HoldPackageGammaConventionNet": "\\$149m",
+    "HoldPackageGammaNet": "\\$554m",
+    "HoldPackageGammaSPYNet": "\\$459m",
+    "HoldPackageGammaWrong": "12\\%",
     "HoldPackageRecall": "58\\%",
     "HoldPricedShare": "100\\%",
     "HoldProfileDrop": "10\\%",
@@ -58,7 +64,8 @@
     "HoldSeries": "720",
     "HoldStockCategoryShare": "34\\%",
     "HoldStockRecall": "100\\%",
-    "HoldStockValue": "\\$22bn"
+    "HoldStockValue": "\\$22bn",
+    "HoldUnpriced": "MBTX and VOO"
   },
   "name": "holders",
   "values": {
@@ -74,6 +81,16 @@
     "category_shares": {
       "package_leg": 0.3073402080735556,
       "stock_leg": 0.33716049267023396
+    },
+    "coverage": {
+      "funds": 168,
+      "package_share_of_priced": 0.880037381506958,
+      "priced_contracts_share": 0.7262227519488496,
+      "priced_funds": 119,
+      "unpriced_underlyings": [
+        "MBTX",
+        "VOO"
+      ]
     },
     "dealer_gamma": {
       "EEM": {
@@ -147,6 +164,64 @@
         "dealer_short": 853328186.3369408,
         "net": 623455331.3044996,
         "share_of_flex_gamma": 0.03218445778834042
+      }
+    },
+    "dealer_gamma_package": {
+      "EEM": {
+        "convention_net": -8570464.728704551,
+        "convention_wrong_share": 0.2686468383742982,
+        "dealer_long": 17826128.73822378,
+        "dealer_short": 10940477.717013817,
+        "net": 6885651.021209964,
+        "share_of_flex_gamma": 0.360593850188257
+      },
+      "EFA": {
+        "convention_net": -5749512.417655193,
+        "convention_wrong_share": 0.14336478763956698,
+        "dealer_long": 66661649.05667023,
+        "dealer_short": 41420743.08141846,
+        "net": 25240905.97525179,
+        "share_of_flex_gamma": 0.22986969719577505
+      },
+      "IWM": {
+        "convention_net": 6134428.893978594,
+        "convention_wrong_share": 0.1409449895417773,
+        "dealer_long": 61065967.21985695,
+        "dealer_short": 29423472.15360935,
+        "net": 31642495.066247597,
+        "share_of_flex_gamma": 0.10435007146016911
+      },
+      "QQQ": {
+        "convention_net": -25930747.367102154,
+        "convention_wrong_share": 0.2804481978508729,
+        "dealer_long": 85847328.46908234,
+        "dealer_short": 53925454.47876207,
+        "net": 31921873.99032028,
+        "share_of_flex_gamma": 0.08062608570657158
+      },
+      "SPY": {
+        "convention_net": 183561191.14673507,
+        "convention_wrong_share": 0.09567204615768288,
+        "dealer_long": 1001506307.7046237,
+        "dealer_short": 542834384.4101642,
+        "net": 458671923.29445946,
+        "share_of_flex_gamma": 0.13220718032557824
+      },
+      "TLT": {
+        "convention_net": -522501.78758007847,
+        "convention_wrong_share": 0.3174097180582857,
+        "dealer_long": 379814.76429233234,
+        "dealer_short": 404450.0222888569,
+        "net": -24635.257996524626,
+        "share_of_flex_gamma": 0.0010764975108505995
+      },
+      "all": {
+        "convention_net": 148922393.7396717,
+        "convention_wrong_share": 0.11670916755834379,
+        "dealer_long": 1233287195.9527495,
+        "dealer_short": 678948981.8632569,
+        "net": 554338214.0894926,
+        "share_of_flex_gamma": 0.12289056437744339
       }
     },
     "design": {

@@ -42,9 +42,11 @@ def test_split_stacks_every_category_and_names_each(styled):
 
 
 def test_lending_has_two_panels_and_skips_months_without_trades(styled):
-    fig = figures.fig_box_lending(DAILY, MONTHLY)
+    confirmed = [{"date": row["date"], "strike_pair": 1e9} for row in DAILY]
+    fig = figures.fig_box_lending(DAILY, MONTHLY, confirmed)
     top, bottom = fig.axes
-    assert len(top.get_lines()) == 2
+    assert len(top.get_lines()) == 3
+    assert "Confirmed by trades" in {text.get_text() for text in top.texts}
     spread = [line for line in bottom.get_lines() if len(line.get_xdata()) == 1]
     assert len(spread) == 1  # only the month with a median
 

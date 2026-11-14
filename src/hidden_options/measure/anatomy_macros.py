@@ -69,6 +69,11 @@ def _boxes(boxes: Mapping[str, Any]) -> dict[str, str]:
         "AnatBoxNetValue": dollars(last["value"]),
         "AnatBoxNeighbourFace": dollars(last["neighbour_face"]),
         "AnatBoxNeighbourFaceFirst": dollars(first["neighbour_face"]),
+        "AnatBoxUnambiguousFace": dollars(last["unambiguous_face"]),
+        "AnatBoxUnambiguousFaceFirst": dollars(first["unambiguous_face"]),
+        "AnatBoxUnambiguousShare": formats.percent(
+            last["unambiguous_face"] / face if face else 0.0
+        ),
         "AnatBoxCount": formats.count(last["boxes"]),
         "AnatBoxWideShare": formats.percent(last["wide_share"]),
         "AnatBoxEuropeanShare": formats.percent(last["european_share"]),
@@ -83,7 +88,18 @@ def _boxes(boxes: Mapping[str, Any]) -> dict[str, str]:
         "AnatBoxOverTwoYears": dollars(last["by_maturity"]["over_2y"]),
         "AnatBoxPeakFace": dollars(boxes["peak"]),
         "AnatBoxPeakDate": formats.long_date(pd.Timestamp(boxes["peak_date"])),
+        **_peak(boxes.get("peak_largest", [])),
     }
+
+
+def _peak(largest: list[Mapping[str, Any]]) -> dict[str, str]:
+    """The largest boxes on the peak date: underlying, expiry and face of each."""
+    macros = {}
+    for row, label in zip(largest, ("First", "Second", "Third"), strict=False):
+        macros[f"AnatBoxPeak{label}Underlying"] = str(row["root"]).lstrip("0123456789")
+        macros[f"AnatBoxPeak{label}Expiry"] = formats.long_date(pd.Timestamp(row["expiry"]))
+        macros[f"AnatBoxPeak{label}Face"] = dollars(row["face"])
+    return macros
 
 
 def _rest(values: Mapping[str, Any]) -> dict[str, str]:
@@ -96,9 +112,10 @@ def _rest(values: Mapping[str, Any]) -> dict[str, str]:
         "AnatPairNotional": dollars(pairs["last_notional"]),
         "AnatPairNotionalFirst": dollars(pairs["first_notional"]),
         "AnatChanceDates": formats.count(chance["dates"]),
-        "AnatChanceBox": formats.percent(chance["box_face_share"], 1),
+        "AnatChanceBox": formats.percent(chance["box_face_share"]),
+        "AnatChanceBoxPairsKept": formats.percent(chance["box_face_share_pairs_kept"]),
         "AnatChancePackage": formats.percent(chance["package_oi_share"]),
-        "AnatChancePair": formats.percent(chance["pair_oi_share"], 1),
+        "AnatChancePair": formats.percent(chance["pair_oi_share"]),
     }
     for place, label in enumerate(("Top", "Second", "Third")):
         if place < len(names):

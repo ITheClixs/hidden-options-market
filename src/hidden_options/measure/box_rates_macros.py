@@ -63,16 +63,103 @@ def box_rates_macros(values: Mapping[str, Any]) -> dict[str, str]:
             values["open_interest"]["face"] * values["open_interest"]["traded_face_share"]
         ),
         **_months(values["monthly"]),
+        **_confirmation(values),
+        **_diagnostics(values.get("diagnostics")),
         **_sizes(values["by_size"]),
-        "BoxRMarkThreeMonth": basis_points(
-            None if marks["mean"] is None else abs(marks["mean"]) * THREE_MONTHS
-        ),
+        "BoxRMarkThreeMonth": basis_points(_three_month(values)),
     }
     for name, stem in MATURITY_STEMS.items():
         macros.update(_bucket(f"BoxR{stem}", values["by_maturity"][name]))
     for name, stem in GROUP_STEMS.items():
         macros.update(_bucket(f"BoxR{stem}", values["by_underlying"][name]))
     return macros
+
+
+def _confirmation(values: Mapping[str, Any]) -> dict[str, str]:
+    """Open-interest box face confirmed by traded packages, by underlying and over time,
+    and whether a box's two lines first appeared together. Added after the first figures."""
+    seen = values["open_interest"]
+    macros: dict[str, str] = {}
+    if "by_underlying" in seen:
+        for name, stem in GROUP_STEMS.items():
+            macros[f"BoxRTraded{stem}"] = formats.percent(seen["by_underlying"][name])
+        macros["BoxRLargestOfTraded"] = formats.percent(seen["largest_share_of_traded"])
+    confirmed = values.get("confirmed") or {}
+    if confirmed.get("first"):
+        first, last = confirmed["first"], confirmed["last"]
+        macros.update(
+            {
+                "BoxRConfirmedFirst": dollars(first["strike_pair"]),
+                "BoxRConfirmedLast": dollars(last["strike_pair"]),
+                "BoxRConfirmedFirstShare": formats.percent(
+                    _part(first["strike_pair"], first["face"])
+                ),
+                "BoxRConfirmedGrowth": formats.decimal(confirmed["growth"], 1),
+            }
+        )
+    origins = values.get("origins") or {}
+    if origins.get("same_date_share"):
+        same = origins["same_date_share"]
+        macros.update(
+            {
+                "BoxRCensored": formats.percent(origins["censored_share"]),
+                "BoxRSameDateConfirmed": formats.percent(same["confirmed"]),
+                "BoxRSameDateUnconfirmed": formats.percent(same["unconfirmed"]),
+            }
+        )
+    return macros
+
+
+def _diagnostics(found: Mapping[str, Any] | None) -> dict[str, str]:
+    """How much the headline rests on a few dates, and how the spread moved by quarter.
+    Added after the first figures."""
+    if not found or found.get("top_dates_share") is None:
+        return {}
+    quarters = [row for row in found["by_quarter"] if row["median"] is not None]
+    low = min(quarters, key=lambda row: row["median"])
+    high = max(quarters, key=lambda row: row["median"])
+    macros = {
+        "BoxRTopDates": formats.count(found["top_dates"]),
+        "BoxRTopDatesShare": formats.percent(found["top_dates_share"]),
+        "BoxREffectiveDates": formats.count(found["effective_dates"]),
+        "BoxRUnweighted": basis_points(found["unweighted_mean"]),
+        "BoxRLeaveOneLow": basis_points(found["leave_one_low"]),
+        "BoxRLeaveOneHigh": basis_points(found["leave_one_high"]),
+        "BoxRQuarterLow": basis_points(low["median"]),
+        "BoxRQuarterLowName": _quarter(low["quarter"]),
+        "BoxRQuarterHigh": basis_points(high["median"]),
+        "BoxRQuarterHighName": _quarter(high["quarter"]),
+        "BoxRMarkGapHeadline": basis_points(found["marks_headline"]["mean"]),
+        "BoxRMarkGapHeadlineMedian": basis_points(found["marks_headline"]["median"]),
+    }
+    longest = found.get("longest_largest")
+    if longest:
+        macros.update(
+            {
+                "BoxRLongestLargestFace": dollars(longest["face"]),
+                "BoxRLongestLargestSpread": basis_points(longest["spread"]),
+                "BoxRLongestLargestYear": longest["expiry"][:4],
+                "BoxRLongestLargestShare": formats.percent(longest["face_share"]),
+            }
+        )
+    return macros
+
+
+def _quarter(label: str) -> str:
+    """`2025Q2` as prose writes it: `the second quarter of 2025`."""
+    names = {"1": "first", "2": "second", "3": "third", "4": "fourth"}
+    return f"the {names[label[-1]]} quarter of {label[:4]}"
+
+
+def _three_month(values: Mapping[str, Any]) -> float | None:
+    """What the gap between OCC's marks and traded rates on boxes of up to a year comes to,
+    as a share of face, over three months."""
+    found = (values.get("diagnostics") or {}).get("marks_headline") or values["marks"]
+    return None if found["mean"] is None else abs(found["mean"]) * THREE_MONTHS
+
+
+def _part(part: float, whole: float) -> float:
+    return part / whole if whole else 0.0
 
 
 def _months(monthly: list[Mapping[str, Any]]) -> dict[str, str]:

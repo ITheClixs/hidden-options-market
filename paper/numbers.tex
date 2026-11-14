@@ -16,17 +16,30 @@
 \newcommand{\AnatBoxOverTwoYears}{\$13bn}
 \newcommand{\AnatBoxPeakDate}{10 September 2026}
 \newcommand{\AnatBoxPeakFace}{\$96bn}
+\newcommand{\AnatBoxPeakFirstExpiry}{18 December 2026}
+\newcommand{\AnatBoxPeakFirstFace}{\$16bn}
+\newcommand{\AnatBoxPeakFirstUnderlying}{SPY}
+\newcommand{\AnatBoxPeakSecondExpiry}{18 September 2026}
+\newcommand{\AnatBoxPeakSecondFace}{\$15bn}
+\newcommand{\AnatBoxPeakSecondUnderlying}{SPY}
+\newcommand{\AnatBoxPeakThirdExpiry}{30 September 2026}
+\newcommand{\AnatBoxPeakThirdFace}{\$15bn}
+\newcommand{\AnatBoxPeakThirdUnderlying}{QQQ}
 \newcommand{\AnatBoxSPXFace}{\$45bn}
 \newcommand{\AnatBoxSPYFace}{\$19bn}
 \newcommand{\AnatBoxSeries}{10,340}
 \newcommand{\AnatBoxToThreeMonths}{57\%}
+\newcommand{\AnatBoxUnambiguousFace}{\$40bn}
+\newcommand{\AnatBoxUnambiguousFaceFirst}{\$15bn}
+\newcommand{\AnatBoxUnambiguousShare}{59\%}
 \newcommand{\AnatBoxValue}{\$171bn}
 \newcommand{\AnatBoxValueShare}{31\%}
 \newcommand{\AnatBoxWideShare}{85\%}
-\newcommand{\AnatChanceBox}{3.7\%}
+\newcommand{\AnatChanceBox}{4\%}
+\newcommand{\AnatChanceBoxPairsKept}{72\%}
 \newcommand{\AnatChanceDates}{24}
 \newcommand{\AnatChancePackage}{75\%}
-\newcommand{\AnatChancePair}{35.3\%}
+\newcommand{\AnatChancePair}{35\%}
 \newcommand{\AnatColocated}{6\%}
 \newcommand{\AnatDates}{475}
 \newcommand{\AnatFinancingValueShare}{77\%}
@@ -65,22 +78,28 @@
 \newcommand{\AnatStockMeanOIShare}{4\%}
 \newcommand{\AnatStockMeanValueShare}{21\%}
 \newcommand{\AnatStockOIShare}{2\%}
-\newcommand{\AnatStockSecondName}{QQQ}
-\newcommand{\AnatStockSecondValue}{\$8.7bn}
+\newcommand{\AnatStockSecondName}{EFA}
+\newcommand{\AnatStockSecondValue}{\$2.5bn}
 \newcommand{\AnatStockSeries}{742}
 \newcommand{\AnatStockThirdName}{IWM}
 \newcommand{\AnatStockThirdValue}{\$2.7bn}
-\newcommand{\AnatStockTopName}{SPY}
-\newcommand{\AnatStockTopValue}{\$74bn}
+\newcommand{\AnatStockTopName}{EEM}
+\newcommand{\AnatStockTopValue}{\$0.7bn}
 \newcommand{\AnatStockUnderlyings}{22}
 \newcommand{\AnatStockValue}{\$91bn}
 \newcommand{\AnatStockValueShare}{17\%}
 \newcommand{\BeyondHorizonMean}{11\%}
 \newcommand{\BeyondHorizonShare}{16\%}
 \newcommand{\BoxRBenchmark}{3.89\%}
+\newcommand{\BoxRCensored}{42\%}
+\newcommand{\BoxRConfirmedFirst}{\$7.1bn}
+\newcommand{\BoxRConfirmedFirstShare}{32\%}
+\newcommand{\BoxRConfirmedGrowth}{4.0}
+\newcommand{\BoxRConfirmedLast}{\$28bn}
 \newcommand{\BoxRDroppedPrice}{9}
 \newcommand{\BoxRDroppedRange}{14}
 \newcommand{\BoxRDroppedShort}{29}
+\newcommand{\BoxREffectiveDates}{9}
 \newcommand{\BoxRElseFace}{\$63bn}
 \newcommand{\BoxRElseHigh}{46}
 \newcommand{\BoxRElseLow}{8}
@@ -94,8 +113,17 @@
 \newcommand{\BoxRHeadlineDates}{369}
 \newcommand{\BoxRHeadlineFace}{\$147bn}
 \newcommand{\BoxRHeadlineTrades}{1,099}
+\newcommand{\BoxRLargestOfTraded}{58\%}
 \newcommand{\BoxRLastDate}{22 October 2026}
+\newcommand{\BoxRLeaveOneHigh}{40}
+\newcommand{\BoxRLeaveOneLow}{33}
+\newcommand{\BoxRLongestLargestFace}{\$1.0bn}
+\newcommand{\BoxRLongestLargestShare}{22\%}
+\newcommand{\BoxRLongestLargestSpread}{-291}
+\newcommand{\BoxRLongestLargestYear}{2031}
 \newcommand{\BoxRMarkGap}{-35}
+\newcommand{\BoxRMarkGapHeadline}{-37}
+\newcommand{\BoxRMarkGapHeadlineMedian}{-42}
 \newcommand{\BoxRMarkGapMedian}{-42}
 \newcommand{\BoxRMarkMatched}{1,304}
 \newcommand{\BoxRMarkMatchedShare}{100\%}
@@ -123,6 +151,10 @@
 \newcommand{\BoxROverTwoYearsSpread}{-42}
 \newcommand{\BoxROverTwoYearsTrades}{83}
 \newcommand{\BoxRQuarterEndShare}{85\%}
+\newcommand{\BoxRQuarterHigh}{56}
+\newcommand{\BoxRQuarterHighName}{the fourth quarter of 2025}
+\newcommand{\BoxRQuarterLow}{11}
+\newcommand{\BoxRQuarterLowName}{the second quarter of 2025}
 \newcommand{\BoxRRate}{4.25\%}
 \newcommand{\BoxRSPXFace}{\$13bn}
 \newcommand{\BoxRSPXHigh}{51}
@@ -136,6 +168,8 @@
 \newcommand{\BoxRSPYMedian}{41}
 \newcommand{\BoxRSPYSpread}{39}
 \newcommand{\BoxRSPYTrades}{604}
+\newcommand{\BoxRSameDateConfirmed}{99\%}
+\newcommand{\BoxRSameDateUnconfirmed}{26\%}
 \newcommand{\BoxRSampleFace}{\$153bn}
 \newcommand{\BoxRSampleTrades}{1,307}
 \newcommand{\BoxRSizeMedianHigh}{42}
@@ -157,10 +191,16 @@
 \newcommand{\BoxRToOneMonthMedian}{39}
 \newcommand{\BoxRToOneMonthSpread}{31}
 \newcommand{\BoxRToOneMonthTrades}{172}
+\newcommand{\BoxRTopDates}{6}
+\newcommand{\BoxRTopDatesShare}{79\%}
+\newcommand{\BoxRTradedElse}{18\%}
 \newcommand{\BoxRTradedFace}{\$28bn}
+\newcommand{\BoxRTradedSPX}{23\%}
+\newcommand{\BoxRTradedSPY}{86\%}
 \newcommand{\BoxRTradedShare}{41\%}
 \newcommand{\BoxRTrades}{1,359}
 \newcommand{\BoxRUnresolved}{8}
+\newcommand{\BoxRUnweighted}{36}
 \newcommand{\BreakDate}{6 June 2025}
 \newcommand{\BreakMonth}{June 2025}
 \newcommand{\BreakShiftDays}{22}
@@ -492,6 +532,8 @@
 \newcommand{\HoldBoxMarketFace}{\$70bn}
 \newcommand{\HoldBoxMarketShare}{21\%}
 \newcommand{\HoldBoxShareOfItsBox}{92\%}
+\newcommand{\HoldCoverageContracts}{73\%}
+\newcommand{\HoldCoverageFunds}{119}
 \newcommand{\HoldDesign}{96.0\%}
 \newcommand{\HoldDesignCall}{98.9\%}
 \newcommand{\HoldDesignContracts}{1,792,021}
@@ -526,6 +568,10 @@
 \newcommand{\HoldMedianShare}{98\%}
 \newcommand{\HoldNetAssets}{\$36bn}
 \newcommand{\HoldPackageCategoryShare}{31\%}
+\newcommand{\HoldPackageGammaConventionNet}{\$149m}
+\newcommand{\HoldPackageGammaNet}{\$554m}
+\newcommand{\HoldPackageGammaSPYNet}{\$459m}
+\newcommand{\HoldPackageGammaWrong}{12\%}
 \newcommand{\HoldPackageRecall}{58\%}
 \newcommand{\HoldPricedShare}{100\%}
 \newcommand{\HoldProfileDrop}{10\%}
@@ -538,6 +584,7 @@
 \newcommand{\HoldStockCategoryShare}{34\%}
 \newcommand{\HoldStockRecall}{100\%}
 \newcommand{\HoldStockValue}{\$22bn}
+\newcommand{\HoldUnpriced}{MBTX and VOO}
 \newcommand{\IvAtFloor}{22}
 \newcommand{\IvBelowDeepCalls}{89.1\%}
 \newcommand{\IvBelowIntrinsic}{86,957}

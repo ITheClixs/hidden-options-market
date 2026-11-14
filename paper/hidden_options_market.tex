@@ -16,11 +16,11 @@
 \input{numbers}
 
 \title{\textbf{The Hidden Options Market}\\[0.4em]
-\large How Much Option Convexity Listed Chains Miss, and Whether It Moves Prices}
+\large What Listed Option Chains Leave Out, What It Is Made Of, and Whether It Moves Prices}
 
 \author{Anonymous}
 
-\date{8 November 2026}
+\date{14 November 2026}
 
 \begin{document}
 \maketitle
@@ -30,22 +30,20 @@
 FLEX options are exchange options with negotiated terms, cleared by the Options Clearing
 Corporation and absent from the listed chains most option research uses. From OCC's daily
 FLEX open-interest report, \PanelStart{} to \PanelEnd{}, we ask what this hidden market is
-and whether its risk matters. By value it is mostly not options. Box spreads, deep calls
-through which funds hold their underlying, and same-strike call and put pairs are
-\AnatFinancingValueShare{} of its \ValueEnd{} of mark value on the last date. Box
-positions carry \AnatBoxFace{} of face, \AnatBoxGrowth{} times the level \PanelMonths{}
-months earlier, and boxes traded on Cboe at \BoxRSpread{} basis points over Treasuries.
-Counted in gamma, across the \GammaUnderlyings{} underlyings whose listed chains we store,
-FLEX is \GammaMedianGross{} of the median one's gross and \GammaMedianNetted{} once
-same-strike pairs are netted; it stays large only in a few products such as SPY and NDX.
-In tests specified in advance, netted FLEX dollar gamma does not predict next-day
-volatility (minimum detectable effect \GPredMDEShare{} of mean absolute return per
-standard deviation), and no tendency of closes to settle at large FLEX strikes is
-detected, by a design whose size and power on real returns match the simulated ones but
-that detects none at listed strikes either. Two measurement results travel further:
-classifying off-grid strikes as FLEX misses \FlexOnGridShare{} of FLEX series, and strike
-notional overstates delta exposure at least \PosGrossMedian{}-fold for the median
-underlying.
+and whether its risk matters. By gross mark value, \AnatFinancingValueShare{} of it sits
+in series that read as box spreads, deep calls through which funds hold their
+underlying, and same-strike call and put pairs. Box spreads confirmed by traded orders
+carry \BoxRTradedFace{} of face on the last date, and boxes of up to a year traded on
+Cboe at a median \BoxRSpreadMedian{} basis points over Treasuries. On one date, issuer
+holdings give the dealer's side of one issuer's fund packages: net long gamma, several
+times what the sign convention of listed gamma figures implies. Counted in gamma, FLEX is
+\GammaMedianGross{} of the median followed underlying's gross and \GammaMedianNetted{}
+once same-strike pairs are netted. In tests specified in advance, netted FLEX dollar gamma
+does not predict next-day volatility (minimum detectable effect \GPredMDEShare{} of mean
+absolute return per standard deviation), and no pinning at large FLEX strikes is
+detected, by a design that detects none at listed strikes either. Off-grid strike rules
+miss \FlexOnGridShare{} of FLEX series, and strike notional overstates delta exposure at
+least \PosGrossMedian{}-fold for the median underlying.
 \vspace{0.8em}
 \noindent\textbf{Keywords:} FLEX options; clearing data; open interest; box spreads;
 hidden inventory; dealer gamma; hedging; option market structure.
@@ -73,11 +71,13 @@ cleared FLEX series, with roughly twenty months of history. The one study we kno
 that uses OCC's FLEX files, \citet{prakash2026}, examines 53 FLEX events in 41
 single names outside the S\&P 500 between March 2025 and March 2026, with event-study
 designs on listed open interest, implied volatility and returns. We use the whole daily
-report, for every underlying, over twenty-three months, and ask what the market is and
+report, for every underlying, over \PanelMonths{} months, and ask what the market is and
 whether its convexity matters.
 
-\paragraph{What we find.} There are four results. By value the hidden market is mostly
-lending and delta-one exposure, not options, and the lending can be sized and priced.
+\paragraph{What we find.} There are four results. By gross mark value the hidden market
+is mostly series that read as lending and delta-one exposure, not options; the lending
+that trades confirm can be sized and priced; and for one issuer's funds the dealer's side
+is known.
 Measured in convexity rather than contracts, the part of the option market that listed
 chains omit is modest for most names and large in a few products. Two tests specified in advance find no
 effect of that hidden convexity on the visible market, and for each we report what it
@@ -87,24 +87,25 @@ exposed two measurement errors that any study of open interest can make. The
 market's size and growth are the setting rather than the finding, and we describe them
 last.
 
-\paragraph{What it is made of.} Three products can be read from open interest alone
-(Section~\ref{sec:anatomy}). A box spread, two strikes that each carry equal call and put
-open interest with one count, is a loan. Box positions carry \AnatBoxFace{} of face on
-the last date, \AnatBoxGrowth{} times the first date's, and \BoxRTradedShare{} of that can
-be traced to four-leg box orders in Cboe's public reports of FLEX executions. In those
-reports \BoxRHeadlineTrades{} boxes of up to a year traded at \BoxRSpread{} basis points
-over the Treasury curve (standard error \BoxRSpreadSE{}). That is the convenience yield of
-\citet{binsbergen2022} in traded prices, with the amounts traded, and OCC's marks value
-the same boxes at about the Treasury rate. Calls struck at a few percent of spot, through
+\paragraph{What it is made of.} Four kinds of series can be read from open interest
+alone (Section~\ref{sec:anatomy}). A box spread, a forward bought at one strike and sold
+at another, pays the distance between the strikes at expiry and is a loan. Pairs of
+strikes whose calls and puts all carry one count look like boxes, but such matches often
+arise by chance. Cboe's public reports of FLEX executions confirm \BoxRTradedFace{} of
+box face on the last date as four-leg box orders, against \AnatBoxFace{} that counts
+alone suggest. In those reports \BoxRHeadlineTrades{} boxes of up to a year traded at a
+median \BoxRSpreadMedian{} basis points over the Treasury curve: the convenience yield of
+\citet{binsbergen2022} in traded prices, with the amounts traded. OCC's marks value the
+same boxes at about the Treasury rate. Calls struck at a few percent of spot, through
 which defined-outcome funds hold their underlying, are worth \AnatStockValue{}. Strikes
-with equal call and put open interest, which are forwards if held on opposite sides, are
-\AnatPairOIShare{} of open interest. Together the three hold \AnatFinancingValueShare{} of
-mark value. What is left as options is \AnatOptionOIShare{} of open interest and
-\AnatGammaOptions{} of gross FLEX gamma. On one date issuer files also name holders
-and sides (Section~\ref{sec:holders}). One exchange-traded fund holds
-\HoldBoxShareOfItsBox{} of the largest box. For the \HoldFlexFunds{} funds of one
-defined-outcome issuer, the dealer opposite is net long \HoldGammaNet{} of gamma for a
-1\% move, where the sign convention applied to listed chains would show
+with equal call and put open interest outside boxes, forwards if held on opposite sides,
+are \AnatPairOIShare{} of open interest. Together these series hold
+\AnatFinancingValueShare{} of gross mark value; what reads as options is
+\AnatOptionOIShare{} of open interest and \AnatGammaOptions{} of gross FLEX gamma. On one
+date issuer files also name holders and sides (Section~\ref{sec:holders}). One
+exchange-traded fund holds \HoldBoxShareOfItsBox{} of the largest box. For one
+defined-outcome issuer's funds the dealer opposite is net long \HoldGammaNet{} of gamma
+for a 1\% move, where the sign convention applied to listed chains would show
 \HoldGammaConventionNet{}.
 
 \paragraph{How much convexity it holds.} Counted in contracts the book is large, for
@@ -340,13 +341,14 @@ with later outcomes has to respect that lag.
 \subsection{Trade reports and the Treasury curve}
 \label{sec:trades}
 
-Two further sources enter Section~\ref{sec:anatomy} only. Cboe publishes every FLEX
+Three further sources enter Section~\ref{sec:anatomy} only. Cboe publishes every FLEX
 execution on its options exchange in a daily file: time, price, size, root, expiry,
 right, strike and a flag for the legs of a multi-leg order, with no buyer or seller. The
 files begin on \BoxRFirstDate{}. SPX FLEX trades only on Cboe; FLEX on equities and ETFs
 also trades on other exchanges, which these files do not cover. Each execution appears
 twice, once from each side, and we count it once. The benchmark for the rates in those
-trades is the US Treasury's daily par yield curve.
+trades is the US Treasury's daily par yield curve. The third source is two issuers'
+holdings files, described in Section~\ref{sec:holders}.
 
 \section{The hidden market}
 \label{sec:market}
@@ -574,8 +576,9 @@ contracts open beside a \HiddenLineOpposite{} line of \HiddenLineOppositeOpenInt
 at the same strike. It is marked at \HiddenLineValue{}, against \HiddenLineListed{} for
 every listed \HiddenLineSymbol{} option together. We therefore report the value share
 beside the open-interest share and not in its place. Neither is a measure of risk.
-Intrinsic value and paired lines are mostly financing: a deep in-the-money pair at one
-strike is a forward, whose value is large and whose convexity is none. The risk measure
+Intrinsic value and paired lines look like financing: a deep in-the-money pair at one
+strike, held on opposite sides, is a forward, whose value is large and whose convexity is
+none (Section~\ref{sec:anatomy} sorts them). The risk measure
 is gamma. Section~\ref{sec:gamma} prices it on the listed surface and nets same-strike
 pairs: FLEX is \GammaMedianGross{} of the median underlying's gamma counted gross, and
 \GammaMedianNetted{} netted.
@@ -922,11 +925,13 @@ of one, outside the validated cells, moves the median floor to \PosFloorGrossMed
 \label{sec:anatomy}
 
 Section~\ref{sec:positions} showed that cleared series are legs of larger positions.
-This section says which positions. Three products leave a fingerprint in open interest
-that needs no outside data: a loan, a fund's stock holding and a forward. A log entry
-fixed the rules for reading them before the panel was measured. It was written after an
-exploratory look at five report dates, which it describes, so the rules are informed by
-the data and the figures below are not.
+This section asks which positions, by reading products from counts and marks alone, and
+then checks the reading against public trades and fund holdings. A log entry fixed the
+rules and the figures to report before the panel was measured. It was written after an
+exploratory look at five report dates, which included the box face and the stock-leg
+value on the first and last dates, so those two figures were not blind: what was fixed
+in advance is how they are computed, not ignorance of their size. Checks added after the
+figures were seen are labelled as such below.
 
 \subsection{Four fingerprints}
 \label{sec:products}
@@ -936,20 +941,23 @@ alone. Call a strike \emph{paired} when its call and its put carry the same open
 interest.
 
 \begin{itemize}
-\item \textbf{Box spreads.} Two paired strikes with one count: four series. A long call
-and a short put at the lower strike are a forward bought there, and the reverse at the
-upper strike is a forward sold. Together they pay the distance between the strikes at
-expiry whatever the underlying does, so a box is a loan, and its face is that distance
-times the count. When more than two paired strikes of one root and expiry share a count
-we match them from the outside in, which gives the largest face any matching can, and
-report the neighbour matching, which gives the smallest, beside it.
+\item \textbf{Box spreads.} A box spread is a long call and a short put at one strike,
+which together are a forward bought there, with the reverse at a higher strike. At
+expiry it pays the distance between the strikes whatever the underlying does, so the
+buyer lends the discounted amount and the seller borrows it. Its face is that distance
+times 100 times the count. The rule looks for two paired strikes with one count. When
+more than two paired strikes of a root and expiry share a count we match them from the
+outside in, which gives the largest face any matching can, and report beside it the
+neighbour matching, which pairs each strike with the next one up, and the face in boxes
+whose count only two paired strikes share, where the matching is not in question.
 \item \textbf{Stock-leg calls.} An unpaired call struck at no more than 5\% of its mark
-plus its strike. Defined-outcome funds hold their underlying this way, as the first leg
-of the collar in Section~\ref{sec:cases} did. Such a call is worth nearly its contracts
-times spot and has no gamma.
+plus its strike, which moves almost one for one with the underlying. Defined-outcome
+funds, exchange-traded funds that hold an index through such a call and add puts and a
+call that buffer losses and cap gains over a set period, hold their underlying this way,
+as the first leg of the collar in Section~\ref{sec:cases} did.
 \item \textbf{Package legs.} Any other series with exactly the count of a stock-leg call
-at its root and expiry: the puts and the call that turn the stock leg into a buffer.
-\item \textbf{Same-strike pairs.} A paired strike that is in neither. Held on opposite
+at its root and expiry: the puts and the cap call of such a fund.
+\item \textbf{Same-strike pairs.} A paired strike in neither category. Held on opposite
 sides it is a forward. Held on the same side it would be a straddle, and the report
 cannot say which.
 \end{itemize}
@@ -959,84 +967,104 @@ with open interest gets one.
 
 \input{tables/anatomy}
 
-By value the market is mostly not options (Table~\ref{tab:anatomy},
+By gross mark value most of the market sits in series that read as loans and as
+delta-one exposure, which moves one for one with the underlying (Table~\ref{tab:anatomy},
 Figure~\ref{fig:product-split}). On \AnatLastDate{} box legs hold \AnatBoxValueShare{} of
 mark value, stock-leg calls \AnatStockValueShare{} and same-strike pairs
 \AnatPairValueShare{}: \AnatFinancingValueShare{} in all. Over the \AnatDates{} report
 dates the three average \AnatBoxMeanValueShare{}, \AnatStockMeanValueShare{} and
-\AnatPairMeanValueShare{}. By contracts the weights differ. Boxes and stock legs are
-\AnatBoxOIShare{} and \AnatStockOIShare{} of open interest, few contracts each worth a
-great deal, and pairs are \AnatPairOIShare{}. What is left as options, package legs and
-other, is \AnatOptionOIShare{} of open interest and the remaining value.
+\AnatPairMeanValueShare{}. Two qualifications matter. The shares are of gross marks: the
+legs of the boxes are marked at \AnatBoxValue{}, while the boxes net to
+\AnatBoxNetValue{}. And a pair is a forward only if its two lines are held on opposite
+sides, which the report does not show. By contracts the weights differ: boxes and stock
+legs are \AnatBoxOIShare{} and \AnatStockOIShare{} of open interest, few contracts each
+worth a great deal, and pairs are \AnatPairOIShare{}. Package legs and other, the part
+that reads as options, are \AnatOptionOIShare{} of open interest.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{figures/product_split.pdf}
-\caption{Mark value of FLEX open interest by product on every report date. Box legs,
-same-strike pairs and stock-leg calls are lending and delta-one exposure; package legs
-and other are options.}
+\caption{Gross mark value of FLEX open interest by the category the rules give each
+series, on every report date. Box legs, same-strike pairs and stock-leg calls read as
+loans, forwards and stock holdings; package legs and other read as options.}
 \label{fig:product-split}
 \end{figure}
 
 The split anticipates the gamma result of Section~\ref{sec:gamma}. On the
 \AnatGammaDates{} settlements where FLEX series can be priced on a listed surface,
 same-strike pairs carry \AnatGammaPair{} of gross FLEX dollar gamma and box legs
-\AnatGammaBox{}. Held as forwards and loans, both net to none. Package legs and other
+\AnatGammaBox{}. Held as forwards and boxes, both net to none. Package legs and other
 carry \AnatGammaOptions{}.
 
-The stock legs are a measure of their own. They are worth \AnatStockValue{} on the last
-date, in \AnatStockUnderlyings{} underlyings, with \AnatStockTopValue{} in
-\AnatStockTopName{} and \AnatStockSecondValue{} in \AnatStockSecondName{}, against
-\AnatStockFirst{} when the panel begins. That is stock exposure held through FLEX calls,
-and a lower bound on the assets of the funds that hold their underlying this way. The
-pairs, read as forwards, have a notional of \AnatPairNotional{} on the last date and
-\AnatPairNotionalFirst{} on the first: the count times the forward price each pair
-implies.
+The stock legs are worth \AnatStockValue{} on the last date, in \AnatStockUnderlyings{}
+underlyings, with \AnatStockTopValue{} in \AnatStockTopName{} and
+\AnatStockSecondValue{} in \AnatStockSecondName{}, against \AnatStockFirst{} when the
+panel begins. That is stock exposure held through FLEX calls. One issuer's funds hold
+\HoldStockCategoryShare{} of their open interest (Section~\ref{sec:holders}); who holds
+the rest is not known. The pairs, read as forwards, have a notional of
+\AnatPairNotional{} on the last date and \AnatPairNotionalFirst{} on the first.
 
-Two checks bear on the rules. Shuffling the counts of each root and expiry among its
-series, on \AnatChanceDates{} of the dates, leaves \AnatChanceBox{} of the box face: four
-lines with one count do not arise by chance. The same shuffle leaves \AnatChancePackage{}
-of package-leg open interest and \AnatChancePair{} of pair open interest. It keeps every
-bucket's counts, so where several series of a bucket share a count it reproduces the
-match, and it is a weak benchmark for those two categories. Second, a fund package whose
-legs share strikes with other packages fails the equal-count rule and lands in other.
-\AnatColocated{} of other's open interest sits at a root and expiry with a stock-leg
-call, so that leak is small.
+A fund package whose legs share a strike with another package fails the equal-count
+rule and lands in other. \AnatColocated{} of other's open interest sits at a root and
+expiry with a stock-leg call, which bounds that leak. Dealing the counts of each root and
+expiry at random among its series, on \AnatChanceDates{} of the dates, leaves
+\AnatChancePackage{} of package-leg open interest and \AnatChancePair{} of pair open
+interest, so the deal is a weak benchmark for those two categories: wherever several
+series of a bucket share a count, it reproduces the match.
 
-\subsection{A lending market}
+\subsection{Box lending: what counts show and what trades confirm}
 \label{sec:boxes}
 
-Box positions carry \AnatBoxFace{} of face on \AnatLastDate{}, against
-\AnatBoxFaceFirst{} on \AnatFirstDate{}: \AnatBoxGrowth{} times as much in \PanelMonths{}
-months (Figure~\ref{fig:box-lending}). Under the neighbour matching the figures are
-\AnatBoxNeighbourFace{} and \AnatBoxNeighbourFaceFirst{}. All of the face is in
-European-style roots, which a loan needs, since an American leg could be exercised
-early. \AnatBoxWideShare{} is in boxes whose upper strike is at least 1.25 times the
-lower: lenders use strikes far from the market, such as 4,001 and 9,001 on SPX or 10.01
-and 10,010.01 on SPY. SPX holds \AnatBoxSPXFace{} of the face and SPY \AnatBoxSPYFace{}.
-\AnatBoxToThreeMonths{} matures within three months, and \AnatBoxOverOneYear{} runs
-beyond a year. Face peaks at quarter ends, at up to \AnatBoxPeakFace{}, when maturing
-boxes and their replacements are open together. The legs of these boxes are marked at
-\AnatBoxValue{} gross, because a box struck below the market holds two deep calls of
-nearly equal worth. Net, the boxes are worth \AnatBoxNetValue{}, which is the money lent.
+Counts alone find box positions with \AnatBoxFace{} of face on \AnatLastDate{}, against
+\AnatBoxFaceFirst{} on \AnatFirstDate{} (Figure~\ref{fig:box-lending}). The neighbour
+matching gives \AnatBoxNeighbourFace{}, and boxes whose count only two paired strikes
+share hold \AnatBoxUnambiguousFace{}. All of the face is in roots of European style,
+which a loan needs, since an American leg could be exercised early; a FLEX root's leading
+digit gives its style. \AnatBoxWideShare{} is in boxes whose upper strike is at least
+1.25 times the lower, such as 4,001 and 9,001 on SPX or 10.01 and 10,010.01 on SPY. Face
+peaks just before quarterly expiries, when maturing boxes and their replacements are open
+together. On \AnatBoxPeakDate{}, at \AnatBoxPeakFace{}, the three largest were a
+\AnatBoxPeakFirstUnderlying{} box expiring \AnatBoxPeakFirstExpiry{}
+(\AnatBoxPeakFirstFace{}), the \AnatBoxPeakSecondUnderlying{} box it replaced, expiring
+\AnatBoxPeakSecondExpiry{} (\AnatBoxPeakSecondFace{}), and a
+\AnatBoxPeakThirdUnderlying{} box expiring \AnatBoxPeakThirdExpiry{}
+(\AnatBoxPeakThirdFace{}).
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.9\textwidth]{figures/box_lending.pdf}
-\caption{Top: face of the box positions in open interest, under the two matchings of
-strikes that share a count. Bottom: each month's median spread of traded box rates over
-the Treasury curve, for boxes of seven days to one year.}
+\caption{Top: face of the box positions the count rule finds in open interest, under the
+outside-in and the neighbour matching of strikes that share a count, and in red the part
+whose root and strikes traded as a four-leg box order in Cboe's reports. Bottom: each
+month's median spread of traded box rates over the Treasury curve, for boxes of seven
+days to one year.}
 \label{fig:box-lending}
 \end{figure}
 
-Not every such position was lent as a box. The trade reports of the next subsection show
-which strike pairs traded as four-leg orders. They account for \BoxRTradedShare{} of the
-last date's face, \BoxRTradedFace{}. Much of the rest is pairs of SPX strikes at uneven
-levels whose counts match, which look like forwards struck at the index level of two
-different dates. Such a position pays a fixed amount at expiry, as a box does, but need
-not have been lent as one, and a box opened before the trade files begin cannot be
-confirmed either. Box lending through FLEX on the last date therefore lies between
-\BoxRTradedFace{} and \AnatBoxFace{}.
+Equal counts do not by themselves make a box, and two checks added after these figures
+were seen show how far they fall short. First, keeping every paired strike paired and
+dealing only the counts of a root's paired strikes among its expiries still finds
+\AnatChanceBoxPairsKept{} of the box face, on \AnatChanceDates{} dates: pairs with round
+counts coincide often. (Dealing all counts at random, pairs included, finds
+\AnatChanceBox{}, but that deal breaks the pairs and so does not ask this question.)
+Second, the trade reports of the next subsection show which strike pairs traded as
+four-leg box orders. They account for \BoxRTradedShare{} of the last date's face,
+\BoxRTradedFace{}: \BoxRTradedSPY{} of the face in SPY, \BoxRTradedSPX{} in SPX and
+\BoxRTradedElse{} elsewhere, and one box, the largest, is \BoxRLargestOfTraded{} of what is
+confirmed. The two readings also differ in how their lines opened. Of the face whose
+lines can be dated (\BoxRCensored{} was already open on the first report date), the two
+strikes of a confirmed box first carried open interest on the same report date in
+\BoxRSameDateConfirmed{} of cases, as lines opened in one trade would. For the
+unconfirmed rest the figure is \BoxRSameDateUnconfirmed{}: most of it is pairs struck at
+the index level of different dates whose counts happen to match. Those are two forwards,
+which pay a fixed amount only if held on opposite sides.
+
+Box lending that the data confirm is therefore \BoxRTradedFace{} on the last date, and
+the count rule's \AnatBoxFace{} is not a measure of lending. Reading a box as confirmed
+when its root and strikes traded as a box at any expiry, which reaches boxes rolled from
+before the trade files begin, gives \BoxRConfirmedFirst{} on the first report date
+(\BoxRConfirmedFirstShare{} of that date's count) and \BoxRConfirmedLast{} on the last.
+That growth rests on the strike pairs one fund rolls (Section~\ref{sec:holders}).
 
 \subsection{The price of a box}
 \label{sec:box-rates}
@@ -1045,10 +1073,11 @@ Open interest says how much is lent, not at what rate. OCC's marks imply a rate,
 mark is a valuation. Cboe's execution reports (Section~\ref{sec:trades}) give prices
 paid. A box traded as one order appears there as four legs with one timestamp, and its
 net price, the lower forward less the upper, is the amount lent whichever side each
-party took. A second log entry fixed the reading before the files were collected. The
-box's rate discounts the distance between its strikes to that price over the calendar
-days to expiry. Its spread is that rate less the Treasury par yield curve of the trade
-date at the same maturity, both continuously compounded.
+party took. A second log entry fixed the reading after two of the files had been opened
+to learn their layout, one of them the panel's last trade date, and before the rest were
+collected. The box's rate discounts the distance between its strikes to that price over
+the calendar days to expiry. Its spread is that rate less the Treasury par yield curve of
+the trade date at the same maturity, both continuously compounded.
 
 \input{tables/box_rates}
 
@@ -1056,23 +1085,30 @@ The \BoxRFiles{} files from \BoxRFirstDate{} to \BoxRLastDate{} hold \BoxRExecut
 executions and \BoxRTrades{} box trades with \BoxRFace{} of face. \BoxRUnresolved{}
 groups with more legs could not be read as one box. \BoxRDroppedShort{} trades with
 under seven days to run, \BoxRDroppedPrice{} without a positive price and
-\BoxRDroppedRange{} with a rate outside $-5\%$ to 25\% are left out of the rates. For
-the \BoxRHeadlineTrades{} boxes of seven days to one year, where a Treasury bill yield
-is a zero rate, the traded rate averages \BoxRRate{} against \BoxRBenchmark{} on the
-Treasury curve, weighted by face (Table~\ref{tab:box-rates}). The spread is
-\BoxRSpread{} basis points, with a standard error of \BoxRSpreadSE{} clustered by trade
-date, a median of \BoxRSpreadMedian{} and an interquartile range of \BoxRSpreadLow{} to
-\BoxRSpreadHigh{}. It is much the same from one month to twelve, and in SPX and SPY.
+\BoxRDroppedRange{} with a rate outside $-5\%$ to 25\% are left out of the rates. For the
+\BoxRHeadlineTrades{} boxes of seven days to one year, where a Treasury bill yield is a
+zero rate, the median spread is \BoxRSpreadMedian{} basis points, with an interquartile
+range of \BoxRSpreadLow{} to \BoxRSpreadHigh{} (Table~\ref{tab:box-rates}). Weighted by
+face, the traded rate averages \BoxRRate{} against \BoxRBenchmark{} on the Treasury
+curve, a spread of \BoxRSpread{} basis points.
 
-By month the median moves between \BoxRMonthLow{} and \BoxRMonthHigh{} basis points
-(Figure~\ref{fig:box-lending}), and \BoxRQuarterEndShare{} of the face trades in the
-last month of a calendar quarter. One of those months shows what a face-weighted mean can
-hide. In June 2025 a single roll, a short box and a longer one traded seconds apart in
-near-equal size, pulls the month's mean below its median. The two legs of a roll are
-priced together, so the rate of each alone is loose. That reading was added after the
-figures were seen; the medians, which do not move with it, are between
-\BoxRSizeMedianLow{} and \BoxRSizeMedianHigh{} basis points in every band of trade size
-from under \$1m of face to over \$1bn.
+The weighted mean rests on few dates. \BoxRTopDates{} trade dates carry
+\BoxRTopDatesShare{} of the face, about \BoxREffectiveDates{} dates' worth in all, and the
+largest trades are one fund's quarterly roll of a SPY box against a QQQ box, two legs
+traded seconds apart in near-equal size and priced together. A standard error clustered
+by date, \BoxRSpreadSE{} basis points, overstates how precise that mean is. The level
+does not depend on those dates: the unweighted mean is \BoxRUnweighted{}, leaving out one
+date at a time moves the weighted mean between \BoxRLeaveOneLow{} and
+\BoxRLeaveOneHigh{}, and the median is between \BoxRSizeMedianLow{} and
+\BoxRSizeMedianHigh{} in every band of trade size from under \$1m of face to over \$1bn.
+These checks were added after the figures were seen. The spread has not been constant.
+Its quarterly median ranges from \BoxRQuarterLow{} basis points in \BoxRQuarterLowName{}
+to \BoxRQuarterHigh{} in \BoxRQuarterHighName{}, the monthly median from \BoxRMonthLow{}
+to \BoxRMonthHigh{} (Figure~\ref{fig:box-lending}), and \BoxRQuarterEndShare{} of the face
+trades in the last month of a calendar quarter. Beyond two years the mean in
+Table~\ref{tab:box-rates} is carried by one \BoxRLongestLargestFace{} trade expiring in
+\BoxRLongestLargestYear{} at $\BoxRLongestLargestSpread$ basis points,
+\BoxRLongestLargestShare{} of that row's face.
 
 A positive spread is the convenience yield of Treasuries that \citet{binsbergen2022}
 measure in quoted prices of listed SPX options. \citet{kozlowski2025} apply their method
@@ -1080,15 +1116,15 @@ to quotes up to August 2025 and find 26 basis points at six months and 21 at twe
 that year. Ours is the same quantity in traded prices, with the amounts traded, on the
 FLEX side of the market.
 
-OCC's marks say something else. For \BoxRMarkMatched{} of the trades all four series are
-in OCC's report of the trade date, and the rate in those marks less the traded rate
-averages $\BoxRMarkGap$ basis points ($\BoxRMarkGapMedian$ at the median). The marks
-value a box at about the Treasury rate, and lenders were paid more. Mark value therefore
-overstates what a box traded for by that gap times its remaining life, about
-\BoxRMarkThreeMonth{} basis points of face on a three-month box.
+OCC's marks say something else. For boxes of up to a year whose four series are in OCC's
+report of the trade date, the rate in those marks less the traded rate averages
+$\BoxRMarkGapHeadline$ basis points ($\BoxRMarkGapHeadlineMedian$ at the median;
+$\BoxRMarkGap$ over all maturities). The marks value a box at about the Treasury rate,
+and lenders were paid more. Mark value therefore overstates what a box traded for by
+that gap times its remaining life, about \BoxRMarkThreeMonth{} basis points of face on a
+three-month box.
 
-The reports carry no buyer or seller, so they do not say who lends. The next
-subsection names one lender.
+The reports carry no buyer or seller. The next subsection names one lender.
 
 \subsection{Who holds it: two issuers on one date}
 \label{sec:holders}
@@ -1102,62 +1138,67 @@ panel ends. The check covers one date and two issuers, and nothing below is know
 other issuers or other dates.
 
 The file holds \HoldFunds{} funds with options and \HoldNetAssets{} of net assets.
-\HoldFoundLines{} of their \HoldLines{} FLEX lines are in the report, and the funds hold
-a median \HoldMedianShare{} of the open interest of each series found. A FLEX series is
-close to bespoke: where one of these funds holds a series, little of it is held
-elsewhere.
+\HoldFoundLines{} of their \HoldLines{} FLEX lines are in the report. The funds hold a
+median \HoldMedianShare{} of the open interest of each series found, and \HoldHeldShare{}
+of those series' open interest taken together: where one of these funds holds a FLEX
+series, little of it is held elsewhere.
 
-The holdings score the rules of Section~\ref{sec:products}. Take a fund's stock leg to
-be a long call struck at no more than 5\% of the fund's own price plus the strike, and
-its package legs to be its other FLEX lines at that root and expiry. The stock-leg rule
-finds \HoldStockRecall{} of the stock legs. The package rule finds \HoldPackageRecall{}
-of the package legs, by contracts. It misses legs at a strike several funds share, whose
-count in the report is the sum of theirs, so the package legs of Table~\ref{tab:anatomy}
-are a lower bound and the rest sit in other. These funds alone are
-\HoldStockCategoryShare{} of the report's stock-leg open interest.
+The holdings bear on the rules of Section~\ref{sec:products}, though less than a full
+score would. Take a fund's stock leg to be a long call struck at no more than 5\% of the
+fund's own price plus the strike. The rule finds \HoldStockRecall{} of those, which
+shows only that OCC's marks agree with the funds' prices and that these calls are not
+paired; whether the rule's other stock legs belong to such funds cannot be checked with
+these files. Take a fund's package legs to be its other FLEX lines at that root and
+expiry. The equal-count rule finds \HoldPackageRecall{} of them, by contracts. It misses
+legs at a strike several funds share, whose count in the report is the sum of theirs, so
+the package legs of Table~\ref{tab:anatomy} are a lower bound and the rest sit in other.
 
 The holdings also give sides. The design of a defined-outcome fund predicts each one:
-long the stock leg and the highest put, short the lower puts and every other call.
-\HoldDesign{} of the package legs, by contracts, are held as predicted: \HoldDesignUpperPut{}
-of the upper puts, \HoldDesignCall{} of the calls and \HoldDesignLowerPut{} of the lower
-puts. The dealer holds the opposite, so in these legs the dealer's side is known. Priced
-from OCC's marks, the dealer is long \HoldGammaLong{} of dollar gamma for a 1\% move, in
-the lower puts and the caps, and short \HoldGammaShort{}, in the upper puts: net long
-\HoldGammaNet{}. In SPY the net is \HoldGammaSPYNet{}, and the legs are
+long the stock leg and the highest put, short the lower puts and the cap call, the call
+above the market that limits the fund's gain. \HoldDesign{} of the package legs, by
+contracts, are held as predicted: \HoldDesignUpperPut{} of the upper puts,
+\HoldDesignCall{} of the calls and \HoldDesignLowerPut{} of the lower puts. The dealer
+holds the opposite, so in these legs the dealer's side is known.
+
+Priced from OCC's marks, the matched lines give the dealer \HoldGammaLong{} of long and
+\HoldGammaShort{} of short dollar gamma for a 1\% move: net long \HoldGammaNet{}, and
+\HoldPackageGammaNet{} in the package legs alone. Pricing needs a spot, which here comes
+from a stock-leg call, so the funds' \HoldUnpriced{} lines are left out; the figures cover
+\HoldCoverageFunds{} of the \HoldFlexFunds{} funds and \HoldCoverageContracts{} of their
+contracts outside stock legs. In SPY the net is \HoldGammaSPYNet{}, and the legs are
 \HoldGammaSPYShare{} of SPY's gross FLEX gamma on the date. The convention applied to
 listed chains, dealers long calls and short puts, gets the lower puts wrong. It puts
-\HoldGammaWrong{} of these legs' gross gamma on the wrong side and gives a net of
-\HoldGammaConventionNet{}. Section~\ref{sec:gamma} reports FLEX under that convention
-only as an assumption; where it can be checked, it misses most of the dealer's position.
+\HoldGammaWrong{} of these legs' gross gamma on the wrong side, and because those legs
+offset others, the net it reports is \HoldGammaConventionNet{} (\HoldPackageGammaConventionNet{}
+in the package legs alone). Section~\ref{sec:gamma} reports FLEX under that convention
+only as an assumption; where it can be checked, it understates the dealer's net long
+gamma several times over.
 
-Figure~\ref{fig:dealer-map} carries the comparison across price levels in SPY, with each
-leg's volatility held where its mark puts it. With the disclosed sides the dealer is long
-gamma at every level above a fall of \HoldProfileShortFrom{}, and close to flat between
-falls of \HoldProfileShortFrom{} and \HoldProfileShortTo{}. At \HoldProfileDrop{} below
-spot the dealer's net is \HoldProfileDropDealer{} for a 1\% move, and the convention
-would put it at \HoldProfileDropConvention{}. The convention reads these funds as a
-large source of dealer short gamma in a fall. Their holdings say there is almost none,
-because the dealer who is short the upper puts is long the lower ones. This view was
-added after the figures the log entry specified had been seen.
+Figure~\ref{fig:dealer-map}, added after those figures were seen, carries the comparison
+across price levels in SPY, for the same matched lines, with each leg's volatility held
+where its mark puts it. With the disclosed sides the dealer is long gamma at every level
+above a fall of \HoldProfileShortFrom{}, and close to flat between falls of
+\HoldProfileShortFrom{} and \HoldProfileShortTo{}. At \HoldProfileDrop{} below spot the
+dealer's net is \HoldProfileDropDealer{} for a 1\% move, and the convention would put it
+at \HoldProfileDropConvention{}. The convention reads these funds as a large source of
+dealer short gamma in a fall. Their holdings say there is almost none, because the dealer
+who is short the upper puts is long the lower ones.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{figures/dealer_gamma_map.pdf}
-\caption{The dealer's net dollar gamma in the SPY legs of one issuer's defined-outcome
-funds on \HoldReportDate{}, at other price levels: with the sides the funds disclose,
-and under the convention that dealers are long calls and short puts.}
+\caption{The dealer's net dollar gamma in the matched SPY lines of one issuer's
+defined-outcome funds on \HoldReportDate{}, at other price levels: with the sides the
+funds disclose, and under the convention that dealers are long calls and short puts.}
 \label{fig:dealer-map}
 \end{figure}
 
-The box fund answers the question the trade reports left open. BOXX holds
-\HoldBoxContracts{} contracts of the SPY box struck at 10.01 and 10,010.01 that expires
-in December 2026, on the lending side. That is \HoldBoxFace{} of face,
+The box fund names one lender. BOXX holds \HoldBoxContracts{} contracts of the SPY box
+struck at 10.01 and 10,010.01 that expires in December 2026, on the lending side, and is
+short a QQQ box of \HoldBoxBorrowedFace{}. The SPY box is \HoldBoxFace{} of face,
 \HoldBoxShareOfItsBox{} of that box's open interest and \HoldBoxMarketShare{} of the
-\HoldBoxMarketFace{} of box face in the report. The lender in the largest box of the
-market is one exchange-traded fund. The peak of September 2026 in
-Figure~\ref{fig:box-lending} is that box's predecessor and the box itself open together:
-both stood at about 15,000 contracts on 10 September, a week before the older one
-expired.
+\HoldBoxMarketFace{} of box face the count rule finds on the date. It is the box that led
+the peak of September 2026, when the second largest was a SPY box expiring that month.
 
 \section{How much gamma do listed chains leave out?}
 \label{sec:gamma}
@@ -1222,7 +1263,8 @@ Under the sign convention vendors apply to listed chains, calls positive and put
 negative, adding FLEX would reverse the sign of the listed figure on \GammaFlipShare{} of
 \GammaSignedDays{} underlying-days, and the FLEX term is a median \GammaSignedRelative{}
 of the listed one in size. That convention is an assumption about who is long, not a
-finding, and we report it only because it is what such figures use.
+finding, and we report it only because it is what such figures use. Where fund holdings
+give the sides (Section~\ref{sec:holders}), it gets the dealer's net gamma badly wrong.
 
 The figures do not rest on the surface. On the \GammaMarkShare{} of FLEX open interest
 whose own mark inverts to a validated volatility (Section~\ref{sec:pricing}), gamma at
@@ -1350,7 +1392,8 @@ it: their slope is $\GPredTopTotalBeta\times10^{-4}$ ($t=\GPredTopTotalT$), and 
 difference from the rest has $t=\GPredTopT$. The minimum detectable effect at 80\% power
 is $\GPredMDE\times10^{-4}$ per standard deviation, $\GPredMDEHolm\times10^{-4}$ at the
 level Holm's adjustment applies, and \GPredMDEShare{} of the mean next-day absolute
-return, which under the rule fixed in advance makes the result \GPredVerdict{}. Gross and vendor-signed gamma, the
+return, which under the rule fixed in advance makes the result \GPredVerdict{}. Gross and
+vendor-signed gamma (an assumption, Section~\ref{sec:holders}), the
 open-to-close return and the session range agree; those rows are descriptive.
 
 The one large coefficient is in the lead, netted gamma two dates later, at
@@ -1552,25 +1595,30 @@ that positions span series. The gamma test nets same-strike pairs, but spreads, 
 and other multi-strike structures enter at gross gamma.
 \item \textbf{Products are read from counts, not holders.} The rules of
 Section~\ref{sec:anatomy} see equal counts and marks. A same-strike pair may be a
-straddle and not a forward. \BoxRTradedShare{} of the box face is confirmed by traded box
-orders, so the rest may not have been lent as boxes. The trade reports cover one exchange
-and carry no buyer or seller, and rates on boxes beyond a year are set against par
-yields. Holders and sides are known for two issuers on one date after the panel ends,
-and for no one else.
+straddle and not a forward. Equal counts among pairs often arise by chance, and only
+\BoxRTradedShare{} of the box face the count rule finds is confirmed by traded box orders;
+that check misses boxes traded off Cboe, which SPX boxes cannot be, and boxes opened
+before the trade files begin. The headline box rate rests on about \BoxREffectiveDates{}
+dates' worth of face, and rates beyond a year are set against par yields. Checked
+against one issuer's holdings, the stock-leg rule's recall is close to circular and its
+precision unknown. Holders and sides are known for two issuers on one date after the
+panel ends, and the dealer's gamma is priced for \HoldCoverageFunds{} of their
+\HoldFlexFunds{} funds; for everyone else they are not known.
 \end{enumerate}
 
 \section{Conclusion}
 
-Listed option chains leave out a publicly reported market, and by value most of what
-they leave out is not options. Box spreads, deep calls that stand in for stock, and
-same-strike pairs hold \AnatFinancingValueShare{} of its mark value on the last date. The
-box positions carry \AnatBoxFace{} of face, of which \BoxRTradedFace{} is confirmed by
-traded box orders, and boxes of up to a year traded at \BoxRSpread{} basis points over
-Treasuries. The hidden options market is in large part a market for cash and for
+Listed option chains leave out a publicly reported market, and by gross mark value most
+of what they leave out reads as something other than options: series that look like box
+spreads, deep calls that stand in for stock, and same-strike pairs hold
+\AnatFinancingValueShare{} of its mark value on the last date. Box lending confirmed by
+traded orders is \BoxRTradedFace{} of face, \BoxRTradedShare{} of what equal counts
+suggest, and boxes of up to a year traded at a median \BoxRSpreadMedian{} basis points
+over Treasuries. In large part the hidden options market is a market for cash and for
 delta-one exposure. Where an issuer's holdings can be set beside the report, holders and
 sides are known: one fund is the lender in the largest box, and the dealer opposite one
-issuer's defined-outcome funds is net long gamma, which the sign convention of listed
-gamma figures mostly misses.
+issuer's defined-outcome funds is net long gamma, several times what the sign convention
+of listed gamma figures shows.
 
 Counted in convexity, what remains is small. FLEX is \GammaMedianGross{} of the median underlying's gamma
 gross and \GammaMedianNetted{} once its forwards are netted, though it stays at

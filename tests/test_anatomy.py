@@ -11,8 +11,10 @@ from hidden_options.measure.anatomy import (
     box_lending,
     classify,
     colocated_other_share,
+    new_lines,
     pair_notional,
     shuffled,
+    shuffled_pairs,
     split,
     stock_leg_value,
 )
@@ -238,3 +240,57 @@ class TestChance:
         again = shuffled(day, np.random.default_rng(3))
         assert mixed["open_interest"].tolist() == again["open_interest"].tolist()
         assert day["open_interest"].tolist() == [500, 500, 500, 500, 1800, 1800, 1800, 1800]
+
+
+class TestPairsKeptShuffle:
+    def test_pairs_stay_paired_and_roots_keep_their_counts(self):
+        later = E + pd.Timedelta(days=30)
+        rows = [
+            ("2SPX", "SPX", right, strike, 1.0, count, expiry)
+            for strike, count, expiry in (
+                (100.0, 40, E),
+                (200.0, 40, E),
+                (300.0, 7, later),
+                (400.0, 9, later),
+            )
+            for right in ("C", "P")
+        ] + [("2SPX", "SPX", "C", 555.0, 1.0, 123, E)]
+        day = report(rows)
+        mixed = shuffled_pairs(day, np.random.default_rng(1))
+        wide = mixed.pivot_table(
+            index=["expiry", "strike"], columns="right", values="open_interest", aggfunc="sum"
+        )
+        paired = wide.dropna()
+        assert (paired["C"] == paired["P"]).all()
+        assert sorted(paired["C"]) == [7, 9, 40, 40]
+        lone = mixed[(mixed["strike"] == 555.0)]["open_interest"].iloc[0]
+        assert lone == 123
+
+    def test_unambiguous_face_counts_groups_of_two_only(self):
+        rows = [
+            ("2SPX", "SPX", right, strike, 1.0, count)
+            for strike, count in (
+                (100.0, 40),
+                (200.0, 40),
+                (300.0, 9),
+                (400.0, 9),
+                (500.0, 9),
+                (600.0, 9),
+            )
+            for right in ("C", "P")
+        ]
+        lending = box_lending(classify(report(rows)), D)
+        assert lending["unambiguous_face"] == pytest.approx(100 * 100 * 40)
+        assert lending["face"] == pytest.approx(100 * 100 * 40 + (300 + 100) * 100 * 9)
+
+
+def test_new_lines_record_the_first_date_a_line_has_open_interest():
+    first = report([("2SPY", "SPY", "C", 100.0, 1.0, 5), ("2SPY", "SPY", "P", 100.0, 1.0, 0)])
+    later = D + pd.Timedelta(days=1)
+    second = report(
+        [("2SPY", "SPY", "C", 100.0, 1.0, 5), ("2SPY", "SPY", "P", 200.0, 1.0, 3)], date=later
+    )
+    known = new_lines(pd.DataFrame(columns=["root", "expiry", "strike", "first_date"]), first, D)
+    known = new_lines(known, second, later)
+    dates = dict(zip(known["strike"], known["first_date"], strict=True))
+    assert dates == {100.0: D, 200.0: later}

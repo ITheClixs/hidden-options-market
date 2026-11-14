@@ -12,9 +12,9 @@ panel.
 **In brief**
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
-- **What it is made of.** By mark value, 77\% is not outright options: box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards). Box positions carry \$68bn of face, 3.1 times the level 23 months earlier; 41\% of that is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
-- **The price of the lending.** 1,099 box spreads of up to a year traded on Cboe at 36bp over the Treasury curve (standard error 4.9bp, median 39bp). OCC's marks value the same boxes at about the Treasury rate.
-- **Who holds it.** On one date, issuer files name holders and sides. One ETF (BOXX) holds 92\% of the largest box, 21\% of all box face. For 168 defined-outcome funds of one issuer, 99.2\% of FLEX lines are in OCC's report, the product design predicts the side of 96.0\% of package legs, and the dealer opposite is net long \$623m of gamma per 1% move, where the vendor convention (dealers long calls, short puts) would show \$40m.
+- **What it is made of.** By gross mark value, 77\% sits in series that read as box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards if held on opposite sides). Equal counts alone suggest \$68bn of box face, but such matches often arise by chance; \$28bn (41\%) is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
+- **The price of the lending.** 1,099 box spreads of up to a year traded on Cboe at a median 39bp over the Treasury curve (interquartile range 25 to 49bp; face-weighted mean 36bp, which rests on about 9 dates' worth of face). OCC's marks value the same boxes at about the Treasury rate.
+- **Who holds it.** On one date, issuer files name holders and sides. One ETF (BOXX) holds 92\% of the largest box. For 168 defined-outcome funds of one issuer, 99.2\% of FLEX lines are in OCC's report, the product design predicts the side of 96.0\% of package legs, and the dealer opposite is net long \$623m of gamma per 1% move (\$554m in package legs alone), where the vendor convention (dealers long calls, short puts) would show \$40m (\$149m).
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the 34 option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold 4.5\% of the netted FLEX book there.
 - **Pinning?** Not detected. On 2,643 expiries, over 326 dates, when only FLEX options expire, stocks without listed weekday expiries do not close nearer the largest FLEX strike (*t* -1.06). The rule leaves out the 32 names with listed weekday expiries, among them SPY, where FLEX holds the most gamma, QQQ and the largest single names; the books it covers are a median 3.5\% of a day's share volume. The minimum detectable effect is 0.078σ. Moved to 32 sets of placebo dates in the same names, the test rejects on 6\% of them and, with one expiry in ten pinned in the real closes, on 75\%. But the same design finds no pinning at listed strikes on 34 monthly expirations either (net of a matched placebo added after the fact, *t* -1.64), so this is what the design can see, not proof of absence. Both tests are unsigned, so effects that differ in sign across books or names could offset.
@@ -96,9 +96,9 @@ The split on 22 October 2026:
 
 ![Mark value of FLEX open interest by product on every report date](docs/figures/product_split.png)
 
-- **Boxes.** \$68bn of face on the last date against \$22bn on the first (\$52bn and \$18bn under the smallest matching of strikes that share a count). All of it is in European-style roots, and 57\% matures within three months. Shuffled counts reproduce 3.7\% of it.
-- **Not all of it was lent as a box.** 41\% of the last date's face (\$28bn) is at strikes that traded as a four-leg box order. Much of the rest is pairs of SPX forwards at uneven strikes whose counts match.
-- **Stock legs.** \$91bn of stock exposure held through deep FLEX calls, \$74bn of it in SPY.
+- **Boxes by count.** \$68bn of face on the last date against \$22bn on the first, with the outside-in matching of strikes that share a count; \$52bn with the neighbour matching, and \$40bn where only two paired strikes share the count. All of it is in European-style roots. Keeping pairs paired and dealing their counts at random among a root's expiries reproduces 72\% of it, so equal counts alone do not make a box.
+- **Boxes confirmed by trades.** 41\% of the last date's face (\$28bn) is at strikes that traded as a four-leg box order: 86\% in SPY, 23\% in SPX. The two lines of a confirmed box first appeared on the same report date in 99\% of cases, against 26\% for the unconfirmed rest, which is mostly forwards struck at different dates whose counts match.
+- **Stock legs.** \$91bn of stock exposure held through deep FLEX calls, \$0.7bn of it in EEM.
 - **Pairs.** Read as forwards, \$869bn of notional.
 
 ### What a box costs
@@ -117,9 +117,12 @@ trade date at the same maturity, in basis points:
 | 1 to 3 months | 539 | \$9.7bn | 35 | 35 | 22 to 46 |
 | 3 to 12 months | 388 | \$78bn | 40 | 41 | 33 to 51 |
 
-The mean is weighted by face and has a standard error of 4.9bp, clustered by
-trade date. The rate in OCC's marks for the same boxes is -35bp from the
-traded rate on average: the marks value a box at about the Treasury rate.
+The mean is weighted by face. 6 trade dates carry 79\% of it, mostly one fund's
+quarterly roll, so a standard error clustered by date (4.9bp) overstates its precision; the
+unweighted mean is 36bp and leaving out one date at a time gives 33 to
+40bp. The quarterly median ranges from 11bp in the second quarter of 2025 to
+56bp in the fourth quarter of 2025. For boxes of up to a year, the rate in OCC's marks is
+-37bp from the traded rate: the marks value a box at about the Treasury rate.
 
 ![Box face in open interest, and each month's median traded spread over Treasuries](docs/figures/box_lending.png)
 
@@ -132,8 +135,8 @@ holdings table, captured on 10 November 2026, were set against OCC's report of
 One date, two issuers; nothing here is known for others.
 
 - **Matching.** 99.2\% of 730 FLEX lines from 168 funds are in the report, and the funds hold a median 98\% of each series' open interest.
-- **Rules.** The stock-leg rule finds 100\% of the funds' stock legs; the equal-count package rule finds 58\% of their package legs, missing strikes that several funds share.
-- **Sides.** The product design predicts the side of 96.0\% of package legs. The dealer opposite is long \$1,477m and short \$853m of dollar gamma per 1% move: net long \$623m, against \$40m under the vendor convention.
+- **Rules.** The stock-leg rule finds 100\% of the funds' stock legs, which shows little since the check uses the same 5% rule on the funds' prices; the equal-count package rule finds 58\% of their package legs, missing strikes that several funds share.
+- **Sides.** The product design predicts the side of 96.0\% of package legs. Pricing covers 119 of the funds (MBTX and VOO lines have no spot here). The dealer opposite is long \$1,477m and short \$853m of dollar gamma per 1% move: net long \$623m, against \$40m under the vendor convention.
 - **The lender.** BOXX holds 14,902 contracts of the largest SPY box on the lending side: \$15bn of face, 92\% of that box's open interest.
 
 ![The dealer's net gamma in one issuer's SPY legs across price levels: with the sides the funds disclose, and under the convention that dealers are long calls and short puts](docs/figures/dealer_gamma_map.png)

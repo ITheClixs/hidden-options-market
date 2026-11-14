@@ -26,6 +26,7 @@ from hidden_options.measure.anatomy import (
     colocated_other_share,
     pair_notional,
     shuffled,
+    shuffled_pairs,
     split,
     stock_leg_value,
 )
@@ -41,6 +42,7 @@ NAME = "anatomy"
 SEED = 20261110
 CHANCE_EVERY = 20
 TOP_UNDERLYINGS = 8
+PEAK_BOXES = 3
 REPORT_COLUMNS = (
     "report_date",
     "kind",
@@ -68,23 +70,27 @@ def anatomy_result(
     dollar gamma per FLEX series and date (GAMMA_COLUMNS) on the `hidden_gamma` domain.
     """
     rng = np.random.default_rng(seed)
+    # A generator of its own, so adding the second deal leaves the first one's draws alone.
+    rng_pairs = np.random.default_rng(seed + 1)
     gamma_days = {pd.Timestamp(str(day)): rows for day, rows in gamma.groupby("date")}
     daily: list[dict[str, Any]] = []
     ends: dict[str, tuple[pd.Timestamp, Anatomy]] = {}
-    chance = {"dates": 0, "box_face": 0.0, "box_face_actual": 0.0}
+    chance = {"dates": 0, "box_face": 0.0, "box_face_actual": 0.0, "box_face_pairs_kept": 0.0}
     chance.update({f"{name}_oi": 0.0 for name in ("package_leg", "pair")})
     chance.update({f"{name}_oi_actual": 0.0 for name in ("package_leg", "pair")})
     gamma_sums = dict.fromkeys(CATEGORIES, 0.0)
+    largest: dict[str, list[dict[str, Any]]] = {}
     gamma_total = gamma_matched = 0.0
 
     for place, day in enumerate(days):
         date = pd.Timestamp(day["report_date"].iloc[0])
         found = classify(day)
         daily.append(_daily(found, date))
+        largest[daily[-1]["date"]] = _largest_boxes(found)
         ends.setdefault("first", (date, found))
         ends["last"] = (date, found)
         if place % chance_every == 0:
-            _add_chance(chance, day, found, rng)
+            _add_chance(chance, day, found, rng, rng_pairs)
         if date in gamma_days:
             sums, matched = gamma_by_category(gamma_days[date], found.series)
             for name, amount in sums.items():
@@ -109,6 +115,7 @@ def anatomy_result(
             "growth": _ratio(last["lending"]["face"], first["lending"]["face"]),
             "peak": max(daily, key=lambda row: row["box_face"])["box_face"],
             "peak_date": max(daily, key=lambda row: row["box_face"])["date"],
+            "peak_largest": largest[max(daily, key=lambda row: row["box_face"])["date"]],
         },
         "stock_legs": {
             "first_value": stock_first,
@@ -127,6 +134,9 @@ def anatomy_result(
         "chance": {
             "dates": int(chance["dates"]),
             "box_face_share": _ratio(chance["box_face"], chance["box_face_actual"]),
+            "box_face_share_pairs_kept": _ratio(
+                chance["box_face_pairs_kept"], chance["box_face_actual"]
+            ),
             "package_oi_share": _ratio(chance["package_leg_oi"], chance["package_leg_oi_actual"]),
             "pair_oi_share": _ratio(chance["pair_oi"], chance["pair_oi_actual"]),
         },
@@ -164,9 +174,25 @@ def _daily(found: Anatomy, date: pd.Timestamp) -> dict[str, Any]:
         "box_face": float(found.boxes["face"].sum()),
         "box_value": float(found.boxes["value"].sum()),
         "box_neighbour_face": found.neighbour_face,
+        "box_unambiguous_face": float(found.boxes.loc[found.boxes["sharing"] == 2, "face"].sum()),
         "pair_notional": pair_notional(found.series),
         "colocated_other_share": colocated_other_share(found.series),
     }
+
+
+def _largest_boxes(found: Anatomy) -> list[dict[str, Any]]:
+    """The date's PEAK_BOXES largest boxes by face. Added after the first figures, to say
+    what the peak of box face is made of."""
+    top = found.boxes.sort_values("face", ascending=False).head(PEAK_BOXES)
+    return [
+        {
+            "root": str(row["root"]),
+            "expiry": f"{pd.Timestamp(row['expiry']):%Y-%m-%d}",
+            "count": int(row["count"]),
+            "face": float(row["face"]),
+        }
+        for _, row in top.iterrows()
+    ]
 
 
 def _end(date: pd.Timestamp, found: Anatomy) -> dict[str, Any]:
@@ -189,13 +215,21 @@ def _mean_shares(daily: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
 
 
 def _add_chance(
-    chance: dict[str, float], day: pd.DataFrame, found: Anatomy, rng: np.random.Generator
+    chance: dict[str, float],
+    day: pd.DataFrame,
+    found: Anatomy,
+    rng: np.random.Generator,
+    rng_pairs: np.random.Generator,
 ) -> None:
     dealt = classify(shuffled(day, rng))
     actual, random = split(found.series), split(dealt.series)
     chance["dates"] += 1
     chance["box_face"] += float(dealt.boxes["face"].sum())
     chance["box_face_actual"] += float(found.boxes["face"].sum())
+    # A second deal, added after the first results: paired strikes stay paired and only
+    # their counts move among the expiries of a root.
+    kept = classify(shuffled_pairs(day, rng_pairs))
+    chance["box_face_pairs_kept"] += float(kept.boxes["face"].sum())
     for name in ("package_leg", "pair"):
         chance[f"{name}_oi"] += random[name]["open_interest"]
         chance[f"{name}_oi_actual"] += actual[name]["open_interest"]

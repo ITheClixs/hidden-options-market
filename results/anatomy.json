@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T15:11:35+00:00",
+  "generated_at": "2026-11-14T17:28:05+00:00",
   "inputs": {
     "chance_every": 20,
     "dates": 475,
@@ -25,17 +25,30 @@
     "AnatBoxOverTwoYears": "\\$13bn",
     "AnatBoxPeakDate": "10 September 2026",
     "AnatBoxPeakFace": "\\$96bn",
+    "AnatBoxPeakFirstExpiry": "18 December 2026",
+    "AnatBoxPeakFirstFace": "\\$16bn",
+    "AnatBoxPeakFirstUnderlying": "SPY",
+    "AnatBoxPeakSecondExpiry": "18 September 2026",
+    "AnatBoxPeakSecondFace": "\\$15bn",
+    "AnatBoxPeakSecondUnderlying": "SPY",
+    "AnatBoxPeakThirdExpiry": "30 September 2026",
+    "AnatBoxPeakThirdFace": "\\$15bn",
+    "AnatBoxPeakThirdUnderlying": "QQQ",
     "AnatBoxSPXFace": "\\$45bn",
     "AnatBoxSPYFace": "\\$19bn",
     "AnatBoxSeries": "10,340",
     "AnatBoxToThreeMonths": "57\\%",
+    "AnatBoxUnambiguousFace": "\\$40bn",
+    "AnatBoxUnambiguousFaceFirst": "\\$15bn",
+    "AnatBoxUnambiguousShare": "59\\%",
     "AnatBoxValue": "\\$171bn",
     "AnatBoxValueShare": "31\\%",
     "AnatBoxWideShare": "85\\%",
-    "AnatChanceBox": "3.7\\%",
+    "AnatChanceBox": "4\\%",
+    "AnatChanceBoxPairsKept": "72\\%",
     "AnatChanceDates": "24",
     "AnatChancePackage": "75\\%",
-    "AnatChancePair": "35.3\\%",
+    "AnatChancePair": "35\\%",
     "AnatColocated": "6\\%",
     "AnatDates": "475",
     "AnatFinancingValueShare": "77\\%",
@@ -74,13 +87,13 @@
     "AnatStockMeanOIShare": "4\\%",
     "AnatStockMeanValueShare": "21\\%",
     "AnatStockOIShare": "2\\%",
-    "AnatStockSecondName": "QQQ",
-    "AnatStockSecondValue": "\\$8.7bn",
+    "AnatStockSecondName": "EFA",
+    "AnatStockSecondValue": "\\$2.5bn",
     "AnatStockSeries": "742",
     "AnatStockThirdName": "IWM",
     "AnatStockThirdValue": "\\$2.7bn",
-    "AnatStockTopName": "SPY",
-    "AnatStockTopValue": "\\$74bn",
+    "AnatStockTopName": "EEM",
+    "AnatStockTopValue": "\\$0.7bn",
     "AnatStockUnderlyings": "22",
     "AnatStockValue": "\\$91bn",
     "AnatStockValueShare": "17\\%"
@@ -106,6 +119,7 @@
         "face": 21932617463.0,
         "mark_rate": 0.043575730633415334,
         "neighbour_face": 18267214326.0,
+        "unambiguous_face": 14883383537.0,
         "value": 21126010326.890003,
         "wide_share": 0.7835547649062646
       },
@@ -128,14 +142,36 @@
         "face": 67852374021.0,
         "mark_rate": 0.04159314133816648,
         "neighbour_face": 52468217115.0,
+        "unambiguous_face": 40245672807.0,
         "value": 65375262532.64001,
         "wide_share": 0.8497488293358059
       },
       "peak": 95507181825.0,
-      "peak_date": "2026-09-10"
+      "peak_date": "2026-09-10",
+      "peak_largest": [
+        {
+          "count": 15658,
+          "expiry": "2026-12-18",
+          "face": 15658000000.0,
+          "root": "2SPY"
+        },
+        {
+          "count": 15226,
+          "expiry": "2026-09-18",
+          "face": 15226000000.0,
+          "root": "2SPY"
+        },
+        {
+          "count": 15212,
+          "expiry": "2026-09-30",
+          "face": 15196788000.0,
+          "root": "2QQQ"
+        }
+      ]
     },
     "chance": {
       "box_face_share": 0.03730012040049431,
+      "box_face_share_pairs_kept": 0.7244301171164652,
       "dates": 24,
       "package_oi_share": 0.7540961534364325,
       "pair_oi_share": 0.3529862660108272
@@ -144,6 +180,7 @@
       {
         "box_face": 21932617463.0,
         "box_neighbour_face": 18267214326.0,
+        "box_unambiguous_face": 14883383537.0,
         "box_value": 21126010326.890003,
         "colocated_other_share": 0.07572049156795814,
         "date": "2024-12-02",
@@ -166,6 +203,7 @@
       {
         "box_face": 22097933843.0,
         "box_neighbour_face": 18396919733.0,
+        "box_unambiguous_face": 14999429568.0,
         "box_value": 21291824901.95,
         "colocated_other_share": 0.07508468038749475,
         "date": "2024-12-03",
@@ -188,6 +226,7 @@
       {
         "box_face": 22386769085.0,
         "box_neighbour_face": 18656659558.999996,
+        "box_unambiguous_face": 15195581969.0,
         "box_value": 21586391061.53,
         "colocated_other_share": 0.07283272439638498,
         "date": "2024-12-04",
@@ -210,6 +249,7 @@
       {
         "box_face": 22509623332.0,
         "box_neighbour_face": 18758409526.0,
+        "box_unambiguous_face": 15271048030.0,
         "box_value": 21696169536.530003,
         "colocated_other_share": 0.07301730433903379,
         "date": "2024-12-05",
@@ -232,6 +272,7 @@
       {
         "box_face": 22585348344.0,
         "box_neighbour_face": 18829558520.999996,
+        "box_unambiguous_face": 15318653098.0,
         "box_value": 21779539437.54,
         "colocated_other_share": 0.07381288283977697,
         "date": "2024-12-06",
@@ -254,6 +295,7 @@
       {
         "box_face": 22777810290.0,
         "box_neighbour_face": 18978705978.0,
+        "box_unambiguous_face": 15462593852.0,
         "box_value": 21968134643.21,
         "colocated_other_share": 0.07465410080324648,
         "date": "2024-12-09",
@@ -276,6 +318,7 @@
       {
         "box_face": 22978040570.0,
         "box_neighbour_face": 19120435040.999996,
+        "box_unambiguous_face": 15491514746.0,
         "box_value": 22154625814.84,
         "colocated_other_share": 0.07470641329165512,
         "date": "2024-12-10",
@@ -298,6 +341,7 @@
       {
         "box_face": 23068429915.0,
         "box_neighbour_face": 19071049206.999996,
+        "box_unambiguous_face": 15055037922.0,
         "box_value": 22232655528.160004,
         "colocated_other_share": 0.07379350790296982,
         "date": "2024-12-11",
@@ -320,6 +364,7 @@
       {
         "box_face": 21244049275.0,
         "box_neighbour_face": 17154531066.999998,
+        "box_unambiguous_face": 13059842683.0,
         "box_value": 20355856822.78,
         "colocated_other_share": 0.08461086782929594,
         "date": "2024-12-12",
@@ -342,6 +387,7 @@
       {
         "box_face": 21289279263.0,
         "box_neighbour_face": 17201497140.999996,
+        "box_unambiguous_face": 13117389179.0,
         "box_value": 20388507711.88,
         "colocated_other_share": 0.0800358264927976,
         "date": "2024-12-13",
@@ -364,6 +410,7 @@
       {
         "box_face": 21453072607.0,
         "box_neighbour_face": 17310737013.0,
+        "box_unambiguous_face": 13156066356.0,
         "box_value": 20544478106.47,
         "colocated_other_share": 0.07426696386562338,
         "date": "2024-12-16",
@@ -386,6 +433,7 @@
       {
         "box_face": 21600393346.0,
         "box_neighbour_face": 17410465161.0,
+        "box_unambiguous_face": 13257747200.0,
         "box_value": 20684601859.550003,
         "colocated_other_share": 0.07430265277101471,
         "date": "2024-12-17",
@@ -408,6 +456,7 @@
       {
         "box_face": 21711805774.0,
         "box_neighbour_face": 17508655792.999996,
+        "box_unambiguous_face": 13193191123.0,
         "box_value": 20772499663.730003,
         "colocated_other_share": 0.07315035864504117,
         "date": "2024-12-18",
@@ -430,6 +479,7 @@
       {
         "box_face": 21740356834.0,
         "box_neighbour_face": 17537159482.0,
+        "box_unambiguous_face": 13221694812.0,
         "box_value": 20796187670.36,
         "colocated_other_share": 0.07287929348509567,
         "date": "2024-12-19",
@@ -452,6 +502,7 @@
       {
         "box_face": 14919675681.0,
         "box_neighbour_face": 11991404950.0,
+        "box_unambiguous_face": 9057026694.0,
         "box_value": 13982050589.04,
         "colocated_other_share": 0.05609036918368563,
         "date": "2024-12-20",
@@ -474,6 +525,7 @@
       {
         "box_face": 15115433732.0,
         "box_neighbour_face": 12185287273.0,
+        "box_unambiguous_face": 9196492116.0,
         "box_value": 14160037364.36,
         "colocated_other_share": 0.07950132680089246,
         "date": "2024-12-23",
@@ -496,6 +548,7 @@
       {
         "box_face": 15158536758.0,
         "box_neighbour_face": 12226954643.0,
+        "box_unambiguous_face": 9192414617.0,
         "box_value": 14207646063.400002,
         "colocated_other_share": 0.0794871465817971,
         "date": "2024-12-24",
@@ -518,6 +571,7 @@
       {
         "box_face": 15347201437.0,
         "box_neighbour_face": 12391929724.0,
+        "box_unambiguous_face": 9268841681.0,
         "box_value": 14392734882.54,
         "colocated_other_share": 0.07962050638828098,
         "date": "2024-12-26",
@@ -540,6 +594,7 @@
       {
         "box_face": 15382186140.0,
         "box_neighbour_face": 12406810436.999998,
+        "box_unambiguous_face": 9252790807.0,
         "box_value": 14426530057.76,
         "colocated_other_share": 0.07820757343993774,
         "date": "2024-12-27",
@@ -562,6 +617,7 @@
       {
         "box_face": 15455214598.0,
         "box_neighbour_face": 12455614397.0,
+        "box_unambiguous_face": 9297427021.0,
         "box_value": 14515419257.010002,
         "colocated_other_share": 0.07909675084154773,
         "date": "2024-12-30",
@@ -584,6 +640,7 @@
       {
         "box_face": 15523768261.0,
         "box_neighbour_face": 12515270682.000002,
+        "box_unambiguous_face": 9315240926.0,
         "box_value": 14572987900.53,
         "colocated_other_share": 0.07600506350574929,
         "date": "2024-12-31",
@@ -606,6 +663,7 @@
       {
         "box_face": 15607909759.0,
         "box_neighbour_face": 12598289404.0,
+        "box_unambiguous_face": 9395539596.0,
         "box_value": 14654411196.73,
         "colocated_other_share": 0.08115183448684735,
         "date": "2025-01-02",
@@ -628,6 +686,7 @@
       {
         "box_face": 22148898528.0,
         "box_neighbour_face": 19122937678.999996,
+        "box_unambiguous_face": 15919564205.0,
         "box_value": 21144813096.450005,
         "colocated_other_share": 0.0789981575358396,
         "date": "2025-01-03",
@@ -650,6 +709,7 @@
       {
         "box_face": 22706374925.0,
         "box_neighbour_face": 19608787285.0,
+        "box_unambiguous_face": 16390323355.0,
         "box_value": 21693022798.47,
         "colocated_other_share": 0.07884517402015155,
         "date": "2025-01-06",
@@ -672,6 +732,7 @@
       {
         "box_face": 20502948765.0,
         "box_neighbour_face": 17349468911.0,
+        "box_unambiguous_face": 14110744674.0,
         "box_value": 19484349588.42,
         "colocated_other_share": 0.07933229330224598,
         "date": "2025-01-07",
@@ -694,6 +755,7 @@
       {
         "box_face": 19499302298.0,
         "box_neighbour_face": 16316396083.000002,
+        "box_unambiguous_face": 13039265940.0,
         "box_value": 18518005398.600002,
         "colocated_other_share": 0.0793111685606197,
         "date": "2025-01-08",
@@ -716,6 +778,7 @@
       {
         "box_face": 19499302298.0,
         "box_neighbour_face": 16316396083.000002,
+        "box_unambiguous_face": 13039265940.0,
         "box_value": 18523231467.450005,
         "colocated_other_share": 0.07961306077272276,
         "date": "2025-01-09",
@@ -738,6 +801,7 @@
       {
         "box_face": 19603588346.0,
         "box_neighbour_face": 16370788816.0,
+        "box_unambiguous_face": 13066904330.0,
         "box_value": 18597591314.930004,
         "colocated_other_share": 0.07971052343093052,
         "date": "2025-01-10",
@@ -760,6 +824,7 @@
       {
         "box_face": 19746976402.0,
         "box_neighbour_face": 16494204106.0,
+        "box_unambiguous_face": 13058627782.0,
         "box_value": 18732539595.420002,
         "colocated_other_share": 0.08001918048080968,
         "date": "2025-01-13",
@@ -782,6 +847,7 @@
       {
         "box_face": 19832178705.0,
         "box_neighbour_face": 16570534187.0,
+        "box_unambiguous_face": 13097328261.0,
         "box_value": 18816906988.2,
         "colocated_other_share": 0.0790553074302389,
         "date": "2025-01-14",
@@ -804,6 +870,7 @@
       {
         "box_face": 19852047448.0,
         "box_neighbour_face": 16590402929.999998,
+        "box_unambiguous_face": 13117197004.0,
         "box_value": 18859330438.15,
         "colocated_other_share": 0.07832636666793626,
         "date": "2025-01-15",
@@ -826,6 +893,7 @@
       {
         "box_face": 19905027820.0,
         "box_neighbour_face": 16631935361.999998,
+        "box_unambiguous_face": 13157286694.0,
         "box_value": 18917285611.64,
         "colocated_other_share": 0.08020137663573351,
         "date": "2025-01-16",
@@ -848,6 +916,7 @@
       {
         "box_face": 20110946377.0,
         "box_neighbour_face": 16826738458.000002,
+        "box_unambiguous_face": 13313401402.0,
         "box_value": 19047286251.600002,
         "colocated_other_share": 0.05728403865762498,
         "date": "2025-01-17",
@@ -870,6 +939,7 @@
       {
         "box_face": 20134921017.0,
         "box_neighbour_face": 16850454690.999996,
+        "box_unambiguous_face": 13342220633.0,
         "box_value": 19080940808.45,
         "colocated_other_share": 0.08408265610992917,
         "date": "2025-01-21",
@@ -892,6 +962,7 @@
       {
         "box_face": 20431465066.0,
         "box_neighbour_face": 17146599972.0,
+        "box_unambiguous_face": 13637109830.0,
         "box_value": 19365284333.08,
         "colocated_other_share": 0.08523020280132307,
         "date": "2025-01-22",
@@ -914,6 +985,7 @@
       {
         "box_face": 20477241665.0,
         "box_neighbour_face": 17163373482.0,
+        "box_unambiguous_face": 13655542048.0,
         "box_value": 19409820583.42,
         "colocated_other_share": 0.08488226859845888,
         "date": "2025-01-23",
@@ -936,6 +1008,7 @@
       {
         "box_face": 20624821631.0,
         "box_neighbour_face": 17260310590.0,
+        "box_unambiguous_face": 13706079122.0,
         "box_value": 19547267106.57,
         "colocated_other_share": 0.08331364106619117,
         "date": "2025-01-24",
@@ -958,6 +1031,7 @@
       {
         "box_face": 20657589372.0,
         "box_neighbour_face": 17287030045.999996,
+        "box_unambiguous_face": 13701990170.0,
         "box_value": 19600715941.12,
         "colocated_other_share": 0.08233049247056225,
         "date": "2025-01-27",
@@ -980,6 +1054,7 @@
       {
         "box_face": 20729977112.0,
         "box_neighbour_face": 17290464543.0,
+        "box_unambiguous_face": 13702786635.0,
         "box_value": 19666354327.329998,
         "colocated_other_share": 0.08196702091467835,
         "date": "2025-01-28",
@@ -1002,6 +1077,7 @@
       {
         "box_face": 20996051321.0,
         "box_neighbour_face": 17430145536.0,
+        "box_unambiguous_face": 13792158687.0,
         "box_value": 19911923555.53,
         "colocated_other_share": 0.08179864990782101,
         "date": "2025-01-29",
@@ -1024,6 +1100,7 @@
       {
         "box_face": 21018012616.0,
         "box_neighbour_face": 17500018240.0,
+        "box_unambiguous_face": 13857745162.0,
         "box_value": 19938750331.920002,
         "colocated_other_share": 0.08024237004481576,
         "date": "2025-01-30",
@@ -1046,6 +1123,7 @@
       {
         "box_face": 18947686368.0,
         "box_neighbour_face": 15425144306.0,
+        "box_unambiguous_face": 11780614818.0,
         "box_value": 17856992167.519997,
         "colocated_other_share": 0.07696454300838265,
         "date": "2025-01-31",
@@ -1068,6 +1146,7 @@
       {
         "box_face": 19120125780.0,
         "box_neighbour_face": 15550655886.000002,
+        "box_unambiguous_face": 11892557254.0,
         "box_value": 18026122944.15,
         "colocated_other_share": 0.08108367716253294,
         "date": "2025-02-03",
@@ -1090,6 +1169,7 @@
       {
         "box_face": 19200605221.0,
         "box_neighbour_face": 15608770713.0,
+        "box_unambiguous_face": 11906753638.0,
         "box_value": 18110844588.02,
         "colocated_other_share": 0.07940575360021584,
         "date": "2025-02-04",
@@ -1112,6 +1192,7 @@
       {
         "box_face": 19255506618.0,
         "box_neighbour_face": 15657274408.000002,
+        "box_unambiguous_face": 12004025387.0,
         "box_value": 18177949967.07,
         "colocated_other_share": 0.07927008380455158,
         "date": "2025-02-05",
@@ -1134,6 +1215,7 @@
       {
         "box_face": 19368441881.0,
         "box_neighbour_face": 15686165371.0,
+        "box_unambiguous_face": 11938849194.0,
         "box_value": 18274546173.89,
         "colocated_other_share": 0.07873220619865577,
         "date": "2025-02-06",
@@ -1156,6 +1238,7 @@
       {
         "box_face": 19466313167.0,
         "box_neighbour_face": 15712980709.0,
+        "box_unambiguous_face": 11957969276.0,
         "box_value": 18351663189.0,
         "colocated_other_share": 0.07821128661881159,
         "date": "2025-02-07",
@@ -1178,6 +1261,7 @@
       {
         "box_face": 19504090761.0,
         "box_neighbour_face": 15743474366.999998,
+        "box_unambiguous_face": 11991696659.0,
         "box_value": 18394959887.440002,
         "colocated_other_share": 0.07920068690580073,
         "date": "2025-02-10",
@@ -1200,6 +1284,7 @@
       {
         "box_face": 19610538156.0,
         "box_neighbour_face": 15802260397.000004,
+        "box_unambiguous_face": 11989935357.0,
         "box_value": 18492705980.600002,
         "colocated_other_share": 0.07867500922090787,
         "date": "2025-02-11",
@@ -1222,6 +1307,7 @@
       {
         "box_face": 20067271461.0,
         "box_neighbour_face": 16186869318.0,
+        "box_unambiguous_face": 12375457967.0,
         "box_value": 18905766450.79,
         "colocated_other_share": 0.07776283601680967,
         "date": "2025-02-12",
@@ -1244,6 +1330,7 @@
       {
         "box_face": 20304331777.0,
         "box_neighbour_face": 16408773432.0,
+        "box_unambiguous_face": 12570800658.0,
         "box_value": 19145958522.870003,
         "colocated_other_share": 0.07712376442725731,
         "date": "2025-02-13",
@@ -1266,6 +1353,7 @@
       {
         "box_face": 20422317555.0,
         "box_neighbour_face": 16518231772.999998,
+        "box_unambiguous_face": 12613080604.0,
         "box_value": 19266865546.78,
         "colocated_other_share": 0.07626424188761763,
         "date": "2025-02-14",
@@ -1288,6 +1376,7 @@
       {
         "box_face": 20472158543.0,
         "box_neighbour_face": 16561701772.999998,
+        "box_unambiguous_face": 12627967601.0,
         "box_value": 19314726645.15,
         "colocated_other_share": 0.07687255382213534,
         "date": "2025-02-18",
@@ -1310,6 +1399,7 @@
       {
         "box_face": 20538632428.0,
         "box_neighbour_face": 16629117186.999998,
+        "box_unambiguous_face": 12670515842.0,
         "box_value": 19377400772.6,
         "colocated_other_share": 0.07623458579196482,
         "date": "2025-02-19",
@@ -1332,6 +1422,7 @@
       {
         "box_face": 20637524313.0,
         "box_neighbour_face": 16733136010.0,
+        "box_unambiguous_face": 12766190636.0,
         "box_value": 19480790154.41,
         "colocated_other_share": 0.07738151661339795,
         "date": "2025-02-20",
@@ -1354,6 +1445,7 @@
       {
         "box_face": 20502587780.0,
         "box_neighbour_face": 16585366366.0,
+        "box_unambiguous_face": 12661018044.0,
         "box_value": 19365228231.53,
         "colocated_other_share": 0.06517266430250683,
         "date": "2025-02-21",
@@ -1376,6 +1468,7 @@
       {
         "box_face": 20568300820.0,
         "box_neighbour_face": 16644192893.0,
+        "box_unambiguous_face": 12717105234.0,
         "box_value": 19439835420.53,
         "colocated_other_share": 0.07871092421869837,
         "date": "2025-02-24",
@@ -1398,6 +1491,7 @@
       {
         "box_face": 20637026861.0,
         "box_neighbour_face": 16694924986.000002,
+        "box_unambiguous_face": 12758236703.0,
         "box_value": 19524143272.66,
         "colocated_other_share": 0.0806403237319902,
         "date": "2025-02-25",
@@ -1420,6 +1514,7 @@
       {
         "box_face": 20738765691.0,
         "box_neighbour_face": 16787647816.0,
+        "box_unambiguous_face": 12850943533.0,
         "box_value": 19629079115.24,
         "colocated_other_share": 0.07834511250054083,
         "date": "2025-02-26",
@@ -1442,6 +1537,7 @@
       {
         "box_face": 20806036297.0,
         "box_neighbour_face": 16851919057.0,
+        "box_unambiguous_face": 12901973525.0,
         "box_value": 19691677716.98,
         "colocated_other_share": 0.07774707217539595,
         "date": "2025-02-27",
@@ -1464,6 +1560,7 @@
       {
         "box_face": 20899104885.0,
         "box_neighbour_face": 16944183044.999998,
+        "box_unambiguous_face": 12992496913.0,
         "box_value": 19803432106.45,
         "colocated_other_share": 0.07487325458849046,
         "date": "2025-02-28",
@@ -1486,6 +1583,7 @@
       {
         "box_face": 20990498985.0,
         "box_neighbour_face": 17035830745.000002,
+        "box_unambiguous_face": 13084469413.0,
         "box_value": 19908186511.420002,
         "colocated_other_share": 0.07597461453406518,
         "date": "2025-03-03",
@@ -1508,6 +1606,7 @@
       {
         "box_face": 21201232445.0,
         "box_neighbour_face": 17225439545.0,
+        "box_unambiguous_face": 13271994260.0,
         "box_value": 20117555287.13,
         "colocated_other_share": 0.07508322336332011,
         "date": "2025-03-04",
@@ -1530,6 +1629,7 @@
       {
         "box_face": 21235445778.0,
         "box_neighbour_face": 17256511612.0,
+        "box_unambiguous_face": 13255189628.0,
         "box_value": 20140757836.48,
         "colocated_other_share": 0.07354077250693244,
         "date": "2025-03-05",
@@ -1552,6 +1652,7 @@
       {
         "box_face": 21355486060.0,
         "box_neighbour_face": 17340358223.0,
+        "box_unambiguous_face": 13338635575.0,
         "box_value": 20263084086.81,
         "colocated_other_share": 0.0746875441790489,
         "date": "2025-03-06",
@@ -1574,6 +1675,7 @@
       {
         "box_face": 21525945773.0,
         "box_neighbour_face": 17491568101.000004,
+        "box_unambiguous_face": 13483187469.0,
         "box_value": 20415906778.950005,
         "colocated_other_share": 0.07123691229328839,
         "date": "2025-03-07",
@@ -1596,6 +1698,7 @@
       {
         "box_face": 21483747047.0,
         "box_neighbour_face": 17451980552.0,
+        "box_unambiguous_face": 13441670582.0,
         "box_value": 20409193240.32,
         "colocated_other_share": 0.0726769084071973,
         "date": "2025-03-10",
@@ -1618,6 +1721,7 @@
       {
         "box_face": 32977617785.0,
         "box_neighbour_face": 28848214964.0,
+        "box_unambiguous_face": 24721085159.0,
         "box_value": 31807253345.510002,
         "colocated_other_share": 0.07294908567815579,
         "date": "2025-03-11",
@@ -1640,6 +1744,7 @@
       {
         "box_face": 33051853395.0,
         "box_neighbour_face": 28947116647.999996,
+        "box_unambiguous_face": 24857184711.0,
         "box_value": 31865242649.769997,
         "colocated_other_share": 0.07340382717961039,
         "date": "2025-03-12",
@@ -1662,6 +1767,7 @@
       {
         "box_face": 34223024476.0,
         "box_neighbour_face": 30092630623.0,
+        "box_unambiguous_face": 26002850227.0,
         "box_value": 33045051748.9,
         "colocated_other_share": 0.07325169037539375,
         "date": "2025-03-13",
@@ -1684,6 +1790,7 @@
       {
         "box_face": 34234653727.0,
         "box_neighbour_face": 30083990705.0,
+        "box_unambiguous_face": 25989933424.0,
         "box_value": 33040210751.989998,
         "colocated_other_share": 0.06966274433145556,
         "date": "2025-03-14",
@@ -1706,6 +1813,7 @@
       {
         "box_face": 28321165553.0,
         "box_neighbour_face": 24163091714.0,
+        "box_unambiguous_face": 20063986284.0,
         "box_value": 27132528013.98,
         "colocated_other_share": 0.07083341529259284,
         "date": "2025-03-17",
@@ -1728,6 +1836,7 @@
       {
         "box_face": 28424781360.0,
         "box_neighbour_face": 24268540802.0,
+        "box_unambiguous_face": 20163122183.0,
         "box_value": 27237998814.08,
         "colocated_other_share": 0.07099234643646633,
         "date": "2025-03-18",
@@ -1750,6 +1859,7 @@
       {
         "box_face": 28467004941.0,
         "box_neighbour_face": 24308766245.0,
+        "box_unambiguous_face": 20182388469.0,
         "box_value": 27289435162.100002,
         "colocated_other_share": 0.06967900096027532,
         "date": "2025-03-19",
@@ -1772,6 +1882,7 @@
       {
         "box_face": 28854672909.0,
         "box_neighbour_face": 24655590089.0,
+        "box_unambiguous_face": 20517733457.0,
         "box_value": 27680124233.43,
         "colocated_other_share": 0.07216297832985023,
         "date": "2025-03-20",
@@ -1794,6 +1905,7 @@
       {
         "box_face": 24963584685.0,
         "box_neighbour_face": 20816423954.000004,
+        "box_unambiguous_face": 16868863195.0,
         "box_value": 23790980355.43,
         "colocated_other_share": 0.0541754926844826,
         "date": "2025-03-21",
@@ -1816,6 +1928,7 @@
       {
         "box_face": 25015008068.0,
         "box_neighbour_face": 20841177480.0,
+        "box_unambiguous_face": 16889680190.0,
         "box_value": 23827527519.85,
         "colocated_other_share": 0.076881479717085,
         "date": "2025-03-24",
@@ -1838,6 +1951,7 @@
       {
         "box_face": 25031575938.0,
         "box_neighbour_face": 20844753073.0,
+        "box_unambiguous_face": 16890228698.0,
         "box_value": 23851228137.27,
         "colocated_other_share": 0.07671016858852857,
         "date": "2025-03-25",
@@ -1860,6 +1974,7 @@
       {
         "box_face": 25060242186.0,
         "box_neighbour_face": 20867876118.0,
+        "box_unambiguous_face": 16908077698.0,
         "box_value": 23877916768.510002,
         "colocated_other_share": 0.0710000102351109,
         "date": "2025-03-26",
@@ -1882,6 +1997,7 @@
       {
         "box_face": 25074867738.0,
         "box_neighbour_face": 20881708578.0,
+        "box_unambiguous_face": 16922365168.0,
         "box_value": 23893107533.35,
         "colocated_other_share": 0.07149509834643179,
         "date": "2025-03-27",
@@ -1904,6 +2020,7 @@
       {
         "box_face": 25101707547.0,
         "box_neighbour_face": 20886468405.0,
+        "box_unambiguous_face": 16883229464.0,
         "box_value": 23947976790.52,
         "colocated_other_share": 0.07010357706870148,
         "date": "2025-03-28",
@@ -1926,6 +2043,7 @@
       {
         "box_face": 22117513512.0,
         "box_neighbour_face": 17866868966.0,
+        "box_unambiguous_face": 13856439739.0,
         "box_value": 20973547921.55,
         "colocated_other_share": 0.07094026889042639,
         "date": "2025-03-31",
@@ -1948,6 +2066,7 @@
       {
         "box_face": 22274208143.0,
         "box_neighbour_face": 17915324698.0,
+        "box_unambiguous_face": 13898304500.0,
         "box_value": 21137850081.87,
         "colocated_other_share": 0.07454401226947743,
         "date": "2025-04-01",
@@ -1970,6 +2089,7 @@
       {
         "box_face": 22259916529.0,
         "box_neighbour_face": 17900084053.0,
+        "box_unambiguous_face": 13880979999.0,
         "box_value": 21114356561.559998,
         "colocated_other_share": 0.07423389397993792,
         "date": "2025-04-02",
@@ -1992,6 +2112,7 @@
       {
         "box_face": 22279560475.0,
         "box_neighbour_face": 17905039824.0,
+        "box_unambiguous_face": 13879064095.0,
         "box_value": 21184214224.91,
         "colocated_other_share": 0.07557419213512334,
         "date": "2025-04-03",
@@ -2014,6 +2135,7 @@
       {
         "box_face": 22319157025.0,
         "box_neighbour_face": 17944636373.999996,
+        "box_unambiguous_face": 13918660645.0,
         "box_value": 21246237530.09,
         "colocated_other_share": 0.07505706528600786,
         "date": "2025-04-04",
@@ -2036,6 +2158,7 @@
       {
         "box_face": 22347346703.0,
         "box_neighbour_face": 17946558440.0,
+        "box_unambiguous_face": 13917286043.0,
         "box_value": 21264498731.86,
         "colocated_other_share": 0.07484535934222682,
         "date": "2025-04-07",
@@ -2058,6 +2181,7 @@
       {
         "box_face": 22414320715.0,
         "box_neighbour_face": 18005120900.0,
+        "box_unambiguous_face": 13963307143.0,
         "box_value": 21333262374.550003,
         "colocated_other_share": 0.07384479522602672,
         "date": "2025-04-08",
@@ -2080,6 +2204,7 @@
       {
         "box_face": 22498272037.0,
         "box_neighbour_face": 18073904150.0,
+        "box_unambiguous_face": 14034059941.0,
         "box_value": 21350546288.129997,
         "colocated_other_share": 0.07409063805676543,
         "date": "2025-04-09",
@@ -2102,6 +2227,7 @@
       {
         "box_face": 22530988001.0,
         "box_neighbour_face": 18106990794.000004,
+        "box_unambiguous_face": 14059415990.0,
         "box_value": 21411382004.199997,
         "colocated_other_share": 0.07449031098170039,
         "date": "2025-04-10",
@@ -2124,6 +2250,7 @@
       {
         "box_face": 22611644767.0,
         "box_neighbour_face": 18176787952.0,
+        "box_unambiguous_face": 14117879997.0,
         "box_value": 21466009521.960003,
         "colocated_other_share": 0.07289785866474552,
         "date": "2025-04-11",
@@ -2146,6 +2273,7 @@
       {
         "box_face": 22652228169.0,
         "box_neighbour_face": 18214156874.0,
+        "box_unambiguous_face": 14152470979.0,
         "box_value": 21541303378.18,
         "colocated_other_share": 0.07592702455516742,
         "date": "2025-04-14",
@@ -2168,6 +2296,7 @@
       {
         "box_face": 22685005120.0,
         "box_neighbour_face": 18224725207.000004,
+        "box_unambiguous_face": 14158058573.0,
         "box_value": 21577305286.12,
         "colocated_other_share": 0.07866568045448635,
         "date": "2025-04-15",
@@ -2190,6 +2319,7 @@
       {
         "box_face": 22666315419.0,
         "box_neighbour_face": 18192268806.000004,
+        "box_unambiguous_face": 14132073007.0,
         "box_value": 21568827842.350002,
         "colocated_other_share": 0.07826883390716799,
         "date": "2025-04-16",
@@ -2212,6 +2342,7 @@
       {
         "box_face": 22310764141.0,
         "box_neighbour_face": 17885176627.999996,
+        "box_unambiguous_face": 13838632829.0,
         "box_value": 21214671871.370003,
         "colocated_other_share": 0.06485839301806304,
         "date": "2025-04-17",
@@ -2234,6 +2365,7 @@
       {
         "box_face": 22400048923.0,
         "box_neighbour_face": 17973833908.0,
+        "box_unambiguous_face": 13926205709.0,
         "box_value": 21325459923.96,
         "colocated_other_share": 0.0871311838133333,
         "date": "2025-04-21",
@@ -2256,6 +2388,7 @@
       {
         "box_face": 22445156769.0,
         "box_neighbour_face": 18010196809.0,
+        "box_unambiguous_face": 13932383390.0,
         "box_value": 21356638470.049995,
         "colocated_other_share": 0.08774371774193929,
         "date": "2025-04-22",
@@ -2278,6 +2411,7 @@
       {
         "box_face": 22501995443.0,
         "box_neighbour_face": 18032507326.000004,
+        "box_unambiguous_face": 13905594779.0,
         "box_value": 21395359977.92,
         "colocated_other_share": 0.08897987973736225,
         "date": "2025-04-23",
@@ -2300,6 +2434,7 @@
       {
         "box_face": 22548924073.0,
         "box_neighbour_face": 18068188351.000004,
+        "box_unambiguous_face": 13901272242.0,
         "box_value": 21459005638.04,
         "colocated_other_share": 0.08733312813317094,
         "date": "2025-04-24",
@@ -2322,6 +2457,7 @@
       {
         "box_face": 22669392552.0,
         "box_neighbour_face": 18187084611.999996,
+        "box_unambiguous_face": 14010297937.0,
         "box_value": 21584366040.760002,
         "colocated_other_share": 0.08492130157514557,
         "date": "2025-04-25",
@@ -2344,6 +2480,7 @@
       {
         "box_face": 22720777130.0,
         "box_neighbour_face": 18198237295.0,
+        "box_unambiguous_face": 13962868206.0,
         "box_value": 21659224697.08,
         "colocated_other_share": 0.08645931685386196,
         "date": "2025-04-28",
@@ -2366,6 +2503,7 @@
       {
         "box_face": 22808819808.0,
         "box_neighbour_face": 18287302966.0,
+        "box_unambiguous_face": 14041008120.0,
         "box_value": 21752294794.83,
         "colocated_other_share": 0.08644733432062199,
         "date": "2025-04-29",
@@ -2388,6 +2526,7 @@
       {
         "box_face": 22863637952.0,
         "box_neighbour_face": 18300382955.0,
+        "box_unambiguous_face": 14029192679.0,
         "box_value": 21815677576.850002,
         "colocated_other_share": 0.08842992585552238,
         "date": "2025-04-30",
@@ -2410,6 +2549,7 @@
       {
         "box_face": 23085835154.0,
         "box_neighbour_face": 18478375351.0,
+        "box_unambiguous_face": 14198848173.0,
         "box_value": 22010232461.72,
         "colocated_other_share": 0.09056209007061006,
         "date": "2025-05-01",
@@ -2432,6 +2572,7 @@
       {
         "box_face": 23177476090.0,
         "box_neighbour_face": 18554703003.0,
+        "box_unambiguous_face": 14249855269.0,
         "box_value": 22064415689.17,
         "colocated_other_share": 0.08948219218511257,
         "date": "2025-05-02",
@@ -2454,6 +2595,7 @@
       {
         "box_face": 23303087874.0,
         "box_neighbour_face": 18684640001.0,
+        "box_unambiguous_face": 14375777493.0,
         "box_value": 22191995500.320004,
         "colocated_other_share": 0.09117913245599878,
         "date": "2025-05-05",
@@ -2476,6 +2618,7 @@
       {
         "box_face": 23376237050.0,
         "box_neighbour_face": 18724816117.0,
+        "box_unambiguous_face": 14417546489.0,
         "box_value": 22277180199.64,
         "colocated_other_share": 0.09071430675809976,
         "date": "2025-05-06",
@@ -2498,6 +2641,7 @@
       {
         "box_face": 23414467181.0,
         "box_neighbour_face": 18754842024.0,
+        "box_unambiguous_face": 14353242282.0,
         "box_value": 22315871017.2,
         "colocated_other_share": 0.09036886479975911,
         "date": "2025-05-07",
@@ -2520,6 +2664,7 @@
       {
         "box_face": 23504306675.0,
         "box_neighbour_face": 18837273204.000004,
+        "box_unambiguous_face": 14426218248.0,
         "box_value": 22374196738.99,
         "colocated_other_share": 0.0879654110142288,
         "date": "2025-05-08",
@@ -2542,6 +2687,7 @@
       {
         "box_face": 23650769123.0,
         "box_neighbour_face": 18979411253.0,
+        "box_unambiguous_face": 14504557115.0,
         "box_value": 22515421745.21,
         "colocated_other_share": 0.08623327781589349,
         "date": "2025-05-09",
@@ -2564,6 +2710,7 @@
       {
         "box_face": 23736127835.0,
         "box_neighbour_face": 19019771961.0,
+        "box_unambiguous_face": 14486806078.0,
         "box_value": 22573978458.78,
         "colocated_other_share": 0.08490340061416855,
         "date": "2025-05-12",
@@ -2586,6 +2733,7 @@
       {
         "box_face": 23918596822.0,
         "box_neighbour_face": 19157974860.000004,
+        "box_unambiguous_face": 14534939853.0,
         "box_value": 22745804910.500004,
         "colocated_other_share": 0.083929789031569,
         "date": "2025-05-13",
@@ -2608,6 +2756,7 @@
       {
         "box_face": 24021542241.0,
         "box_neighbour_face": 19259774474.0,
+        "box_unambiguous_face": 14626125334.0,
         "box_value": 22835163172.469997,
         "colocated_other_share": 0.0847815924940239,
         "date": "2025-05-14",
@@ -2630,6 +2779,7 @@
       {
         "box_face": 24090991496.0,
         "box_neighbour_face": 19325803609.0,
+        "box_unambiguous_face": 14693804069.0,
         "box_value": 22925618183.579998,
         "colocated_other_share": 0.08411850994384057,
         "date": "2025-05-15",
@@ -2652,6 +2802,7 @@
       {
         "box_face": 23997723832.0,
         "box_neighbour_face": 19206594861.0,
+        "box_unambiguous_face": 14576880978.0,
         "box_value": 22832121338.519997,
         "colocated_other_share": 0.06827787897130706,
         "date": "2025-05-16",
@@ -2674,6 +2825,7 @@
       {
         "box_face": 24040876467.0,
         "box_neighbour_face": 19237056045.0,
+        "box_unambiguous_face": 14591746549.0,
         "box_value": 22883741306.85,
         "colocated_other_share": 0.09327898610134658,
         "date": "2025-05-19",
@@ -2696,6 +2848,7 @@
       {
         "box_face": 24115686544.0,
         "box_neighbour_face": 19292806025.999996,
+        "box_unambiguous_face": 14573372010.0,
         "box_value": 22959893208.060005,
         "colocated_other_share": 0.09292017765994157,
         "date": "2025-05-20",
@@ -2718,6 +2871,7 @@
       {
         "box_face": 24271660910.0,
         "box_neighbour_face": 19386879539.0,
+        "box_unambiguous_face": 14662051259.0,
         "box_value": 23099266279.029995,
         "colocated_other_share": 0.09048593581964884,
         "date": "2025-05-21",
@@ -2740,6 +2894,7 @@
       {
         "box_face": 24367871711.0,
         "box_neighbour_face": 19447596567.000004,
+        "box_unambiguous_face": 14706117804.0,
         "box_value": 23196429649.420002,
         "colocated_other_share": 0.09131019605942448,
         "date": "2025-05-22",
@@ -2762,6 +2917,7 @@
       {
         "box_face": 24380528937.0,
         "box_neighbour_face": 19446221451.000004,
+        "box_unambiguous_face": 14668566996.0,
         "box_value": 23218201330.960007,
         "colocated_other_share": 0.09071116707989706,
         "date": "2025-05-23",
@@ -2784,6 +2940,7 @@
       {
         "box_face": 24431746626.0,
         "box_neighbour_face": 19494211766.000004,
+        "box_unambiguous_face": 14709651450.0,
         "box_value": 23290561697.91,
         "colocated_other_share": 0.0927999427180295,
         "date": "2025-05-27",
@@ -2806,6 +2963,7 @@
       {
         "box_face": 24539137527.0,
         "box_neighbour_face": 19539490724.0,
+        "box_unambiguous_face": 14751159251.0,
         "box_value": 23383556272.66,
         "colocated_other_share": 0.09077063757919586,
         "date": "2025-05-28",
@@ -2828,6 +2986,7 @@
       {
         "box_face": 24597657737.0,
         "box_neighbour_face": 19593255397.999996,
+        "box_unambiguous_face": 14801024601.0,
         "box_value": 23451050803.95,
         "colocated_other_share": 0.09108460386404026,
         "date": "2025-05-29",
@@ -2850,6 +3009,7 @@
       {
         "box_face": 24691107667.0,
         "box_neighbour_face": 19679042238.0,
+        "box_unambiguous_face": 14809275291.0,
         "box_value": 23549575558.11,
         "colocated_other_share": 0.0870626327518047,
         "date": "2025-05-30",
@@ -2872,6 +3032,7 @@
       {
         "box_face": 24721831164.0,
         "box_neighbour_face": 19710724935.0,
+        "box_unambiguous_face": 14840248388.0,
         "box_value": 23581508391.08,
         "colocated_other_share": 0.0893238380855063,
         "date": "2025-06-02",
@@ -2894,6 +3055,7 @@
       {
         "box_face": 24960871841.0,
         "box_neighbour_face": 19944432303.000004,
+        "box_unambiguous_face": 15069506606.0,
         "box_value": 23811533452.890003,
         "colocated_other_share": 0.09158033065731512,
         "date": "2025-06-03",
@@ -2916,6 +3078,7 @@
       {
         "box_face": 24977795677.0,
         "box_neighbour_face": 19947306516.000004,
+        "box_unambiguous_face": 15069991828.0,
         "box_value": 23849173316.520004,
         "colocated_other_share": 0.09006400714842945,
         "date": "2025-06-04",
@@ -2938,6 +3101,7 @@
       {
         "box_face": 25057998776.0,
         "box_neighbour_face": 20017275975.000004,
+        "box_unambiguous_face": 15137588543.0,
         "box_value": 23917707324.059998,
         "colocated_other_share": 0.09051673829417745,
         "date": "2025-06-05",
@@ -2960,6 +3124,7 @@
       {
         "box_face": 38614963082.0,
         "box_neighbour_face": 33576686117.999996,
+        "box_unambiguous_face": 28693253398.0,
         "box_value": 37341997531.350006,
         "colocated_other_share": 0.08783920254859454,
         "date": "2025-06-06",
@@ -2982,6 +3147,7 @@
       {
         "box_face": 25161501183.0,
         "box_neighbour_face": 20065901274.999996,
+        "box_unambiguous_face": 15167607757.0,
         "box_value": 23922451128.899998,
         "colocated_other_share": 0.09321988369489403,
         "date": "2025-06-09",
@@ -3004,6 +3170,7 @@
       {
         "box_face": 31677632320.0,
         "box_neighbour_face": 26580571380.000004,
+        "box_unambiguous_face": 21671475266.0,
         "box_value": 30421575976.739998,
         "colocated_other_share": 0.09294219731854131,
         "date": "2025-06-10",
@@ -3026,6 +3193,7 @@
       {
         "box_face": 31805242154.0,
         "box_neighbour_face": 26680280920.000004,
+        "box_unambiguous_face": 21776860678.0,
         "box_value": 30568100038.22001,
         "colocated_other_share": 0.08904904355955494,
         "date": "2025-06-11",
@@ -3048,6 +3216,7 @@
       {
         "box_face": 31869071500.0,
         "box_neighbour_face": 26733991816.000004,
+        "box_unambiguous_face": 21822499334.0,
         "box_value": 30640511823.280006,
         "colocated_other_share": 0.0889316997122931,
         "date": "2025-06-12",
@@ -3070,6 +3239,7 @@
       {
         "box_face": 31885153657.0,
         "box_neighbour_face": 26708788335.999996,
+        "box_unambiguous_face": 21763663123.0,
         "box_value": 30648464002.2,
         "colocated_other_share": 0.08482375726093845,
         "date": "2025-06-13",
@@ -3092,6 +3262,7 @@
       {
         "box_face": 32321899995.0,
         "box_neighbour_face": 27119418683.0,
+        "box_unambiguous_face": 22165325257.0,
         "box_value": 31080724242.609997,
         "colocated_other_share": 0.08814642877789497,
         "date": "2025-06-16",
@@ -3114,6 +3285,7 @@
       {
         "box_face": 32333019321.0,
         "box_neighbour_face": 27126801066.999996,
+        "box_unambiguous_face": 22145959573.0,
         "box_value": 31100091543.929996,
         "colocated_other_share": 0.08764337267721273,
         "date": "2025-06-17",
@@ -3136,6 +3308,7 @@
       {
         "box_face": 32885587339.0,
         "box_neighbour_face": 27666845783.000004,
+        "box_unambiguous_face": 22681800173.0,
         "box_value": 31634089652.009995,
         "colocated_other_share": 0.10153617981720556,
         "date": "2025-06-18",
@@ -3158,6 +3331,7 @@
       {
         "box_face": 29168673372.0,
         "box_neighbour_face": 24008135391.0,
+        "box_unambiguous_face": 19117362461.0,
         "box_value": 27933493658.44,
         "colocated_other_share": 0.07145085440302525,
         "date": "2025-06-20",
@@ -3180,6 +3354,7 @@
       {
         "box_face": 29162351136.0,
         "box_neighbour_face": 23991492204.999996,
+        "box_unambiguous_face": 19032239625.0,
         "box_value": 27958901821.579998,
         "colocated_other_share": 0.09357016565044309,
         "date": "2025-06-23",
@@ -3202,6 +3377,7 @@
       {
         "box_face": 29310109515.0,
         "box_neighbour_face": 24123011186.999996,
+        "box_unambiguous_face": 19157662767.0,
         "box_value": 28112364427.36,
         "colocated_other_share": 0.1028302544202776,
         "date": "2025-06-24",
@@ -3224,6 +3400,7 @@
       {
         "box_face": 29402445895.0,
         "box_neighbour_face": 24183571669.0,
+        "box_unambiguous_face": 19210401609.0,
         "box_value": 28208899545.019997,
         "colocated_other_share": 0.09463439150513225,
         "date": "2025-06-25",
@@ -3246,6 +3423,7 @@
       {
         "box_face": 29495513157.0,
         "box_neighbour_face": 24289288383.999996,
+        "box_unambiguous_face": 19312962716.0,
         "box_value": 28313155229.270004,
         "colocated_other_share": 0.09462527664879088,
         "date": "2025-06-26",
@@ -3268,6 +3446,7 @@
       {
         "box_face": 29529179429.0,
         "box_neighbour_face": 24323603788.0,
+        "box_unambiguous_face": 19347969534.0,
         "box_value": 28343108764.23,
         "colocated_other_share": 0.08594757520658122,
         "date": "2025-06-27",
@@ -3290,6 +3469,7 @@
       {
         "box_face": 26448781273.0,
         "box_neighbour_face": 21239982032.000004,
+        "box_unambiguous_face": 16264702728.0,
         "box_value": 25279663444.59,
         "colocated_other_share": 0.0845037244446675,
         "date": "2025-06-30",
@@ -3312,6 +3492,7 @@
       {
         "box_face": 26484583201.0,
         "box_neighbour_face": 21274833092.0,
+        "box_unambiguous_face": 16298206344.0,
         "box_value": 25306276835.230003,
         "colocated_other_share": 0.0899142586239289,
         "date": "2025-07-01",
@@ -3334,6 +3515,7 @@
       {
         "box_face": 26588359115.0,
         "box_neighbour_face": 21333349458.000004,
+        "box_unambiguous_face": 16356833592.0,
         "box_value": 25404500332.210003,
         "colocated_other_share": 0.09372308113730923,
         "date": "2025-07-02",
@@ -3356,6 +3538,7 @@
       {
         "box_face": 26647609748.0,
         "box_neighbour_face": 21388869715.000004,
+        "box_unambiguous_face": 16407707753.0,
         "box_value": 25434855505.120003,
         "colocated_other_share": 0.09404770883489919,
         "date": "2025-07-03",
@@ -3378,6 +3561,7 @@
       {
         "box_face": 26706795196.0,
         "box_neighbour_face": 21439063586.999996,
+        "box_unambiguous_face": 16453399753.0,
         "box_value": 25500802242.81,
         "colocated_other_share": 0.09200346340176849,
         "date": "2025-07-07",
@@ -3400,6 +3584,7 @@
       {
         "box_face": 26743809633.0,
         "box_neighbour_face": 21468477904.0,
+        "box_unambiguous_face": 16416039090.0,
         "box_value": 25535213122.219997,
         "colocated_other_share": 0.09729915031776734,
         "date": "2025-07-08",
@@ -3422,6 +3607,7 @@
       {
         "box_face": 26852443613.0,
         "box_neighbour_face": 21517427324.0,
+        "box_unambiguous_face": 16491880030.0,
         "box_value": 25654139860.259995,
         "colocated_other_share": 0.09689590827109368,
         "date": "2025-07-09",
@@ -3444,6 +3630,7 @@
       {
         "box_face": 26986529095.0,
         "box_neighbour_face": 21590607958.0,
+        "box_unambiguous_face": 16608536354.0,
         "box_value": 25777097511.2,
         "colocated_other_share": 0.095482266641734,
         "date": "2025-07-10",
@@ -3466,6 +3653,7 @@
       {
         "box_face": 27054744541.0,
         "box_neighbour_face": 21654377164.000004,
+        "box_unambiguous_face": 16677892720.0,
         "box_value": 25834048520.92,
         "colocated_other_share": 0.09398604558024536,
         "date": "2025-07-11",
@@ -3488,6 +3676,7 @@
       {
         "box_face": 27088012074.0,
         "box_neighbour_face": 21677709509.000008,
+        "box_unambiguous_face": 16701545320.0,
         "box_value": 25877598484.239998,
         "colocated_other_share": 0.096023189072097,
         "date": "2025-07-14",
@@ -3510,6 +3699,7 @@
       {
         "box_face": 27157074356.0,
         "box_neighbour_face": 21686630437.0,
+        "box_unambiguous_face": 16699718700.0,
         "box_value": 25923977038.809998,
         "colocated_other_share": 0.09561300459588248,
         "date": "2025-07-15",
@@ -3532,6 +3722,7 @@
       {
         "box_face": 27234661956.0,
         "box_neighbour_face": 21766291497.0,
+        "box_unambiguous_face": 16794668140.0,
         "box_value": 26014973153.35,
         "colocated_other_share": 0.09524257585703517,
         "date": "2025-07-16",
@@ -3554,6 +3745,7 @@
       {
         "box_face": 27363459700.0,
         "box_neighbour_face": 21880097661.999996,
+        "box_unambiguous_face": 16882535209.0,
         "box_value": 26127348160.829998,
         "colocated_other_share": 0.09757267439619532,
         "date": "2025-07-17",
@@ -3576,6 +3768,7 @@
       {
         "box_face": 27259960676.0,
         "box_neighbour_face": 21772115899.0,
+        "box_unambiguous_face": 16749353909.0,
         "box_value": 26032210209.68,
         "colocated_other_share": 0.08002825546093079,
         "date": "2025-07-18",
@@ -3598,6 +3791,7 @@
       {
         "box_face": 27289133538.0,
         "box_neighbour_face": 21784121151.0,
+        "box_unambiguous_face": 16761147161.0,
         "box_value": 26079223504.350002,
         "colocated_other_share": 0.09745862420247028,
         "date": "2025-07-21",
@@ -3620,6 +3814,7 @@
       {
         "box_face": 27482919316.0,
         "box_neighbour_face": 21943627710.0,
+        "box_unambiguous_face": 16918839119.0,
         "box_value": 26270851585.18,
         "colocated_other_share": 0.09732066847272437,
         "date": "2025-07-22",
@@ -3642,6 +3837,7 @@
       {
         "box_face": 27631602867.0,
         "box_neighbour_face": 22045371561.0,
+        "box_unambiguous_face": 16971756550.0,
         "box_value": 26404039262.73,
         "colocated_other_share": 0.09688622913564045,
         "date": "2025-07-23",
@@ -3664,6 +3860,7 @@
       {
         "box_face": 27819787810.0,
         "box_neighbour_face": 22144855564.0,
+        "box_unambiguous_face": 17057492692.0,
         "box_value": 26568826376.870003,
         "colocated_other_share": 0.09653433513764591,
         "date": "2025-07-24",
@@ -3686,6 +3883,7 @@
       {
         "box_face": 27936360228.0,
         "box_neighbour_face": 22242206568.0,
+        "box_unambiguous_face": 17163074787.0,
         "box_value": 26681674325.0,
         "colocated_other_share": 0.09257927797151769,
         "date": "2025-07-25",
@@ -3708,6 +3906,7 @@
       {
         "box_face": 28101307915.0,
         "box_neighbour_face": 22379856946.999996,
+        "box_unambiguous_face": 17290301612.0,
         "box_value": 26848020922.88,
         "colocated_other_share": 0.09717004883201141,
         "date": "2025-07-28",
@@ -3730,6 +3929,7 @@
       {
         "box_face": 28269570551.0,
         "box_neighbour_face": 22527140803.0,
+        "box_unambiguous_face": 17433661200.0,
         "box_value": 27029800892.36,
         "colocated_other_share": 0.0970200027214587,
         "date": "2025-07-29",
@@ -3752,6 +3952,7 @@
       {
         "box_face": 28434627804.0,
         "box_neighbour_face": 22645242931.0,
+        "box_unambiguous_face": 17540503965.0,
         "box_value": 27171619195.04,
         "colocated_other_share": 0.09542599548811373,
         "date": "2025-07-30",
@@ -3774,6 +3975,7 @@
       {
         "box_face": 28673293360.0,
         "box_neighbour_face": 22829121934.999996,
+        "box_unambiguous_face": 17681604304.0,
         "box_value": 27401553928.710003,
         "colocated_other_share": 0.09293136922562908,
         "date": "2025-07-31",
@@ -3796,6 +3998,7 @@
       {
         "box_face": 28734753451.0,
         "box_neighbour_face": 22864750095.0,
+        "box_unambiguous_face": 17695167595.0,
         "box_value": 27521629276.27,
         "colocated_other_share": 0.09275775033873276,
         "date": "2025-08-01",
@@ -3818,6 +4021,7 @@
       {
         "box_face": 28363655987.0,
         "box_neighbour_face": 22491694966.0,
+        "box_unambiguous_face": 17316410631.0,
         "box_value": 27178304368.64,
         "colocated_other_share": 0.09283767133239536,
         "date": "2025-08-04",
@@ -3840,6 +4044,7 @@
       {
         "box_face": 28533110475.0,
         "box_neighbour_face": 22601474547.000004,
+        "box_unambiguous_face": 17330177112.0,
         "box_value": 27332808541.91,
         "colocated_other_share": 0.09265112881361867,
         "date": "2025-08-05",
@@ -3862,6 +4067,7 @@
       {
         "box_face": 28991602360.0,
         "box_neighbour_face": 23028057805.0,
+        "box_unambiguous_face": 17743020815.0,
         "box_value": 27792018527.940002,
         "colocated_other_share": 0.09098159568123952,
         "date": "2025-08-06",
@@ -3884,6 +4090,7 @@
       {
         "box_face": 29038166384.0,
         "box_neighbour_face": 23049304342.0,
+        "box_unambiguous_face": 17745243548.0,
         "box_value": 27823711121.06,
         "colocated_other_share": 0.09042202006999941,
         "date": "2025-08-07",
@@ -3906,6 +4113,7 @@
       {
         "box_face": 29123325386.0,
         "box_neighbour_face": 23124363707.000004,
+        "box_unambiguous_face": 17802769051.0,
         "box_value": 27903597827.68,
         "colocated_other_share": 0.08745156960944947,
         "date": "2025-08-08",
@@ -3928,6 +4136,7 @@
       {
         "box_face": 29338684106.0,
         "box_neighbour_face": 23290592670.0,
+        "box_unambiguous_face": 17967514461.0,
         "box_value": 28125106797.9,
         "colocated_other_share": 0.08993068092593548,
         "date": "2025-08-11",
@@ -3950,6 +4159,7 @@
       {
         "box_face": 29419143611.0,
         "box_neighbour_face": 23362768531.0,
+        "box_unambiguous_face": 18026182463.0,
         "box_value": 28211175544.420002,
         "colocated_other_share": 0.0894732656151287,
         "date": "2025-08-12",
@@ -3972,6 +4182,7 @@
       {
         "box_face": 29466428157.0,
         "box_neighbour_face": 23408174051.000004,
+        "box_unambiguous_face": 18070235009.0,
         "box_value": 28271871763.129997,
         "colocated_other_share": 0.0894271132836096,
         "date": "2025-08-13",
@@ -3994,6 +4205,7 @@
       {
         "box_face": 29395809860.0,
         "box_neighbour_face": 23330783804.0,
+        "box_unambiguous_face": 17983976987.0,
         "box_value": 28188323144.670002,
         "colocated_other_share": 0.08684268802509526,
         "date": "2025-08-14",
@@ -4016,6 +4228,7 @@
       {
         "box_face": 29355730654.0,
         "box_neighbour_face": 23288734278.0,
+        "box_unambiguous_face": 17931525721.0,
         "box_value": 28138783732.75,
         "colocated_other_share": 0.0742467969180065,
         "date": "2025-08-15",
@@ -4038,6 +4251,7 @@
       {
         "box_face": 29360881654.0,
         "box_neighbour_face": 23297479274.0,
+        "box_unambiguous_face": 17944045521.0,
         "box_value": 28152626319.189995,
         "colocated_other_share": 0.09315241182592326,
         "date": "2025-08-18",
@@ -4060,6 +4274,7 @@
       {
         "box_face": 29480737022.0,
         "box_neighbour_face": 23386968295.0,
+        "box_unambiguous_face": 17985831654.0,
         "box_value": 28274610546.54,
         "colocated_other_share": 0.0936297356573708,
         "date": "2025-08-19",
@@ -4082,6 +4297,7 @@
       {
         "box_face": 29968723870.0,
         "box_neighbour_face": 23809931956.0,
+        "box_unambiguous_face": 18320302579.0,
         "box_value": 28749910820.499996,
         "colocated_other_share": 0.09322694542377362,
         "date": "2025-08-20",
@@ -4104,6 +4320,7 @@
       {
         "box_face": 30056417747.0,
         "box_neighbour_face": 23900318494.0,
+        "box_unambiguous_face": 18414018079.0,
         "box_value": 28821804642.37,
         "colocated_other_share": 0.09282934676601892,
         "date": "2025-08-21",
@@ -4126,6 +4343,7 @@
       {
         "box_face": 30098018274.0,
         "box_neighbour_face": 23942459421.0,
+        "box_unambiguous_face": 18460653906.0,
         "box_value": 28891299710.83,
         "colocated_other_share": 0.09038153257815948,
         "date": "2025-08-22",
@@ -4148,6 +4366,7 @@
       {
         "box_face": 30437301939.0,
         "box_neighbour_face": 24268993211.0,
+        "box_unambiguous_face": 18783146216.0,
         "box_value": 29224354510.270004,
         "colocated_other_share": 0.09310892838701534,
         "date": "2025-08-25",
@@ -4170,6 +4389,7 @@
       {
         "box_face": 30615430246.0,
         "box_neighbour_face": 24437148204.000004,
+        "box_unambiguous_face": 18951491217.0,
         "box_value": 29418586171.54,
         "colocated_other_share": 0.0923869199848531,
         "date": "2025-08-26",
@@ -4192,6 +4412,7 @@
       {
         "box_face": 30670671894.0,
         "box_neighbour_face": 24510825178.0,
+        "box_unambiguous_face": 18979196727.0,
         "box_value": 29476784546.430004,
         "colocated_other_share": 0.09227176030280138,
         "date": "2025-08-27",
@@ -4214,6 +4435,7 @@
       {
         "box_face": 30713428555.0,
         "box_neighbour_face": 24553559339.0,
+        "box_unambiguous_face": 19021518688.0,
         "box_value": 29518407713.36,
         "colocated_other_share": 0.09117186986381037,
         "date": "2025-08-28",
@@ -4236,6 +4458,7 @@
       {
         "box_face": 30734872130.0,
         "box_neighbour_face": 24574247258.0,
+        "box_unambiguous_face": 19041496335.0,
         "box_value": 29544919339.79,
         "colocated_other_share": 0.08570723595033161,
         "date": "2025-08-29",
@@ -4258,6 +4481,7 @@
       {
         "box_face": 30794374530.0,
         "box_neighbour_face": 24633749658.0,
+        "box_unambiguous_face": 19100998735.0,
         "box_value": 29610073617.07,
         "colocated_other_share": 0.08922876553913289,
         "date": "2025-09-02",
@@ -4280,6 +4504,7 @@
       {
         "box_face": 30875716633.0,
         "box_neighbour_face": 24708470693.0,
+        "box_unambiguous_face": 19174641976.0,
         "box_value": 29705224244.949997,
         "colocated_other_share": 0.09125667413908839,
         "date": "2025-09-03",
@@ -4302,6 +4527,7 @@
       {
         "box_face": 30968784317.0,
         "box_neighbour_face": 24813022191.000004,
+        "box_unambiguous_face": 19265026646.0,
         "box_value": 29807178657.3,
         "colocated_other_share": 0.08844524930367997,
         "date": "2025-09-04",
@@ -4324,6 +4550,7 @@
       {
         "box_face": 31053705053.0,
         "box_neighbour_face": 24880800884.0,
+        "box_unambiguous_face": 19310287109.0,
         "box_value": 29915189340.85,
         "colocated_other_share": 0.08518942234092214,
         "date": "2025-09-05",
@@ -4346,6 +4573,7 @@
       {
         "box_face": 31277775873.0,
         "box_neighbour_face": 25034619619.0,
+        "box_unambiguous_face": 19432971338.0,
         "box_value": 30149902610.700005,
         "colocated_other_share": 0.0890043836283934,
         "date": "2025-09-08",
@@ -4368,6 +4596,7 @@
       {
         "box_face": 48028098293.0,
         "box_neighbour_face": 41719295404.99999,
+        "box_unambiguous_face": 36073308052.0,
         "box_value": 46769583704.89,
         "colocated_other_share": 0.08870064992186777,
         "date": "2025-09-09",
@@ -4390,6 +4619,7 @@
       {
         "box_face": 48303694539.0,
         "box_neighbour_face": 41934434439.0,
+        "box_unambiguous_face": 36134114770.0,
         "box_value": 47046131159.850006,
         "colocated_other_share": 0.08827702658961371,
         "date": "2025-09-10",
@@ -4412,6 +4642,7 @@
       {
         "box_face": 31870159194.0,
         "box_neighbour_face": 25379349819.0,
+        "box_unambiguous_face": 19552028353.0,
         "box_value": 30633501910.089996,
         "colocated_other_share": 0.0884448182646853,
         "date": "2025-09-11",
@@ -4434,6 +4665,7 @@
       {
         "box_face": 35422059460.0,
         "box_neighbour_face": 28797012489.0,
+        "box_unambiguous_face": 22921387123.0,
         "box_value": 34151294499.97,
         "colocated_other_share": 0.08368957914769971,
         "date": "2025-09-12",
@@ -4456,6 +4688,7 @@
       {
         "box_face": 35567798385.0,
         "box_neighbour_face": 28942157245.999996,
+        "box_unambiguous_face": 23077335024.0,
         "box_value": 34314361880.520004,
         "colocated_other_share": 0.08538809097596352,
         "date": "2025-09-15",
@@ -4478,6 +4711,7 @@
       {
         "box_face": 39020175432.0,
         "box_neighbour_face": 32345650084.000004,
+        "box_unambiguous_face": 26470243375.0,
         "box_value": 37766176785.72,
         "colocated_other_share": 0.08642771139201655,
         "date": "2025-09-16",
@@ -4500,6 +4734,7 @@
       {
         "box_face": 36145074652.0,
         "box_neighbour_face": 29379309095.0,
+        "box_unambiguous_face": 23454862753.0,
         "box_value": 34871665837.06,
         "colocated_other_share": 0.09350667611224361,
         "date": "2025-09-17",
@@ -4522,6 +4757,7 @@
       {
         "box_face": 36432546763.0,
         "box_neighbour_face": 29639053022.999996,
+        "box_unambiguous_face": 23554981584.0,
         "box_value": 35143924699.66,
         "colocated_other_share": 0.09208182934643873,
         "date": "2025-09-18",
@@ -4544,6 +4780,7 @@
       {
         "box_face": 35890663386.0,
         "box_neighbour_face": 29225773321.000004,
+        "box_unambiguous_face": 23262077798.0,
         "box_value": 34599834822.4,
         "colocated_other_share": 0.06275267461704202,
         "date": "2025-09-19",
@@ -4566,6 +4803,7 @@
       {
         "box_face": 36042463868.0,
         "box_neighbour_face": 29291129891.000004,
+        "box_unambiguous_face": 23268987651.0,
         "box_value": 34749616205.47,
         "colocated_other_share": 0.08772421150699132,
         "date": "2025-09-22",
@@ -4588,6 +4826,7 @@
       {
         "box_face": 36123677493.0,
         "box_neighbour_face": 29363295933.0,
+        "box_unambiguous_face": 23340245331.0,
         "box_value": 34837416933.29,
         "colocated_other_share": 0.08867159513100512,
         "date": "2025-09-23",
@@ -4610,6 +4849,7 @@
       {
         "box_face": 36265780939.0,
         "box_neighbour_face": 29478368606.0,
+        "box_unambiguous_face": 23419655103.0,
         "box_value": 34968435283.61,
         "colocated_other_share": 0.08886833156676079,
         "date": "2025-09-24",
@@ -4632,6 +4872,7 @@
       {
         "box_face": 36444779075.0,
         "box_neighbour_face": 29617845632.0,
+        "box_unambiguous_face": 23503684885.0,
         "box_value": 35109523047.39,
         "colocated_other_share": 0.08750383467483394,
         "date": "2025-09-25",
@@ -4654,6 +4895,7 @@
       {
         "box_face": 36684411902.0,
         "box_neighbour_face": 29854658022.999996,
+        "box_unambiguous_face": 23758694580.0,
         "box_value": 35347642121.95,
         "colocated_other_share": 0.084962426826417,
         "date": "2025-09-26",
@@ -4676,6 +4918,7 @@
       {
         "box_face": 40049591092.0,
         "box_neighbour_face": 33133412417.000008,
+        "box_unambiguous_face": 26982576228.0,
         "box_value": 38729609754.32,
         "colocated_other_share": 0.08620047709446407,
         "date": "2025-09-29",
@@ -4698,6 +4941,7 @@
       {
         "box_face": 33933402230.0,
         "box_neighbour_face": 26958348628.000004,
+        "box_unambiguous_face": 20766801624.0,
         "box_value": 32615301514.379997,
         "colocated_other_share": 0.08190745363369313,
         "date": "2025-09-30",
@@ -4720,6 +4964,7 @@
       {
         "box_face": 34347615258.0,
         "box_neighbour_face": 27306241838.0,
+        "box_unambiguous_face": 21043180269.0,
         "box_value": 33032406646.83,
         "colocated_other_share": 0.0854284684893576,
         "date": "2025-10-01",
@@ -4742,6 +4987,7 @@
       {
         "box_face": 34670223831.0,
         "box_neighbour_face": 27536959484.000004,
+        "box_unambiguous_face": 21193444719.0,
         "box_value": 33352742083.380005,
         "colocated_other_share": 0.08572894133927021,
         "date": "2025-10-02",
@@ -4764,6 +5010,7 @@
       {
         "box_face": 34870200800.0,
         "box_neighbour_face": 27592035016.000004,
+        "box_unambiguous_face": 21219815844.0,
         "box_value": 33542549533.769997,
         "colocated_other_share": 0.08418521915985375,
         "date": "2025-10-03",
@@ -4786,6 +5033,7 @@
       {
         "box_face": 37166387454.0,
         "box_neighbour_face": 29914001738.0,
+        "box_unambiguous_face": 23476744035.0,
         "box_value": 35811343399.28,
         "colocated_other_share": 0.08632771300596201,
         "date": "2025-10-06",
@@ -4808,6 +5056,7 @@
       {
         "box_face": 37467963667.0,
         "box_neighbour_face": 30165558301.0,
+        "box_unambiguous_face": 23759008878.0,
         "box_value": 36106806382.380005,
         "colocated_other_share": 0.08588988780895201,
         "date": "2025-10-07",
@@ -4830,6 +5079,7 @@
       {
         "box_face": 35665371249.0,
         "box_neighbour_face": 28358303309.000004,
+        "box_unambiguous_face": 21944007758.0,
         "box_value": 34312813317.889996,
         "colocated_other_share": 0.08516176955725643,
         "date": "2025-10-08",
@@ -4852,6 +5102,7 @@
       {
         "box_face": 35702453528.0,
         "box_neighbour_face": 28397976948.0,
+        "box_unambiguous_face": 21935093895.0,
         "box_value": 34347395575.219997,
         "colocated_other_share": 0.08515882555283541,
         "date": "2025-10-09",
@@ -4874,6 +5125,7 @@
       {
         "box_face": 35741068670.0,
         "box_neighbour_face": 28346090388.0,
+        "box_unambiguous_face": 21774410992.0,
         "box_value": 34415040258.95999,
         "colocated_other_share": 0.08313376720922416,
         "date": "2025-10-10",
@@ -4896,6 +5148,7 @@
       {
         "box_face": 35691362067.0,
         "box_neighbour_face": 28337761415.000004,
+        "box_unambiguous_face": 21866412372.0,
         "box_value": 34383284398.5,
         "colocated_other_share": 0.08285903505614009,
         "date": "2025-10-13",
@@ -4918,6 +5171,7 @@
       {
         "box_face": 35697118615.0,
         "box_neighbour_face": 28315263733.999996,
+        "box_unambiguous_face": 21801486349.0,
         "box_value": 34397231174.85,
         "colocated_other_share": 0.08606356271167688,
         "date": "2025-10-14",
@@ -4940,6 +5194,7 @@
       {
         "box_face": 36194438135.0,
         "box_neighbour_face": 28779534595.0,
+        "box_unambiguous_face": 22276803220.0,
         "box_value": 34879967983.14,
         "colocated_other_share": 0.0826661157478209,
         "date": "2025-10-15",
@@ -4962,6 +5217,7 @@
       {
         "box_face": 36382935609.0,
         "box_neighbour_face": 28946731967.999996,
+        "box_unambiguous_face": 22403152382.0,
         "box_value": 35091147051.22,
         "colocated_other_share": 0.0834771199910581,
         "date": "2025-10-16",
@@ -4984,6 +5240,7 @@
       {
         "box_face": 36463689703.0,
         "box_neighbour_face": 29076071049.0,
+        "box_unambiguous_face": 22483799003.0,
         "box_value": 35150063621.380005,
         "colocated_other_share": 0.06679292261793339,
         "date": "2025-10-17",
@@ -5006,6 +5263,7 @@
       {
         "box_face": 36635691968.0,
         "box_neighbour_face": 29196843020.0,
+        "box_unambiguous_face": 22522494539.0,
         "box_value": 35330033060.770004,
         "colocated_other_share": 0.08441661844809421,
         "date": "2025-10-20",
@@ -5028,6 +5286,7 @@
       {
         "box_face": 36788566834.0,
         "box_neighbour_face": 29304121224.0,
+        "box_unambiguous_face": 22682713530.0,
         "box_value": 35480034813.36,
         "colocated_other_share": 0.08397207853831536,
         "date": "2025-10-21",
@@ -5050,6 +5309,7 @@
       {
         "box_face": 37209146504.0,
         "box_neighbour_face": 29648789272.000004,
+        "box_unambiguous_face": 22849676563.0,
         "box_value": 35891093563.44,
         "colocated_other_share": 0.08417245338969938,
         "date": "2025-10-22",
@@ -5072,6 +5332,7 @@
       {
         "box_face": 37004604044.0,
         "box_neighbour_face": 29434868035.000004,
+        "box_unambiguous_face": 22608834785.0,
         "box_value": 35669301342.11,
         "colocated_other_share": 0.08461965454206845,
         "date": "2025-10-23",
@@ -5094,6 +5355,7 @@
       {
         "box_face": 37186379314.0,
         "box_neighbour_face": 29583620183.000004,
+        "box_unambiguous_face": 22695076428.0,
         "box_value": 35849477916.04,
         "colocated_other_share": 0.08173095464174013,
         "date": "2025-10-24",
@@ -5116,6 +5378,7 @@
       {
         "box_face": 37269893812.0,
         "box_neighbour_face": 29608266699.0,
+        "box_unambiguous_face": 22654657362.0,
         "box_value": 35938174184.76,
         "colocated_other_share": 0.08418427743639008,
         "date": "2025-10-27",
@@ -5138,6 +5401,7 @@
       {
         "box_face": 37588905767.0,
         "box_neighbour_face": 29726424115.999996,
+        "box_unambiguous_face": 22696280420.0,
         "box_value": 36248994084.25,
         "colocated_other_share": 0.08345727647757019,
         "date": "2025-10-28",
@@ -5160,6 +5424,7 @@
       {
         "box_face": 37759769874.0,
         "box_neighbour_face": 29851805675.0,
+        "box_unambiguous_face": 22805024107.0,
         "box_value": 36382997886.58,
         "colocated_other_share": 0.08018634969171588,
         "date": "2025-10-29",
@@ -5182,6 +5447,7 @@
       {
         "box_face": 38259697788.0,
         "box_neighbour_face": 30211890537.0,
+        "box_unambiguous_face": 23122325712.0,
         "box_value": 36857474850.67,
         "colocated_other_share": 0.07979165553389034,
         "date": "2025-10-30",
@@ -5204,6 +5470,7 @@
       {
         "box_face": 39069648730.0,
         "box_neighbour_face": 30968117743.0,
+        "box_unambiguous_face": 23824360394.0,
         "box_value": 37631283999.43,
         "colocated_other_share": 0.07804682841024824,
         "date": "2025-10-31",
@@ -5226,6 +5493,7 @@
       {
         "box_face": 41889887566.0,
         "box_neighbour_face": 33786289920.000004,
+        "box_unambiguous_face": 26579979253.0,
         "box_value": 40444570583.65,
         "colocated_other_share": 0.08169441935518375,
         "date": "2025-11-03",
@@ -5248,6 +5516,7 @@
       {
         "box_face": 42049921448.0,
         "box_neighbour_face": 33947617906.0,
+        "box_unambiguous_face": 26768567805.0,
         "box_value": 40604985045.34,
         "colocated_other_share": 0.08301164426757617,
         "date": "2025-11-04",
@@ -5270,6 +5539,7 @@
       {
         "box_face": 42209913089.0,
         "box_neighbour_face": 34095267813.0,
+        "box_unambiguous_face": 26886949542.0,
         "box_value": 40744340324.450005,
         "colocated_other_share": 0.08274116609784896,
         "date": "2025-11-05",
@@ -5292,6 +5562,7 @@
       {
         "box_face": 42440981957.0,
         "box_neighbour_face": 34266323593.0,
+        "box_unambiguous_face": 26983237000.0,
         "box_value": 40996076900.22,
         "colocated_other_share": 0.0827537267150617,
         "date": "2025-11-06",
@@ -5314,6 +5585,7 @@
       {
         "box_face": 42549564315.0,
         "box_neighbour_face": 34363189375.0,
+        "box_unambiguous_face": 27038113195.0,
         "box_value": 41108431271.89,
         "colocated_other_share": 0.08343780449121642,
         "date": "2025-11-07",
@@ -5336,6 +5608,7 @@
       {
         "box_face": 42471888861.0,
         "box_neighbour_face": 34278082683.0,
+        "box_unambiguous_face": 26962206964.0,
         "box_value": 41032902243.76,
         "colocated_other_share": 0.0851696890604883,
         "date": "2025-11-10",
@@ -5358,6 +5631,7 @@
       {
         "box_face": 42526430693.0,
         "box_neighbour_face": 34294982356.999992,
+        "box_unambiguous_face": 26990845064.0,
         "box_value": 41098201934.65,
         "colocated_other_share": 0.08642006845545633,
         "date": "2025-11-11",
@@ -5380,6 +5654,7 @@
       {
         "box_face": 42926817025.0,
         "box_neighbour_face": 34601154384.0,
+        "box_unambiguous_face": 27240928784.0,
         "box_value": 41498804779.87,
         "colocated_other_share": 0.08570971955447076,
         "date": "2025-11-12",
@@ -5402,6 +5677,7 @@
       {
         "box_face": 43240846572.0,
         "box_neighbour_face": 34712779746.0,
+        "box_unambiguous_face": 27280549439.0,
         "box_value": 41795399939.17,
         "colocated_other_share": 0.0856344873018213,
         "date": "2025-11-13",
@@ -5424,6 +5700,7 @@
       {
         "box_face": 43394556880.0,
         "box_neighbour_face": 34824009177.00001,
+        "box_unambiguous_face": 27399509612.0,
         "box_value": 41941604172.35,
         "colocated_other_share": 0.08494136398186355,
         "date": "2025-11-14",
@@ -5446,6 +5723,7 @@
       {
         "box_face": 43524551576.0,
         "box_neighbour_face": 34924594976.0,
+        "box_unambiguous_face": 27494231113.0,
         "box_value": 42087010489.03,
         "colocated_other_share": 0.08741079701743067,
         "date": "2025-11-17",
@@ -5468,6 +5746,7 @@
       {
         "box_face": 43737874786.0,
         "box_neighbour_face": 35077027227.0,
+        "box_unambiguous_face": 27592414456.0,
         "box_value": 42312124234.19,
         "colocated_other_share": 0.08943047715847585,
         "date": "2025-11-18",
@@ -5490,6 +5769,7 @@
       {
         "box_face": 43778849969.0,
         "box_neighbour_face": 35032137696.0,
+        "box_unambiguous_face": 27524068230.0,
         "box_value": 42345612179.7,
         "colocated_other_share": 0.08620290569010242,
         "date": "2025-11-19",
@@ -5512,6 +5792,7 @@
       {
         "box_face": 44201465524.0,
         "box_neighbour_face": 35364472162.0,
+        "box_unambiguous_face": 27822223755.0,
         "box_value": 42772546189.369995,
         "colocated_other_share": 0.08641490364217576,
         "date": "2025-11-20",
@@ -5534,6 +5815,7 @@
       {
         "box_face": 44394231938.0,
         "box_neighbour_face": 35488161384.0,
+        "box_unambiguous_face": 27879129219.0,
         "box_value": 42977099995.28,
         "colocated_other_share": 0.07336755795402966,
         "date": "2025-11-21",
@@ -5556,6 +5838,7 @@
       {
         "box_face": 44665247339.0,
         "box_neighbour_face": 35705703014.0,
+        "box_unambiguous_face": 28151670024.0,
         "box_value": 43254097538.29,
         "colocated_other_share": 0.09202638960570399,
         "date": "2025-11-24",
@@ -5578,6 +5861,7 @@
       {
         "box_face": 45035555129.0,
         "box_neighbour_face": 36016448224.0,
+        "box_unambiguous_face": 28355545396.0,
         "box_value": 43628984858.57001,
         "colocated_other_share": 0.0935231882301622,
         "date": "2025-11-25",
@@ -5600,6 +5884,7 @@
       {
         "box_face": 45294254876.0,
         "box_neighbour_face": 36187648958.00001,
+        "box_unambiguous_face": 28473303148.0,
         "box_value": 43875747404.6,
         "colocated_other_share": 0.09179834818082709,
         "date": "2025-11-26",
@@ -5622,6 +5907,7 @@
       {
         "box_face": 45427512665.0,
         "box_neighbour_face": 36277612549.00001,
+        "box_unambiguous_face": 28515089273.0,
         "box_value": 44018279860.28001,
         "colocated_other_share": 0.08818186071052549,
         "date": "2025-11-28",
@@ -5644,6 +5930,7 @@
       {
         "box_face": 45533566152.0,
         "box_neighbour_face": 36317503980.0,
+        "box_unambiguous_face": 28526270994.0,
         "box_value": 44120879229.23,
         "colocated_other_share": 0.12553964729772404,
         "date": "2025-12-01",
@@ -5666,6 +5953,7 @@
       {
         "box_face": 45440468456.0,
         "box_neighbour_face": 36292415584.0,
+        "box_unambiguous_face": 28433660668.0,
         "box_value": 44022193151.62,
         "colocated_other_share": 0.12818401338998814,
         "date": "2025-12-02",
@@ -5688,6 +5976,7 @@
       {
         "box_face": 45736887067.0,
         "box_neighbour_face": 36547865208.00001,
+        "box_unambiguous_face": 28678416112.0,
         "box_value": 44317421491.65,
         "colocated_other_share": 0.12670835334097208,
         "date": "2025-12-03",
@@ -5710,6 +5999,7 @@
       {
         "box_face": 46364036658.0,
         "box_neighbour_face": 37028923703.0,
+        "box_unambiguous_face": 29086906585.0,
         "box_value": 44920607087.130005,
         "colocated_other_share": 0.12835386863921097,
         "date": "2025-12-04",
@@ -5732,6 +6022,7 @@
       {
         "box_face": 63496271734.0,
         "box_neighbour_face": 54036347214.0,
+        "box_unambiguous_face": 45933068307.0,
         "box_value": 61925359826.06,
         "colocated_other_share": 0.12766980181968113,
         "date": "2025-12-05",
@@ -5754,6 +6045,7 @@
       {
         "box_face": 63597708733.0,
         "box_neighbour_face": 54087526172.99999,
+        "box_unambiguous_face": 45978349634.0,
         "box_value": 62030387626.25001,
         "colocated_other_share": 0.13112019278838546,
         "date": "2025-12-08",
@@ -5776,6 +6068,7 @@
       {
         "box_face": 55537831240.0,
         "box_neighbour_face": 45968851944.0,
+        "box_unambiguous_face": 37840121023.0,
         "box_value": 53975859219.60999,
         "colocated_other_share": 0.132574192745451,
         "date": "2025-12-09",
@@ -5798,6 +6091,7 @@
       {
         "box_face": 54564756583.0,
         "box_neighbour_face": 44931400790.0,
+        "box_unambiguous_face": 36776061069.0,
         "box_value": 53010464460.67,
         "colocated_other_share": 0.13127177903636095,
         "date": "2025-12-10",
@@ -5820,6 +6114,7 @@
       {
         "box_face": 54397060678.0,
         "box_neighbour_face": 44795579240.0,
+        "box_unambiguous_face": 36638331597.0,
         "box_value": 52853645420.75001,
         "colocated_other_share": 0.13112269013600655,
         "date": "2025-12-11",
@@ -5842,6 +6137,7 @@
       {
         "box_face": 54432344280.0,
         "box_neighbour_face": 44801533292.99999,
+        "box_unambiguous_face": 36673460473.0,
         "box_value": 52886426837.840004,
         "colocated_other_share": 0.12932193344548876,
         "date": "2025-12-12",
@@ -5864,6 +6160,7 @@
       {
         "box_face": 54438024608.0,
         "box_neighbour_face": 44808739698.0,
+        "box_unambiguous_face": 36638366933.0,
         "box_value": 52913695304.14,
         "colocated_other_share": 0.13255928163853753,
         "date": "2025-12-15",
@@ -5886,6 +6183,7 @@
       {
         "box_face": 54898380709.0,
         "box_neighbour_face": 45220760270.0,
+        "box_unambiguous_face": 36963317768.0,
         "box_value": 53373481274.270004,
         "colocated_other_share": 0.13399660567186442,
         "date": "2025-12-16",
@@ -5908,6 +6206,7 @@
       {
         "box_face": 54958186655.0,
         "box_neighbour_face": 45283326947.99999,
+        "box_unambiguous_face": 37046658128.0,
         "box_value": 53429912398.42,
         "colocated_other_share": 0.13726010941820696,
         "date": "2025-12-17",
@@ -5930,6 +6229,7 @@
       {
         "box_face": 55243674562.0,
         "box_neighbour_face": 45384275543.0,
+        "box_unambiguous_face": 37087883661.0,
         "box_value": 53722000831.350006,
         "colocated_other_share": 0.13746314486728567,
         "date": "2025-12-18",
@@ -5952,6 +6252,7 @@
       {
         "box_face": 39818422598.0,
         "box_neighbour_face": 32798754932.000004,
+        "box_unambiguous_face": 26753698263.0,
         "box_value": 38290983694.14,
         "colocated_other_share": 0.11148805502548292,
         "date": "2025-12-19",
@@ -5974,6 +6275,7 @@
       {
         "box_face": 39857658342.0,
         "box_neighbour_face": 32833265080.0,
+        "box_unambiguous_face": 26783759711.0,
         "box_value": 38334300694.26001,
         "colocated_other_share": 0.14891406988280145,
         "date": "2025-12-22",
@@ -5996,6 +6298,7 @@
       {
         "box_face": 39883062364.0,
         "box_neighbour_face": 32841814167.000008,
+        "box_unambiguous_face": 26804307713.0,
         "box_value": 38353339232.91,
         "colocated_other_share": 0.1487043554433793,
         "date": "2025-12-23",
@@ -6018,6 +6321,7 @@
       {
         "box_face": 39923420904.0,
         "box_neighbour_face": 32882172707.0,
+        "box_unambiguous_face": 26844666253.0,
         "box_value": 38398163081.13,
         "colocated_other_share": 0.14492366462256553,
         "date": "2025-12-24",
@@ -6040,6 +6344,7 @@
       {
         "box_face": 39900873578.0,
         "box_neighbour_face": 32859688731.0,
+        "box_unambiguous_face": 26824143427.0,
         "box_value": 38392273748.28,
         "colocated_other_share": 0.14491665340750529,
         "date": "2025-12-26",
@@ -6062,6 +6367,7 @@
       {
         "box_face": 39937995616.0,
         "box_neighbour_face": 32865624083.000004,
+        "box_unambiguous_face": 26809746331.0,
         "box_value": 38445715528.409996,
         "colocated_other_share": 0.14998434342796083,
         "date": "2025-12-29",
@@ -6084,6 +6390,7 @@
       {
         "box_face": 36234194219.0,
         "box_neighbour_face": 29148513684.999996,
+        "box_unambiguous_face": 23077720870.0,
         "box_value": 34741782093.46,
         "colocated_other_share": 0.14743987406432857,
         "date": "2025-12-30",
@@ -6106,6 +6413,7 @@
       {
         "box_face": 33443896190.0,
         "box_neighbour_face": 26339677380.999996,
+        "box_unambiguous_face": 20261147271.0,
         "box_value": 31939359147.050003,
         "colocated_other_share": 0.1403218119165979,
         "date": "2025-12-31",
@@ -6128,6 +6436,7 @@
       {
         "box_face": 33588310175.0,
         "box_neighbour_face": 26482983326.0,
+        "box_unambiguous_face": 20406586131.0,
         "box_value": 32088261050.980003,
         "colocated_other_share": 0.14605315218253195,
         "date": "2026-01-02",
@@ -6150,6 +6459,7 @@
       {
         "box_face": 34076231315.0,
         "box_neighbour_face": 26921603494.000008,
+        "box_unambiguous_face": 20821143537.0,
         "box_value": 32578789622.460007,
         "colocated_other_share": 0.14238104106430244,
         "date": "2026-01-05",
@@ -6172,6 +6482,7 @@
       {
         "box_face": 34069032409.0,
         "box_neighbour_face": 26889283854.000004,
+        "box_unambiguous_face": 20788270652.0,
         "box_value": 32566302774.91999,
         "colocated_other_share": 0.14206830497806255,
         "date": "2026-01-06",
@@ -6194,6 +6505,7 @@
       {
         "box_face": 34287337189.0,
         "box_neighbour_face": 27086298108.000004,
+        "box_unambiguous_face": 20966782106.0,
         "box_value": 32782938804.34,
         "colocated_other_share": 0.13523363360942034,
         "date": "2026-01-07",
@@ -6216,6 +6528,7 @@
       {
         "box_face": 34640013888.0,
         "box_neighbour_face": 27398577162.0,
+        "box_unambiguous_face": 21275048648.0,
         "box_value": 33112829022.32,
         "colocated_other_share": 0.13528055381819448,
         "date": "2026-01-08",
@@ -6238,6 +6551,7 @@
       {
         "box_face": 36395368590.0,
         "box_neighbour_face": 29110289744.0,
+        "box_unambiguous_face": 22900469646.0,
         "box_value": 34844837606.009995,
         "colocated_other_share": 0.1334891566069083,
         "date": "2026-01-09",
@@ -6260,6 +6574,7 @@
       {
         "box_face": 36669190691.0,
         "box_neighbour_face": 29431771684.000004,
+        "box_unambiguous_face": 23197011155.0,
         "box_value": 35120613009.229996,
         "colocated_other_share": 0.1312619920694586,
         "date": "2026-01-12",
@@ -6282,6 +6597,7 @@
       {
         "box_face": 36928423487.0,
         "box_neighbour_face": 29674024524.0,
+        "box_unambiguous_face": 23412709611.0,
         "box_value": 35378191709.58,
         "colocated_other_share": 0.12971190370877972,
         "date": "2026-01-13",
@@ -6304,6 +6620,7 @@
       {
         "box_face": 36985410004.0,
         "box_neighbour_face": 29724669705.0,
+        "box_unambiguous_face": 23462592012.0,
         "box_value": 35441844950.89,
         "colocated_other_share": 0.12054528960153837,
         "date": "2026-01-14",
@@ -6326,6 +6643,7 @@
       {
         "box_face": 37372839961.0,
         "box_neighbour_face": 30050234426.0,
+        "box_unambiguous_face": 23722089032.0,
         "box_value": 35801697932.33,
         "colocated_other_share": 0.1211618052932466,
         "date": "2026-01-15",
@@ -6348,6 +6666,7 @@
       {
         "box_face": 35687297541.0,
         "box_neighbour_face": 28336365345.0,
+        "box_unambiguous_face": 22007027170.0,
         "box_value": 34104477774.719997,
         "colocated_other_share": 0.07254893719822275,
         "date": "2026-01-16",
@@ -6370,6 +6689,7 @@
       {
         "box_face": 35713698415.0,
         "box_neighbour_face": 28362592807.000004,
+        "box_unambiguous_face": 22033242170.0,
         "box_value": 34146078136.740005,
         "colocated_other_share": 0.101173256187721,
         "date": "2026-01-20",
@@ -6392,6 +6712,7 @@
       {
         "box_face": 35745732413.0,
         "box_neighbour_face": 28393365676.0,
+        "box_unambiguous_face": 22062990493.0,
         "box_value": 34179162060.63,
         "colocated_other_share": 0.10032285315610608,
         "date": "2026-01-21",
@@ -6414,6 +6735,7 @@
       {
         "box_face": 35857766264.0,
         "box_neighbour_face": 28509904728.000004,
+        "box_unambiguous_face": 22112415662.0,
         "box_value": 34275820277.16,
         "colocated_other_share": 0.09998700117328597,
         "date": "2026-01-22",
@@ -6436,6 +6758,7 @@
       {
         "box_face": 36300023548.0,
         "box_neighbour_face": 28920214977.000004,
+        "box_unambiguous_face": 22471137338.0,
         "box_value": 34704692271.22,
         "colocated_other_share": 0.09463974966726342,
         "date": "2026-01-23",
@@ -6458,6 +6781,7 @@
       {
         "box_face": 36946594928.0,
         "box_neighbour_face": 29507128502.000004,
+        "box_unambiguous_face": 23030753153.0,
         "box_value": 35338201446.56,
         "colocated_other_share": 0.09470294757146475,
         "date": "2026-01-26",
@@ -6480,6 +6804,7 @@
       {
         "box_face": 37399480084.0,
         "box_neighbour_face": 29762803122.000004,
+        "box_unambiguous_face": 23202394077.0,
         "box_value": 35784967462.090004,
         "colocated_other_share": 0.09585731640380202,
         "date": "2026-01-27",
@@ -6502,6 +6827,7 @@
       {
         "box_face": 37673665192.0,
         "box_neighbour_face": 29990392651.0,
+        "box_unambiguous_face": 23356715331.0,
         "box_value": 36042095525.82001,
         "colocated_other_share": 0.09340269280356907,
         "date": "2026-01-28",
@@ -6524,6 +6850,7 @@
       {
         "box_face": 37766069592.0,
         "box_neighbour_face": 30064559958.999996,
+        "box_unambiguous_face": 23318700881.0,
         "box_value": 36142665494.53,
         "colocated_other_share": 0.09347909844805541,
         "date": "2026-01-29",
@@ -6546,6 +6873,7 @@
       {
         "box_face": 38435834122.0,
         "box_neighbour_face": 30727359758.0,
+        "box_unambiguous_face": 23980152002.0,
         "box_value": 36806974111.700005,
         "colocated_other_share": 0.08933665796806581,
         "date": "2026-01-30",
@@ -6568,6 +6896,7 @@
       {
         "box_face": 38544424735.0,
         "box_neighbour_face": 30828990274.0,
+        "box_unambiguous_face": 24022445498.0,
         "box_value": 36904851282.399994,
         "colocated_other_share": 0.09096307227880614,
         "date": "2026-02-02",
@@ -6590,6 +6919,7 @@
       {
         "box_face": 40841463838.0,
         "box_neighbour_face": 33093630261.0,
+        "box_unambiguous_face": 26147870988.0,
         "box_value": 39129041402.76,
         "colocated_other_share": 0.08960527316413155,
         "date": "2026-02-03",
@@ -6612,6 +6942,7 @@
       {
         "box_face": 41083816180.0,
         "box_neighbour_face": 33246248191.999996,
+        "box_unambiguous_face": 26252256474.0,
         "box_value": 39353869777.31999,
         "colocated_other_share": 0.09107811846957853,
         "date": "2026-02-04",
@@ -6634,6 +6965,7 @@
       {
         "box_face": 41124459340.0,
         "box_neighbour_face": 33307768177.0,
+        "box_unambiguous_face": 26208456877.0,
         "box_value": 39427875839.53,
         "colocated_other_share": 0.09007086071725705,
         "date": "2026-02-05",
@@ -6656,6 +6988,7 @@
       {
         "box_face": 41190315433.0,
         "box_neighbour_face": 33321717950.0,
+        "box_unambiguous_face": 26205466914.0,
         "box_value": 39487790244.03,
         "colocated_other_share": 0.0883063371770267,
         "date": "2026-02-06",
@@ -6678,6 +7011,7 @@
       {
         "box_face": 41552789057.0,
         "box_neighbour_face": 33675997181.999992,
+        "box_unambiguous_face": 26527933396.0,
         "box_value": 39860021289.149994,
         "colocated_other_share": 0.09002157702923191,
         "date": "2026-02-09",
@@ -6700,6 +7034,7 @@
       {
         "box_face": 41605085814.0,
         "box_neighbour_face": 33705652747.000004,
+        "box_unambiguous_face": 26544472951.0,
         "box_value": 39927822720.65,
         "colocated_other_share": 0.0892825493228507,
         "date": "2026-02-10",
@@ -6722,6 +7057,7 @@
       {
         "box_face": 41686469000.0,
         "box_neighbour_face": 33785050426.000004,
+        "box_unambiguous_face": 26622679289.0,
         "box_value": 39985287023.36,
         "colocated_other_share": 0.08819524168300985,
         "date": "2026-02-11",
@@ -6744,6 +7080,7 @@
       {
         "box_face": 41707604505.0,
         "box_neighbour_face": 33820400645.000004,
+        "box_unambiguous_face": 26668272254.0,
         "box_value": 40029079330.310005,
         "colocated_other_share": 0.08869603256317651,
         "date": "2026-02-12",
@@ -6766,6 +7103,7 @@
       {
         "box_face": 41670089824.0,
         "box_neighbour_face": 33789057011.0,
+        "box_unambiguous_face": 26627210756.0,
         "box_value": 40016699929.979996,
         "colocated_other_share": 0.08785471962772676,
         "date": "2026-02-13",
@@ -6788,6 +7126,7 @@
       {
         "box_face": 42675098613.0,
         "box_neighbour_face": 34760762719.0,
+        "box_unambiguous_face": 27590370813.0,
         "box_value": 41025340191.39,
         "colocated_other_share": 0.08838047792635004,
         "date": "2026-02-17",
@@ -6810,6 +7149,7 @@
       {
         "box_face": 42638710575.0,
         "box_neighbour_face": 34722823996.0,
+        "box_unambiguous_face": 27547963357.0,
         "box_value": 40983370751.56,
         "colocated_other_share": 0.08871534415536465,
         "date": "2026-02-18",
@@ -6832,6 +7172,7 @@
       {
         "box_face": 42964833072.0,
         "box_neighbour_face": 34998203964.0,
+        "box_unambiguous_face": 27817924434.0,
         "box_value": 41298487892.94,
         "colocated_other_share": 0.08750529975206481,
         "date": "2026-02-19",
@@ -6854,6 +7195,7 @@
       {
         "box_face": 42082496327.0,
         "box_neighbour_face": 34105432203.999996,
+        "box_unambiguous_face": 27054416760.0,
         "box_value": 40404795109.79001,
         "colocated_other_share": 0.07006989636955627,
         "date": "2026-02-20",
@@ -6876,6 +7218,7 @@
       {
         "box_face": 42136377157.0,
         "box_neighbour_face": 34151170086.0,
+        "box_unambiguous_face": 27043867814.0,
         "box_value": 40491345946.78,
         "colocated_other_share": 0.08640116320908899,
         "date": "2026-02-23",
@@ -6898,6 +7241,7 @@
       {
         "box_face": 42146654774.0,
         "box_neighbour_face": 34162248018.0,
+        "box_unambiguous_face": 27017220541.0,
         "box_value": 40496888174.85,
         "colocated_other_share": 0.08625576433376829,
         "date": "2026-02-24",
@@ -6920,6 +7264,7 @@
       {
         "box_face": 42200957801.0,
         "box_neighbour_face": 34195416412.0,
+        "box_unambiguous_face": 27039973224.0,
         "box_value": 40539532484.52,
         "colocated_other_share": 0.0842171638988262,
         "date": "2026-02-25",
@@ -6942,6 +7287,7 @@
       {
         "box_face": 42260273758.0,
         "box_neighbour_face": 34225546589.0,
+        "box_unambiguous_face": 27064562088.0,
         "box_value": 40608177150.130005,
         "colocated_other_share": 0.08454308190922638,
         "date": "2026-02-26",
@@ -6964,6 +7310,7 @@
       {
         "box_face": 42226593994.0,
         "box_neighbour_face": 34186283727.0,
+        "box_unambiguous_face": 27028193777.0,
         "box_value": 40608097654.65001,
         "colocated_other_share": 0.08004868879324807,
         "date": "2026-02-27",
@@ -6986,6 +7333,7 @@
       {
         "box_face": 42253223871.0,
         "box_neighbour_face": 34116875570.000004,
+        "box_unambiguous_face": 27054645150.0,
         "box_value": 40605416248.96001,
         "colocated_other_share": 0.08324477642393427,
         "date": "2026-03-02",
@@ -7008,6 +7356,7 @@
       {
         "box_face": 42687537294.0,
         "box_neighbour_face": 34523208264.0,
+        "box_unambiguous_face": 27456151323.0,
         "box_value": 41023817517.939995,
         "colocated_other_share": 0.08335480423561756,
         "date": "2026-03-03",
@@ -7030,6 +7379,7 @@
       {
         "box_face": 64349587026.0,
         "box_neighbour_face": 56170872095.00001,
+        "box_unambiguous_face": 49109435209.0,
         "box_value": 62526299163.82001,
         "colocated_other_share": 0.08278637576295712,
         "date": "2026-03-04",
@@ -7052,6 +7402,7 @@
       {
         "box_face": 64529152295.0,
         "box_neighbour_face": 56323533076.0,
+        "box_unambiguous_face": 49253185684.0,
         "box_value": 62682148169.59999,
         "colocated_other_share": 0.08321672014567606,
         "date": "2026-03-05",
@@ -7074,6 +7425,7 @@
       {
         "box_face": 52511243503.0,
         "box_neighbour_face": 44303200166.00001,
+        "box_unambiguous_face": 37231717074.0,
         "box_value": 50710546625.29,
         "colocated_other_share": 0.08255963036706375,
         "date": "2026-03-06",
@@ -7096,6 +7448,7 @@
       {
         "box_face": 52692340047.0,
         "box_neighbour_face": 44402915304.0,
+        "box_unambiguous_face": 37328100943.0,
         "box_value": 50889498074.79001,
         "colocated_other_share": 0.08415328899661423,
         "date": "2026-03-09",
@@ -7118,6 +7471,7 @@
       {
         "box_face": 53958405138.0,
         "box_neighbour_face": 45644795572.99999,
+        "box_unambiguous_face": 38580501030.0,
         "box_value": 52142546290.86,
         "colocated_other_share": 0.0842019754525029,
         "date": "2026-03-10",
@@ -7140,6 +7494,7 @@
       {
         "box_face": 55054378822.0,
         "box_neighbour_face": 46897882071.0,
+        "box_unambiguous_face": 39888490660.0,
         "box_value": 53194942488.39,
         "colocated_other_share": 0.08367834709284905,
         "date": "2026-03-11",
@@ -7162,6 +7517,7 @@
       {
         "box_face": 55952766260.0,
         "box_neighbour_face": 47812971957.0,
+        "box_unambiguous_face": 40741435276.0,
         "box_value": 54026061172.77,
         "colocated_other_share": 0.08350106186972395,
         "date": "2026-03-12",
@@ -7184,6 +7540,7 @@
       {
         "box_face": 56024798726.0,
         "box_neighbour_face": 47885711614.0,
+        "box_unambiguous_face": 40796048925.0,
         "box_value": 54111576948.21999,
         "colocated_other_share": 0.07976944025237635,
         "date": "2026-03-13",
@@ -7206,6 +7563,7 @@
       {
         "box_face": 56630002957.0,
         "box_neighbour_face": 48489199365.0,
+        "box_unambiguous_face": 41397688778.0,
         "box_value": 54745413991.740005,
         "colocated_other_share": 0.08611578136580622,
         "date": "2026-03-16",
@@ -7228,6 +7586,7 @@
       {
         "box_face": 52090563890.0,
         "box_neighbour_face": 43926276036.0,
+        "box_unambiguous_face": 36832165958.0,
         "box_value": 50215697465.9,
         "colocated_other_share": 0.08587122037464129,
         "date": "2026-03-17",
@@ -7250,6 +7609,7 @@
       {
         "box_face": 52172057090.0,
         "box_neighbour_face": 44004361378.0,
+        "box_unambiguous_face": 36909357413.0,
         "box_value": 50275389467.25001,
         "colocated_other_share": 0.08521525891635943,
         "date": "2026-03-18",
@@ -7272,6 +7632,7 @@
       {
         "box_face": 52605903077.0,
         "box_neighbour_face": 44416528102.99999,
+        "box_unambiguous_face": 37253470506.0,
         "box_value": 50664819371.30999,
         "colocated_other_share": 0.07916308267599588,
         "date": "2026-03-19",
@@ -7294,6 +7655,7 @@
       {
         "box_face": 50975701911.0,
         "box_neighbour_face": 42829280543.0,
+        "box_unambiguous_face": 35722565119.0,
         "box_value": 48999934254.79001,
         "colocated_other_share": 0.06326335743948014,
         "date": "2026-03-20",
@@ -7316,6 +7678,7 @@
       {
         "box_face": 51816337168.0,
         "box_neighbour_face": 43681963270.0,
+        "box_unambiguous_face": 36575236301.0,
         "box_value": 49863852236.64,
         "colocated_other_share": 0.08284744398818651,
         "date": "2026-03-23",
@@ -7338,6 +7701,7 @@
       {
         "box_face": 51849526697.0,
         "box_neighbour_face": 43714904911.0,
+        "box_unambiguous_face": 36603272041.0,
         "box_value": 49867214237.41,
         "colocated_other_share": 0.08312034617461561,
         "date": "2026-03-24",
@@ -7360,6 +7724,7 @@
       {
         "box_face": 52053384630.0,
         "box_neighbour_face": 43912181811.0,
+        "box_unambiguous_face": 36695156908.0,
         "box_value": 50087071325.99,
         "colocated_other_share": 0.08179217058322583,
         "date": "2026-03-25",
@@ -7382,6 +7747,7 @@
       {
         "box_face": 52076084169.0,
         "box_neighbour_face": 43933797955.00001,
+        "box_unambiguous_face": 36706075445.0,
         "box_value": 50078026599.73,
         "colocated_other_share": 0.08069423224989822,
         "date": "2026-03-26",
@@ -7404,6 +7770,7 @@
       {
         "box_face": 52165543111.0,
         "box_neighbour_face": 44017059659.0,
+        "box_unambiguous_face": 36786617112.0,
         "box_value": 50193094015.59001,
         "colocated_other_share": 0.0777195756892852,
         "date": "2026-03-27",
@@ -7426,6 +7793,7 @@
       {
         "box_face": 52209359441.0,
         "box_neighbour_face": 44055414436.00001,
+        "box_unambiguous_face": 36802950686.0,
         "box_value": 50284466117.37001,
         "colocated_other_share": 0.07844595205673448,
         "date": "2026-03-30",
@@ -7448,6 +7816,7 @@
       {
         "box_face": 47631777201.0,
         "box_neighbour_face": 39474781241.99999,
+        "box_unambiguous_face": 32222574426.0,
         "box_value": 45721344253.4,
         "colocated_other_share": 0.07406950658750915,
         "date": "2026-03-31",
@@ -7470,6 +7839,7 @@
       {
         "box_face": 47727367288.0,
         "box_neighbour_face": 39545661621.0,
+        "box_unambiguous_face": 32264906646.0,
         "box_value": 45811682539.57001,
         "colocated_other_share": 0.07636814657839898,
         "date": "2026-04-01",
@@ -7492,6 +7862,7 @@
       {
         "box_face": 47806627004.0,
         "box_neighbour_face": 39624862771.00001,
+        "box_unambiguous_face": 32324403475.0,
         "box_value": 45896634080.19,
         "colocated_other_share": 0.0751908401523795,
         "date": "2026-04-02",
@@ -7514,6 +7885,7 @@
       {
         "box_face": 47889897454.0,
         "box_neighbour_face": 39692421995.00001,
+        "box_unambiguous_face": 32378797395.0,
         "box_value": 45981510980.6,
         "colocated_other_share": 0.0767643156168905,
         "date": "2026-04-06",
@@ -7536,6 +7908,7 @@
       {
         "box_face": 47979270314.0,
         "box_neighbour_face": 39743797738.00001,
+        "box_unambiguous_face": 32428010478.0,
         "box_value": 46069419774.10999,
         "colocated_other_share": 0.07595328207930825,
         "date": "2026-04-07",
@@ -7558,6 +7931,7 @@
       {
         "box_face": 48068856167.0,
         "box_neighbour_face": 39823316286.0,
+        "box_unambiguous_face": 32500199322.0,
         "box_value": 46177127800.200005,
         "colocated_other_share": 0.07603692703054256,
         "date": "2026-04-08",
@@ -7580,6 +7954,7 @@
       {
         "box_face": 48179308849.0,
         "box_neighbour_face": 39887041221.0,
+        "box_unambiguous_face": 32561832240.0,
         "box_value": 46288798237.39,
         "colocated_other_share": 0.07540747816364507,
         "date": "2026-04-09",
@@ -7602,6 +7977,7 @@
       {
         "box_face": 48368485810.0,
         "box_neighbour_face": 40041986715.0,
+        "box_unambiguous_face": 32715833661.0,
         "box_value": 46467964288.27,
         "colocated_other_share": 0.07460635580175379,
         "date": "2026-04-10",
@@ -7624,6 +8000,7 @@
       {
         "box_face": 48382747921.0,
         "box_neighbour_face": 40076926986.0,
+        "box_unambiguous_face": 32736386599.0,
         "box_value": 46506189942.14,
         "colocated_other_share": 0.07471425556572658,
         "date": "2026-04-13",
@@ -7646,6 +8023,7 @@
       {
         "box_face": 48567399055.0,
         "box_neighbour_face": 40233426479.0,
+        "box_unambiguous_face": 32849623648.0,
         "box_value": 46702936068.329994,
         "colocated_other_share": 0.07439574471656481,
         "date": "2026-04-14",
@@ -7668,6 +8046,7 @@
       {
         "box_face": 48621092281.0,
         "box_neighbour_face": 40253541545.0,
+        "box_unambiguous_face": 32841281553.0,
         "box_value": 46752997055.82001,
         "colocated_other_share": 0.07229236111560518,
         "date": "2026-04-15",
@@ -7690,6 +8069,7 @@
       {
         "box_face": 49549092950.0,
         "box_neighbour_face": 41173412182.0,
+        "box_unambiguous_face": 33743756232.0,
         "box_value": 47666966581.759995,
         "colocated_other_share": 0.07176695309707064,
         "date": "2026-04-16",
@@ -7712,6 +8092,7 @@
       {
         "box_face": 48806690334.0,
         "box_neighbour_face": 40458168574.0,
+        "box_unambiguous_face": 33069497292.0,
         "box_value": 46933844307.65,
         "colocated_other_share": 0.06225874743782221,
         "date": "2026-04-17",
@@ -7734,6 +8115,7 @@
       {
         "box_face": 48747813060.0,
         "box_neighbour_face": 40382971196.0,
+        "box_unambiguous_face": 32992598688.0,
         "box_value": 46905663080.44,
         "colocated_other_share": 0.07572278927290227,
         "date": "2026-04-20",
@@ -7756,6 +8138,7 @@
       {
         "box_face": 48828436464.0,
         "box_neighbour_face": 40439807659.0,
+        "box_unambiguous_face": 33041361794.0,
         "box_value": 46966399825.22,
         "colocated_other_share": 0.07619388440138816,
         "date": "2026-04-21",
@@ -7778,6 +8161,7 @@
       {
         "box_face": 49001865755.0,
         "box_neighbour_face": 40572402611.0,
+        "box_unambiguous_face": 33137235978.0,
         "box_value": 47134906414.049995,
         "colocated_other_share": 0.07703796606865368,
         "date": "2026-04-22",
@@ -7800,6 +8184,7 @@
       {
         "box_face": 49042998742.0,
         "box_neighbour_face": 40553604151.0,
+        "box_unambiguous_face": 33095300554.0,
         "box_value": 47160550870.81001,
         "colocated_other_share": 0.07749848126658938,
         "date": "2026-04-23",
@@ -7822,6 +8207,7 @@
       {
         "box_face": 49322907251.0,
         "box_neighbour_face": 40727900901.99999,
+        "box_unambiguous_face": 33179641307.0,
         "box_value": 47446740042.76,
         "colocated_other_share": 0.0740673119122192,
         "date": "2026-04-24",
@@ -7844,6 +8230,7 @@
       {
         "box_face": 49571141147.0,
         "box_neighbour_face": 40959444508.99999,
+        "box_unambiguous_face": 33410642332.0,
         "box_value": 47696093106.49,
         "colocated_other_share": 0.0754469265583443,
         "date": "2026-04-27",
@@ -7866,6 +8253,7 @@
       {
         "box_face": 49619434070.0,
         "box_neighbour_face": 41000781882.00001,
+        "box_unambiguous_face": 33456166471.0,
         "box_value": 47729257878.41,
         "colocated_other_share": 0.07601620382172923,
         "date": "2026-04-28",
@@ -7888,6 +8276,7 @@
       {
         "box_face": 49677030988.0,
         "box_neighbour_face": 41061803346.99999,
+        "box_unambiguous_face": 33500357245.0,
         "box_value": 47758566435.62,
         "colocated_other_share": 0.07522273350628444,
         "date": "2026-04-29",
@@ -7910,6 +8299,7 @@
       {
         "box_face": 49873606394.0,
         "box_neighbour_face": 41240396426.99999,
+        "box_unambiguous_face": 33604238255.0,
         "box_value": 47964797099.05,
         "colocated_other_share": 0.07382156531403129,
         "date": "2026-04-30",
@@ -7932,6 +8322,7 @@
       {
         "box_face": 49928085419.0,
         "box_neighbour_face": 41279332063.00001,
+        "box_unambiguous_face": 33637656894.0,
         "box_value": 48020011263.95,
         "colocated_other_share": 0.0730300453404523,
         "date": "2026-05-01",
@@ -7954,6 +8345,7 @@
       {
         "box_face": 50176634855.0,
         "box_neighbour_face": 41430556974.0,
+        "box_unambiguous_face": 33763971086.0,
         "box_value": 48248182432.479996,
         "colocated_other_share": 0.07388051231877694,
         "date": "2026-05-04",
@@ -7976,6 +8368,7 @@
       {
         "box_face": 50331339133.0,
         "box_neighbour_face": 41460863557.00001,
+        "box_unambiguous_face": 33746669286.0,
         "box_value": 48410308468.84999,
         "colocated_other_share": 0.07371797866785808,
         "date": "2026-05-05",
@@ -7998,6 +8391,7 @@
       {
         "box_face": 50860986370.0,
         "box_neighbour_face": 41911543123.99999,
+        "box_unambiguous_face": 34041117410.0,
         "box_value": 48945946948.479996,
         "colocated_other_share": 0.07335747096180874,
         "date": "2026-05-06",
@@ -8020,6 +8414,7 @@
       {
         "box_face": 51020248177.0,
         "box_neighbour_face": 42056685091.0,
+        "box_unambiguous_face": 34168762929.0,
         "box_value": 49087201244.76999,
         "colocated_other_share": 0.0735531821032178,
         "date": "2026-05-07",
@@ -8042,6 +8437,7 @@
       {
         "box_face": 51212739785.0,
         "box_neighbour_face": 42197743866.0,
+        "box_unambiguous_face": 34207656756.0,
         "box_value": 49285013367.67,
         "colocated_other_share": 0.07019741869184197,
         "date": "2026-05-08",
@@ -8064,6 +8460,7 @@
       {
         "box_face": 50771414666.0,
         "box_neighbour_face": 41727096866.0,
+        "box_unambiguous_face": 33736930656.0,
         "box_value": 48856556203.18,
         "colocated_other_share": 0.0725520489008438,
         "date": "2026-05-11",
@@ -8086,6 +8483,7 @@
       {
         "box_face": 50718145550.0,
         "box_neighbour_face": 41681695082.00001,
+        "box_unambiguous_face": 33751509094.0,
         "box_value": 48788127226.45,
         "colocated_other_share": 0.07294999830429962,
         "date": "2026-05-12",
@@ -8108,6 +8506,7 @@
       {
         "box_face": 50868392800.0,
         "box_neighbour_face": 41827864516.99999,
+        "box_unambiguous_face": 33902413409.0,
         "box_value": 48936044541.229996,
         "colocated_other_share": 0.07239439790731861,
         "date": "2026-05-13",
@@ -8130,6 +8529,7 @@
       {
         "box_face": 51212698675.0,
         "box_neighbour_face": 42036936472.0,
+        "box_unambiguous_face": 34004487310.0,
         "box_value": 49267568323.79,
         "colocated_other_share": 0.0726198396499814,
         "date": "2026-05-14",
@@ -8152,6 +8552,7 @@
       {
         "box_face": 51493839127.0,
         "box_neighbour_face": 42257600491.0,
+        "box_unambiguous_face": 34200941869.0,
         "box_value": 49481276817.85,
         "colocated_other_share": 0.06288589594459748,
         "date": "2026-05-15",
@@ -8174,6 +8575,7 @@
       {
         "box_face": 51642915126.0,
         "box_neighbour_face": 42326888295.00001,
+        "box_unambiguous_face": 34207808225.0,
         "box_value": 49642927664.10999,
         "colocated_other_share": 0.07362256437725477,
         "date": "2026-05-18",
@@ -8196,6 +8598,7 @@
       {
         "box_face": 51798639142.0,
         "box_neighbour_face": 42465623697.0,
+        "box_unambiguous_face": 34348062002.0,
         "box_value": 49777299668.310005,
         "colocated_other_share": 0.07287294143392041,
         "date": "2026-05-19",
@@ -8218,6 +8621,7 @@
       {
         "box_face": 52026078944.0,
         "box_neighbour_face": 42631444296.0,
+        "box_unambiguous_face": 34454649568.0,
         "box_value": 50034517174.149994,
         "colocated_other_share": 0.07271291518338899,
         "date": "2026-05-20",
@@ -8240,6 +8644,7 @@
       {
         "box_face": 52348878902.0,
         "box_neighbour_face": 42905687830.0,
+        "box_unambiguous_face": 34755324342.0,
         "box_value": 50327955662.25001,
         "colocated_other_share": 0.0737756536452345,
         "date": "2026-05-21",
@@ -8262,6 +8667,7 @@
       {
         "box_face": 52530941095.0,
         "box_neighbour_face": 43046659563.0,
+        "box_unambiguous_face": 34771619689.0,
         "box_value": 50493562872.36001,
         "colocated_other_share": 0.07195903762224794,
         "date": "2026-05-22",
@@ -8284,6 +8690,7 @@
       {
         "box_face": 52930364395.0,
         "box_neighbour_face": 43402424885.99999,
+        "box_unambiguous_face": 35115354699.0,
         "box_value": 50932148709.079994,
         "colocated_other_share": 0.07403614480509367,
         "date": "2026-05-26",
@@ -8306,6 +8713,7 @@
       {
         "box_face": 53110089148.0,
         "box_neighbour_face": 43429822807.00001,
+        "box_unambiguous_face": 35098054172.0,
         "box_value": 51115695344.78,
         "colocated_other_share": 0.0739525642341622,
         "date": "2026-05-27",
@@ -8328,6 +8736,7 @@
       {
         "box_face": 53633443792.0,
         "box_neighbour_face": 43913912449.00001,
+        "box_unambiguous_face": 35532083319.0,
         "box_value": 51636125450.850006,
         "colocated_other_share": 0.07223452887319791,
         "date": "2026-05-28",
@@ -8350,6 +8759,7 @@
       {
         "box_face": 54053621619.0,
         "box_neighbour_face": 44248179369.00001,
+        "box_unambiguous_face": 35808662907.0,
         "box_value": 52056261216.149994,
         "colocated_other_share": 0.06843352444322665,
         "date": "2026-05-29",
@@ -8372,6 +8782,7 @@
       {
         "box_face": 79061802033.0,
         "box_neighbour_face": 69253531719.99998,
+        "box_unambiguous_face": 60657157781.0,
         "box_value": 76886629965.72002,
         "colocated_other_share": 0.07058964653684935,
         "date": "2026-06-01",
@@ -8394,6 +8805,7 @@
       {
         "box_face": 79709528128.0,
         "box_neighbour_face": 69867292423.0,
+        "box_unambiguous_face": 61265781642.0,
         "box_value": 77520948485.01999,
         "colocated_other_share": 0.07052496478402363,
         "date": "2026-06-02",
@@ -8416,6 +8828,7 @@
       {
         "box_face": 68078441046.0,
         "box_neighbour_face": 58151841138.0,
+        "box_unambiguous_face": 49506254553.0,
         "box_value": 65900231240.91,
         "colocated_other_share": 0.06989872221547798,
         "date": "2026-06-03",
@@ -8438,6 +8851,7 @@
       {
         "box_face": 67314190349.0,
         "box_neighbour_face": 57314114391.00001,
+        "box_unambiguous_face": 48616462398.0,
         "box_value": 65147606062.740005,
         "colocated_other_share": 0.06726510090162015,
         "date": "2026-06-04",
@@ -8460,6 +8874,7 @@
       {
         "box_face": 67731789762.0,
         "box_neighbour_face": 57739763850.0,
+        "box_unambiguous_face": 49018938231.0,
         "box_value": 65529636710.96001,
         "colocated_other_share": 0.0657967336815055,
         "date": "2026-06-05",
@@ -8482,6 +8897,7 @@
       {
         "box_face": 67972379677.0,
         "box_neighbour_face": 57955449297.0,
+        "box_unambiguous_face": 49216490362.0,
         "box_value": 65788721348.68,
         "colocated_other_share": 0.07044026646171864,
         "date": "2026-06-08",
@@ -8504,6 +8920,7 @@
       {
         "box_face": 68049239268.0,
         "box_neighbour_face": 58019486449.0,
+        "box_unambiguous_face": 49252005149.0,
         "box_value": 65880626490.939995,
         "colocated_other_share": 0.06982443631935925,
         "date": "2026-06-09",
@@ -8526,6 +8943,7 @@
       {
         "box_face": 68453768823.0,
         "box_neighbour_face": 58273468916.0,
+        "box_unambiguous_face": 49442195674.0,
         "box_value": 66271827136.63999,
         "colocated_other_share": 0.06932343796086324,
         "date": "2026-06-10",
@@ -8548,6 +8966,7 @@
       {
         "box_face": 68744148893.0,
         "box_neighbour_face": 58487829095.00001,
+        "box_unambiguous_face": 49565852037.0,
         "box_value": 66579214379.28,
         "colocated_other_share": 0.06558368021883146,
         "date": "2026-06-11",
@@ -8570,6 +8989,7 @@
       {
         "box_face": 68905462504.0,
         "box_neighbour_face": 58561487302.0,
+        "box_unambiguous_face": 49596948564.0,
         "box_value": 66731334870.579994,
         "colocated_other_share": 0.06486823384450874,
         "date": "2026-06-12",
@@ -8592,6 +9012,7 @@
       {
         "box_face": 74497305859.0,
         "box_neighbour_face": 58952515666.0,
+        "box_unambiguous_face": 49142981392.0,
         "box_value": 72294647852.3,
         "colocated_other_share": 0.06824665470364491,
         "date": "2026-06-15",
@@ -8614,6 +9035,7 @@
       {
         "box_face": 74935260012.0,
         "box_neighbour_face": 59248143532.99999,
+        "box_unambiguous_face": 49351426885.0,
         "box_value": 72738956237.19,
         "colocated_other_share": 0.06830063273820827,
         "date": "2026-06-16",
@@ -8636,6 +9058,7 @@
       {
         "box_face": 75095766763.0,
         "box_neighbour_face": 59330248993.00001,
+        "box_unambiguous_face": 49413856630.0,
         "box_value": 72845307542.23999,
         "colocated_other_share": 0.06792855914294028,
         "date": "2026-06-17",
@@ -8658,6 +9081,7 @@
       {
         "box_face": 67048294451.0,
         "box_neighbour_face": 51527431679.0,
+        "box_unambiguous_face": 41828775344.0,
         "box_value": 64785878534.090004,
         "colocated_other_share": 0.04986279134515027,
         "date": "2026-06-18",
@@ -8680,6 +9104,7 @@
       {
         "box_face": 67281894115.0,
         "box_neighbour_face": 51716085864.0,
+        "box_unambiguous_face": 41956421476.0,
         "box_value": 65033567111.28999,
         "colocated_other_share": 0.06644820791185602,
         "date": "2026-06-22",
@@ -8702,6 +9127,7 @@
       {
         "box_face": 67482720132.0,
         "box_neighbour_face": 51886429196.0,
+        "box_unambiguous_face": 42075511446.0,
         "box_value": 65223516040.33001,
         "colocated_other_share": 0.06593850173020256,
         "date": "2026-06-23",
@@ -8724,6 +9150,7 @@
       {
         "box_face": 67937490895.0,
         "box_neighbour_face": 52330388702.0,
+        "box_unambiguous_face": 42513203048.0,
         "box_value": 65705840067.46,
         "colocated_other_share": 0.06438501502579484,
         "date": "2026-06-24",
@@ -8746,6 +9173,7 @@
       {
         "box_face": 68073404063.0,
         "box_neighbour_face": 52460380288.0,
+        "box_unambiguous_face": 42634435132.0,
         "box_value": 65851144123.07,
         "colocated_other_share": 0.06313861195357517,
         "date": "2026-06-25",
@@ -8768,6 +9196,7 @@
       {
         "box_face": 67840291807.0,
         "box_neighbour_face": 52166029522.0,
+        "box_unambiguous_face": 42341056646.0,
         "box_value": 65635916655.009995,
         "colocated_other_share": 0.06227951645345363,
         "date": "2026-06-26",
@@ -8790,6 +9219,7 @@
       {
         "box_face": 67844655878.0,
         "box_neighbour_face": 52143849791.99999,
+        "box_unambiguous_face": 42315423586.0,
         "box_value": 65650438589.14001,
         "colocated_other_share": 0.06184306194329262,
         "date": "2026-06-29",
@@ -8812,6 +9242,7 @@
       {
         "box_face": 61689188074.0,
         "box_neighbour_face": 45903205132.0,
+        "box_unambiguous_face": 36029432140.0,
         "box_value": 59472083101.7,
         "colocated_other_share": 0.05804169561810474,
         "date": "2026-06-30",
@@ -8834,6 +9265,7 @@
       {
         "box_face": 61871226515.0,
         "box_neighbour_face": 46020412772.99999,
+        "box_unambiguous_face": 36056374609.0,
         "box_value": 59639644471.45,
         "colocated_other_share": 0.059061880875100115,
         "date": "2026-07-01",
@@ -8856,6 +9288,7 @@
       {
         "box_face": 56944657392.0,
         "box_neighbour_face": 46116243772.0,
+        "box_unambiguous_face": 36840233297.0,
         "box_value": 54764205171.020004,
         "colocated_other_share": 0.05729223567640263,
         "date": "2026-07-02",
@@ -8878,6 +9311,7 @@
       {
         "box_face": 57085568785.0,
         "box_neighbour_face": 46214065670.00001,
+        "box_unambiguous_face": 36919668827.0,
         "box_value": 54929928837.16,
         "colocated_other_share": 0.05902006765310146,
         "date": "2026-07-06",
@@ -8900,6 +9334,7 @@
       {
         "box_face": 57184796569.0,
         "box_neighbour_face": 46306521606.0,
+        "box_unambiguous_face": 37009497207.0,
         "box_value": 55013419855.65001,
         "colocated_other_share": 0.05782866081481023,
         "date": "2026-07-07",
@@ -8922,6 +9357,7 @@
       {
         "box_face": 57292424985.0,
         "box_neighbour_face": 46327520559.0,
+        "box_unambiguous_face": 37014187540.0,
         "box_value": 55105438138.84,
         "colocated_other_share": 0.05701413898428311,
         "date": "2026-07-08",
@@ -8944,6 +9380,7 @@
       {
         "box_face": 57434184835.0,
         "box_neighbour_face": 46420901124.99999,
+        "box_unambiguous_face": 37074730032.0,
         "box_value": 55263993010.51001,
         "colocated_other_share": 0.05679343239138098,
         "date": "2026-07-09",
@@ -8966,6 +9403,7 @@
       {
         "box_face": 57724018646.0,
         "box_neighbour_face": 46583489280.00001,
+        "box_unambiguous_face": 37214825998.0,
         "box_value": 55524102173.84999,
         "colocated_other_share": 0.05608740591274272,
         "date": "2026-07-10",
@@ -8988,6 +9426,7 @@
       {
         "box_face": 58022817801.0,
         "box_neighbour_face": 46829981122.99999,
+        "box_unambiguous_face": 37454714466.0,
         "box_value": 55808299435.060005,
         "colocated_other_share": 0.05687334251684425,
         "date": "2026-07-13",
@@ -9010,6 +9449,7 @@
       {
         "box_face": 58174581724.0,
         "box_neighbour_face": 46926539758.00001,
+        "box_unambiguous_face": 37505404919.0,
         "box_value": 55993253717.020004,
         "colocated_other_share": 0.056406191132344484,
         "date": "2026-07-14",
@@ -9032,6 +9472,7 @@
       {
         "box_face": 58277865446.0,
         "box_neighbour_face": 46965733252.0,
+        "box_unambiguous_face": 37542128926.0,
         "box_value": 56124931425.399994,
         "colocated_other_share": 0.05641355110337437,
         "date": "2026-07-15",
@@ -9054,6 +9495,7 @@
       {
         "box_face": 58373131703.0,
         "box_neighbour_face": 47070833164.0,
+        "box_unambiguous_face": 37631419082.0,
         "box_value": 56210677964.71999,
         "colocated_other_share": 0.056092527396543856,
         "date": "2026-07-16",
@@ -9076,6 +9518,7 @@
       {
         "box_face": 57644199389.0,
         "box_neighbour_face": 46350701265.0,
+        "box_unambiguous_face": 36843891770.0,
         "box_value": 55481087375.25,
         "colocated_other_share": 0.047160472925205206,
         "date": "2026-07-17",
@@ -9098,6 +9541,7 @@
       {
         "box_face": 57750500174.0,
         "box_neighbour_face": 46430383529.00001,
+        "box_unambiguous_face": 36923329661.0,
         "box_value": 55583812565.66,
         "colocated_other_share": 0.0616703955858855,
         "date": "2026-07-20",
@@ -9120,6 +9564,7 @@
       {
         "box_face": 57954227535.0,
         "box_neighbour_face": 46626350005.00001,
+        "box_unambiguous_face": 37114875828.0,
         "box_value": 55765195792.41,
         "colocated_other_share": 0.06086046655925784,
         "date": "2026-07-21",
@@ -9142,6 +9587,7 @@
       {
         "box_face": 58336142867.0,
         "box_neighbour_face": 46944893754.0,
+        "box_unambiguous_face": 37443268793.0,
         "box_value": 56128576806.16,
         "colocated_other_share": 0.06185265131477521,
         "date": "2026-07-22",
@@ -9164,6 +9610,7 @@
       {
         "box_face": 58544425057.0,
         "box_neighbour_face": 47118635738.0,
+        "box_unambiguous_face": 37581273610.0,
         "box_value": 56308007265.55999,
         "colocated_other_share": 0.06109735294487299,
         "date": "2026-07-23",
@@ -9186,6 +9633,7 @@
       {
         "box_face": 58615414471.0,
         "box_neighbour_face": 47180562595.00001,
+        "box_unambiguous_face": 37602278525.0,
         "box_value": 56396207079.33,
         "colocated_other_share": 0.06053206929825917,
         "date": "2026-07-24",
@@ -9208,6 +9656,7 @@
       {
         "box_face": 58905946036.0,
         "box_neighbour_face": 47450691426.00001,
+        "box_unambiguous_face": 37853750900.0,
         "box_value": 56698365294.7,
         "colocated_other_share": 0.061824419564589686,
         "date": "2026-07-27",
@@ -9230,6 +9679,7 @@
       {
         "box_face": 59012264283.0,
         "box_neighbour_face": 47502882483.00001,
+        "box_unambiguous_face": 37852829449.0,
         "box_value": 56824480008.26001,
         "colocated_other_share": 0.061827798870818,
         "date": "2026-07-28",
@@ -9252,6 +9702,7 @@
       {
         "box_face": 59037241479.0,
         "box_neighbour_face": 47524244589.0,
+        "box_unambiguous_face": 37882637823.0,
         "box_value": 56877189956.840004,
         "colocated_other_share": 0.06263929826623037,
         "date": "2026-07-29",
@@ -9274,6 +9725,7 @@
       {
         "box_face": 59118776791.0,
         "box_neighbour_face": 47609098165.0,
+        "box_unambiguous_face": 37969101632.0,
         "box_value": 56957661802.04,
         "colocated_other_share": 0.06143945549348003,
         "date": "2026-07-30",
@@ -9296,6 +9748,7 @@
       {
         "box_face": 59323267108.0,
         "box_neighbour_face": 47651425309.00001,
+        "box_unambiguous_face": 37910415647.0,
         "box_value": 57131731544.78,
         "colocated_other_share": 0.05963888467623357,
         "date": "2026-07-31",
@@ -9318,6 +9771,7 @@
       {
         "box_face": 59512422198.0,
         "box_neighbour_face": 47828362974.0,
+        "box_unambiguous_face": 38081867640.0,
         "box_value": 57348659515.100006,
         "colocated_other_share": 0.061428391047820614,
         "date": "2026-08-03",
@@ -9340,6 +9794,7 @@
       {
         "box_face": 59484751682.0,
         "box_neighbour_face": 47813711597.0,
+        "box_unambiguous_face": 38120074028.0,
         "box_value": 57353570152.490005,
         "colocated_other_share": 0.06149166359977839,
         "date": "2026-08-04",
@@ -9362,6 +9817,7 @@
       {
         "box_face": 59522467623.0,
         "box_neighbour_face": 47839657057.00001,
+        "box_unambiguous_face": 38156298620.0,
         "box_value": 57399059076.04001,
         "colocated_other_share": 0.06123910512961873,
         "date": "2026-08-05",
@@ -9384,6 +9840,7 @@
       {
         "box_face": 59568977663.0,
         "box_neighbour_face": 47886592983.00001,
+        "box_unambiguous_face": 38189469490.0,
         "box_value": 57419909477.21999,
         "colocated_other_share": 0.06067402780356782,
         "date": "2026-08-06",
@@ -9406,6 +9863,7 @@
       {
         "box_face": 60102772909.0,
         "box_neighbour_face": 48329755786.99999,
+        "box_unambiguous_face": 38557777382.0,
         "box_value": 57953028265.02,
         "colocated_other_share": 0.05971092199136762,
         "date": "2026-08-07",
@@ -9428,6 +9886,7 @@
       {
         "box_face": 60139455857.0,
         "box_neighbour_face": 48359064377.0,
+        "box_unambiguous_face": 38530264946.0,
         "box_value": 57995312367.85,
         "colocated_other_share": 0.059926126921849246,
         "date": "2026-08-10",
@@ -9450,6 +9909,7 @@
       {
         "box_face": 60184497725.0,
         "box_neighbour_face": 48379395965.0,
+        "box_unambiguous_face": 38547197715.0,
         "box_value": 58052286056.10999,
         "colocated_other_share": 0.06024255718211612,
         "date": "2026-08-11",
@@ -9472,6 +9932,7 @@
       {
         "box_face": 60509549232.0,
         "box_neighbour_face": 48533518536.00001,
+        "box_unambiguous_face": 38648080406.0,
         "box_value": 58366991027.920006,
         "colocated_other_share": 0.06061221701247818,
         "date": "2026-08-12",
@@ -9494,6 +9955,7 @@
       {
         "box_face": 60721405099.0,
         "box_neighbour_face": 48667269837.99999,
+        "box_unambiguous_face": 38689574069.0,
         "box_value": 58602715455.59,
         "colocated_other_share": 0.060546707847487446,
         "date": "2026-08-13",
@@ -9516,6 +9978,7 @@
       {
         "box_face": 61342214754.0,
         "box_neighbour_face": 49191814863.0,
+        "box_unambiguous_face": 38880405747.0,
         "box_value": 59127641384.19001,
         "colocated_other_share": 0.05790931785226635,
         "date": "2026-08-14",
@@ -9538,6 +10001,7 @@
       {
         "box_face": 61488518621.0,
         "box_neighbour_face": 49335250683.99999,
+        "box_unambiguous_face": 39012218522.0,
         "box_value": 59289825155.39001,
         "colocated_other_share": 0.05888515060477699,
         "date": "2026-08-17",
@@ -9560,6 +10024,7 @@
       {
         "box_face": 61647006961.0,
         "box_neighbour_face": 49484588651.00001,
+        "box_unambiguous_face": 39171637657.0,
         "box_value": 59455814694.409996,
         "colocated_other_share": 0.05941015076100453,
         "date": "2026-08-18",
@@ -9582,6 +10047,7 @@
       {
         "box_face": 61901293902.0,
         "box_neighbour_face": 49644355007.0,
+        "box_unambiguous_face": 39327718208.0,
         "box_value": 59712838838.340004,
         "colocated_other_share": 0.05873991737613798,
         "date": "2026-08-19",
@@ -9604,6 +10070,7 @@
       {
         "box_face": 62231656556.0,
         "box_neighbour_face": 49743604137.99999,
+        "box_unambiguous_face": 39378585444.0,
         "box_value": 60031755126.67999,
         "colocated_other_share": 0.05789370292142188,
         "date": "2026-08-20",
@@ -9626,6 +10093,7 @@
       {
         "box_face": 62368961937.0,
         "box_neighbour_face": 49793604091.0,
+        "box_unambiguous_face": 39479998552.0,
         "box_value": 60149064973.020004,
         "colocated_other_share": 0.04966370438058078,
         "date": "2026-08-21",
@@ -9648,6 +10116,7 @@
       {
         "box_face": 62460809123.0,
         "box_neighbour_face": 49843915130.00001,
+        "box_unambiguous_face": 39465017514.0,
         "box_value": 60257794299.37,
         "colocated_other_share": 0.060779601609886234,
         "date": "2026-08-24",
@@ -9670,6 +10139,7 @@
       {
         "box_face": 63127026867.0,
         "box_neighbour_face": 50385870392.0,
+        "box_unambiguous_face": 39942178248.0,
         "box_value": 60928157177.72,
         "colocated_other_share": 0.061730643269289086,
         "date": "2026-08-25",
@@ -9692,6 +10162,7 @@
       {
         "box_face": 63322898672.0,
         "box_neighbour_face": 50412161062.0,
+        "box_unambiguous_face": 39935567058.0,
         "box_value": 61106308218.16,
         "colocated_other_share": 0.06161840718732993,
         "date": "2026-08-26",
@@ -9714,6 +10185,7 @@
       {
         "box_face": 63556467338.0,
         "box_neighbour_face": 50582977151.99999,
+        "box_unambiguous_face": 40099020087.0,
         "box_value": 61333124038.08,
         "colocated_other_share": 0.06031521407280946,
         "date": "2026-08-27",
@@ -9736,6 +10208,7 @@
       {
         "box_face": 63989678981.0,
         "box_neighbour_face": 50864405623.99999,
+        "box_unambiguous_face": 40355063760.0,
         "box_value": 61697797203.83999,
         "colocated_other_share": 0.057926680075644235,
         "date": "2026-08-28",
@@ -9758,6 +10231,7 @@
       {
         "box_face": 63793812168.0,
         "box_neighbour_face": 50659806008.00001,
+        "box_unambiguous_face": 40146755044.0,
         "box_value": 61513244683.770004,
         "colocated_other_share": 0.05663434299736624,
         "date": "2026-08-31",
@@ -9780,6 +10254,7 @@
       {
         "box_face": 64192871397.0,
         "box_neighbour_face": 50945153710.0,
+        "box_unambiguous_face": 40272431468.0,
         "box_value": 61886914673.25,
         "colocated_other_share": 0.057597801220134554,
         "date": "2026-09-01",
@@ -9802,6 +10277,7 @@
       {
         "box_face": 64405685062.0,
         "box_neighbour_face": 51148247906.0,
+        "box_unambiguous_face": 40437975010.0,
         "box_value": 62103871800.21,
         "colocated_other_share": 0.0577363395978401,
         "date": "2026-09-02",
@@ -9824,6 +10300,7 @@
       {
         "box_face": 64516000223.0,
         "box_neighbour_face": 51210044111.0,
+        "box_unambiguous_face": 40401992169.0,
         "box_value": 62232241806.259995,
         "colocated_other_share": 0.05751074232370812,
         "date": "2026-09-03",
@@ -9846,6 +10323,7 @@
       {
         "box_face": 64757995755.0,
         "box_neighbour_face": 51404501329.0,
+        "box_unambiguous_face": 40591049671.0,
         "box_value": 62457259764.61001,
         "colocated_other_share": 0.05663311319899727,
         "date": "2026-09-04",
@@ -9868,6 +10346,7 @@
       {
         "box_face": 64814537072.0,
         "box_neighbour_face": 51445431785.0,
+        "box_unambiguous_face": 40631989777.0,
         "box_value": 62533499108.32,
         "colocated_other_share": 0.05959187016319828,
         "date": "2026-09-08",
@@ -9890,6 +10369,7 @@
       {
         "box_face": 80341001566.0,
         "box_neighbour_face": 66902450845.00001,
+        "box_unambiguous_face": 55968966992.0,
         "box_value": 77884339030.77002,
         "colocated_other_share": 0.059116411750572556,
         "date": "2026-09-09",
@@ -9912,6 +10392,7 @@
       {
         "box_face": 95507181825.0,
         "box_neighbour_face": 82056550556.0,
+        "box_unambiguous_face": 71091915662.0,
         "box_value": 92967249668.47,
         "colocated_other_share": 0.05834480193888233,
         "date": "2026-09-10",
@@ -9934,6 +10415,7 @@
       {
         "box_face": 80016554685.0,
         "box_neighbour_face": 66582056362.999985,
+        "box_unambiguous_face": 55633991728.0,
         "box_value": 77477609569.17,
         "colocated_other_share": 0.05511504309030659,
         "date": "2026-09-11",
@@ -9956,6 +10438,7 @@
       {
         "box_face": 80189604648.0,
         "box_neighbour_face": 66704094879.99999,
+        "box_unambiguous_face": 55704317845.0,
         "box_value": 77674846079.36,
         "colocated_other_share": 0.05567112460108111,
         "date": "2026-09-14",
@@ -9978,6 +10461,7 @@
       {
         "box_face": 80359311281.0,
         "box_neighbour_face": 66774426017.99999,
+        "box_unambiguous_face": 55657608991.0,
         "box_value": 77829166372.7,
         "colocated_other_share": 0.05478050144899917,
         "date": "2026-09-15",
@@ -10000,6 +10484,7 @@
       {
         "box_face": 73615128466.0,
         "box_neighbour_face": 60032003292.00001,
+        "box_unambiguous_face": 48943232054.0,
         "box_value": 71066684270.21,
         "colocated_other_share": 0.05518199139289491,
         "date": "2026-09-16",
@@ -10022,6 +10507,7 @@
       {
         "box_face": 73777167264.0,
         "box_neighbour_face": 60090809245.99999,
+        "box_unambiguous_face": 48954835918.0,
         "box_value": 71243782722.99,
         "colocated_other_share": 0.05373483430242362,
         "date": "2026-09-17",
@@ -10044,6 +10530,7 @@
       {
         "box_face": 63831112774.0,
         "box_neighbour_face": 50079291748.00001,
+        "box_unambiguous_face": 38962841106.0,
         "box_value": 61277421647.60001,
         "colocated_other_share": 0.047866209134288046,
         "date": "2026-09-18",
@@ -10066,6 +10553,7 @@
       {
         "box_face": 64569701600.0,
         "box_neighbour_face": 50769666878.00001,
+        "box_unambiguous_face": 39560377588.0,
         "box_value": 62016031184.94,
         "colocated_other_share": 0.06008163581072581,
         "date": "2026-09-21",
@@ -10088,6 +10576,7 @@
       {
         "box_face": 64751586394.0,
         "box_neighbour_face": 50880788619.00001,
+        "box_unambiguous_face": 39624379614.0,
         "box_value": 62192058116.86001,
         "colocated_other_share": 0.06578245186648772,
         "date": "2026-09-22",
@@ -10110,6 +10599,7 @@
       {
         "box_face": 65497880265.0,
         "box_neighbour_face": 51444564487.0,
+        "box_unambiguous_face": 40124864932.0,
         "box_value": 62865886256.32001,
         "colocated_other_share": 0.06498031435119622,
         "date": "2026-09-23",
@@ -10132,6 +10622,7 @@
       {
         "box_face": 66048444015.0,
         "box_neighbour_face": 51788665826.0,
+        "box_unambiguous_face": 40341450695.0,
         "box_value": 63415342059.380005,
         "colocated_other_share": 0.06109856752314805,
         "date": "2026-09-24",
@@ -10154,6 +10645,7 @@
       {
         "box_face": 66147978474.0,
         "box_neighbour_face": 51840209092.0,
+        "box_unambiguous_face": 40356124471.0,
         "box_value": 63521919585.99,
         "colocated_other_share": 0.05533235215826838,
         "date": "2026-09-25",
@@ -10176,6 +10668,7 @@
       {
         "box_face": 66311114904.0,
         "box_neighbour_face": 51968461385.99999,
+        "box_unambiguous_face": 40364924804.0,
         "box_value": 63672130069.369995,
         "colocated_other_share": 0.05566434339731662,
         "date": "2026-09-28",
@@ -10198,6 +10691,7 @@
       {
         "box_face": 66118623284.0,
         "box_neighbour_face": 51650578855.0,
+        "box_unambiguous_face": 39980289090.0,
         "box_value": 63493628819.850006,
         "colocated_other_share": 0.054486453271592517,
         "date": "2026-09-29",
@@ -10220,6 +10714,7 @@
       {
         "box_face": 65886953644.0,
         "box_neighbour_face": 51486458925.0,
+        "box_unambiguous_face": 39757016021.0,
         "box_value": 63263714955.20001,
         "colocated_other_share": 0.05222497343715336,
         "date": "2026-09-30",
@@ -10242,6 +10737,7 @@
       {
         "box_face": 65903121659.0,
         "box_neighbour_face": 51479175858.99999,
+        "box_unambiguous_face": 39702927899.0,
         "box_value": 63329161469.14001,
         "colocated_other_share": 0.05308478638742125,
         "date": "2026-10-01",
@@ -10264,6 +10760,7 @@
       {
         "box_face": 66166178765.0,
         "box_neighbour_face": 51621552326.0,
+        "box_unambiguous_face": 39753803038.0,
         "box_value": 63576047665.329994,
         "colocated_other_share": 0.051689009109022445,
         "date": "2026-10-02",
@@ -10286,6 +10783,7 @@
       {
         "box_face": 66628689413.0,
         "box_neighbour_face": 51922159192.99999,
+        "box_unambiguous_face": 39994748960.0,
         "box_value": 64040054585.43,
         "colocated_other_share": 0.051513953677951044,
         "date": "2026-10-05",
@@ -10308,6 +10806,7 @@
       {
         "box_face": 67108947592.0,
         "box_neighbour_face": 52233398441.00001,
+        "box_unambiguous_face": 40264929814.0,
         "box_value": 64524284877.57,
         "colocated_other_share": 0.05207533481739353,
         "date": "2026-10-06",
@@ -10330,6 +10829,7 @@
       {
         "box_face": 67422072187.0,
         "box_neighbour_face": 52483611418.99999,
+        "box_unambiguous_face": 40432113478.0,
         "box_value": 64839410323.170006,
         "colocated_other_share": 0.052570032570139945,
         "date": "2026-10-07",
@@ -10352,6 +10852,7 @@
       {
         "box_face": 67481470012.0,
         "box_neighbour_face": 52432409803.0,
+        "box_unambiguous_face": 40396543087.0,
         "box_value": 64904613868.66,
         "colocated_other_share": 0.05163678717596431,
         "date": "2026-10-08",
@@ -10374,6 +10875,7 @@
       {
         "box_face": 67580044798.0,
         "box_neighbour_face": 52546449147.0,
+        "box_unambiguous_face": 40479564284.0,
         "box_value": 64989925694.37,
         "colocated_other_share": 0.048850063474275736,
         "date": "2026-10-09",
@@ -10396,6 +10898,7 @@
       {
         "box_face": 67607398571.0,
         "box_neighbour_face": 52564214390.0,
+        "box_unambiguous_face": 40490292886.0,
         "box_value": 65040756091.07001,
         "colocated_other_share": 0.05037141001813352,
         "date": "2026-10-12",
@@ -10418,6 +10921,7 @@
       {
         "box_face": 67636021730.0,
         "box_neighbour_face": 52544886500.0,
+        "box_unambiguous_face": 40452445450.0,
         "box_value": 65072827145.48,
         "colocated_other_share": 0.049236316111211355,
         "date": "2026-10-13",
@@ -10440,6 +10944,7 @@
       {
         "box_face": 67629254467.0,
         "box_neighbour_face": 52581778198.00001,
+        "box_unambiguous_face": 40639332576.0,
         "box_value": 65068288837.96,
         "colocated_other_share": 0.0495748201476667,
         "date": "2026-10-14",
@@ -10462,6 +10967,7 @@
       {
         "box_face": 67918188132.0,
         "box_neighbour_face": 52720425121.0,
+        "box_unambiguous_face": 40758751101.0,
         "box_value": 65373335494.22999,
         "colocated_other_share": 0.050639578830145096,
         "date": "2026-10-15",
@@ -10484,6 +10990,7 @@
       {
         "box_face": 67699311826.0,
         "box_neighbour_face": 52509388959.0,
+        "box_unambiguous_face": 40557055622.0,
         "box_value": 65167208906.61,
         "colocated_other_share": 0.04619318631028264,
         "date": "2026-10-16",
@@ -10506,6 +11013,7 @@
       {
         "box_face": 67396486304.0,
         "box_neighbour_face": 52218233275.00001,
+        "box_unambiguous_face": 40122834727.0,
         "box_value": 64879317975.18,
         "colocated_other_share": 0.056618637652950034,
         "date": "2026-10-19",
@@ -10528,6 +11036,7 @@
       {
         "box_face": 67418536228.0,
         "box_neighbour_face": 52140908703.0,
+        "box_unambiguous_face": 39851141366.0,
         "box_value": 64897672609.87,
         "colocated_other_share": 0.05749432771496841,
         "date": "2026-10-20",
@@ -10550,6 +11059,7 @@
       {
         "box_face": 67679817524.0,
         "box_neighbour_face": 52264413597.0,
+        "box_unambiguous_face": 40076001496.0,
         "box_value": 65117845594.2,
         "colocated_other_share": 0.05774241370128018,
         "date": "2026-10-21",
@@ -10572,6 +11082,7 @@
       {
         "box_face": 67852374021.0,
         "box_neighbour_face": 52468217115.0,
+        "box_unambiguous_face": 40245672807.0,
         "box_value": 65375262532.64001,
         "colocated_other_share": 0.05613870932151649,
         "date": "2026-10-22",
@@ -10614,6 +11125,7 @@
         "face": 21932617463.0,
         "mark_rate": 0.043575730633415334,
         "neighbour_face": 18267214326.0,
+        "unambiguous_face": 14883383537.0,
         "value": 21126010326.890003,
         "wide_share": 0.7835547649062646
       },
@@ -10677,6 +11189,7 @@
         "face": 67852374021.0,
         "mark_rate": 0.04159314133816648,
         "neighbour_face": 52468217115.0,
+        "unambiguous_face": 40245672807.0,
         "value": 65375262532.64001,
         "wide_share": 0.8497488293358059
       },

@@ -18,8 +18,13 @@ import pandas as pd
 
 from hidden_options.collect.treasury import SNAPSHOT as CURVE_SNAPSHOT
 from hidden_options.config import PANEL_END, RAW_DIR
-from hidden_options.measure.anatomy import MATURITY_LABELS, UNDERLYING_GROUPS, classify
-from hidden_options.measure.anatomy_result import REPORT_COLUMNS
+from hidden_options.measure.anatomy import (
+    MATURITY_LABELS,
+    UNDERLYING_GROUPS,
+    classify,
+    new_lines,
+)
+from hidden_options.measure.anatomy_result import REPORT_COLUMNS, report_days
 from hidden_options.measure.box_rates import (
     MIN_DAYS,
     benchmark_rates,
@@ -40,6 +45,8 @@ MATURITY_EDGES = (30, 91, 365, 730)
 SIZE_EDGES = (1e6, 1e7, 1e8, 1e9)
 SIZE_LABELS = ("to_1m", "1m_10m", "10m_100m", "100m_1bn", "over_1bn")
 BOX_KEY = ["root", "expiry", "lower", "upper"]
+STRIKE_PAIR = ["root", "lower", "upper"]
+TOP_DATES = 6
 
 
 def box_rates_result(
@@ -47,12 +54,16 @@ def box_rates_result(
     curve: pd.DataFrame,
     read_report: Callable[[pd.Timestamp], pd.DataFrame | None],
     last_boxes: pd.DataFrame,
+    daily_boxes: Iterable[tuple[pd.Timestamp, pd.DataFrame]] = (),
+    origins: pd.DataFrame | None = None,
 ) -> Result:
-    """The figures the specification lists.
+    """The figures the specification lists, and diagnostics added after they were seen.
 
     `days` yields one trade date's published rows at a time. `read_report` returns OCC's
     FLEX report of a date, or None. `last_boxes` holds the boxes found in open interest
-    on the last report date, with their `face`.
+    on the last report date, with their `face`. `daily_boxes` yields each report date
+    with the boxes found in its open interest, for the series of confirmed box face.
+    `origins` holds the date each line first had open interest (`anatomy.new_lines`).
     """
     found, files, executed, unresolved = [], 0, 0, 0
     for day in days:
@@ -104,6 +115,14 @@ def box_rates_result(
         "by_size": _by_size(headline),
         "marks": _marks(sample, read_report),
         "open_interest": _seen_trading(last_boxes, trades),
+        "diagnostics": {
+            **_weight(headline),
+            "by_quarter": _by_quarter(headline),
+            "marks_headline": _marks(headline.reset_index(drop=True), read_report),
+            "longest_largest": _largest(sample[bucket == len(MATURITY_LABELS) - 1]),
+        },
+        "confirmed": _confirmed(daily_boxes, trades),
+        "origins": _origins(last_boxes, trades, origins),
     }
     run_inputs = {
         "first_date": values["sample"]["first_date"],
@@ -181,13 +200,162 @@ def _marks(
     }
 
 
-def _seen_trading(last_boxes: pd.DataFrame, trades: pd.DataFrame) -> dict[str, float]:
-    """The share of open-interest box face at strikes that traded as a box package."""
-    face = float(last_boxes["face"].sum())
-    traded = trades[BOX_KEY].drop_duplicates().assign(traded=True)
-    seen = last_boxes.merge(traded, on=BOX_KEY, how="left")["traded"].fillna(False)
-    inside = float(last_boxes["face"].to_numpy(float)[seen.to_numpy(dtype=bool)].sum())
-    return {"face": face, "traded_face_share": inside / face if face else 0.0}
+def _seen_trading(last_boxes: pd.DataFrame, trades: pd.DataFrame) -> dict[str, Any]:
+    """The share of open-interest box face at strikes that traded as a box package: in
+    all (specified), and by underlying with the largest such box's part (added after)."""
+    amounts = last_boxes["face"].to_numpy(float)
+    face = float(amounts.sum())
+    seen = _traded(last_boxes, trades, BOX_KEY)
+    inside = float(amounts[seen].sum())
+    group = np.where(
+        last_boxes["underlying"].isin(UNDERLYING_GROUPS[:2]), last_boxes["underlying"], "other"
+    )
+    return {
+        "face": face,
+        "traded_face_share": inside / face if face else 0.0,
+        "by_underlying": {
+            name: _ratio(amounts[seen & (group == name)].sum(), amounts[group == name].sum())
+            for name in UNDERLYING_GROUPS
+        },
+        "largest_share_of_traded": _ratio(amounts[seen].max() if seen.any() else 0.0, inside),
+    }
+
+
+def _traded(boxes: pd.DataFrame, trades: pd.DataFrame, key: list[str]) -> np.ndarray:
+    """Which `boxes` share `key` with a box package in the trade files."""
+    known = trades[key].drop_duplicates().assign(traded=True)
+    return boxes.merge(known, on=key, how="left")["traded"].fillna(False).to_numpy(dtype=bool)
+
+
+def _confirmed(
+    daily_boxes: Iterable[tuple[pd.Timestamp, pd.DataFrame]], trades: pd.DataFrame
+) -> dict[str, Any]:
+    """On every report date, the open-interest box face that the trade files confirm.
+
+    Added after the first figures. Two readings: the box's own root, expiry and strikes
+    traded as a package at some time in the files (`exact`), or its root and strikes did
+    at any expiry (`strike_pair`). The second reaches boxes that expired before the files
+    begin, at the cost of trusting that a strike pair used for boxes stays one.
+    """
+    rows = []
+    for date, boxes in daily_boxes:
+        amounts = boxes["face"].to_numpy(float)
+        rows.append(
+            {
+                "date": f"{date:%Y-%m-%d}",
+                "face": float(amounts.sum()),
+                "exact": float(amounts[_traded(boxes, trades, BOX_KEY)].sum()),
+                "strike_pair": float(amounts[_traded(boxes, trades, STRIKE_PAIR)].sum()),
+            }
+        )
+    if not rows:
+        return {"daily": [], "first": None, "last": None, "growth": None}
+    first, last = rows[0], rows[-1]
+    return {
+        "daily": rows,
+        "first": first,
+        "last": last,
+        "growth": _ratio(last["strike_pair"], first["strike_pair"]),
+    }
+
+
+def _origins(
+    boxes: pd.DataFrame, trades: pd.DataFrame, origins: pd.DataFrame | None
+) -> dict[str, Any]:
+    """Whether the two strikes of each box on the last date first had open interest on
+    the same report date, as lines opened in one trade would. Lines already open on the
+    first report date cannot be dated and are counted apart. Added after the first
+    figures."""
+    if origins is None or origins.empty or boxes.empty:
+        return {"censored_share": None, "same_date_share": {}}
+    start = origins["first_date"].min()
+    dated = origins.set_index(["root", "expiry", "strike"])["first_date"]
+
+    def first(side: str) -> np.ndarray:
+        keys = pd.MultiIndex.from_frame(
+            boxes[["root", "expiry", side]].rename(columns={side: "strike"})
+        )
+        return dated.reindex(keys).to_numpy()
+
+    lower, upper = first("lower"), first("upper")
+    face = boxes["face"].to_numpy(float)
+    censored = (lower == start) | (upper == start)
+    same = ~censored & (lower == upper)
+    traded = _traded(boxes, trades, BOX_KEY)
+    shares = {}
+    for name, chosen in (
+        ("all", np.ones(len(boxes), dtype=bool)),
+        ("confirmed", traded),
+        ("unconfirmed", ~traded),
+    ):
+        dateable = chosen & ~censored
+        shares[name] = _ratio(face[same & chosen].sum(), face[dateable].sum())
+    return {"censored_share": _ratio(face[censored].sum(), face.sum()), "same_date_share": shares}
+
+
+def _weight(headline: pd.DataFrame) -> dict[str, Any]:
+    """How much of the headline mean rests on a few dates, the mean without weights, and
+    the range of the mean when one date at a time is left out. Added after the first
+    figures."""
+    empty: dict[str, Any] = {
+        "top_dates": TOP_DATES,
+        "top_dates_share": None,
+        "effective_dates": None,
+        "unweighted_mean": None,
+        "leave_one_low": None,
+        "leave_one_high": None,
+    }
+    if headline.empty:
+        return empty
+    weighted = headline.assign(moment=headline["spread"] * headline["face"])
+    by_date = weighted.groupby("trade_date")[["face", "moment"]].sum()
+    face = by_date["face"].to_numpy(dtype=np.float64)
+    moment = by_date["moment"].to_numpy(dtype=np.float64)
+    total_face, total_moment = float(face.sum()), float(moment.sum())
+    out = {
+        **empty,
+        "top_dates_share": float(np.sort(face)[::-1][:TOP_DATES].sum()) / total_face,
+        "effective_dates": total_face**2 / float(np.square(face).sum()),
+        "unweighted_mean": float(headline["spread"].mean()),
+    }
+    if len(face) > 1:
+        without = [(total_moment - m) / (total_face - f) for f, m in zip(face, moment, strict=True)]
+        out["leave_one_low"] = float(min(without))
+        out["leave_one_high"] = float(max(without))
+    return out
+
+
+def _largest(trades: pd.DataFrame) -> dict[str, Any] | None:
+    """The largest trade by face in a bucket, with its spread. Added after the first
+    figures, when one trade carried the mean of the longest bucket."""
+    if trades.empty:
+        return None
+    top = trades.iloc[int(np.argmax(trades["face"].to_numpy(float)))]
+    return {
+        "face": float(top["face"]),
+        "spread": float(top["spread"]),
+        "expiry": f"{pd.Timestamp(top['expiry']):%Y-%m-%d}",
+        "face_share": float(top["face"] / trades["face"].sum()),
+    }
+
+
+def _by_quarter(headline: pd.DataFrame) -> list[dict[str, Any]]:
+    """The spread in each calendar quarter. Added after the first figures."""
+    quarters = headline["trade_date"].dt.to_period("Q").astype(str)
+    rows = []
+    for quarter in sorted(quarters.unique()):
+        summary = spread_summary(headline[quarters == quarter])
+        rows.append(
+            {
+                "quarter": str(quarter),
+                **{k: summary[k] for k in ("trades", "face", "mean", "median")},
+            }
+        )
+    return rows
+
+
+def _ratio(part: Any, whole: Any) -> float:
+    return float(part) / float(whole) if float(whole) else 0.0
 
 
 def _iso(day: Any) -> str | None:
@@ -232,12 +400,18 @@ def last_report_day(raw: Path, until: pd.Timestamp) -> pd.DataFrame:
 def box_rates_analysis() -> Result:
     """Box rates on every execution report on disk up to PANEL_END."""
     end = pd.Timestamp(PANEL_END)
-    last = last_report_day(RAW_DIR, end)
+    daily, known = [], pd.DataFrame(columns=["root", "expiry", "strike", "first_date"])
+    for day in report_days(RAW_DIR, end):
+        date = pd.Timestamp(day["report_date"].iloc[0])
+        daily.append((date, classify(day).boxes))
+        known = new_lines(known, day, date)
     return box_rates_result(
         trade_days(RAW_DIR, end),
         pd.read_parquet(RAW_DIR / CURVE_SNAPSHOT),
         lambda day: read_report_day(RAW_DIR, day),
-        classify(last).boxes,
+        daily[-1][1],
+        daily,
+        known,
     )
 
 

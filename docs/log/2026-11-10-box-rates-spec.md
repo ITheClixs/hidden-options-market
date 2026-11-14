@@ -140,3 +140,34 @@ specification.
 **Reading.** Box spreads on Cboe traded about 36bp above Treasuries of the same
 maturity. The figure for box positions in open interest is an upper bound on lending
 done through boxes; the part confirmed by traded packages since April 2025 is 41% of it.
+
+## Review, 2026-11-14
+
+A referee pass on the paper's new section raised points about this entry. Nothing above
+is changed.
+
+- **What was seen.** Before this entry was written, two files had been opened, one of
+  them the last trade date of the panel, and thirteen box rates computed from them, as
+  "What was seen before writing" says. The paper's sentence that the reading was fixed
+  "before the files were collected" now says that as well.
+- **The clarification.** The note under "Box trade" covers both bullets added while the
+  code was written: the widened description of unresolved groups and the rule for a box
+  executed several times at one instant. Both were added before any file beyond the two
+  named was read.
+- **The headline rests on few dates.** Six trade dates carry most of the face in the
+  headline sample, and the largest trades are one fund's quarterly roll of a SPY box
+  against a QQQ box. A clustered standard error over the dates therefore overstates the
+  precision. The paper now leads with the median and reports the concentration, the
+  unweighted mean, the mean with each date left out in turn, and the median by quarter.
+- **Confirmed lending.** The share of open-interest box face confirmed by traded
+  packages is reported by underlying, with the largest box's part of it. A series of
+  confirmed face on every report date is added, under two readings: the box's own strikes
+  and expiry traded as a package, or its root and strikes did at any expiry. The second
+  reaches boxes that expired before the files begin.
+- **Line origins.** For each box on the last date, whether its two strike lines first
+  had open interest on the same report date, as lines opened in one trade would.
+- **The longest bucket.** Its face-weighted mean rests on one large trade, which is
+  reported.
+
+These were added after the figures had been seen. They are diagnostics, not part of the
+specification, and the paper labels them so.

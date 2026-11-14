@@ -56,6 +56,7 @@ def holders_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "HoldBoxMarketFace": dollars(box["market_face"]),
     }
     macros.update(_profile(values["profile"]))
+    macros.update(_coverage(values))
     for name in ("all", *UNDERLYINGS):
         if name not in gamma:
             continue
@@ -72,6 +73,25 @@ def holders_macros(values: Mapping[str, Any]) -> dict[str, str]:
             }
         )
     return macros
+
+
+def _coverage(values: Mapping[str, Any]) -> dict[str, str]:
+    """What share of the matched holdings could be priced, and the dealer's gamma in the
+    package legs alone. Added after the first figures."""
+    coverage = values.get("coverage")
+    package = values.get("dealer_gamma_package", {})
+    if not coverage or "all" not in package:
+        return {}
+    missing = coverage["unpriced_underlyings"]
+    return {
+        "HoldCoverageFunds": formats.count(coverage["priced_funds"]),
+        "HoldCoverageContracts": formats.percent(coverage["priced_contracts_share"]),
+        "HoldUnpriced": " and ".join(missing) if missing else "none",
+        "HoldPackageGammaNet": millions(package["all"]["net"]),
+        "HoldPackageGammaConventionNet": millions(package["all"]["convention_net"]),
+        "HoldPackageGammaWrong": formats.percent(package["all"]["convention_wrong_share"]),
+        "HoldPackageGammaSPYNet": millions(package["SPY"]["net"]) if "SPY" in package else "n/a",
+    }
 
 
 def _profile(profile: Mapping[str, Any]) -> dict[str, str]:

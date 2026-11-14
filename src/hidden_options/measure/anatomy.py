@@ -37,13 +37,25 @@ UNDERLYING_GROUPS = ("SPX", "SPY", "other")
 BUCKET = ["root", "expiry"]
 LINE = [*BUCKET, "strike"]
 SERIES = [*LINE, "right"]
-BOX_COLUMNS = ("root", "expiry", "underlying", "count", "lower", "upper", "face", "value")
+BOX_COLUMNS = (
+    "root",
+    "expiry",
+    "underlying",
+    "count",
+    "lower",
+    "upper",
+    "face",
+    "value",
+    "sharing",
+)
 
 
 @dataclass(frozen=True)
 class Anatomy:
     """One date's series with their `category`, its boxes, and the box face under the
-    alternative matching of each paired strike with its neighbour."""
+    alternative matching of each paired strike with its neighbour. A box's `sharing` is
+    how many paired strikes of its root and expiry carry its count: at two, the matching
+    is not in question."""
 
     series: pd.DataFrame
     boxes: pd.DataFrame
@@ -99,6 +111,7 @@ def _paired_strikes(held: pd.DataFrame) -> pd.DataFrame:
     rank = group.rank(method="first").astype(np.int64) - 1
     size = group.transform("size").astype(np.int64)
     middle = (size % 2 == 1) & (rank == (size - 1) // 2)
+    paired["sharing"] = size
     paired["slot"] = rank.where(rank <= size - 1 - rank, size - 1 - rank).where(~middle, -1)
     paired["neighbour_slot"] = (rank // 2).where(rank < 2 * (size // 2), -1)
     return paired
@@ -111,6 +124,7 @@ def _spans(paired: pd.DataFrame, slot: str) -> pd.DataFrame:
         upper=("strike", "last"),
         lower_forward=("forward", "first"),
         upper_forward=("forward", "last"),
+        sharing=("sharing", "first"),
     )
     return spans.reset_index()
 
@@ -167,6 +181,7 @@ def box_lending(found: Anatomy, report_date: pd.Timestamp) -> dict[str, Any]:
         "face": total,
         "value": float(boxes["value"].sum()),
         "neighbour_face": found.neighbour_face,
+        "unambiguous_face": float(face[boxes["sharing"].to_numpy() == 2].sum()),
         "by_maturity": {
             label: float(face[bucket == place].sum()) for place, label in enumerate(MATURITY_LABELS)
         },
@@ -229,6 +244,42 @@ def shuffled(day: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
     return frame.assign(open_interest=dealt)
 
 
+def shuffled_pairs(day: pd.DataFrame, rng: np.random.Generator) -> pd.DataFrame:
+    """`day` with the counts of its paired strikes dealt at random among the paired strikes
+    of the same root, across its expiries. Unpaired lines are left alone.
+
+    A new frame. Every paired strike stays paired and every root keeps its counts, so what
+    the deal breaks is only which expiry two equal counts fall in: the boxes it still
+    finds are those that equal counts alone would give.
+    """
+    frame = day.reset_index(drop=True)
+    paired = _paired_strikes(frame.loc[frame["open_interest"] > 0])
+    if paired.empty:
+        return frame
+    receiving = paired.sort_values("root", kind="stable").index.to_numpy()
+    giving = (
+        paired.assign(draw=rng.random(len(paired)))
+        .sort_values(["root", "draw"], kind="stable")
+        .index.to_numpy()
+    )
+    dealt = pd.Series(paired.loc[giving, "count"].to_numpy(), index=receiving)
+    fresh = paired[LINE].assign(dealt=dealt.reindex(paired.index).to_numpy())
+    joined = frame.merge(fresh, on=LINE, how="left")
+    counts = joined["dealt"].where(joined["dealt"].notna(), joined["open_interest"])
+    return frame.assign(open_interest=counts.astype(frame["open_interest"].dtype).to_numpy())
+
+
+def new_lines(known: pd.DataFrame, day: pd.DataFrame, date: pd.Timestamp) -> pd.DataFrame:
+    """`known` (root, expiry, strike, first_date) with the lines of `day` not yet in it,
+    first seen on `date`. A new frame; lines without open interest are not counted."""
+    lines = day.loc[day["open_interest"] > 0, LINE].drop_duplicates()
+    if known.empty:
+        return lines.assign(first_date=date).reset_index(drop=True)
+    joined = lines.merge(known[LINE], on=LINE, how="left", indicator=True)
+    fresh = joined.loc[joined["_merge"] == "left_only", LINE].assign(first_date=date)
+    return pd.concat([known, fresh], ignore_index=True)
+
+
 def _share(part: float, whole: float) -> float:
     return float(part / whole) if whole else 0.0
 
@@ -241,8 +292,10 @@ __all__ = [
     "box_lending",
     "classify",
     "colocated_other_share",
+    "new_lines",
     "pair_notional",
     "shuffled",
+    "shuffled_pairs",
     "split",
     "stock_leg_value",
 ]

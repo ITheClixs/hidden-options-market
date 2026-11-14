@@ -99,6 +99,8 @@ def test_chance_benchmark_is_recorded(result):
     chance = result.values["chance"]
     assert chance["dates"] == 2
     assert 0.0 <= chance["box_face_share"] <= 1.0
+    assert chance["box_face_share_pairs_kept"] >= 0.0
+    assert result.values["boxes"]["last"]["unambiguous_face"] == pytest.approx(1100 * 100 * 500)
 
 
 def test_gamma_by_category(result):
@@ -143,3 +145,15 @@ def test_table_prints_the_macro_strings(result):
     assert "Box spreads" in table
     assert result.macros["AnatStockValue"] in table
     assert "tab:anatomy" in table
+
+
+def test_peak_composition(result):
+    (box,) = result.values["boxes"]["peak_largest"]
+    assert box["root"] == "2SPY" and box["count"] == 500
+
+
+def test_peak_macros(result):
+    macros = anatomy_macros(result.values)
+    assert macros["AnatBoxPeakFirstUnderlying"] == "SPY"
+    assert macros["AnatChanceBoxPairsKept"].endswith("\\%")
+    assert macros["AnatBoxUnambiguousFace"] == "\\$0.1bn"

@@ -121,3 +121,18 @@ def test_profile_across_spot_levels(result):
     assert len(profile["dealer"]) == len(profile["moves"]) == 61
     middle = profile["moves"].index(0.0)
     assert profile["dealer"][middle] == pytest.approx(result.values["dealer_gamma"]["SPY"]["net"])
+
+
+def test_coverage_and_package_only_gamma(result):
+    coverage = result.values["coverage"]
+    assert coverage["priced_contracts_share"] == pytest.approx(1.0)
+    assert coverage["priced_funds"] == coverage["funds"] == 1
+    assert coverage["unpriced_underlyings"] == []
+    package = result.values["dealer_gamma_package"]["all"]
+    assert package["net"] <= result.values["dealer_gamma"]["all"]["dealer_long"]
+
+
+def test_coverage_macros(result):
+    macros = holders_macros(result.values)
+    assert macros["HoldCoverageFunds"] == "1"
+    assert macros["HoldUnpriced"] == "none"

@@ -74,6 +74,7 @@ def report_for(day):
 LAST_BOXES = pd.DataFrame(
     {
         "root": ["2SPY", "2SPX"],
+        "underlying": ["SPY", "SPX"],
         "expiry": [E, E],
         "lower": [100.0, 4001.0],
         "upper": [1100.0, 9001.0],
@@ -117,7 +118,21 @@ def result():
             ignore_index=True,
         ),
     ]
-    return box_rates_result(days, CURVE, report_for, LAST_BOXES)
+    earlier = LAST_BOXES.assign(expiry=pd.Timestamp("2026-09-18"))  # expired before the files
+    daily = [(D1, earlier.iloc[:1]), (D2, LAST_BOXES)]
+    start = pd.Timestamp("2026-09-01")
+    origins = pd.DataFrame(
+        {
+            "root": ["2SPY", "2SPY", "2SPX", "2SPX"],
+            "expiry": [E] * 4,
+            "strike": [100.0, 1100.0, 4001.0, 9001.0],
+            # The SPY box's two lines opened together; the SPX box's on different dates.
+            "first_date": [D1, D1, start + pd.Timedelta(days=3), D1],
+        }
+    )
+    filler = pd.DataFrame({"root": ["2XYZ"], "expiry": [E], "strike": [1.0], "first_date": [start]})
+    origins = pd.concat([filler, origins], ignore_index=True)
+    return box_rates_result(days, CURVE, report_for, LAST_BOXES, daily, origins)
 
 
 def test_sample_counts(result):
@@ -200,3 +215,48 @@ def test_no_box_at_all_is_an_error():
     quiet = box_rows(D1, root="2SPY", lower=100.0, upper=1100.0, size=30, price=950.0).iloc[:2]
     with pytest.raises(ValueError, match="No box trade"):
         box_rates_result([quiet], CURVE, report_for, LAST_BOXES)
+
+
+def test_confirmation_by_underlying_and_its_largest_box(result):
+    seen = result.values["open_interest"]
+    assert seen["by_underlying"]["SPY"] == pytest.approx(1.0)
+    assert seen["by_underlying"]["SPX"] == pytest.approx(0.0)
+    assert seen["largest_share_of_traded"] == pytest.approx(1.0)
+
+
+def test_confirmed_series_reads_strike_pairs_across_expiries(result):
+    confirmed = result.values["confirmed"]
+    first, last = confirmed["first"], confirmed["last"]
+    # On D1 the box had another expiry, so only the strike-pair reading confirms it.
+    assert first["exact"] == pytest.approx(0.0)
+    assert first["strike_pair"] == pytest.approx(3e6)
+    assert last["exact"] == pytest.approx(3e6)
+    assert last["face"] == pytest.approx(4e6)
+    assert confirmed["growth"] == pytest.approx(1.0)
+
+
+def test_weight_diagnostics(result):
+    found = result.values["diagnostics"]
+    assert found["top_dates_share"] == pytest.approx(1.0)  # two dates, both in the top six
+    assert 1.0 < found["effective_dates"] < 2.0
+    assert found["leave_one_low"] < found["leave_one_high"]
+    assert [row["quarter"] for row in found["by_quarter"]] == ["2026Q4"]
+    assert found["marks_headline"]["matched"] == 2
+
+
+def test_origins_of_the_last_dates_boxes(result):
+    found = result.values["origins"]
+    assert found["censored_share"] == pytest.approx(0.0)
+    assert found["same_date_share"]["confirmed"] == pytest.approx(1.0)
+    assert found["same_date_share"]["unconfirmed"] == pytest.approx(0.0)
+    assert found["same_date_share"]["all"] == pytest.approx(0.75)
+
+
+def test_diagnostic_macros(result):
+    macros = box_rates_macros(result.values)
+    assert macros["BoxRTradedSPY"] == "100\\%"
+    assert macros["BoxRSameDateConfirmed"] == "100\\%"
+    assert macros["BoxRTopDatesShare"] == "100\\%"
+    assert macros["BoxRConfirmedGrowth"] == "1.0"
+    assert macros["BoxRQuarterLowName"] == "the fourth quarter of 2026"
+    assert macros["BoxRLongestLargestYear"] == "2028"

@@ -151,3 +151,28 @@ about a third of gross gamma, is in package legs and "other".
 41% of the box face on the last date is at strikes that traded as a box package on Cboe
 since April 2025. Much of the rest is pairs of same-strike pairs in SPX whose counts
 match. The box figure is therefore an upper bound on lending done as boxes.
+
+## Review, 2026-11-14
+
+A referee pass on the paper's new section raised points about this entry. Nothing above
+is changed; the points and what was done about them are recorded here.
+
+- **What was seen.** The exploratory look listed above includes the box face and the
+  stock-leg value on the first and last report dates, which are the headline figures.
+  Those figures were seen before the rules were fixed. What this entry fixed in advance
+  is the rules and the list of figures, not blindness to their size. The paper now says
+  so.
+- **The neighbour matching is not the smallest.** With an odd number of paired strikes
+  sharing a count, the neighbour matching drops the top strike, which is not always the
+  choice that gives the least face. The paper no longer calls it the smallest. A third
+  reading is added: face in boxes whose count is shared by exactly two paired strikes of
+  their root and expiry, where the matching is not in question.
+- **The chance check did not test the box rule.** Dealing every count of a bucket at
+  random breaks the pairs as well, so it says nothing about two genuine pairs sharing a
+  count by coincidence. A second deal is added: paired strikes stay paired and their
+  counts move among the expiries of their root.
+- **The peak.** The paper described the September 2026 peak from a look at the data. The
+  largest boxes on the peak date are now part of the result.
+
+These additions were made after the figures had been seen. They are diagnostics, not
+part of the specification, and the paper labels them so.

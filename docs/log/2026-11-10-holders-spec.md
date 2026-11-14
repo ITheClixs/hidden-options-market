@@ -131,3 +131,24 @@ The convention reads these funds as a large source of dealer short gamma in a fa
 holdings say there is almost none, because the dealer who is short the upper puts is
 long the lower ones. The profile holds volatility fixed and covers one issuer on one
 date.
+
+## Review, 2026-11-14
+
+A referee pass raised points about this entry. Nothing above is changed.
+
+- **Coverage of the dealer's gamma.** The spot of an underlying comes only from a
+  stock-leg call. The funds' VOO and MBTX lines have none, so they are not priced, and
+  the dealer's gamma covers fewer funds than the matching does. The result now reports
+  how many funds and what share of contracts (stock legs aside) are priced.
+- **Lines outside packages.** The specified dealer's gamma covers every matched line,
+  including lines with no stock leg beside them. The same figure on package legs alone
+  is added.
+- **The stock-leg check is close to circular.** A true stock leg is defined by the same
+  5% rule, on the fund's price in place of OCC's mark. Full recall shows that the two
+  prices agree and that these calls are not paired, not that the rule finds the stock
+  legs of other holders. Precision cannot be measured with these files. The paper says
+  so.
+- **Omitted figures.** The BOXX fund's short QQQ box and the 91% aggregate share of the
+  matched series' open interest are now in the paper.
+
+These were added after the figures had been seen; the paper labels them so.

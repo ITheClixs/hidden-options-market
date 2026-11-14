@@ -84,6 +84,8 @@ def holders_result(family: pd.DataFrame, box_fund: pd.DataFrame, report: pd.Data
         "priced_share": float(with_gamma.mean()) if len(legs) else 0.0,
         "spots": {name: spots[name] for name in sorted(spots)},
         "dealer_gamma": dealer_gamma(found, gamma),
+        "dealer_gamma_package": dealer_gamma(found[found["role"] == "package_leg"], gamma),
+        "coverage": _coverage(found, gamma),
         "profile": _profile(found, priced),
         "box": _box(box_fund, anatomy.boxes, series),
     }
@@ -94,6 +96,32 @@ def holders_result(family: pd.DataFrame, box_fund: pd.DataFrame, report: pd.Data
         "box_fund_lines": len(box_fund),
     }
     return Result(NAME, values, holders_macros(values), run_inputs, now_iso())
+
+
+def _coverage(found: pd.DataFrame, gamma: pd.DataFrame) -> dict[str, Any]:
+    """How much of the matched holdings could be priced. A series is priced where its
+    underlying has a spot from a stock-leg call and its mark inverts. Stock legs are left
+    out: a call struck at a few percent of spot has no gamma to speak of, and its mark
+    often sits below the model's floor. Added after the first figures, when the dealer's
+    gamma turned out to leave some funds out."""
+    present = found[found["open_interest"].notna() & (found["role"] != "stock_leg")]
+    usable = gamma.loc[gamma["gamma"].notna(), KEY].assign(priced=True)
+    flagged = present.merge(usable, on=KEY, how="left")
+    priced = flagged["priced"].fillna(False).to_numpy(dtype=bool)
+    size = flagged["contracts"].abs().to_numpy(float)
+    funds = flagged["fund"].to_numpy()
+    missing = flagged.loc[~priced, "underlying"].dropna().unique()
+    return {
+        "priced_contracts_share": float(size[priced].sum() / size.sum()) if size.sum() else 0.0,
+        "funds": int(len(set(funds))),
+        "priced_funds": int(len(set(funds[priced]))),
+        "unpriced_underlyings": sorted(str(name) for name in missing),
+        "package_share_of_priced": float(
+            size[priced & (flagged["role"] == "package_leg").to_numpy()].sum() / size[priced].sum()
+        )
+        if size[priced].sum()
+        else 0.0,
+    }
 
 
 def _profile(found: pd.DataFrame, priced: pd.DataFrame) -> dict[str, Any]:

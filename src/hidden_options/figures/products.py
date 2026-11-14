@@ -6,7 +6,8 @@ calls and same-strike pairs in a blue ramp (lending and delta-one exposure), pac
 in the accent and everything else in ink (the options).
 
 F12 has two panels on one date axis. Above, the face of the boxes found in open interest,
-under the outside-in matching and under the neighbour matching. Below, each month's median
+under the outside-in matching and under the neighbour matching, and the part of it whose
+strike pair traded as a box order. Below, each month's median
 spread of traded box rates over the Treasury curve.
 
 F13 draws the dealer's net gamma in one issuer's legs across spot levels, with the sides
@@ -77,9 +78,12 @@ def fig_product_split(daily: Sequence[Mapping[str, Any]]) -> Figure:
 
 
 def fig_box_lending(
-    daily: Sequence[Mapping[str, Any]], monthly: Sequence[Mapping[str, Any]]
+    daily: Sequence[Mapping[str, Any]],
+    monthly: Sequence[Mapping[str, Any]],
+    confirmed: Sequence[Mapping[str, Any]] = (),
 ) -> Figure:
-    """Box face in open interest above, the traded spread over Treasuries below."""
+    """Box face in open interest above, with the part confirmed by traded box orders in
+    the accent; the traded spread over Treasuries below."""
     fig = new_figure(0.9, aspect=0.62)
     top, bottom = fig.subplots(2, 1, sharex=True, height_ratios=(1.3, 1.0))
     dates = pd.to_datetime([row["date"] for row in daily])
@@ -89,6 +93,11 @@ def fig_box_lending(
     top.plot(dates, neighbour, color=PALETTE["muted"])
     label_line_end(top, dates[-1], face[-1], "Outside-in")
     label_line_end(top, dates[-1], neighbour[-1], "Neighbour")
+    if confirmed:
+        when = pd.to_datetime([row["date"] for row in confirmed])
+        traded = np.array([row["strike_pair"] for row in confirmed], dtype=float) / BILLION
+        top.plot(when, traded, color=PALETTE["accent"])
+        label_line_end(top, when[-1], traded[-1], "Confirmed by trades")
     top.set_ylabel("Box face, \\$bn")
     top.set_ylim(0.0, None)
 
@@ -143,9 +152,11 @@ def build_product_split(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) 
 def build_box_lending(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) -> None:
     """F12, for the paper and the README."""
     daily = _values(results, ANATOMY)["daily"]
-    monthly = _values(results, BOX_RATES)["monthly"]
+    rates = _values(results, BOX_RATES)
+    confirmed = (rates.get("confirmed") or {}).get("daily", [])
     apply_style()
-    save(fig_box_lending(daily, monthly), LENDING_STEM, paper=True, readme=True, root=root)
+    fig = fig_box_lending(daily, rates["monthly"], confirmed)
+    save(fig, LENDING_STEM, paper=True, readme=True, root=root)
 
 
 @FIGURES.register(MAP_STEM)
