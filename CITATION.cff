@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code or its results, please cite it as below."
+title: "The Hidden Options Market: Box Lending, Fund Packages and Dealer Gamma in OCC's FLEX Report"
+authors:
+  - family-names: "Güven"
+    given-names: "Mehmet Demir"
+    affiliation: "Department of Computer Science, ETH Zürich"
+repository-code: "https://github.com/ITheClixs/hidden-options-market"
+license: MIT
+type: software

@@ -5,6 +5,7 @@ description = "The hidden options market: OCC FLEX clearing data as a panel, mea
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
+authors = [{ name = "Mehmet Demir Güven" }]
 dependencies = [
     "requests>=2.32",
     "pandas>=2.2",

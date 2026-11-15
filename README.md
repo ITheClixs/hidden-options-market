@@ -1,5 +1,7 @@
 # The Hidden Options Market
 
+*Mehmet Demir Güven · Department of Computer Science, ETH Zürich*
+
 **OCC publishes every cleared FLEX option position each day. Listed option chains leave them out. This repository turns that report into a panel, finds that the hidden book is mostly lending and stock replacement, prices the lending from public trade reports, and signs one issuer's fund legs from their holdings.**
 
 FLEX options are exchange options whose terms the counterparties choose. They are cleared
