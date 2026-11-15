@@ -8,11 +8,13 @@ import pytest
 
 from hidden_options.measure.box_rates import (
     benchmark_rates,
+    block_bootstrap,
     box_trades,
     continuous_curve,
     executions,
     mark_rates,
     rate_sample,
+    settlement_days,
     spread_summary,
 )
 
@@ -66,7 +68,9 @@ class TestBoxTrades:
         assert box["price"] == pytest.approx((752.33 - 0.01) - (0.02 - 9178.2))
         assert box["face"] == pytest.approx(10000 * 100 * 52)
         assert box["days"] == 57
-        assert box["rate"] == pytest.approx(-np.log(box["price"] / 10000) * 365 / 57)
+        # Settles Friday 23 October to Monday 21 December: 59 days.
+        assert box["settle_days"] == 59
+        assert box["rate"] == pytest.approx(-np.log(box["price"] / 10000) * 365 / 59)
 
     def test_a_box_done_twice_at_one_instant_counts_twice(self):
         boxes, _ = box_trades(executions(rows(BOX, copies=4)))
@@ -233,3 +237,31 @@ class TestMarks:
             }
         )
         assert np.isnan(mark_rates(trades, report)[0])
+
+
+class TestSettlement:
+    def test_a_holiday_moves_settlement_to_the_next_business_day(self):
+        # Trade Wednesday 10 November 2027; Veterans Day (11th) is a federal holiday.
+        days = settlement_days(
+            pd.Series([pd.Timestamp("2027-11-10")]), pd.Series([pd.Timestamp("2027-12-17")])
+        )
+        # Settles Friday 12 November to Monday 20 December.
+        assert days[0] == 38
+
+
+class TestBootstrap:
+    def test_intervals_cover_the_point_and_are_reproducible(self):
+        months = [f"2026-{m:02d}" for m in range(1, 13)]
+        trades = pd.DataFrame(
+            {
+                "spread": np.linspace(0.002, 0.005, 36),
+                "face": np.ones(36),
+                "month": np.repeat(months, 3),
+            }
+        )
+        found = block_bootstrap(trades, trades["month"], draws=500, seed=1)
+        again = block_bootstrap(trades, trades["month"], draws=500, seed=1)
+        assert found == again
+        median = float(np.median(trades["spread"]))
+        assert found["median_low"] <= median <= found["median_high"]
+        assert found["mean_low"] < found["mean_high"]

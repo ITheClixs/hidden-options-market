@@ -16,6 +16,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from pandas.tseries.holiday import USFederalHolidayCalendar
 
 from hidden_options.collect.cboe_flex_trades import EXECUTION_COLUMNS
 
@@ -53,8 +54,11 @@ BOX_COLUMNS = (
     "price",
     "face",
     "days",
+    "settle_days",
     "rate",
 )
+# Cash settles on the next business day of Fedwire, whose holidays are the federal ones
+# (`settlement_days`).
 
 
 def executions(rows: pd.DataFrame) -> pd.DataFrame:
@@ -110,9 +114,30 @@ def box_trades(found: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     width = boxes["upper"] - boxes["lower"]
     boxes["face"] = width * CONTRACT_MULTIPLIER * boxes["size"]
     boxes["days"] = (boxes["expiry"] - boxes["trade_date"]).dt.days
-    boxes["rate"] = _rate(boxes["price"], width, boxes["days"])
+    boxes["settle_days"] = settlement_days(boxes["trade_date"], boxes["expiry"])
+    boxes["rate"] = _rate(boxes["price"], width, boxes["settle_days"])
     boxes["underlying"] = boxes["root"].astype(str).str.replace(r"^\d", "", regex=True)
     return boxes[list(BOX_COLUMNS)].reset_index(drop=True), unresolved
+
+
+def settlement_days(trade_date: pd.Series, expiry: pd.Series) -> np.ndarray:
+    """Calendar days from settlement of the premium, the business day after the trade, to
+    settlement of the payoff, the business day after expiry."""
+    first = pd.DatetimeIndex(pd.to_datetime(trade_date)).values.astype("datetime64[D]")
+    last = pd.DatetimeIndex(pd.to_datetime(expiry)).values.astype("datetime64[D]")
+    if len(first) == 0:
+        return np.array([], dtype=np.int64)
+    holidays = (
+        USFederalHolidayCalendar()
+        .holidays(
+            start=pd.Timestamp(first.min()), end=pd.Timestamp(last.max()) + pd.Timedelta(days=10)
+        )
+        .values.astype("datetime64[D]")
+    )
+    start = np.busday_offset(first, 1, roll="backward", holidays=holidays)
+    end = np.busday_offset(last, 1, roll="backward", holidays=holidays)
+    days: np.ndarray = (end - start).astype(np.int64)
+    return days
 
 
 def _rate(price: pd.Series, width: pd.Series, days: pd.Series) -> np.ndarray:
@@ -174,6 +199,33 @@ def rate_sample(trades: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:
     return trades[~short & ~no_price & ~wild].reset_index(drop=True), dropped
 
 
+def block_bootstrap(
+    trades: pd.DataFrame, blocks: pd.Series, *, draws: int, seed: int, level: float = 0.95
+) -> dict[str, float | None]:
+    """Intervals for the median spread and the face-weighted mean, resampling whole
+    blocks (calendar months, say) with replacement, so trades of one block move together."""
+    if trades.empty:
+        return {"median_low": None, "median_high": None, "mean_low": None, "mean_high": None}
+    rng = np.random.default_rng(seed)
+    labels = blocks.to_numpy()
+    names = np.unique(labels)
+    members = {name: np.flatnonzero(labels == name) for name in names}
+    spread = trades["spread"].to_numpy(float)
+    face = trades["face"].to_numpy(float)
+    medians, means = np.empty(draws), np.empty(draws)
+    for draw in range(draws):
+        rows = np.concatenate([members[name] for name in rng.choice(names, size=len(names))])
+        medians[draw] = np.median(spread[rows])
+        means[draw] = np.average(spread[rows], weights=face[rows])
+    tail = (1 - level) / 2 * 100
+    return {
+        "median_low": float(np.percentile(medians, tail)),
+        "median_high": float(np.percentile(medians, 100 - tail)),
+        "mean_low": float(np.percentile(means, tail)),
+        "mean_high": float(np.percentile(means, 100 - tail)),
+    }
+
+
 def spread_summary(trades: pd.DataFrame) -> dict[str, Any]:
     """The spread's face-weighted mean with a standard error clustered by trade date, and
     its median and quartiles across trades."""
@@ -226,7 +278,7 @@ def mark_rates(trades: pd.DataFrame, report: pd.DataFrame) -> np.ndarray:
 
     value = (leg("lower", "C") - leg("lower", "P")) - (leg("upper", "C") - leg("upper", "P"))
     width = (trades["upper"] - trades["lower"]).to_numpy(float)
-    days = trades["days"].to_numpy(float)
+    days = trades["settle_days" if "settle_days" in trades else "days"].to_numpy(float)
     usable = np.isfinite(value) & (value > 0) & (days > 0)
     out = np.full(len(trades), np.nan)
     out[usable] = -np.log(value[usable] / width[usable]) / (days[usable] / DAYS_PER_YEAR)
@@ -238,10 +290,12 @@ __all__ = [
     "MATURITY_YEARS",
     "MIN_DAYS",
     "benchmark_rates",
+    "block_bootstrap",
     "box_trades",
     "continuous_curve",
     "executions",
     "mark_rates",
     "rate_sample",
+    "settlement_days",
     "spread_summary",
 ]

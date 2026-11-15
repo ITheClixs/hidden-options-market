@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from hidden_options.measure.box_rates import benchmark_rates
+from hidden_options.measure.box_rates import benchmark_rates, settlement_days
 from hidden_options.measure.box_rates_macros import box_rates_macros
 from hidden_options.measure.box_rates_result import box_rates_result
 
@@ -40,7 +40,8 @@ def box_rows(day, *, root, lower, upper, price, size, expiry=E, minute=0):
 
 
 def price_at(rate: float, width: float, day: pd.Timestamp, expiry: pd.Timestamp) -> float:
-    return width * np.exp(-rate * (expiry - day).days / 365)
+    days = settlement_days(pd.Series([day]), pd.Series([expiry]))[0]
+    return width * np.exp(-rate * days / 365)
 
 
 CURVE = pd.DataFrame(
@@ -53,7 +54,9 @@ CURVE = pd.DataFrame(
     }
 )
 # The curve is flat in quoted yields, not in continuous rates, so each trade has its own.
-BENCHMARKS = benchmark_rates(CURVE, pd.Series([D1, D2]), np.array([58, 57]))
+BENCHMARKS = benchmark_rates(
+    CURVE, pd.Series([D1, D2]), settlement_days(pd.Series([D1, D2]), pd.Series([E, E]))
+)
 
 
 def report_for(day):
@@ -260,3 +263,17 @@ def test_diagnostic_macros(result):
     assert macros["BoxRConfirmedGrowth"] == "1.0"
     assert macros["BoxRQuarterLowName"] == "the fourth quarter of 2026"
     assert macros["BoxRLongestLargestYear"] == "2028"
+
+
+def test_additions_after_review(result):
+    found = result.values["diagnostics"]
+    old = found["trade_date_convention"]
+    assert old["trades"] == result.values["headline"]["trades"]
+    assert old["median"] != result.values["headline"]["median"]  # the day count moved it
+    boot = found["bootstrap"]
+    assert boot["median_low"] <= result.values["headline"]["median"] <= boot["median_high"]
+    assert [row["year"] for row in found["by_year"]] == [2026]
+    assert found["matched_window"]["trades"] == 0  # all trades are after August 2025
+    assert found["sofr"]["trades"] == 0  # no SOFR series given here
+    macros = box_rates_macros(result.values)
+    assert "BoxRYearTwentyTwentySix" in macros

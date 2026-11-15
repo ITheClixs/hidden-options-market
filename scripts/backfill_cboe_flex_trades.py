@@ -3,8 +3,9 @@
 
 About one request per weekday for the reports. Dates already on disk are skipped, so an
 interrupted run resumes; dates with no file at the source (holidays, and everything before
-the archive begins on 31 March 2025) are counted as absent. The Treasury's par yield curve,
-the benchmark for the rates in those trades, is fetched whole for the years covered.
+the archive begins on 31 March 2025) are counted as absent. The Treasury's par yield curve
+and the New York Fed's SOFR, the benchmarks for the rates in those trades, are fetched
+whole for the period covered.
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from datetime import date
 from pathlib import Path
 
 from hidden_options.collect.cboe_flex_trades import backfill
+from hidden_options.collect.sofr import collect_sofr
 from hidden_options.collect.treasury import collect_curve
 from hidden_options.config import RAW_DIR
 
@@ -34,6 +36,8 @@ def main(argv: list[str] | None = None) -> int:
     logging.info("FLEX execution reports: %s", summary)
     curve = collect_curve(range(args.start.year, args.end.year + 1), args.root)
     logging.info("Treasury curve: %d dates to %s", len(curve), curve["date"].max().date())
+    sofr = collect_sofr(args.start, args.end, args.root)
+    logging.info("SOFR: %d dates to %s", len(sofr), sofr["date"].max().date())
     return 1 if summary["failed"] else 0
 
 

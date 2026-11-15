@@ -13,7 +13,7 @@ panel.
 
 - **Size.** \$547bn of mark value on 22 October 2026. In a census of 680 underlyings, FLEX is at least a tenth of option open interest for 184.
 - **What it is made of.** By gross mark value, 77\% sits in series that read as box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards if held on opposite sides). Equal counts alone suggest \$68bn of box face, but such matches often arise by chance; \$28bn (41\%) is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
-- **The price of the lending.** 1,099 box spreads of up to a year traded on Cboe at a median 39bp over the Treasury curve (interquartile range 25 to 49bp; face-weighted mean 36bp, which rests on about 9 dates' worth of face). OCC's marks value the same boxes at about the Treasury rate.
+- **The price of the lending.** 1,099 box spreads of up to a year traded on Cboe at a median 31bp over the Treasury curve (95% interval 25 to 36bp, resampling months), on settlement-to-settlement days. The spread rose from 24bp in 2025 to 32bp in 2026; over the months a quote-based estimate of the same spread covers, FLEX boxes traded at 8bp, well below it. OCC's marks value the same boxes at about the Treasury rate.
 - **Who holds it.** On one date, issuer files name holders and sides. One ETF (BOXX) holds 92\% of the largest box. For 168 defined-outcome funds of one issuer, 99.2\% of FLEX lines are in OCC's report, the product design predicts the side of 96.0\% of package legs, and the dealer opposite is net long \$623m of gamma per 1% move (\$554m in package legs alone), where the vendor convention (dealers long calls, short puts) would show \$40m (\$149m).
 - **Convexity.** Across the 71 followed underlyings with stored listed chains, over 48 settlements, FLEX is 18.0\% of the median one's option gamma when every contract is counted, which listed-only gamma figures leave out. Most of it is same-strike call/put pairs, which are forwards. With those netted it is 1.5\% (2.6\% if listed pairs are netted too). It stays large in SPY (12.0\% FLEX-netted) and NDX (15.0\%).
 - **Does it move prices?** No effect found at daily resolution. In a test fixed in advance, netted FLEX dollar gamma does not predict next-day volatility (*t* -0.79, 353,972 underlying-days). The minimum detectable effect is 2.13bp per standard deviation, 1.1\% of mean \|*r*\|. The hedge a 1% move calls for is 5.86bp of a day's dollar volume in the median case. The bound is on an average slope across names, and the measure is unsigned, so books or names whose effects differ in sign could offset. An attempt to sign it in the 34 option-income programme names fails on the funds' own holdings: their written calls are listed, and they hold 4.5\% of the netted FLEX book there.
@@ -112,17 +112,17 @@ trade date at the same maturity, in basis points:
 
 | Box trades | Trades | Face | Mean | Median | Interquartile |
 |---|---:|---:|---:|---:|---:|
-| All, 7 days to 1 year | 1,099 | \$147bn | 36 | 39 | 25 to 49 |
-| 7 days to 1 month | 172 | \$59bn | 31 | 39 | 15 to 54 |
-| 1 to 3 months | 539 | \$9.7bn | 35 | 35 | 22 to 46 |
-| 3 to 12 months | 388 | \$78bn | 40 | 41 | 33 to 51 |
+| All, 7 days to 1 year | 1,099 | \$147bn | 36 | 31 | 18 to 41 |
+| 7 days to 1 month | 172 | \$59bn | 40 | 28 | 2 to 44 |
+| 1 to 3 months | 539 | \$9.7bn | 26 | 27 | 14 to 37 |
+| 3 to 12 months | 388 | \$78bn | 34 | 36 | 29 to 46 |
 
 The mean is weighted by face. 6 trade dates carry 79\% of it, mostly one fund's
-quarterly roll, so a standard error clustered by date (4.9bp) overstates its precision; the
-unweighted mean is 36bp and leaving out one date at a time gives 33 to
-40bp. The quarterly median ranges from 11bp in the second quarter of 2025 to
-56bp in the fourth quarter of 2025. For boxes of up to a year, the rate in OCC's marks is
--37bp from the traded rate: the marks value a box at about the Treasury rate.
+quarterly roll, so a standard error clustered by date (4.1bp) overstates its precision; the
+unweighted mean is 28bp and leaving out one date at a time gives 33 to
+39bp. The quarterly median ranges from 6bp in the second quarter of 2025 to
+49bp in the fourth quarter of 2025. For boxes of up to a year, the rate in OCC's marks is
+-36bp from the traded rate: the marks value a box at about the Treasury rate.
 
 ![Box face in open interest, and each month's median traded spread over Treasuries](docs/figures/box_lending.png)
 

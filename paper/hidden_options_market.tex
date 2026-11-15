@@ -35,7 +35,8 @@ which funds hold their underlying, and same-strike call and put pairs hold
 \AnatFinancingValueShare{} of its gross mark value, \AnatNonOptionOIShare{} of its open
 interest and \AnatNonOptionGamma{} of its gross gamma. Box spreads confirmed by traded
 orders carry \BoxRTradedFace{} of face on the last date, and on Cboe boxes of up to a
-year traded at a median \BoxRSpreadMedian{} basis points over Treasuries. On one date,
+year traded at a median \BoxRSpreadMedian{} basis points over Treasuries
+(\BoxRYearTwentyTwentyFive{} in 2025, \BoxRYearTwentyTwentySix{} in 2026). On one date,
 issuer holdings sign one issuer's buffer-fund packages: their counterparties are net long
 gamma, and the sign convention behind gamma-exposure figures, applied to the same legs,
 reads a large short position in a fall where there is almost none. Counted in gamma,
@@ -94,9 +95,12 @@ strikes whose calls and puts all carry one count look like boxes, but such match
 arise by chance. Cboe's public reports of FLEX executions confirm \BoxRTradedFace{} of
 box face on the last date as four-leg box orders, against \AnatBoxFace{} that counts
 alone suggest. In those reports \BoxRHeadlineTrades{} boxes of up to a year traded at a
-median \BoxRSpreadMedian{} basis points over the Treasury curve: the convenience yield of
-\citet{binsbergen2022} in traded prices, with the amounts traded. OCC's marks value the
-same boxes at about the Treasury rate. Calls struck at a few percent of spot, through
+median \BoxRSpreadMedian{} basis points over the Treasury curve, rising from
+\BoxRYearTwentyTwentyFive{} in 2025 to \BoxRYearTwentyTwentySix{} in 2026. That is the
+kind of spread \citet{binsbergen2022} read as a convenience yield in quoted prices, here
+in traded prices with the amounts traded; over the months a quote-based estimate covers,
+FLEX boxes traded well below it. OCC's marks value the same boxes at about the Treasury
+rate. Calls struck at a few percent of spot, through
 which defined-outcome funds hold their underlying, are worth \AnatStockValue{}. Strikes
 with equal call and put open interest outside boxes, forwards if held on opposite sides,
 are \AnatPairOIShare{} of open interest. Together these series hold
@@ -1089,9 +1093,14 @@ paid. A box traded as one order appears there as four legs with one timestamp, a
 net price, the lower forward less the upper, is the amount lent whichever side each
 party took. A second log entry fixed the reading after two of the files had been opened
 to learn their layout, one of them the panel's last trade date, and before the rest were
-collected. The box's rate discounts the distance between its strikes to that price over
-the calendar days to expiry. Its spread is that rate less the Treasury par yield curve of
-the trade date at the same maturity, both continuously compounded.
+collected. The box's rate discounts the distance between its strikes to that price,
+continuously compounded, over the days from settlement of the premium, the business day
+after the trade, to settlement of the payoff, the business day after expiry. Its spread
+is that rate less the Treasury par yield curve of the trade date at the same maturity.
+The entry first counted days from trade date to expiry; review found that wrong, and an
+amendment made after the rates were seen moved to settlement dates. That moves the
+median from \BoxRTradeDateMedian{} to \BoxRSpreadMedian{} basis points and leaves the
+weighted mean as it was.
 
 \input{tables/box_rates}
 
@@ -1102,33 +1111,47 @@ under seven days to run, \BoxRDroppedPrice{} without a positive price and
 \BoxRDroppedRange{} with a rate outside $-5\%$ to 25\% are left out of the rates. For the
 \BoxRHeadlineTrades{} boxes of seven days to one year, where a Treasury bill yield is a
 zero rate, the median spread is \BoxRSpreadMedian{} basis points, with an interquartile
-range of \BoxRSpreadLow{} to \BoxRSpreadHigh{} (Table~\ref{tab:box-rates}). Weighted by
-face, the traded rate averages \BoxRRate{} against \BoxRBenchmark{} on the Treasury
-curve, a spread of \BoxRSpread{} basis points.
+range of \BoxRSpreadLow{} to \BoxRSpreadHigh{} across trades (Table~\ref{tab:box-rates}).
+Weighted by face, the traded rate averages \BoxRRate{} against \BoxRBenchmark{} on the
+Treasury curve, a spread of \BoxRSpread{} basis points.
 
-The weighted mean rests on few dates. \BoxRTopDates{} trade dates carry
-\BoxRTopDatesShare{} of the face, about \BoxREffectiveDates{} dates' worth in all, and the
-largest trades are one fund's quarterly roll of a SPY box against a QQQ box, two legs
-traded seconds apart in near-equal size and priced together. A standard error clustered
-by date, \BoxRSpreadSE{} basis points, overstates how precise that mean is. The level
-does not depend on those dates: the unweighted mean is \BoxRUnweighted{}, leaving out one
-date at a time moves the weighted mean between \BoxRLeaveOneLow{} and
-\BoxRLeaveOneHigh{}, and the median is between \BoxRSizeMedianLow{} and
-\BoxRSizeMedianHigh{} in every band of trade size from under \$1m of face to over \$1bn.
-These checks were added after the figures were seen. The spread has not been constant.
-Its quarterly median ranges from \BoxRQuarterLow{} basis points in \BoxRQuarterLowName{}
-to \BoxRQuarterHigh{} in \BoxRQuarterHighName{}, the monthly median from \BoxRMonthLow{}
-to \BoxRMonthHigh{} (Figure~\ref{fig:box-lending}), and \BoxRQuarterEndShare{} of the face
-trades in the last month of a calendar quarter. Beyond two years the mean in
-Table~\ref{tab:box-rates} is carried by one \BoxRLongestLargestFace{} trade expiring in
-\BoxRLongestLargestYear{} at $\BoxRLongestLargestSpread$ basis points,
-\BoxRLongestLargestShare{} of that row's face.
+Both figures need intervals that allow for dependence over time, and the weighted mean
+rests on few dates. \BoxRTopDates{} trade dates carry \BoxRTopDatesShare{} of the face,
+about \BoxREffectiveDates{} dates' worth in all, and the largest trades are one fund's
+quarterly roll of a SPY box against a QQQ box, two legs traded seconds apart in
+near-equal size and priced together. Resampling calendar months gives 95\% intervals of
+\BoxRMedianLow{} to \BoxRMedianHigh{} basis points for the median and \BoxRMeanLow{} to
+\BoxRMeanHigh{} for the mean. The unweighted mean is \BoxRUnweighted{}, leaving out one
+date at a time moves the weighted mean between \BoxRLeaveOneLow{} and \BoxRLeaveOneHigh{},
+and the median is between \BoxRSizeMedianLow{} and \BoxRSizeMedianHigh{} in every band of
+trade size from under \$1m of face to over \$1bn. These checks were added after the
+figures were seen.
 
-A positive spread is the convenience yield of Treasuries that \citet{binsbergen2022}
-measure in quoted prices of listed SPX options. \citet{kozlowski2025} apply their method
-to quotes up to August 2025 and find 26 basis points at six months and 21 at twelve for
-that year. Ours is the same quantity in traded prices, with the amounts traded, on the
-FLEX side of the market.
+The spread has not been constant. Its median was \BoxRYearTwentyTwentyFive{} basis points
+in 2025 and \BoxRYearTwentyTwentySix{} in 2026. By quarter it ranges from
+\BoxRQuarterLow{} in \BoxRQuarterLowName{} to \BoxRQuarterHigh{} in
+\BoxRQuarterHighName{}, by month from \BoxRMonthLow{} to \BoxRMonthHigh{}
+(Figure~\ref{fig:box-lending}), and \BoxRQuarterEndShare{} of the face trades in the last
+month of a calendar quarter. Beyond two years the mean in Table~\ref{tab:box-rates} is
+carried by one \BoxRLongestLargestFace{} trade expiring in \BoxRLongestLargestYear{} at
+$\BoxRLongestLargestSpread$ basis points, \BoxRLongestLargestShare{} of that row's face,
+which is unlikely to be a loan at all.
+
+A spread of this kind over Treasuries is what \citet{binsbergen2022} measure in quoted
+prices of listed SPX options and read as the convenience yield of Treasuries.
+\citet{kozlowski2025} apply their method to quotes up to \BoxRWindowEnd{} and find 26
+basis points at six months and 21 at twelve for 2025. Over the same months, from the
+first trade file to that date, FLEX boxes traded at a median \BoxRWindowMedian{} basis
+points (\BoxRWindowTrades{} trades): well below the quote-based figure. The pooled median
+is higher because the spread rose afterwards. A convenience yield is one reading of it;
+others fit the data as well. Tax treatment differs between cash-settled index boxes and
+physically settled ETF boxes, though the SPX and SPY medians are close. The concentration
+in the last month of each quarter is the pattern balance-sheet costs leave in other
+arbitrage spreads \citep{du2018}. And a box lender is paid against a Treasury curve no
+intermediary funds at: over overnight SOFR on the trade date, boxes of up to
+\BoxRSofrMaxDays{} days traded at a median \BoxRSofrMedian{} basis points
+(\BoxRSofrTrades{} trades), a term rate set against an overnight one. These data cannot
+tell the readings apart.
 
 OCC's marks say something else. For boxes of up to a year whose four series are in OCC's
 report of the trade date, the rate in those marks less the traded rate averages
@@ -1729,6 +1752,11 @@ Bootstrap-based improvements for inference with clustered errors.
 Cameron, A.~C., J.~B. Gelbach, and D.~L. Miller (2011).
 Robust inference with multiway clustering.
 \emph{Journal of Business and Economic Statistics} 29(2), 238--249.
+
+\bibitem[Du et al.(2018)]{du2018}
+Du, W., A.~Tepper, and A.~Verdelhan (2018).
+Deviations from covered interest rate parity.
+\emph{Journal of Finance} 73(3), 915--957.
 
 \bibitem[G\^{a}rleanu et al.(2009)]{garleanu2009}
 G\^{a}rleanu, N., L.~H. Pedersen, and A.~M. Poteshman (2009).

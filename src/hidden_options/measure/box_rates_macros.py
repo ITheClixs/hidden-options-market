@@ -132,6 +132,7 @@ def _diagnostics(found: Mapping[str, Any] | None) -> dict[str, str]:
         "BoxRMarkGapHeadline": basis_points(found["marks_headline"]["mean"]),
         "BoxRMarkGapHeadlineMedian": basis_points(found["marks_headline"]["median"]),
     }
+    macros.update(_additions(found))
     longest = found.get("longest_largest")
     if longest:
         macros.update(
@@ -143,6 +144,47 @@ def _diagnostics(found: Mapping[str, Any] | None) -> dict[str, str]:
             }
         )
     return macros
+
+
+def _additions(found: Mapping[str, Any]) -> dict[str, str]:
+    """The convention sensitivity, the bootstrap intervals, the yearly medians, the matched
+    window and the spread over SOFR. Added after the first figures."""
+    macros: dict[str, str] = {}
+    old = found.get("trade_date_convention")
+    if old:
+        macros["BoxRTradeDateMedian"] = basis_points(old["median"])
+        macros["BoxRTradeDateMean"] = basis_points(old["mean"])
+    boot = found.get("bootstrap")
+    if boot and boot["median_low"] is not None:
+        macros.update(
+            {
+                "BoxRMedianLow": basis_points(boot["median_low"]),
+                "BoxRMedianHigh": basis_points(boot["median_high"]),
+                "BoxRMeanLow": basis_points(boot["mean_low"]),
+                "BoxRMeanHigh": basis_points(boot["mean_high"]),
+            }
+        )
+    for row in found.get("by_year", []):
+        macros[f"BoxRYear{_word(row['year'])}"] = basis_points(row["median"])
+        macros[f"BoxRYear{_word(row['year'])}Trades"] = formats.count(row["trades"])
+    window = found.get("matched_window")
+    if window:
+        macros["BoxRWindowMedian"] = basis_points(window["median"])
+        macros["BoxRWindowTrades"] = formats.count(window["trades"])
+        macros["BoxRWindowEnd"] = formats.long_date(pd.Timestamp(window["end"]))
+    sofr = found.get("sofr")
+    if sofr:
+        macros["BoxRSofrMedian"] = basis_points(sofr["median"])
+        macros["BoxRSofrMean"] = basis_points(sofr["mean"])
+        macros["BoxRSofrTrades"] = formats.count(sofr["trades"])
+        macros["BoxRSofrMaxDays"] = formats.count(sofr["max_days"])
+    return macros
+
+
+def _word(year: int) -> str:
+    """A year spelled for a macro name, which takes letters only: 2025 -> TwentyTwentyFive."""
+    tens = {25: "TwentyFive", 26: "TwentySix", 27: "TwentySeven", 28: "TwentyEight"}
+    return "Twenty" + tens.get(year % 100, str(year % 100))
 
 
 def _quarter(label: str) -> str:

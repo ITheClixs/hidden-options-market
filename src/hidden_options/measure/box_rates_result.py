@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from hidden_options.collect.sofr import SNAPSHOT as SOFR_SNAPSHOT
 from hidden_options.collect.treasury import SNAPSHOT as CURVE_SNAPSHOT
 from hidden_options.config import PANEL_END, RAW_DIR
 from hidden_options.measure.anatomy import (
@@ -28,6 +29,7 @@ from hidden_options.measure.anatomy_result import REPORT_COLUMNS, report_days
 from hidden_options.measure.box_rates import (
     MIN_DAYS,
     benchmark_rates,
+    block_bootstrap,
     box_trades,
     executions,
     mark_rates,
@@ -47,6 +49,12 @@ SIZE_LABELS = ("to_1m", "1m_10m", "10m_100m", "100m_1bn", "over_1bn")
 BOX_KEY = ["root", "expiry", "lower", "upper"]
 STRIKE_PAIR = ["root", "lower", "upper"]
 TOP_DATES = 6
+SEED = 20261115
+BOOTSTRAP_DRAWS = 2000
+SOFR_MAX_DAYS = 91
+DAYS_PER_YEAR = 365.0
+# The last observation in Kozlowski and Sullivan (2025), for a matched-period comparison.
+MATCHED_END = pd.Timestamp("2025-08-29")
 
 
 def box_rates_result(
@@ -56,6 +64,7 @@ def box_rates_result(
     last_boxes: pd.DataFrame,
     daily_boxes: Iterable[tuple[pd.Timestamp, pd.DataFrame]] = (),
     origins: pd.DataFrame | None = None,
+    sofr: pd.DataFrame | None = None,
 ) -> Result:
     """The figures the specification lists, and diagnostics added after they were seen.
 
@@ -64,6 +73,7 @@ def box_rates_result(
     on the last report date, with their `face`. `daily_boxes` yields each report date
     with the boxes found in its open interest, for the series of confirmed box face.
     `origins` holds the date each line first had open interest (`anatomy.new_lines`).
+    `sofr` holds the New York Fed's SOFR by date, in percent.
     """
     found, files, executed, unresolved = [], 0, 0, 0
     for day in days:
@@ -80,7 +90,7 @@ def box_rates_result(
         raise ValueError("No box trade in the execution reports")
     trades = pd.concat(found, ignore_index=True)
     kept, dropped = rate_sample(trades)
-    benchmark = benchmark_rates(curve, kept["trade_date"], kept["days"].to_numpy())
+    benchmark = benchmark_rates(curve, kept["trade_date"], kept["settle_days"].to_numpy())
     kept = kept.assign(benchmark=benchmark, spread=kept["rate"] - benchmark)
     sample = kept[kept["benchmark"].notna()].reset_index(drop=True)
     headline = sample[sample["days"] <= HEADLINE_MAX_DAYS]
@@ -120,6 +130,19 @@ def box_rates_result(
             "by_quarter": _by_quarter(headline),
             "marks_headline": _marks(headline.reset_index(drop=True), read_report),
             "longest_largest": _largest(sample[bucket == len(MATURITY_LABELS) - 1]),
+            "trade_date_convention": _trade_date_convention(headline, curve),
+            "bootstrap": block_bootstrap(
+                headline,
+                headline["trade_date"].dt.strftime("%Y-%m"),
+                draws=BOOTSTRAP_DRAWS,
+                seed=SEED,
+            ),
+            "by_year": _by_year(headline),
+            "matched_window": {
+                "end": f"{MATCHED_END:%Y-%m-%d}",
+                **spread_summary(headline[headline["trade_date"] <= MATCHED_END]),
+            },
+            "sofr": _over_sofr(headline, sofr),
         },
         "confirmed": _confirmed(daily_boxes, trades),
         "origins": _origins(last_boxes, trades, origins),
@@ -325,6 +348,46 @@ def _weight(headline: pd.DataFrame) -> dict[str, Any]:
     return out
 
 
+def _trade_date_convention(headline: pd.DataFrame, curve: pd.DataFrame) -> dict[str, Any]:
+    """The headline spread as first computed, over calendar days from trade date to expiry:
+    the convention the 2026-11-15 amendment replaced, kept as a sensitivity."""
+    if headline.empty:
+        return spread_summary(headline)
+    width = (headline["upper"] - headline["lower"]).to_numpy(float)
+    years = headline["days"].to_numpy(float) / DAYS_PER_YEAR
+    rate = -np.log(headline["price"].to_numpy(float) / width) / years
+    bench = benchmark_rates(curve, headline["trade_date"], headline["days"].to_numpy())
+    return spread_summary(headline.assign(spread=rate - bench))
+
+
+def _over_sofr(headline: pd.DataFrame, sofr: pd.DataFrame | None) -> dict[str, Any]:
+    """The spread over overnight SOFR on the trade date (or the last published before it),
+    continuously compounded, for boxes of up to SOFR_MAX_DAYS. A term rate against an
+    overnight one: a funding desk's comparison, not a like-for-like benchmark."""
+    short = headline[headline["days"] <= SOFR_MAX_DAYS]
+    if sofr is None or sofr.empty or short.empty:
+        return {**spread_summary(short.iloc[0:0]), "max_days": SOFR_MAX_DAYS}
+    series = sofr.sort_values("date")
+    place = np.searchsorted(series["date"].to_numpy(), short["trade_date"].to_numpy(), "right") - 1
+    quoted = np.where(place >= 0, series["rate"].to_numpy(float)[np.clip(place, 0, None)], np.nan)
+    overnight = np.log1p(quoted / 100 / 360) * DAYS_PER_YEAR
+    found = short.assign(spread=short["rate"].to_numpy(float) - overnight)
+    found = found[np.isfinite(found["spread"])]
+    return {**spread_summary(found), "max_days": SOFR_MAX_DAYS}
+
+
+def _by_year(headline: pd.DataFrame) -> list[dict[str, Any]]:
+    """The spread by calendar year of the trade."""
+    years = headline["trade_date"].dt.year
+    return [
+        {
+            "year": int(year),
+            **{k: spread_summary(headline[years == year])[k] for k in ("trades", "median", "mean")},
+        }
+        for year in sorted(years.unique())
+    ]
+
+
 def _largest(trades: pd.DataFrame) -> dict[str, Any] | None:
     """The largest trade by face in a bucket, with its spread. Added after the first
     figures, when one trade carried the mean of the longest bucket."""
@@ -412,6 +475,7 @@ def box_rates_analysis() -> Result:
         daily[-1][1],
         daily,
         known,
+        pd.read_parquet(RAW_DIR / SOFR_SNAPSHOT),
     )
 
 

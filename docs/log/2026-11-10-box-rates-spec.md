@@ -203,3 +203,38 @@ These are diagnostics, not part of the specification, and the paper labels them 
 - **A dated series.** The median by calendar year and by quarter.
 - **A matched-period comparison.** The median over trade dates from 2025-03-31, when the
   files begin, to 2025-08-29, the last observation in Kozlowski and Sullivan (2025).
+
+## Result of the amendment and the additions, 2026-11-15
+
+Computed as the amendment says. The sample (1,099 headline trades) is unchanged: it is
+still selected on calendar days to expiry.
+
+| Figure | Trade date to expiry | Settlement to settlement |
+|---|---|---|
+| Headline median, 7 days to 1 year | 38.7bp | 30.7bp |
+| Headline interquartile range | 24.8 to 49.3bp | 18.3 to 41.4bp |
+| Headline face-weighted mean | 35.8bp | 35.8bp |
+| 1 to 3 months, median | 35.3bp | 26.7bp |
+| 3 to 12 months, median | 41.2bp | 35.8bp |
+| SPX / SPY / other, median | 39.6 / 41.3 / 29.0bp | 37.1 / 28.2 / 31.7bp |
+| Rate in OCC's marks less traded rate, all maturities | −35bp | −35bp |
+
+The weighted mean barely moves: the large trades are long enough that two days matter
+little.
+
+The additions:
+- **Block bootstrap by month.** Median 24.6 to 35.5bp; face-weighted mean 25.7 to 44.8bp.
+- **By year.** 2025: median 23.5bp on 476 trades. 2026: 32.0bp on 623 trades.
+- **By quarter.** From 6.1bp (second quarter of 2025) to 49.0bp (fourth quarter of 2025).
+- **Matched window**, 2025-03-31 to 2025-08-29, the months the quote-based estimate of
+  Kozlowski and Sullivan (2025) covers: median 8.0bp, mean 10.3bp, on 246 trades. Their
+  figures for 2025 are 26bp at six months and 21bp at twelve. Over the same months, FLEX
+  boxes traded well below the quote-based spread. The pooled figure is higher because the
+  spread rose afterwards.
+- **SOFR.** Boxes of up to three months traded at a median 27.3bp over overnight SOFR on
+  the trade date (mean 35.6bp, 711 trades).
+
+**Reading.** The spread over Treasuries is positive in every quarter. It is not stable: it
+was small in the spring and summer of 2025, below the quote-based estimate of the same
+months, and larger since the fourth quarter of 2025. A pooled median, 31bp, describes the
+period, not a constant.
