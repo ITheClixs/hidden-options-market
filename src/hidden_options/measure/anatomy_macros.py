@@ -42,6 +42,10 @@ def anatomy_macros(values: Mapping[str, Any]) -> dict[str, str]:
         "AnatOptionOIShare": formats.percent(
             sum(parts[name]["open_interest"] for name in ("package_leg", "other")) / held
         ),
+        "AnatNonOptionOIShare": formats.percent(
+            sum(parts[name]["open_interest"] for name in ("box", "stock_leg", "pair")) / held
+        ),
+        "AnatNonOptionGamma": formats.percent(gamma["box"] + gamma["stock_leg"] + gamma["pair"]),
         "AnatGammaOptions": formats.percent(gamma["package_leg"] + gamma["other"]),
         "AnatGammaDates": formats.count(values["gamma"]["dates"]),
         "AnatColocated": formats.percent(last["colocated_other_share"]),
@@ -104,7 +108,8 @@ def _peak(largest: list[Mapping[str, Any]]) -> dict[str, str]:
 
 def _rest(values: Mapping[str, Any]) -> dict[str, str]:
     stock, pairs, chance = values["stock_legs"], values["pairs"], values["chance"]
-    names = list(stock["last_by_underlying"].items())
+    # Results are written with sorted keys, so the stored order is alphabetical: rank here.
+    names = sorted(stock["last_by_underlying"].items(), key=lambda item: -item[1])
     macros = {
         "AnatStockFirst": dollars(stock["first_value"]),
         "AnatStockGrowth": formats.decimal(stock["growth"], 1),

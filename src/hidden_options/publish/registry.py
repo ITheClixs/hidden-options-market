@@ -150,8 +150,18 @@ def run_analyses(analyses: Registry[AnalysisFn], results_dir: Path, only: str | 
 
 
 def run_figures(figures: Registry[FigureFn], only: str | None) -> list[str]:
-    """Run the selected figure builders, returning their names."""
+    """Run the selected figure builders, returning their names.
+
+    Each builder's reads of `results/` and its saved figures are recorded, so the drift
+    check can tell when a committed figure no longer matches its results.
+    """
+    from hidden_options.config import PROJECT_ROOT
+    from hidden_options.publish.figure_sources import record, recording_saves
+    from hidden_options.publish.results import read_results, recording_reads
+
     selected = figures.select(only)
-    for builder in selected.values():
-        builder()
+    for name, builder in selected.items():
+        with recording_reads() as reads, recording_saves() as stems:
+            builder()
+        record(PROJECT_ROOT, stems or {name}, reads, read_results())
     return list(selected)

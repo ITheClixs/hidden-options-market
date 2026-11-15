@@ -1,0 +1,40 @@
+{
+  "anatomy": {
+    "positions": "6c93ff5f811decb5c3ff7ac9bef09707e842ec309f80c5a4f0bc27ae5a56fa51"
+  },
+  "box_lending": {
+    "anatomy": "625a59e337429258c5ee1e3ec5be5a5e9c3ec82598ace18053895ae155c7a2d8",
+    "box_rates": "5f2527020b41a9469a38165b069c259badff84139477ccef2c40b16329f1f292"
+  },
+  "concentration": {
+    "market": "5db4941ee96a5757c1490d1890ef5b0298c03f37ec6a5c4200436e7f17690b77"
+  },
+  "dealer_gamma_map": {
+    "holders": "30e1dfc18850ca92cce2c984fb3d374868c19494cfe68c808d3b815c77dab805"
+  },
+  "gamma_share": {
+    "hidden_gamma": "dff2c0b832af650cea55de0530aa1cda6a8976d2e5c138eed0f6d32233eca4ec"
+  },
+  "growth": {
+    "market": "5db4941ee96a5757c1490d1890ef5b0298c03f37ec6a5c4200436e7f17690b77"
+  },
+  "hidden_share": {
+    "hidden_share": "8a88ed996979c67a8e1a20552f2982c159fd9e73fef4164986cef92e734accf0"
+  },
+  "maturity": {
+    "market": "5db4941ee96a5757c1490d1890ef5b0298c03f37ec6a5c4200436e7f17690b77"
+  },
+  "notional_ratio": {
+    "positions": "6c93ff5f811decb5c3ff7ac9bef09707e842ec309f80c5a4f0bc27ae5a56fa51"
+  },
+  "pinning_null": {
+    "pinning": "f84d3cf4b44bd5432a97a693838c7b80a712f800f77c5a0f8f84d1c332622acb"
+  },
+  "placebo": {},
+  "product_split": {
+    "anatomy": "625a59e337429258c5ee1e3ec5be5a5e9c3ec82598ace18053895ae155c7a2d8"
+  },
+  "strike_grid": {
+    "identification": "8b7173efb74cfbc2e675bf995ea0ec4181370e684c6131de00305e73ef221877"
+  }
+}

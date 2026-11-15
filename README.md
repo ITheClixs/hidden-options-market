@@ -98,7 +98,7 @@ The split on 22 October 2026:
 
 - **Boxes by count.** \$68bn of face on the last date against \$22bn on the first, with the outside-in matching of strikes that share a count; \$52bn with the neighbour matching, and \$40bn where only two paired strikes share the count. All of it is in European-style roots. Keeping pairs paired and dealing their counts at random among a root's expiries reproduces 72\% of it, so equal counts alone do not make a box.
 - **Boxes confirmed by trades.** 41\% of the last date's face (\$28bn) is at strikes that traded as a four-leg box order: 86\% in SPY, 23\% in SPX. The two lines of a confirmed box first appeared on the same report date in 99\% of cases, against 26\% for the unconfirmed rest, which is mostly forwards struck at different dates whose counts match.
-- **Stock legs.** \$91bn of stock exposure held through deep FLEX calls, \$0.7bn of it in EEM.
+- **Stock legs.** \$91bn of stock exposure held through deep FLEX calls, \$74bn of it in SPY.
 - **Pairs.** Read as forwards, \$869bn of notional.
 
 ### What a box costs

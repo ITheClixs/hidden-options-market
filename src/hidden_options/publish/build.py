@@ -10,6 +10,7 @@ from pathlib import Path
 
 from hidden_options.config import PROJECT_ROOT
 from hidden_options.publish import registry
+from hidden_options.publish.figure_sources import stale
 from hidden_options.publish.latex import collect_macros, render_macros
 from hidden_options.publish.readme import render_readme
 from hidden_options.publish.registry import Registry, TableFn
@@ -42,11 +43,13 @@ def check_drift(root: Path = PROJECT_ROOT, *, tables: Registry[TableFn] | None =
 
     A generated file that is missing counts, and so does a table file that no spec
     produces any more, since a stale table would keep printing numbers that no result
-    backs.
+    backs. So does a committed figure drawn from results that have changed since
+    (`figure_sources`).
     """
     expected = render_outputs(root, _tables_or_registered(tables))
     drifted = [path for path, text in expected.items() if _read(root / path) != text]
     drifted += sorted(set(_table_files(root)) - set(expected))
+    drifted += stale(root, read_results(root / "results"))
     return sorted(drifted)
 
 

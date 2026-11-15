@@ -16,7 +16,7 @@
 \input{numbers}
 
 \title{\textbf{The Hidden Options Market}\\[0.4em]
-\large What Listed Option Chains Leave Out, What It Is Made Of, and Whether It Moves Prices}
+\large Box Lending, Fund Packages and Dealer Gamma in OCC's FLEX Report}
 
 \author{Anonymous}
 
@@ -30,20 +30,21 @@
 FLEX options are exchange options with negotiated terms, cleared by the Options Clearing
 Corporation and absent from the listed chains most option research uses. From OCC's daily
 FLEX open-interest report, \PanelStart{} to \PanelEnd{}, we ask what this hidden market is
-and whether its risk matters. By gross mark value, \AnatFinancingValueShare{} of it sits
-in series that read as box spreads, deep calls through which funds hold their
-underlying, and same-strike call and put pairs. Box spreads confirmed by traded orders
-carry \BoxRTradedFace{} of face on the last date, and boxes of up to a year traded on
-Cboe at a median \BoxRSpreadMedian{} basis points over Treasuries. On one date, issuer
-holdings give the dealer's side of one issuer's fund packages: net long gamma, several
-times what the sign convention of listed gamma figures implies. Counted in gamma, FLEX is
-\GammaMedianGross{} of the median followed underlying's gross and \GammaMedianNetted{}
-once same-strike pairs are netted. In tests specified in advance, netted FLEX dollar gamma
-does not predict next-day volatility (minimum detectable effect \GPredMDEShare{} of mean
-absolute return per standard deviation), and no pinning at large FLEX strikes is
-detected, by a design that detects none at listed strikes either. Off-grid strike rules
-miss \FlexOnGridShare{} of FLEX series, and strike notional overstates delta exposure at
-least \PosGrossMedian{}-fold for the median underlying.
+made of and whether its risk matters. Series that read as box spreads, deep calls through
+which funds hold their underlying, and same-strike call and put pairs hold
+\AnatFinancingValueShare{} of its gross mark value, \AnatNonOptionOIShare{} of its open
+interest and \AnatNonOptionGamma{} of its gross gamma. Box spreads confirmed by traded
+orders carry \BoxRTradedFace{} of face on the last date, and on Cboe boxes of up to a
+year traded at a median \BoxRSpreadMedian{} basis points over Treasuries. On one date,
+issuer holdings sign one issuer's buffer-fund packages: their counterparties are net long
+gamma, and the sign convention behind gamma-exposure figures, applied to the same legs,
+reads a large short position in a fall where there is almost none. Counted in gamma,
+FLEX is \GammaMedianGross{} of the median followed underlying's gross and
+\GammaMedianBoth{} once same-strike pairs are netted on both sides, though near a fifth
+in SPY and NDX. In tests specified in advance, netted FLEX dollar gamma does not predict
+next-day single-stock volatility on average (minimum detectable effect \GPredMDEShare{}
+of mean absolute return per standard deviation), and no pinning is detected at the
+largest expiring FLEX strike, by a design that detects none at listed strikes either.
 \vspace{0.8em}
 \noindent\textbf{Keywords:} FLEX options; clearing data; open interest; box spreads;
 hidden inventory; dealer gamma; hedging; option market structure.
@@ -68,20 +69,19 @@ Their open interest is public all the same. The Options Clearing Corporation pub
 daily FLEX open-interest report --- one for equity classes and one for index classes
 --- giving symbol, right, expiry, strike, mark price and open interest for every
 cleared FLEX series, with roughly twenty months of history. The one study we know of
-that uses OCC's FLEX files, \citet{prakash2026}, examines 53 FLEX events in 41
-single names outside the S\&P 500 between March 2025 and March 2026, with event-study
-designs on listed open interest, implied volatility and returns. We use the whole daily
-report, for every underlying, over \PanelMonths{} months, and ask what the market is and
-whether its convexity matters.
+that uses OCC's FLEX files, \citet{prakash2026}, follows FLEX events in single names
+(contrasted below). We use the whole daily report, for every underlying, over
+\PanelMonths{} months, add Cboe's reports of FLEX trades and issuers' holdings files,
+and ask what the market is made of and whether its convexity matters.
 
 \paragraph{What we find.} There are four results. By gross mark value the hidden market
 is mostly series that read as lending and delta-one exposure, not options; the lending
 that trades confirm can be sized and priced; and for one issuer's funds the dealer's side
 is known.
 Measured in convexity rather than contracts, the part of the option market that listed
-chains omit is modest for most names and large in a few products. Two tests specified in advance find no
-effect of that hidden convexity on the visible market, and for each we report what it
-could have seen: the gamma test's minimum detectable effect, and the pinning test's size
+chains omit is modest for most names and large in a few products. Two tests specified in
+advance detect no average effect of that hidden convexity on single-stock volatility or on
+closes at expiry, and for each we report what it could have seen: the gamma test's minimum detectable effect, and the pinning test's size
 and power checked on real returns as well as simulated ones. And building the census
 exposed two measurement errors that any study of open interest can make. The
 market's size and growth are the setting rather than the finding, and we describe them
@@ -104,21 +104,26 @@ are \AnatPairOIShare{} of open interest. Together these series hold
 \AnatOptionOIShare{} of open interest and \AnatGammaOptions{} of gross FLEX gamma. On one
 date issuer files also name holders and sides (Section~\ref{sec:holders}). One
 exchange-traded fund holds \HoldBoxShareOfItsBox{} of the largest box. For one
-defined-outcome issuer's funds the dealer opposite is net long \HoldGammaNet{} of gamma
-for a 1\% move, where the sign convention applied to listed chains would show
-\HoldGammaConventionNet{}.
+defined-outcome issuer's funds, the counterparties, presumably dealers whose hedges we do
+not observe, are net long \HoldGammaNet{} of gamma for a 1\% move. The sign convention
+behind gamma-exposure (GEX) figures, dealers long calls and short puts, applied to the
+same legs, puts \HoldGammaWrong{} of their gamma on the wrong side, and in a
+\HoldProfileDrop{} fall it reads \HoldProfileDropConvention{} where the disclosed sides
+give \HoldProfileDropDealer{}.
 
 \paragraph{How much convexity it holds.} Counted in contracts the book is large, for
 many underlyings a tenth or more of option open interest. But contracts are not risk. What a dealer on the
 other side of a FLEX trade hedges is its gamma near spot, and gamma figures in use are
 built from listed chains (Section~\ref{sec:gamma}). Pricing listed and FLEX series on one
 listed volatility surface, in the \GammaUnderlyings{} underlyings whose listed chains we
-store, FLEX is \GammaMedianGross{} of the median underlying's option
-gamma counted gross, and \GammaMedianNetted{} once its same-strike call and put pairs,
-forwards with no gamma, are netted (\GammaMedianBoth{} if listed pairs are netted too, a comparison added after the
-specification). The omission survives netting in a few products
-where FLEX holds outright options: \GammaSPYNetted{} of SPY's gamma and \GammaNDXNetted{} of
-NDX's (\GammaSPYBoth{} and \GammaNDXBoth{} with listed pairs netted too).
+store, FLEX is \GammaMedianGross{} of the median underlying's option gamma counted
+gross. Netting same-strike call and put pairs on both sides, which removes forwards if
+their two lines are held on opposite sides, leaves \GammaMedianBoth{} for the median
+underlying and \GammaPooledBoth{} pooled (\GammaMedianNetted{} netting the FLEX side
+alone). The rule removes any overlap of calls and puts, so it can also remove straddles:
+the netted shares are a floor, not a measurement of forwards. The omission survives
+netting in a few products where FLEX holds outright options: \GammaSPYBoth{} of SPY's
+gamma and \GammaNDXBoth{} of NDX's.
 
 \paragraph{Whether it moves the visible market.} If dealers' hedging of FLEX books
 moved underlying prices, gamma observed at date $T$, published overnight and so available
@@ -144,7 +149,7 @@ listed series and use FLEX for synthetic stock, and they account for \PBookFundS
 the netted FLEX book in those names. For those funds at least, the hidden book is mostly
 someone else's, and which side dealers take of it remains unobserved.
 
-\paragraph{Whether it pins.} Pinning to large FLEX strikes is not detected either, on the
+\paragraph{Whether it pins.} Pinning to the largest expiring FLEX strike is not detected either, on the
 \PinEvents{} expiries, on \PinDates{} dates, when only FLEX options expire
 ($\PinMean\sigma$, $t=\PinT$; Section~\ref{sec:pinning}). The design needs no listed
 data, and its minimum detectable effect is \PinMDE{} daily standard deviations of
@@ -160,8 +165,9 @@ it still detects no pinning there. The FLEX result is therefore a statement abou
 design can see, and it covers only names without listed weekday expiries, which leaves out
 the largest books.
 
-\paragraph{Two measurement results.} Both emerged from building the census and both
-apply beyond FLEX.
+\paragraph{Two measurement results.} Both emerged from building the census. The first
+matters to anyone who looks for FLEX without OCC's labels, the second to any study that
+sizes books from open interest.
 
 The first concerns identification. Before locating the authoritative report we
 identified FLEX indirectly, reasoning that listed strikes fall on a standard grid so an
@@ -175,12 +181,11 @@ ground truth.
 The second concerns counting. Open interest is reported per series; a position is not a
 series. On an average date \PosStructuredMean{} of FLEX open interest sits in groups of series
 with near-equal counts at one expiry, against \PosChance{} if the counts are dealt at random.
-Separately, strike notional, the usual size of an open-interest book, overstates its delta
-exposure: where a validated delta exists, the median underlying's strike notional is at
-least \PosGrossMedian{} times its delta exposure, whatever the signs of the legs. Part of
-that is a property of any single option, whose delta is below one, and part is netting
-within structures, which accounts for \PosNettingShare{} of the logarithmic gap under the
-all-long reading (Section~\ref{sec:notional}). On single positions the error is \PosButterflyTimes{}-fold on
+Strike notional, the usual size of an open-interest book, therefore overstates its delta
+exposure. Most of that is a known property of any single option, whose delta is below
+one; the part due to the book's structure is netting within it, which accounts for
+\PosNettingShare{} of the logarithmic gap under the all-long reading
+(Section~\ref{sec:notional}). On single positions the error is \PosButterflyTimes{}-fold on
 a butterfly and \PosCollarTimes{}-fold on a collar, and on a deep in-the-money call it is
 \PosDeepTimes{}-fold the other way. Any study using open interest is exposed to the same
 conflation.
@@ -227,18 +232,27 @@ FLEX value on these underlyings is intrinsic, \HiddenValueDeep{} sits in series 
 \HiddenValueDeepThreshold{} intrinsic and \HiddenValuePaired{} in paired lines
 (Section~\ref{sec:hidden}). Much of the value, that is, is financing rather than risk.
 
-\paragraph{Relation to the literature.} Work inferring option-market positioning from
-listed data must assume who holds each side: \citet{bollen2004} read net buying pressure
-from the implied volatility function, \citet{garleanu2009} model demand pressure and
-estimate it from data identifying end users and intermediaries, and \citet{ni2005} use
-strike-level open interest to identify price clustering at expiration. Each takes the
-observable series set as given. We add a category of series that listed data omits, and
+\paragraph{Relation to the literature.} Research on listed positioning can observe sides:
+\citet{bollen2004} build net buying pressure from public customers' trades and ask whether
+it moves the implied volatility function, \citet{garleanu2009} estimate demand pressure
+from data identifying end users and intermediaries, and \citet{ni2005} use positions by
+investor class to explain price clustering at expiration. Gamma-exposure figures in
+practitioner use instead sign listed open interest by convention. FLEX has neither
+source, and each study takes the observable series set as given. We add a category of series that listed data omits, and
 show that a natural way to find it without the authoritative source fails. Much of that
 category turns out to be financing: the rates of box spreads have been measured in quoted
 prices of listed options \citep{binsbergen2022,kozlowski2025}, and we add traded prices
 and the amounts outstanding. We do not
 solve the sign problem in general: our gamma is netted for forwards but not signed,
 except for the funds of one issuer on one date (Section~\ref{sec:holders}).
+\citet{prakash2026} follow 53 FLEX events in 41 single names outside the S\&P 500
+between March 2025 and March 2026. They find listed open interest rising
+after the events, a same-day abnormal return that does not persist, and no link between
+an unsigned listed gamma proxy and later implied volatility. Their event-level effects and
+our daily average null can both hold: they study large single-name events in event
+windows, while we average across all names and price FLEX gamma itself, netted, and, for
+one issuer, signed. They do not split the book into products, count boxes or match
+holdings.
 \citet{park2025} find, from the funds' monthly N-PORT filings, that aggregate call selling
 by option-income funds, one of the identifiable users of FLEX, predicts lower
 subsequent implied and realised volatility, which they attribute to supply pressure on
@@ -1158,7 +1172,9 @@ long the stock leg and the highest put, short the lower puts and the cap call, t
 above the market that limits the fund's gain. \HoldDesign{} of the package legs, by
 contracts, are held as predicted: \HoldDesignUpperPut{} of the upper puts,
 \HoldDesignCall{} of the calls and \HoldDesignLowerPut{} of the lower puts. The dealer
-holds the opposite, so in these legs the dealer's side is known.
+counterparty, presumably a dealer, holds the opposite. Its hedges, including any in
+listed options, are not observed, so what follows is the gamma in these legs, not a
+dealer's book.
 
 Priced from OCC's marks, the matched lines give the dealer \HoldGammaLong{} of long and
 \HoldGammaShort{} of short dollar gamma for a 1\% move: net long \HoldGammaNet{}, and
@@ -1170,9 +1186,8 @@ contracts outside stock legs. In SPY the net is \HoldGammaSPYNet{}, and the legs
 listed chains, dealers long calls and short puts, gets the lower puts wrong. It puts
 \HoldGammaWrong{} of these legs' gross gamma on the wrong side, and because those legs
 offset others, the net it reports is \HoldGammaConventionNet{} (\HoldPackageGammaConventionNet{}
-in the package legs alone). Section~\ref{sec:gamma} reports FLEX under that convention
-only as an assumption; where it can be checked, it understates the dealer's net long
-gamma several times over.
+in the package legs alone). Gamma-exposure figures leave FLEX out altogether; the
+comparison says what the convention would show if it were applied to these legs.
 
 Figure~\ref{fig:dealer-map}, added after those figures were seen, carries the comparison
 across price levels in SPY, for the same matched lines, with each leg's volatility held
@@ -1264,7 +1279,8 @@ negative, adding FLEX would reverse the sign of the listed figure on \GammaFlipS
 \GammaSignedDays{} underlying-days, and the FLEX term is a median \GammaSignedRelative{}
 of the listed one in size. That convention is an assumption about who is long, not a
 finding, and we report it only because it is what such figures use. Where fund holdings
-give the sides (Section~\ref{sec:holders}), it gets the dealer's net gamma badly wrong.
+give the sides (Section~\ref{sec:holders}), it puts \HoldGammaWrong{} of those legs' gamma
+on the wrong side and misreads their exposure in a fall.
 
 The figures do not rest on the surface. On the \GammaMarkShare{} of FLEX open interest
 whose own mark inverts to a validated volatility (Section~\ref{sec:pricing}), gamma at
@@ -1272,7 +1288,8 @@ that volatility is \GammaMarkRatio{} times gamma from the listed surface, and th
 volatilities differ by a median of \GammaMarkVolGap{} points.
 
 A listed-only gamma figure therefore misses nearly a fifth of gross gamma notional in the median
-market we follow, but most of what it misses is the convexity of forwards, which is none.
+market we follow, but most of what it misses sits at same-strike pairs, which carry no
+convexity if they are held as forwards.
 Where FLEX holds outright options, as in SPY and NDX, the omission survives netting. In
 the \GammaProgrammeCount{} underlyings chosen for option-income programmes it mostly does not:
 FLEX is \GammaProgrammeGross{} of the median one's gamma gross and \GammaProgrammeNetted{}
@@ -1348,9 +1365,9 @@ as support for the null.
 
 The minimum detectable effect at 80\% power is $\PredInnovMDE\times10^{-4}$ per log point
 of innovation, \PredMDEShare{} of the mean next-day absolute return. The bound is on
-contracts. Many FLEX contracts are forwards (Section~\ref{sec:gamma}), which carry no
+contracts. Many FLEX contracts sit in same-strike pairs (Section~\ref{sec:gamma}), which carry no
 convexity, and an unsigned count cannot tell dealer-long from dealer-short books, so the
-null does not reach the hedging channel. The next test removes the forwards; it is still
+null does not reach the hedging channel. The next test nets those pairs; it is still
 unsigned.
 
 \subsection{Gamma in place of contracts}
@@ -1570,7 +1587,8 @@ leaves out the names with listed weekday expiries, which include the largest FLE
 
 \begin{enumerate}
 \item \textbf{No dealer positions.} Open interest does not identify who is long, and
-is aggregated across holders. Netting same-strike pairs removes forwards; it does not
+is aggregated across holders. Netting same-strike pairs removes them, which is right if
+they are forwards and wrong if they are straddles; it does not
 sign what remains, so no measure in the tests is a dealer position. The one signed
 reading, in Section~\ref{sec:holders}, covers one issuer's funds on one date.
 \item \textbf{Equity names, within-underlying variation, no positive control.} Index
@@ -1616,17 +1634,18 @@ traded orders is \BoxRTradedFace{} of face, \BoxRTradedShare{} of what equal cou
 suggest, and boxes of up to a year traded at a median \BoxRSpreadMedian{} basis points
 over Treasuries. In large part the hidden options market is a market for cash and for
 delta-one exposure. Where an issuer's holdings can be set beside the report, holders and
-sides are known: one fund is the lender in the largest box, and the dealer opposite one
-issuer's defined-outcome funds is net long gamma, several times what the sign convention
-of listed gamma figures shows.
+sides are known: one fund is the lender in the largest box, and the counterparties to one
+issuer's defined-outcome funds are net long gamma, where the sign convention of
+gamma-exposure figures would read them as short in a fall.
 
-Counted in convexity, what remains is small. FLEX is \GammaMedianGross{} of the median underlying's gamma
-gross and \GammaMedianNetted{} once its forwards are netted, though it stays at
-\GammaSPYNetted{} and \GammaNDXNetted{} of the gamma in SPY and NDX. A gamma figure built
-from listed chains misses that part, and the rest of what it misses is forwards.
+Counted in convexity, what remains is small. FLEX is \GammaMedianGross{} of the median
+underlying's gamma gross and \GammaMedianBoth{} once same-strike pairs are netted on both
+sides, though it stays at \GammaSPYBoth{} and \GammaNDXBoth{} of the gamma in SPY and NDX.
+A gamma figure built from listed chains misses that part; the rest sits at same-strike
+pairs, which carry no convexity if they are forwards.
 
-Whether hidden convexity moves the visible market is a separate question, and at daily
-resolution we find no effect. Netted FLEX dollar gamma, scaled by dollar volume, does not
+Whether hidden convexity moves the visible market is a separate question. At daily
+resolution, on average across equity names, we detect no effect. Netted FLEX dollar gamma, scaled by dollar volume, does not
 predict next-day volatility in a test specified in advance; an effect of
 \GPredMDEShare{} of the mean daily absolute return per standard deviation would have
 been found four times in five, and the result holds with the book priced a day earlier or
@@ -1650,10 +1669,10 @@ Measurement findings travel further than the setting. A natural strike-based rul
 for identifying FLEX misses \FlexOnGridShare{} of FLEX series, those struck on the
 listing grid. Cleared series are not economic positions: \PosStructuredMean{} of open
 interest sits in groups of series with near-equal counts, against \PosChance{} by chance.
-And strike notional overstates delta exposure: on the \PosCovered{} of open interest with
-a validated delta the median underlying's strike notional is at least \PosGrossMedian{}
-times its delta exposure, whatever the signs. On single legs the error reaches
-\PosDeepTimes{}-fold in the other direction.
+And sizing a book by strike notional misstates its exposure: netting within structures
+accounts for \PosNettingShare{} of the gap between strike notional and delta under the
+all-long reading, and on single legs the error reaches \PosDeepTimes{}-fold in the other
+direction.
 
 The market itself has grown fast and recently levelled. A one-break fit dates the start
 of its growth to \BreakMonth{}; averaged over the latest expiry cycle its open interest is

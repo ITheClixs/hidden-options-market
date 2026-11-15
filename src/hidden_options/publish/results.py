@@ -8,9 +8,11 @@ drift.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -82,7 +84,46 @@ def read_results(root: Path = RESULTS_DIR) -> dict[str, Result]:
     if not root.is_dir():
         return {}
     results = (_load(path) for path in sorted(root.glob("*.json")))
-    return {result.name: result for result in results}
+    found = {result.name: result for result in results}
+    return _Recorded(found) if _RECORDERS else found
+
+
+# Sets of result names being recorded. While one is active, `read_results` returns a dict
+# that notes every name looked up in it, which is how a figure learns what it was drawn
+# from without each builder having to say so.
+_RECORDERS: list[set[str]] = []
+
+
+class _Recorded(dict[str, "Result"]):
+    def __getitem__(self, key: str) -> Result:
+        _note(key)
+        return super().__getitem__(key)
+
+    def get(self, key: str, default: Any = None) -> Any:
+        _note(key)
+        return super().get(key, default)
+
+
+def _note(name: str) -> None:
+    for names in _RECORDERS:
+        names.add(name)
+
+
+@contextmanager
+def recording_reads() -> Iterator[set[str]]:
+    """Collect the names of the results looked up while the block runs."""
+    names: set[str] = set()
+    _RECORDERS.append(names)
+    try:
+        yield names
+    finally:
+        _RECORDERS.remove(names)
+
+
+def values_digest(result: Result) -> str:
+    """A hash of a result's values, the part anything drawn from it depends on."""
+    text = json.dumps(result.values, sort_keys=True, ensure_ascii=False, default=_numpy_to_python)
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _serialise(result: Result) -> str:

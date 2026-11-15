@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import dataclasses
+
 import pandas as pd
 import pytest
 
@@ -157,3 +159,21 @@ def test_peak_macros(result):
     assert macros["AnatBoxPeakFirstUnderlying"] == "SPY"
     assert macros["AnatChanceBoxPairsKept"].endswith("\\%")
     assert macros["AnatBoxUnambiguousFace"] == "\\$0.1bn"
+
+
+def test_stock_leg_ranking_survives_a_round_trip_through_the_results_file(result, tmp_path):
+    from hidden_options.publish.results import read_results, write_result
+
+    values = {
+        **result.values,
+        "stock_legs": {
+            **result.values["stock_legs"],
+            "last_by_underlying": {"SPY": 73.6e9, "QQQ": 8.7e9, "IWM": 2.7e9, "EEM": 0.7e9},
+        },
+    }
+    write_result(dataclasses.replace(result, values=values), tmp_path)
+    stored = read_results(tmp_path)["anatomy"]
+    assert list(stored.values["stock_legs"]["last_by_underlying"])[0] == "EEM"  # sorted keys
+    macros = anatomy_macros(stored.values)
+    names = [macros[f"AnatStock{label}Name"] for label in ("Top", "Second", "Third")]
+    assert names == ["SPY", "QQQ", "IWM"]

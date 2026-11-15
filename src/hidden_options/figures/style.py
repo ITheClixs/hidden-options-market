@@ -50,6 +50,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.figure import Figure
 
 from hidden_options.config import PROJECT_ROOT
+from hidden_options.publish.figure_sources import note_saved
 from hidden_options.publish.results import NAME_PATTERN
 
 # Neutrals are true greys, so nothing in the figure tints the white page.
@@ -256,6 +257,7 @@ def save(
     """
     if not NAME_PATTERN.fullmatch(stem):
         raise ValueError(f"Figure name {stem!r} must be letters, digits, _ or -")
+    note_saved(stem)
     if not (paper or readme):
         raise ValueError(
             f"Figure {stem!r}: nothing to write; ask for the paper, the README or both"
