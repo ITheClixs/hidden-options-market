@@ -73,3 +73,29 @@ issuer on one date.
 
 Only a defect found in the code or the data. Any change after a figure has been seen is
 recorded here as a dated amendment.
+
+## Result, 2026-11-15
+
+Computed as specified, with no change after the figures were seen.
+
+- **Sample.** SPY spot 755.24 on the session.
+  - 9,628 listed series and 2,552 FLEX series, every one priced.
+  - 228 FLEX series hold a matched fund line: 1.23m contracts.
+  - The matched lines are 4.6% of listed gross gamma at spot and 16% of FLEX gross gamma.
+- **Net dollar gamma for a 1% move:**
+
+| Reading | At spot | At 10% below spot | Zero-gamma level |
+|---|---|---|---|
+| Listed only, convention | −$4.1bn | −$12.6bn | +0.5% (759) |
+| Listed and FLEX, convention | −$3.4bn | −$15.0bn | +0.4% (758) |
+| Listed and FLEX, matched legs signed | −$3.0bn | −$14.2bn | +0.4% (758) |
+
+- **Change from signing.** +$0.4bn at spot and +$0.8bn at 10% below. That is about a tenth
+  of the net at spot and a twentieth of it at 10% below. The zero-gamma level does not
+  move.
+
+**Reading.** At SPY's scale the holdings correct a small part of the GEX that the
+convention would report with FLEX included. The convention misreads these legs, as the
+holders check found, but they are 4.6% of SPY's listed gamma. Adding FLEX at all matters
+more in a fall than signing them does: under the convention it adds $2.4bn of short gamma
+at 10% below spot. This is one issuer on one date.

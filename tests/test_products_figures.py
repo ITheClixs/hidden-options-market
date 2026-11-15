@@ -79,3 +79,17 @@ def test_dealer_map_draws_both_readings(styled):
     curves = [line for line in ax.get_lines() if len(line.get_xdata()) == 3]
     assert len(curves) == 2
     assert {text.get_text() for text in ax.texts} == {"Disclosed sides", "Convention"}
+
+
+def test_gex_map_draws_three_readings(styled):
+    profiles = {
+        "moves": [-0.1, 0.0, 0.1],
+        "listed": [-12e9, -4e9, 10e9],
+        "convention": [-15e9, -3.4e9, 11e9],
+        "signed": [-14e9, -3e9, 11.2e9],
+    }
+    fig = figures.fig_gex_map(profiles, 755.0)
+    (ax,) = fig.axes
+    curves = [line for line in ax.get_lines() if len(line.get_xdata()) == 3]
+    assert len(curves) == 3
+    assert len(ax.texts) == 3

@@ -42,6 +42,8 @@ ANATOMY = "anatomy"
 BOX_RATES = "box_rates"
 HOLDERS = "holders"
 MAP_STEM = "dealer_gamma_map"
+GEX_RESULT = "gex_map"
+GEX_STEM = "gex_map"
 MILLION = 1e6
 SPLIT_STEM = "product_split"
 LENDING_STEM = "box_lending"
@@ -131,6 +133,29 @@ def fig_dealer_map(profile: Mapping[str, Any]) -> Figure:
     return fig
 
 
+def fig_gex_map(profiles: Mapping[str, Any], spot: float) -> Figure:
+    """SPY's net dealer gamma across price levels under three readings."""
+    fig = new_figure(0.8, aspect=0.55)
+    ax = fig.subplots()
+    level = spot * (1 + np.array(profiles["moves"], dtype=float))
+    ax.axhline(0.0, color=PALETTE["faint"], linewidth=0.8, zorder=0)
+    ax.axvline(spot, color=PALETTE["faint"], linewidth=0.8, zorder=0)
+    readings = (
+        ("listed", "Listed only, convention", PALETTE["muted"]),
+        ("convention", "Listed and FLEX, convention", PALETTE["ink"]),
+        ("signed", "Listed and FLEX, holdings-signed", PALETTE["accent"]),
+    )
+    for row, (key, label, colour) in enumerate(readings):
+        values = np.array(profiles[key], dtype=float) / BILLION
+        ax.plot(level, values, color=colour)
+        # The curves nearly coincide, so a key in the empty corner names them.
+        ax.text(0.02, 0.97 - 0.07 * row, label, transform=ax.transAxes, va="top", color=colour)
+    ax.set_xlabel("SPY price")
+    ax.set_ylabel("Dealer net gamma, \\$bn per 1%")
+    ax.margins(x=0)
+    return fig
+
+
 def _values(results: Path, name: str) -> Mapping[str, Any]:
     found = read_results(results)
     if name not in found:
@@ -167,12 +192,23 @@ def build_dealer_map(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) -> 
     save(fig_dealer_map(profile), MAP_STEM, paper=True, readme=True, root=root)
 
 
+@FIGURES.register(GEX_STEM)
+def build_gex_map(results: Path = RESULTS_DIR, root: Path = PROJECT_ROOT) -> None:
+    """F14, for the paper and the README."""
+    values = _values(results, GEX_RESULT)
+    apply_style()
+    fig = fig_gex_map(values["profiles"], float(values["spot"]))
+    save(fig, GEX_STEM, paper=True, readme=True, root=root)
+
+
 __all__ = [
     "LAYERS",
     "build_box_lending",
     "build_dealer_map",
+    "build_gex_map",
     "build_product_split",
     "fig_box_lending",
     "fig_dealer_map",
+    "fig_gex_map",
     "fig_product_split",
 ]

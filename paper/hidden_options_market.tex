@@ -39,7 +39,8 @@ year traded at a median \BoxRSpreadMedian{} basis points over Treasuries
 (\BoxRYearTwentyTwentyFive{} in 2025, \BoxRYearTwentyTwentySix{} in 2026). On one date,
 issuer holdings sign one issuer's buffer-fund packages: their counterparties are net long
 gamma, and the sign convention behind gamma-exposure figures, applied to the same legs,
-reads a large short position in a fall where there is almost none. Counted in gamma,
+reads a large short position in a fall where there is almost none; at the scale of SPY's
+whole gamma exposure the correction is small. Counted in gamma,
 FLEX is \GammaMedianGross{} of the median followed underlying's gross and
 \GammaMedianBoth{} once same-strike pairs are netted on both sides, though near a fifth
 in SPY and NDX. In tests specified in advance, netted FLEX dollar gamma does not predict
@@ -113,7 +114,9 @@ not observe, are net long \HoldGammaNet{} of gamma for a 1\% move. The sign conv
 behind gamma-exposure (GEX) figures, dealers long calls and short puts, applied to the
 same legs, puts \HoldGammaWrong{} of their gamma on the wrong side, and in a
 \HoldProfileDrop{} fall it reads \HoldProfileDropConvention{} where the disclosed sides
-give \HoldProfileDropDealer{}.
+give \HoldProfileDropDealer{}. Set against SPY's whole gamma exposure, the correction is
+small: it moves the net by \GexSigningSpot{} at spot, where the convention puts it at
+\GexConventionSpot{}, and leaves the level where the net changes sign unchanged.
 
 \paragraph{How much convexity it holds.} Counted in contracts the book is large, for
 many underlyings a tenth or more of option open interest. But contracts are not risk. What a dealer on the
@@ -1222,6 +1225,31 @@ at \HoldProfileDropConvention{}. The convention reads these funds as a large sou
 dealer short gamma in a fall. Their holdings say there is almost none, because the dealer
 who is short the upper puts is long the lower ones.
 
+What that does to SPY's gamma exposure as a whole was fixed in a further log entry before
+the listed chain of the date was priced. Figure~\ref{fig:gex-map} shows the dealer's net
+gamma across price levels three ways: the listed series under the convention, as GEX
+figures report it; listed and FLEX series under the convention; and the same with the
+matched fund legs signed by their disclosed sides. On \GexDate{}, with SPY at
+\GexSpot{}, the three nets at spot are \GexListedSpot{}, \GexConventionSpot{} and
+\GexSignedSpot{} for a 1\% move, and at a \GexDrop{} fall \GexListedDrop{},
+\GexConventionDrop{} and \GexSignedDrop{}. Signing the legs moves the net by
+\GexSigningSpot{} at spot and \GexSigningDrop{} in the fall, and the level at which the
+net changes sign stays at \GexSignedZeroLevel{}. The legs are \GexMatchedShareListed{} of
+SPY's listed gross gamma. At SPY's scale, then, the holdings correct a small part of the
+picture. Adding FLEX at all matters more in a fall than signing these legs: under the
+convention it deepens the dealer's short gamma there by the difference between
+\GexConventionDrop{} and \GexListedDrop{}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/gex_map.pdf}
+\caption{SPY's dealer net dollar gamma for a 1\% move across price levels on \GexDate{},
+three ways: listed series under the convention that dealers are long calls and short
+puts; listed and FLEX series under that convention; and the same with one issuer's fund
+legs signed by their disclosed sides. Each series' volatility is held fixed.}
+\label{fig:gex-map}
+\end{figure}
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\textwidth]{figures/dealer_gamma_map.pdf}
@@ -1659,7 +1687,8 @@ over Treasuries. In large part the hidden options market is a market for cash an
 delta-one exposure. Where an issuer's holdings can be set beside the report, holders and
 sides are known: one fund is the lender in the largest box, and the counterparties to one
 issuer's defined-outcome funds are net long gamma, where the sign convention of
-gamma-exposure figures would read them as short in a fall.
+gamma-exposure figures would read them as short in a fall. At the scale of SPY's whole
+gamma exposure that correction is small, \GexSigningSpot{} at spot.
 
 Counted in convexity, what remains is small. FLEX is \GammaMedianGross{} of the median
 underlying's gamma gross and \GammaMedianBoth{} once same-strike pairs are netted on both

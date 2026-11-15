@@ -1,15 +1,73 @@
 # The Hidden Options Market
 
-**What the options market's hidden part is made of, how much convexity it holds, and whether it moves prices.**
+**OCC publishes every cleared FLEX option position each day. Listed option chains leave them out. This repository turns that report into a panel, finds that the hidden book is mostly lending and stock replacement, prices the lending from public trade reports, and signs one issuer's fund legs from their holdings.**
 
 FLEX options are exchange options whose terms the counterparties choose. They are cleared
-centrally, and they are absent from the listed option chains that most option research is
-built on. They are not unobservable. The
-Options Clearing Corporation publishes a free daily report of every cleared FLEX series —
-root, strike, expiry, mark price and open interest — and this repository turns it into a
-panel.
+centrally and absent from the listed chains that most option research and every
+gamma-exposure (GEX) feed are built on. Everything here comes from free public sources:
+OCC's daily FLEX report, Cboe's FLEX trade reports, issuer holdings files, the Treasury
+curve, SOFR and delayed listed chains.
 
-**In brief**
+## Three results
+
+**1. The hidden book is mostly a lending and stock-replacement book.** Series that read as
+box spreads, deep calls through which funds hold their underlying, and same-strike
+call/put pairs hold {{AnatFinancingValueShare}} of FLEX mark value, {{AnatNonOptionOIShare}} of its
+open interest and {{AnatNonOptionGamma}} of its gross gamma on {{AnatLastDate}}. What reads as options is
+{{AnatOptionOIShare}} of open interest. *Caveat: a same-strike pair is a forward only if its two lines
+are held on opposite sides, which the report cannot show.*
+
+![Mark value of FLEX open interest by product on every report date](docs/figures/product_split.png)
+
+**2. Box lending, sized and priced from trades.** {{BoxRTradedFace}} of box face on the last date is
+confirmed by four-leg box orders in Cboe's reports (counts alone would suggest
+{{AnatBoxFace}}). {{BoxRHeadlineTrades}} boxes of up to a year traded at a median {{BoxRSpreadMedian}}bp over
+Treasuries (95% interval {{BoxRMedianLow}} to {{BoxRMedianHigh}}bp), rising from {{BoxRYearTwentyTwentyFive}}bp in 2025 to
+{{BoxRYearTwentyTwentySix}}bp in 2026, and {{BoxRSofrMedian}}bp over SOFR for boxes up to three months. OCC's own
+marks value the same boxes at about the Treasury rate. One ETF holds {{HoldBoxShareOfItsBox}} of the largest box.
+
+![Box face in open interest and the part confirmed by trades; each month's median traded spread over Treasuries](docs/figures/box_lending.png)
+
+**3. Holdings-signed dealer gamma against the GEX convention.** For {{HoldFlexFunds}} defined-outcome
+funds of one issuer, on {{HoldReportDate}}, the counterparties (presumably dealers, whose hedges are
+not observed) are net long {{HoldGammaNet}} of gamma per 1% move. The convention behind GEX
+figures, dealers long calls and short puts, puts {{HoldGammaWrong}} of that gamma on the wrong side,
+and in a {{HoldProfileDrop}} fall it reads {{HoldProfileDropConvention}} where the disclosed sides give {{HoldProfileDropDealer}}. At SPY's
+scale the correction is small: it moves SPY's GEX from {{GexConventionSpot}} to {{GexSignedSpot}} at spot, and
+leaves the zero-gamma level at {{GexSignedZeroLevel}}. *One issuer, one date.*
+
+![SPY's dealer net gamma across price levels: listed only, listed and FLEX under the convention, and with one issuer's fund legs signed by holdings](docs/figures/gex_map.png)
+
+**And a bounded null.** In a test fixed in advance, netted FLEX dollar gamma does not predict
+next-day single-stock volatility on average. An effect of {{GPredMDEShare}} of mean absolute return
+per standard deviation would have been found four times in five.
+
+## How it was built
+
+- **Data engineering.**
+  - Collectors for OCC's FLEX report, Cboe's FLEX trade reports, issuer holdings, listed
+    chains, bars, the Treasury curve and SOFR.
+  - Every OCC file is reconciled against the class totals it carries.
+  - Reports are filed under the activity date they state. Filing by fetch date would
+    have entered one settlement twice.
+- **Every number is generated.** The paper's numbers, tables and this README are rendered
+  from `results/*.json`. CI fails if any of them, or any figure's record of the results it
+  was drawn from, disagrees.
+- **Specified before estimated.** Each measurement and test has a dated entry in
+  [`docs/log/`](docs/log/README.md), written before its figures, with amendments recorded
+  when something changed after.
+- **Reviewed.** The paper went through several simulated referee rounds. Their findings
+  changed the headline figures, and the log records how.
+
+## How it got here
+
+The project began as a test of whether a disclosed, scheduled option flow moves prices,
+and found nothing. A heuristic I had built to find FLEX (off-grid strikes) was then killed
+by ground truth: it misses {{FlexOnGridShare}} of FLEX series. A positive control for the pinning test
+failed, and is reported. Each turn is in the [research log](docs/log/README.md).
+
+## Details
+
 
 - **Size.** {{ValueEnd}} of mark value on {{PanelEnd}}. In a census of {{HiddenCensusUnderlyings}} underlyings, FLEX is at least a tenth of option open interest for {{HiddenCensusTen}}.
 - **What it is made of.** By gross mark value, {{AnatFinancingValueShare}} sits in series that read as box spreads (loans), deep calls through which funds hold their underlying, and same-strike call/put pairs (forwards if held on opposite sides). Equal counts alone suggest {{AnatBoxFace}} of box face, but such matches often arise by chance; {{BoxRTradedFace}} ({{BoxRTradedShare}}) is confirmed by four-leg box orders in Cboe's public FLEX execution reports.
@@ -344,9 +402,16 @@ src/hidden_options/measure/identification*.py why a strike rule cannot find FLEX
 src/hidden_options/measure/structures.py      leg grouping and valuation on the underlying
 src/hidden_options/measure/holdings_truth.py  fund holdings as truth for the grouping, and its score
 src/hidden_options/measure/positions*.py      series against positions across the market
-src/hidden_options/predict/                   the predictive panel, regressions and permutation test
+src/hidden_options/measure/anatomy*.py        the product split: boxes, stock legs, packages, pairs
+src/hidden_options/measure/box_rates*.py      box trades in Cboe's reports and their rates
+src/hidden_options/measure/holders*.py        issuer holdings against the report: rules and sides
+src/hidden_options/measure/gex_map*.py        SPY's gamma exposure with signed fund legs
+src/hidden_options/measure/hidden_gamma*.py   FLEX's share of option gamma
+src/hidden_options/measure/pinning*.py        the pinning test, its control and its null
+src/hidden_options/predict/                   the predictive panels, regressions and permutation test
+src/hidden_options/figures/                   every figure, drawn from results/
 src/hidden_options/publish/                   results/ to the paper's numbers and tables and this README
-src/hidden_options/collect/                   chains, holdings, bars and N-PORT collectors
+src/hidden_options/collect/                   chains, holdings, Cboe trades, Treasury, SOFR, bars, N-PORT
 scripts/                                      scheduling, one-off back-fills, reproduce.sh
 docs/                                         how the data is collected; the template for this README
 docs/log/                                     superseded work and corrections, dated, as written
@@ -358,6 +423,12 @@ of what was tried and what replaced it are indexed in [`docs/log/`](docs/log/REA
 and the scripts that produced them in [`archive/`](archive/README.md). Raw snapshots
 from the collectors are vendor-sourced and not redistributed here; the scheduled capture
 is described in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
+
+What an outside reader can rerun today: everything from `results/` (numbers, tables,
+README), the test suite, and the Cboe trade reports, Treasury curve and SOFR, which stay
+online. What cannot be rebuilt from public sources today: OCC reports older than its
+roughly twenty-month window, and the daily issuer holdings files and listed chains,
+which their sources overwrite. Those results rest on the captures held here.
 
 ## License
 
