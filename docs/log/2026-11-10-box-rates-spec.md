@@ -171,3 +171,35 @@ is changed.
 
 These were added after the figures had been seen. They are diagnostics, not part of the
 specification, and the paper labels them so.
+
+## Amendment, 2026-11-15, after the rates were seen: settlement-to-settlement days
+
+**A defect found in review.** A box's rate was computed over the calendar days from trade
+date to expiry, and the Treasury benchmark was read at that maturity. Cash moves on
+settlement dates instead:
+- the premium settles on the business day after the trade;
+- the payoff settles on the business day after expiry, both for cash-settled index boxes
+  and for physically settled ETF boxes.
+
+Most boxes expire on a Friday and settle on a Monday. A box traded on a Monday to
+Thursday therefore lends for two calendar days longer than the day count used. The
+referee's recomputation, on a federal business-day calendar, moved the headline median
+from 38.7bp to 30.7bp and left the face-weighted mean unchanged.
+
+**The rule from now on.** The rate and the benchmark maturity both use the calendar days
+from settlement of the premium to settlement of the payoff. Settlement is the next
+business day on the US federal holiday calendar, the calendar of Fedwire, through which
+the cash moves. The trade-date convention stays in the result as a sensitivity row.
+Every figure it changes is recorded in the result note below, beside its old value.
+
+## Additions, 2026-11-15, after the figures were seen
+
+These are diagnostics, not part of the specification, and the paper labels them so:
+- **SOFR.** The spread over the New York Fed's overnight SOFR on the trade date, for
+  boxes of up to three months. A term box against an overnight rate is a mismatch; the
+  row is there because funding desks quote against SOFR.
+- **Block-bootstrap intervals.** Intervals for the median and the face-weighted mean,
+  resampling calendar months, 2,000 draws, fixed seed.
+- **A dated series.** The median by calendar year and by quarter.
+- **A matched-period comparison.** The median over trade dates from 2025-03-31, when the
+  files begin, to 2025-08-29, the last observation in Kozlowski and Sullivan (2025).
