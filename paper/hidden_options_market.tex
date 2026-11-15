@@ -138,7 +138,9 @@ at $T+1$, should carry information about what follows. In a test fixed in advanc
 \GPredDays{} underlying-days, netted FLEX dollar gamma scaled by dollar volume does not
 predict next-day absolute returns ($t=\GPredT$, clustered $p=\GPredP$), and the
 minimum detectable effect is \GPredMDE{} basis points per standard deviation,
-\GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). Priced at $T-1$ instead, or
+\GPredMDEShare{} of the mean (Section~\ref{sec:gamma-pred}). A one-sided book hedged in
+the stock would, under the square-root law of price impact, produce an effect at least
+\GCalRatio{} times that, so the null rules such books out. Priced at $T-1$ instead, or
 with FLEX implied volatility as a control, the coefficient stays indistinguishable from
 zero, though the control turns its sign positive. The one large coefficient in the table,
 on gamma two dates later, comes from re-pricing: with prices held fixed so that only open
@@ -1518,7 +1520,21 @@ volatility. The measure is unsigned, so this bounds the net of dealer-long and
 dealer-short books in each underlying, not either alone. An effect of
 $\GPredMDE\times10^{-4}$ on next-day absolute return per standard deviation of hedging
 demand, \GPredSdX{} basis points of the day's dollar volume per 1\% move, would have been
-found four times in five. Two further limits apply. Scaling by the stock's dollar volume
+found four times in five.
+
+How large an effect should a hedged book produce? A calibration added after the result
+gives an order of magnitude. Suppose an underlying's netted book were one-sided and
+hedged in the stock. On a move of $|r|$ percent the dealer then trades the predictor times
+$|r|$ of a day's dollar volume. Under the square-root law of price impact, a trade of a
+fraction $q$ of daily volume moves the price by $Y\sigma\sqrt{q}$, with $\sigma$ the daily
+volatility and a constant $Y$ that empirical work places between about 0.5 and 1. One
+standard deviation of the predictor would then change next-day $|r|$, on a move of the
+mean size, by \GCalPooledLow{} to \GCalPooledHigh{} basis points (\GCalWithinLow{} to
+\GCalWithinHigh{} at the variation within names). That is at least \GCalRatio{} times the
+minimum detectable effect. The data therefore rule out books that are one-sided and
+hedged in the stock at that scale. What the null cannot reach are books that offset
+within an underlying, hedges laid off in listed options, and risk that is not hedged at
+all. Two further limits apply. Scaling by the stock's dollar volume
 assumes the hedge is traded in the stock. \citet{prakash2026} find listed open interest
 rising after FLEX events, consistent with dealers laying some FLEX risk off in listed
 options, which this test would not see. And with underlying and date fixed effects the
@@ -1700,7 +1716,8 @@ Whether hidden convexity moves the visible market is a separate question. At dai
 resolution, on average across equity names, we detect no effect. Netted FLEX dollar gamma, scaled by dollar volume, does not
 predict next-day volatility in a test specified in advance; an effect of
 \GPredMDEShare{} of the mean daily absolute return per standard deviation would have
-been found four times in five, and the result holds with the book priced a day earlier or
+been found four times in five, and one-sided books hedged in the stock would produce at
+least \GCalRatio{} times that under the square-root law of impact, and the result holds with the book priced a day earlier or
 with its implied volatility as a control. The
 hedging such a book calls for is a small fraction of a day's trading, though an unsigned
 measure cannot exclude books that offset within an underlying, and these data cannot sign

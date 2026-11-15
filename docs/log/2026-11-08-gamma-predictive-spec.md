@@ -111,3 +111,22 @@ any price meets a strike. Nothing in the specification above changes; the estima
 | Underlying-days | 347,687 | 353,972 |
 
 The verdict under the rule above is unchanged: a bounded null.
+
+## Addition, 2026-11-15, after the result was seen: a calibrated alternative
+
+A review asked what the bounded null rules out. Result `gamma_calibration` reads it from
+the stored sample and the minimum detectable effect. Suppose the netted FLEX book of an
+underlying were one-sided and hedged in the stock. Under the square-root law of price
+impact, with a constant of 0.5 to 1, one standard deviation of the predictor would change
+next-day |r| on a move of the mean size by:
+- 17 to 34bp, at the pooled standard deviation;
+- 13 to 25bp, at the standard deviation within names.
+
+The minimum detectable effect is 2.13bp, so the smallest of these is about six times it.
+The data therefore reject books that are one-sided and hedged in the stock at that
+scale. What the null cannot reach is:
+- books that offset within an underlying;
+- hedging in listed options rather than in the stock;
+- risk that is not delta-hedged at all.
+
+This is a reading of the result, not a test, and it changes nothing above.

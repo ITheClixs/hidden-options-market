@@ -40,7 +40,10 @@ leaves the zero-gamma level at {{GexSignedZeroLevel}}. *One issuer, one date.*
 
 **And a bounded null.** In a test fixed in advance, netted FLEX dollar gamma does not predict
 next-day single-stock volatility on average. An effect of {{GPredMDEShare}} of mean absolute return
-per standard deviation would have been found four times in five.
+per standard deviation would have been found four times in five. A one-sided book hedged in
+the stock would, under the square-root law of price impact, move next-day |r| by
+{{GCalWithinLow}} to {{GCalPooledHigh}}bp per standard deviation, at least {{GCalRatio}} times that bound, so the data
+rule such books out; offsetting books and hedges laid off in listed options remain open.
 
 ## How it was built
 

@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-11-15T21:34:44+00:00",
+  "inputs": {
+    "source": "gamma_predictive"
+  },
+  "macros": {
+    "GCalPooledHigh": "34",
+    "GCalPooledLow": "17",
+    "GCalRatio": "6",
+    "GCalWithinHigh": "25",
+    "GCalWithinLow": "13"
+  },
+  "name": "gamma_calibration",
+  "values": {
+    "effects": {
+      "pooled": {
+        "0.5": 0.0016970331379536473,
+        "1.0": 0.0033940662759072947
+      },
+      "within": {
+        "0.5": 0.0012566569847877428,
+        "1.0": 0.0025133139695754855
+      }
+    },
+    "mde": 0.0002134017809606242,
+    "mean_abs_ret": 0.019803188327749726,
+    "smallest_over_mde": 5.888690240216948
+  }
+}
