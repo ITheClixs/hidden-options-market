@@ -1,0 +1,85 @@
+\documentclass[10pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue}
+\setlist{nosep,leftmargin=1.2em}
+\pagestyle{empty}
+
+% Numbers come from the same generated macros as the paper (make publish).
+\input{numbers}
+
+\begin{document}
+
+\noindent{\Large\textbf{The Hidden Options Market}}\\[0.2em]
+{\large Box lending, fund packages and dealer gamma in OCC's FLEX report}\\[0.3em]
+\small One-page summary of a working paper and its code:
+\url{https://github.com/ITheClixs/hidden-options-market}
+
+\medskip
+\noindent\textbf{The question.} FLEX options are exchange options with negotiated
+terms. OCC clears them and reports every position daily, but they are missing from the
+listed chains that option research and every gamma-exposure (GEX) feed use. What is in
+this hidden book, and does its risk matter?
+
+\medskip
+\noindent\textbf{Data.} OCC's daily FLEX report, \PanelStart{} to \PanelEnd{}
+(\PanelDates{} dates); Cboe's FLEX trade reports (\BoxRExecutions{} executions); issuer
+holdings files; the Treasury curve and SOFR; delayed listed chains. All free and public.
+
+\medskip
+\noindent\textbf{1. Mostly lending and stock replacement.} Box spreads, deep calls
+through which funds hold their underlying, and same-strike pairs hold
+\AnatFinancingValueShare{} of mark value, \AnatNonOptionOIShare{} of open interest and
+\AnatNonOptionGamma{} of gross gamma. (A pair is a forward only if held on opposite
+sides, which the report cannot show.)
+
+\medskip
+\noindent\textbf{2. Box lending, priced from trades.} \BoxRTradedFace{} of box face is
+confirmed by traded orders (counts alone suggest \AnatBoxFace{}).
+\BoxRHeadlineTrades{} boxes of up to a year traded at a median \BoxRSpreadMedian{}bp
+over Treasuries (95\% interval \BoxRMedianLow{}--\BoxRMedianHigh{}bp), rising from
+\BoxRYearTwentyTwentyFive{}bp in 2025 to \BoxRYearTwentyTwentySix{}bp in 2026, and
+\BoxRSofrMedian{}bp over SOFR. OCC's marks value the same boxes at about the Treasury
+rate. One ETF holds \HoldBoxShareOfItsBox{} of the largest box.
+
+\medskip
+\noindent\textbf{3. Holdings-signed dealer gamma against the GEX convention.} For one
+issuer's \HoldFlexFunds{} defined-outcome funds, the counterparties are net long
+\HoldGammaNet{} of gamma per 1\% move. The convention (dealers long calls, short puts)
+mis-signs \HoldGammaWrong{} of it and, in a \HoldProfileDrop{} fall, reads
+\HoldProfileDropConvention{} where the disclosed sides give \HoldProfileDropDealer{}.
+At SPY's scale the correction is small: SPY's GEX moves from \GexConventionSpot{} to
+\GexSignedSpot{} at spot. One issuer, one date.
+
+\medskip
+\begin{center}
+\includegraphics[width=0.48\textwidth]{figures/product_split.pdf}\hfill
+\includegraphics[width=0.48\textwidth]{figures/gex_map.pdf}
+\end{center}
+
+\noindent\textbf{A bounded null.} In a test fixed in advance, netted FLEX dollar gamma
+does not predict next-day single-stock volatility on average (minimum detectable effect
+\GPredMDEShare{} of mean $|r|$ per standard deviation). A one-sided book hedged in the
+stock would produce at least \GCalRatio{} times that under the square-root law of
+impact, so such books are ruled out.
+
+\medskip
+\noindent\textbf{How it was built.}
+\begin{itemize}
+\item Collectors for six public sources, with each OCC file reconciled against its own
+  class totals and filed under the activity date it states.
+\item Every number, table and figure is generated from result files; CI fails on any
+  drift, including a figure drawn from stale results.
+\item Each measurement and test was specified in a dated log entry before its figures,
+  with amendments when something changed after; the paper went through simulated
+  referee rounds whose findings changed headline numbers.
+\item What went wrong is kept: a strike heuristic for finding FLEX, killed by ground truth
+  (it misses \FlexOnGridShare{} of FLEX series), and a positive control that failed.
+\end{itemize}
+
+\end{document}

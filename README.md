@@ -45,6 +45,8 @@ the stock would, under the square-root law of price impact, move next-day |r| by
 13 to 34bp per standard deviation, at least 6 times that bound, so the data
 rule such books out; offsetting books and hedges laid off in listed options remain open.
 
+A one-page summary is built from the same numbers by `make paper` (`paper/summary.tex`).
+
 ## How it was built
 
 - **Data engineering.**

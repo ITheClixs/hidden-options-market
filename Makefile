@@ -33,3 +33,4 @@ check:
 # tectonic writes the PDF beside the source; paper/*.pdf is git-ignored.
 paper:
 	tectonic paper/hidden_options_market.tex
+	tectonic paper/summary.tex
