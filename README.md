@@ -376,6 +376,11 @@ positions, recomputed from the report:
 
 Python 3.11+. Every input is free: no WRDS, no OptionMetrics, no vendor feed, no account.
 
+**Five-minute demo.** `make demo` fetches the latest OCC FLEX report and that day's Cboe
+FLEX trades, live, and runs the project's code on them: the product split, the largest
+box positions and fund stock legs, and the day's box trades priced against Treasuries.
+It needs network access and none of the stored captures.
+
 ```bash
 uv venv && uv pip install -e '.[dev,paper]'
 .venv/bin/pytest

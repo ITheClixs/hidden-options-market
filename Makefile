@@ -13,7 +13,7 @@
 PY ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 HIDDEN_OPTIONS = $(PY) -m hidden_options.cli
 
-.PHONY: all results figures publish check paper
+.PHONY: all results figures publish check paper demo
 .NOTPARALLEL:
 
 all: results figures publish check paper
@@ -34,3 +34,7 @@ check:
 paper:
 	tectonic paper/hidden_options_market.tex
 	tectonic paper/summary.tex
+
+# A five-minute run on live public data (OCC and Cboe); needs network, no captures.
+demo:
+	.venv/bin/python scripts/demo.py
