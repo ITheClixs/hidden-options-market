@@ -69,3 +69,30 @@ come from trades during the day.
 
 Only a defect found in the code or the data. Any change after a figure has been seen is
 recorded here as a dated amendment.
+
+## Result, 2026-11-17
+
+Computed as specified. One defect was fixed before any figure was produced: a settlement
+whose chain had no quotes from its own session stopped the run. Such a session now has no
+curve, and its trades count as unmatched.
+
+- **Sessions.** 40 sessions with a listed SPX curve, from 2026-08-14 to 2026-10-22.
+  - Each fit uses a median of 124.5 strikes per expiry, over 2,110 expiries in all.
+  - The median R² of the parity regression is 0.999999.
+- **Trades.** 169 headline FLEX box trades fall in that span. 122 have a curve on their
+  trade date ($2.8bn of face) and 47 do not.
+- **FLEX traded rate less listed SPX rate.**
+  - Median −4.6bp, interquartile range −14.1 to +7.6bp, face-weighted mean −7.9bp.
+  - Resampling trade dates gives 95% intervals of −7.5 to +0.4bp for the median and
+    −13.9 to −2.8bp for the mean.
+- **By underlying (medians).** SPX −3.8bp on 14 trades, SPY −5.5bp on 64, other −2.6bp
+  on 44.
+- **Listed SPX box rate over Treasuries**, at the matched points: median 33.9bp, mean
+  40.7bp.
+
+**Reading.** On the same dates and at the same maturities, FLEX boxes traded at about the
+rate listed SPX quotes imply, a few basis points lower. Lenders in FLEX earned slightly
+less than the listed market, and borrowers paid slightly less. The premium over
+Treasuries is common to both venues: listed boxes carry it too, at about the size the
+quote-based literature reports. The largest FLEX trades, the quarter-end rolls, mostly
+fall on dates without a stored chain, so the matched face is small.

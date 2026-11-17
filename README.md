@@ -25,7 +25,9 @@ are held on opposite sides, which the report cannot show.*
 confirmed by four-leg box orders in Cboe's reports (counts alone would suggest
 \$68bn). 1,099 boxes of up to a year traded at a median 31bp over
 Treasuries (95% interval 25 to 36bp), rising from 24bp in 2025 to
-32bp in 2026, and 27bp over SOFR for boxes up to three months. OCC's own
+32bp in 2026, and 27bp over SOFR for boxes up to three months. On dates with
+listed SPX quotes, FLEX boxes traded a median -5bp from the listed box rate of the same
+maturity (95% interval -8 to 0bp), so the premium is not peculiar to FLEX. OCC's own
 marks value the same boxes at about the Treasury rate. One ETF holds 92\% of the largest box.
 
 ![Box face in open interest and the part confirmed by trades; each month's median traded spread over Treasuries](docs/figures/box_lending.png)

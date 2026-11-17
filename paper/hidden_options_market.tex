@@ -100,9 +100,9 @@ alone suggest. In those reports \BoxRHeadlineTrades{} boxes of up to a year trad
 median \BoxRSpreadMedian{} basis points over the Treasury curve, rising from
 \BoxRYearTwentyTwentyFive{} in 2025 to \BoxRYearTwentyTwentySix{} in 2026. That is the
 kind of spread \citet{binsbergen2022} read as a convenience yield in quoted prices, here
-in traded prices with the amounts traded; over the months a quote-based estimate covers,
-FLEX boxes traded well below it. OCC's marks value the same boxes at about the Treasury
-rate. Calls struck at a few percent of spot, through
+in traded prices with the amounts traded. On dates where listed SPX quotes are stored,
+FLEX boxes traded within a few basis points of the listed box rate of the same maturity.
+OCC's marks value the same boxes at about the Treasury rate. Calls struck at a few percent of spot, through
 which defined-outcome funds hold their underlying, are worth \AnatStockValue{}. Strikes
 with equal call and put open interest outside boxes, forwards if held on opposite sides,
 are \AnatPairOIShare{} of open interest. Together these series hold
@@ -1149,8 +1149,26 @@ prices of listed SPX options and read as the convenience yield of Treasuries.
 basis points at six months and 21 at twelve for 2025. Over the same months, from the
 first trade file to that date, FLEX boxes traded at a median \BoxRWindowMedian{} basis
 points (\BoxRWindowTrades{} trades): well below the quote-based figure. The pooled median
-is higher because the spread rose afterwards. A convenience yield is one reading of it;
-others fit the data as well. Tax treatment differs between cash-settled index boxes and
+is higher because the spread rose afterwards.
+
+A like-for-like comparison is possible where listed SPX quotes are stored. A further log
+entry fixed it before any listed rate was computed. On each session from \LBoxFirst{} to
+\LBoxLast{} (\LBoxSessions{} sessions), a regression of call less put mid prices on the
+strike, expiry by expiry, gives the listed box rate. This is the put-call parity method of
+\citet{binsbergen2022}; it uses a median of \LBoxStrikes{} strikes per expiry, with an
+$R^2$ that rounds to one. Each FLEX box trade of the headline sample is then set against
+the listed rate of its own date and maturity. \LBoxMatched{} of the \LBoxWindowTrades{}
+FLEX trades in that span have a listed curve on their date. They carry \LBoxFace{} of the
+\LBoxWindowFace{} of face, because the largest trades, a quarter-end roll, fall on a date
+without a stored chain. On those matched trades FLEX boxes traded a median
+$\LBoxDiffMedian$ basis points from the listed rate (95\% interval $\LBoxDiffCILow$ to
+\LBoxDiffCIHigh{}, resampling dates; face-weighted mean $\LBoxDiffMean$): about the
+listed rate, a few basis points lower. Listed SPX boxes on the same points sat
+\LBoxListedOverTsyMedian{} basis points over Treasuries. The premium over Treasuries is
+therefore not peculiar to FLEX. Box lenders in FLEX are paid about what the listed market
+pays, and slightly less.
+
+A convenience yield is one reading of that premium; others fit the data as well. Tax treatment differs between cash-settled index boxes and
 physically settled ETF boxes, though the SPX and SPY medians are close. The concentration
 in the last month of each quarter is the pattern balance-sheet costs leave in other
 arbitrage spreads \citep{du2018}. And a box lender is paid against a Treasury curve no

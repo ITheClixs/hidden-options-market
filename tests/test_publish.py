@@ -512,7 +512,8 @@ class TestDrift:
             "[] ['anatomy', 'box_rates', 'conversion', 'gamma_calibration', 'gamma_predictive', "
             "'gex_map', 'hidden_gamma', "
             "'hidden_share', 'holders', "
-            "'identification', 'implied_validation', 'market', 'pinning', 'positions', "
+            "'identification', 'implied_validation', 'listed_boxes', 'market', 'pinning', "
+            "'positions', "
             "'predictive', 'programme_book']"
         )
 

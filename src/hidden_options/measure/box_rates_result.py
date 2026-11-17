@@ -75,20 +75,7 @@ def box_rates_result(
     `origins` holds the date each line first had open interest (`anatomy.new_lines`).
     `sofr` holds the New York Fed's SOFR by date, in percent.
     """
-    found, files, executed, unresolved = [], 0, 0, 0
-    for day in days:
-        files += 1
-        rows = executions(day)
-        executed += int(rows.loc[rows["root"].notna(), "executions"].sum())
-        boxes, left = box_trades(rows)
-        unresolved += left
-        if not boxes.empty:  # an empty frame would turn the dates of the rest into objects
-            found.append(boxes)
-    if not files:
-        raise ValueError("No execution reports to read")
-    if not found:
-        raise ValueError("No box trade in the execution reports")
-    trades = pd.concat(found, ignore_index=True)
+    trades, files, executed, unresolved = collect_trades(days)
     kept, dropped = rate_sample(trades)
     benchmark = benchmark_rates(curve, kept["trade_date"], kept["settle_days"].to_numpy())
     kept = kept.assign(benchmark=benchmark, spread=kept["rate"] - benchmark)
@@ -348,6 +335,35 @@ def _weight(headline: pd.DataFrame) -> dict[str, Any]:
     return out
 
 
+def collect_trades(days: Iterable[pd.DataFrame]) -> tuple[pd.DataFrame, int, int, int]:
+    """Every box trade in `days`, with the number of files, executions on option legs, and
+    groups that could not be read as one box."""
+    found, files, executed, unresolved = [], 0, 0, 0
+    for day in days:
+        files += 1
+        rows = executions(day)
+        executed += int(rows.loc[rows["root"].notna(), "executions"].sum())
+        boxes, left = box_trades(rows)
+        unresolved += left
+        if not boxes.empty:  # an empty frame would turn the dates of the rest into objects
+            found.append(boxes)
+    if not files:
+        raise ValueError("No execution reports to read")
+    if not found:
+        raise ValueError("No box trade in the execution reports")
+    return pd.concat(found, ignore_index=True), files, executed, unresolved
+
+
+def headline_trades(trades: pd.DataFrame, curve: pd.DataFrame) -> pd.DataFrame:
+    """The headline sample: box trades in the rate sample with a Treasury benchmark and at
+    most HEADLINE_MAX_DAYS to expiry, with `benchmark` and `spread`."""
+    kept, _ = rate_sample(trades)
+    benchmark = benchmark_rates(curve, kept["trade_date"], kept["settle_days"].to_numpy())
+    kept = kept.assign(benchmark=benchmark, spread=kept["rate"] - benchmark)
+    sample = kept[kept["benchmark"].notna()]
+    return sample[sample["days"] <= HEADLINE_MAX_DAYS].reset_index(drop=True)
+
+
 def _trade_date_convention(headline: pd.DataFrame, curve: pd.DataFrame) -> dict[str, Any]:
     """The headline spread as first computed, over calendar days from trade date to expiry:
     the convention the 2026-11-15 amendment replaced, kept as a sensitivity."""
@@ -482,6 +498,8 @@ def box_rates_analysis() -> Result:
 __all__ = [
     "NAME",
     "box_rates_analysis",
+    "collect_trades",
+    "headline_trades",
     "box_rates_result",
     "last_report_day",
     "read_report_day",

@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-11-17T18:15:13+00:00",
+  "inputs": {
+    "first_session": "2026-08-14",
+    "last_session": "2026-10-22"
+  },
+  "macros": {
+    "LBoxDiffCIHigh": "0",
+    "LBoxDiffCILow": "-8",
+    "LBoxDiffElse": "-3",
+    "LBoxDiffElseTrades": "44",
+    "LBoxDiffHigh": "8",
+    "LBoxDiffLow": "-14",
+    "LBoxDiffMean": "-8",
+    "LBoxDiffMedian": "-5",
+    "LBoxDiffSPX": "-4",
+    "LBoxDiffSPXTrades": "14",
+    "LBoxDiffSPY": "-6",
+    "LBoxDiffSPYTrades": "64",
+    "LBoxFace": "\\$2.8bn",
+    "LBoxFirst": "14 August 2026",
+    "LBoxLast": "22 October 2026",
+    "LBoxListedOverTsyMean": "41",
+    "LBoxListedOverTsyMedian": "34",
+    "LBoxMatched": "122",
+    "LBoxRSquared": "1.0000",
+    "LBoxSessions": "40",
+    "LBoxStrikes": "124",
+    "LBoxUnmatched": "47",
+    "LBoxWindowFace": "\\$34bn",
+    "LBoxWindowTrades": "169"
+  },
+  "name": "listed_boxes",
+  "values": {
+    "by_underlying": {
+      "SPX": {
+        "dates": 6,
+        "face": 843300000.0,
+        "mean": -7.108741118260738e-05,
+        "median": -0.0003779459557552711,
+        "q25": -0.001019486503234135,
+        "q75": -6.782838987647553e-05,
+        "std_error": 9.27325792264468e-05,
+        "trades": 14
+      },
+      "SPY": {
+        "dates": 37,
+        "face": 1344922600.0,
+        "mean": -0.0014231954342111862,
+        "median": -0.0005534891508868281,
+        "q25": -0.0017135993938829606,
+        "q75": 0.0005227521449431109,
+        "std_error": 0.00040247045590600364,
+        "trades": 64
+      },
+      "other": {
+        "dates": 30,
+        "face": 612955467.0,
+        "mean": -0.0004067620341316191,
+        "median": -0.00026076404131625264,
+        "q25": -0.0009071066422892335,
+        "q75": 0.0025965242743024933,
+        "std_error": 0.0002709146299605847,
+        "trades": 44
+      }
+    },
+    "difference": {
+      "dates": 38,
+      "face": 2801178067.0,
+      "mean": -0.0007937241678134082,
+      "mean_high": -0.000278744985125216,
+      "mean_low": -0.0013901168307036656,
+      "median": -0.0004612677234333354,
+      "median_high": 3.710317596369485e-05,
+      "median_low": -0.0007521402857990321,
+      "q25": -0.0014067281823664634,
+      "q75": 0.0007637169753640823,
+      "std_error": 0.00028026989441786696,
+      "trades": 122
+    },
+    "first_session": "2026-08-14",
+    "fit": {
+      "expiries": 2110,
+      "median_r2": 0.9999991074846197,
+      "median_strikes": 124.5
+    },
+    "last_session": "2026-10-22",
+    "listed_over_treasury": {
+      "dates": 38,
+      "face": 2801178067.0,
+      "mean": 0.004072221298572346,
+      "median": 0.0033895529014581795,
+      "q25": 0.002243398390311291,
+      "q75": 0.004645445396424398,
+      "std_error": 0.0003689249869023539,
+      "trades": 122
+    },
+    "sessions": 40,
+    "unmatched": 47,
+    "window_face": 34469583257.0,
+    "window_trades": 169
+  }
+}

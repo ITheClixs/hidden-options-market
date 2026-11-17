@@ -70,6 +70,7 @@ REGISTRATION_MODULES: tuple[str, ...] = (
     "hidden_options.measure.holders_result",
     "hidden_options.measure.gex_map_result",
     "hidden_options.predict.calibration_result",
+    "hidden_options.measure.listed_boxes_result",
 )
 
 # Modules whose import registers figure builders, loaded only to draw figures.
